@@ -11844,7 +11844,10 @@ elif mode == 'Artificial Intelligence':
 			# -----------------------------
 			# Reasoning Budget
 			# -----------------------------
-			if claude_thinking:
+			if claude_thinking and int( claude_max_tokens ) <= 1024:
+				st.warning( 'Max Tokens must exceed 1024 for Claude reasoning.' )
+				claude_thinking_budget = None
+			elif claude_thinking:
 				claude_thinking_budget = st.number_input( 'Thinking Budget', min_value=1024,
 					max_value=max( 1024, int( claude_max_tokens ) - 1 ),
 					value=min( int( st.session_state.get( 'claude_thinking_budget_chat', 1024 ) ),
