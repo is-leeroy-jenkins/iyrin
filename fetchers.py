@@ -54,6 +54,7 @@ import pandas as pd
 from typing import Any, Dict, Optional, Pattern, List, Tuple
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import asyncio
 import requests
 from PIL.Image import Image
 from astropy.coordinates import SkyCoord
@@ -873,20 +874,35 @@ class WebCrawler( WebFetcher ):
 		'''
 		try:
 			throw_if( 'url', url )
-			if crawl4ai is not None and hasattr( crawl4ai, 'fetch_and_render' ):
-				configuration = { 'url': url }
-				payload = crawl4ai.fetch_and_render( configuration )
-				if payload and isinstance( payload, dict ) and 'content' in payload:
-					self.raw_html = payload.get( 'content', '' )
-					text = self.html_to_text( self.raw_html )
-					self.result = Result( url=url, status=200, text=text,
-						html=self.raw_html, headers=self.headers )
-					return self.result
-			response = requests.get( url, headers=self.headers, timeout=int( time ) )
+			self.raw_url = url
+			self.timeout = int( time )
+			if crawl4ai is not None:
+				async def crawl_page( ) -> Any:
+					async with crawl4ai.AsyncWebCrawler( ) as crawler:
+						return await crawler.arun( url=self.raw_url,
+							config=crawl4ai.CrawlerRunConfig(
+								page_timeout=self.timeout * 1000 ) )
+
+				try:
+					payload = asyncio.run( crawl_page( ) )
+					if payload is not None and payload.success and payload.html:
+						self.raw_html = payload.html
+						text = self.html_to_text( self.raw_html )
+						self.result = Result(
+							url=payload.url or self.raw_url,
+							status=payload.status_code or 200,
+							text=text, html=self.raw_html,
+							headers=payload.response_headers or { } )
+						return self.result
+				except Exception:
+					# Enhanced crawling is optional; retain the existing HTTP fallback.
+					pass
+
+			response = requests.get( self.raw_url, headers=self.headers, timeout=self.timeout )
 			response.raise_for_status( )
 			self.raw_html = response.text
 			text = self.html_to_text( self.raw_html )
-			self.result = Result( url=url, status=response.status_code, text=text,
+			self.result = Result( url=response.url, status=response.status_code, text=text,
 				html=self.raw_html, headers=dict( response.headers ) )
 			return self.result
 		except Exception as exc:

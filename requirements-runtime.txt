@@ -1,4 +1,5 @@
 requests
+boto3
 pandas
 numpy
 openpyxl
@@ -35,14 +36,15 @@ langchain-mistralai
 langchain-huggingface
 langchain-chroma
 langchain-pinecone
-langchain-google-community
+langchain-google-community[gcs,speech]
 sentence-transformers
 docx2txt
+jq
 python-docx
 chromadb
 pinecone
 llama-cpp-python
-unstructured
+unstructured[pptx]
 pyreadline3; sys_platform == "win32"
 PyMuPDF
 openai

@@ -13,6 +13,7 @@
     ******************************************************************************************
 '''
 from __future__ import annotations
+from chunk_ids import vector_document_ids
 from pathlib import Path
 from typing import Any, List
 
@@ -44,7 +45,7 @@ class ChromaStore( ):
 
 	def create( self, documents: List[ Document ], embedder: Embeddings,
 		collection_name: str, persist_directory: str ) -> Chroma:
-		"""Create or replace a persistent Chroma collection."""
+		"""Add documents to a persistent Chroma collection without deleting existing records."""
 		throw_if( 'documents', documents )
 		throw_if( 'embedder', embedder )
 		throw_if( 'collection_name', collection_name )
@@ -58,10 +59,7 @@ class ChromaStore( ):
 			collection_name=self.collection_name,
 			embedding_function=self.embedder,
 			persist_directory=self.persist_directory )
-		self.vector_store.reset_collection( )
-		ids = [
-			str( ( document.metadata or { } ).get( 'chunk_id', f'chunk-{index:06d}' ) )
-			for index, document in enumerate( self.documents, start=1 ) ]
+		ids = vector_document_ids( self.documents )
 		self.vector_store.add_documents( documents=self.documents, ids=ids )
 		return self.vector_store
 
@@ -104,8 +102,6 @@ class PineconeStore( ):
 			index=index,
 			embedding=self.embedder,
 			namespace=self.namespace or None )
-		ids = [
-			str( ( document.metadata or { } ).get( 'chunk_id', f'chunk-{index:06d}' ) )
-			for index, document in enumerate( self.documents, start=1 ) ]
+		ids = vector_document_ids( self.documents )
 		self.vector_store.add_documents( documents=self.documents, ids=ids )
 		return self.vector_store

@@ -70,7 +70,8 @@ from loaders import (TextLoader, CsvLoader, PdfLoader, ExcelLoader, WordLoader, 
 	XmlLoader, PubMedSearchLoader, OpenCityLoader, OutlookLoader, JupyterNotebookLoader,
 	AwsFileLoader, OneDriveDocLoader, GoogleCloudFileLoader, GoogleSpeechToTextLoader,
 	GoogleBucketLoader, AwsBucketLoader, EmailLoader, SpfxLoader, WebCrawler as LoaderWebCrawler)
-from generators import Chat, Gemini, Grok, Mistral
+from generators import Chat, Claude, Gemini, Grok, Mistral
+from upload_documents import load_uploaded_document
 from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData, TidesAndCurrents,
                       AirNow, UvIndex, OpenAQ, PurpleAir, EnviroFacts, Firms, EoNet,
                       USGSEarthquakes, USGSWaterData, USGSTheNationalMap, GlobalImagery,
@@ -11840,7 +11841,10 @@ elif mode == 'Artificial Intelligence':
 			# -----------------------------
 			# Reasoning Budget
 			# -----------------------------
-			if claude_thinking:
+			if claude_thinking and int( claude_max_tokens ) <= 1024:
+				st.warning( 'Max Tokens must exceed 1024 for Claude reasoning.' )
+				claude_thinking_budget = None
+			elif claude_thinking:
 				claude_thinking_budget = st.number_input( 'Thinking Budget', min_value=1024,
 					max_value=max( 1024, int( claude_max_tokens ) - 1 ),
 					value=min( int( st.session_state.get( 'claude_thinking_budget_chat', 1024 ) ),
@@ -11894,6 +11898,39 @@ elif mode == 'Artificial Intelligence':
 				st.button( 'Clear', key='claude_clear_chat', on_click=_clear_claude_state,
 					use_container_width=True )
 		
+
+		# ------ Claude Submit Button
+		if claude_submit:
+			try:
+				throw_if( 'claude_prompt', claude_prompt )
+				if not str( claude_prompt ).strip( ):
+					raise ValueError( 'Prompt cannot be empty.' )
+				if claude_thinking and int( claude_max_tokens ) <= 1024:
+					raise ValueError( 'Max Tokens must exceed 1024 for Claude reasoning.' )
+				if claude_thinking and int( claude_thinking_budget ) >= int( claude_max_tokens ):
+					raise ValueError( 'Thinking Budget must be less than Max Tokens.' )
+				fetcher = Claude( )
+				params = {
+					'model': claude_model,
+					'temperature': float( claude_temperature ),
+					'max_tokens': int( claude_max_tokens ),
+					'top_p': float( claude_top_p ),
+					'top_k': int( claude_top_k ) if int( claude_top_k ) > 0 else None,
+					'system': claude_system.strip( ) or None,
+					'stop_sequences': _normalize_claude_stop_lines( claude_stop ) or None,
+					'thinking': bool( claude_thinking ),
+					'thinking_budget': int( claude_thinking_budget ) if claude_thinking else None,
+					'web_search': bool( claude_web_search ),
+					'search_domains': _normalize_claude_domains( claude_domains ) if claude_web_search else None,
+					'blocked_domains': _normalize_claude_domains( claude_blocked_domains ) if claude_web_search else None,
+				}
+				with st.spinner( 'Generating Claude response...' ):
+					result = invoke_provider( fetcher, claude_prompt, params )
+				_promote_generation_result( 'Claude', result )
+				st.success( 'Claude response generated.' )
+			except Exception as ex:
+				st.error( f'Claude generation failed: {ex}' )
+
 		# ---------------------
 		# ---- Expander GEMINI
 		# ---------------------
@@ -12279,6 +12316,36 @@ elif mode == 'Artificial Intelligence':
 elif mode == 'File Upload':
 	left, center, right = st.columns( [ 0.05, 0.90, 0.05 ] )
 	with center:
+		# ------------------------------------------------------------------
+		# DOCUMENT UPLOAD AND PROCESSING
+		# ------------------------------------------------------------------
+		with st.expander( label='Document Processing', icon='📄', expanded=False ):
+			document_file = st.file_uploader(
+				'Upload Document',
+				type=[ 'txt', 'csv', 'xlsx', 'xls', 'pdf', 'docx', 'pptx',
+					'md', 'html', 'htm', 'json', 'xml' ],
+				key='file_upload_document' )
+			loader_name = 'File Upload'
+			if document_file is not None:
+				if st.button( 'Load Document', key='file_upload_document_load' ):
+					try:
+						loaders = {
+							'.txt': TextLoader, '.csv': CsvLoader,
+							'.xlsx': ExcelLoader, '.xls': ExcelLoader,
+							'.pdf': PdfLoader, '.docx': WordLoader,
+							'.pptx': PowerPointLoader, '.md': MarkdownLoader,
+							'.html': HtmlLoader, '.htm': HtmlLoader,
+							'.json': JsonLoader, '.xml': XmlLoader,
+						}
+						throw_if( 'document_file', document_file )
+						count = load_uploaded_document( document_file, loaders,
+							promote_loader_documents )
+						st.success( f'Loaded {count:,} document(s).' )
+					except Exception as exc:
+						st.error( f'Document loading failed: {exc}' )
+			render_document_processing_controls( loader_name, 'file_upload_document' )
+			render_loading_tabs( )
+
 		st.subheader( 'Excel / CSV' )
 		st.divider( )
 		
