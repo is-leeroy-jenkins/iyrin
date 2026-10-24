@@ -136,8 +136,7 @@ class Result( ):
 		         'encoding',
 		         'headers',
 		         'has_html',
-		         'to_dict',
-		         'response']
+		         'to_dict']
 
 	def to_dict( self ) -> Dict[ str, Any ]:
 		"""
