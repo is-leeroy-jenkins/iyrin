@@ -33,8 +33,9 @@ class FileUploadTests( unittest.TestCase ):
         self.assertIn( "key='file_upload_document'", SOURCE )
 
     def test_temp_files_are_cleanup_scoped( self ) -> None:
-        self.assertIn( 'with TemporaryDirectory( ) as directory:', SOURCE )
-        self.assertIn( "document_file.getvalue( )", SOURCE )
+        helper = (Path( __file__ ).resolve( ).parents[ 1 ] / 'upload_documents.py').read_text( encoding='utf-8' )
+        self.assertIn( 'with TemporaryDirectory( ) as directory:', helper )
+        self.assertIn( "document_file.getvalue( )", helper )
 
 
 if __name__ == '__main__':

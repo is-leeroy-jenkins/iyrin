@@ -39,6 +39,7 @@ langchain-pinecone
 langchain-google-community[gcs,speech]
 sentence-transformers
 docx2txt
+jq
 python-docx
 chromadb
 pinecone
