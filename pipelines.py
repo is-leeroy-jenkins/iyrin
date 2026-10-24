@@ -381,6 +381,7 @@ def initialize_loading_state( ) -> None:
 		'documents': [ ], 'raw_documents': [ ], 'raw_text': '', 'processed_text': None,
 		'lines': None, 'tokens': [ ], 'chunked_documents': [ ], 'df_chunks': pd.DataFrame( ),
 		'embeddings': [ ], 'embedder': None, 'vector_store': None, 'active_loader': None,
+		'chunk_loader': None,
 		'pdf_pages': None,
 	}
 	for key, value in defaults.items( ):
@@ -420,6 +421,7 @@ def reset_document_processing_controls( key_prefix: str ) -> None:
 	throw_if( 'key_prefix', key_prefix )
 	initialize_loading_state( )
 	st.session_state[ 'chunked_documents' ] = [ ]
+	st.session_state[ 'chunk_loader' ] = None
 	st.session_state[ 'df_chunks' ] = pd.DataFrame( )
 	st.session_state[ 'embeddings' ] = [ ]
 	st.session_state[ 'embedder' ] = None
@@ -456,6 +458,7 @@ def clear_if_active( loader_name: str ) -> None:
 	st.session_state[ 'processed_text' ] = None
 	st.session_state[ 'lines' ] = None
 	st.session_state[ 'chunked_documents' ] = [ ]
+	st.session_state[ 'chunk_loader' ] = None
 	st.session_state[ 'df_chunks' ] = pd.DataFrame( )
 	st.session_state[ 'embeddings' ] = [ ]
 	st.session_state[ 'embedder' ] = None
@@ -490,11 +493,7 @@ def get_loader_documents( loader_name: str ) -> List[ Document ]:
 	matched = [
 		document for document in documents
 		if ( getattr( document, 'metadata', { } ) or { } ).get( 'loader' ) == loader_name ]
-	if matched:
-		return matched
-	if st.session_state.get( 'active_loader' ) == loader_name:
-		return list( documents )
-	return [ ]
+	return matched
 
 def render_document_processing_actions( loader_name: str, key_prefix: str ) -> None:
 	"""
@@ -533,6 +532,7 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 			throw_if( 'documents', documents )
 			chunks = chunk_documents( documents, settings[ 'chunk_size' ], settings[ 'chunk_overlap' ] )
 			st.session_state[ 'chunked_documents' ] = chunks
+			st.session_state[ 'chunk_loader' ] = loader_name
 			st.session_state[ 'df_chunks' ] = pd.DataFrame( [ {
 				'Chunk': index,
 				'Chunk ID': ( document.metadata or { } ).get( 'chunk_id', '' ),
@@ -549,6 +549,8 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 
 	if embed_run:
 		try:
+			if st.session_state.get( 'chunk_loader' ) != loader_name:
+				raise ValueError( f'Chunk documents from {loader_name} before embedding.' )
 			chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
 			throw_if( 'chunks', chunks )
 			embedder, vectors = create_embeddings( chunks, settings[ 'provider' ],
@@ -562,6 +564,8 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 
 	if store_run:
 		try:
+			if st.session_state.get( 'chunk_loader' ) != loader_name:
+				raise ValueError( f'Chunk and embed documents from {loader_name} before storing.' )
 			chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
 			embedder = st.session_state.get( 'embedder', None )
 			throw_if( 'chunks', chunks )
@@ -851,6 +855,7 @@ def promote_loader_documents( documents: List[ Document ], loader_name: str ) ->
 	st.session_state[ 'processed_text' ] = None
 	st.session_state[ 'lines' ] = None
 	st.session_state[ 'chunked_documents' ] = [ ]
+	st.session_state[ 'chunk_loader' ] = None
 	st.session_state[ 'df_chunks' ] = pd.DataFrame( )
 	st.session_state[ 'embeddings' ] = [ ]
 	st.session_state[ 'embedder' ] = None
