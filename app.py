@@ -71,6 +71,7 @@ from loaders import (TextLoader, CsvLoader, PdfLoader, ExcelLoader, WordLoader, 
 	AwsFileLoader, OneDriveDocLoader, GoogleCloudFileLoader, GoogleSpeechToTextLoader,
 	GoogleBucketLoader, AwsBucketLoader, EmailLoader, SpfxLoader, WebCrawler as LoaderWebCrawler)
 from generators import Chat, Claude, Gemini, Grok, Mistral
+from upload_documents import load_uploaded_document
 from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData, TidesAndCurrents,
                       AirNow, UvIndex, OpenAQ, PurpleAir, EnviroFacts, Firms, EoNet,
                       USGSEarthquakes, USGSWaterData, USGSTheNationalMap, GlobalImagery,
@@ -12332,8 +12333,6 @@ elif mode == 'File Upload':
 			if document_file is not None:
 				if st.button( 'Load Document', key='file_upload_document_load' ):
 					try:
-						from tempfile import TemporaryDirectory
-						extension = Path( document_file.name ).suffix.lower( )
 						loaders = {
 							'.txt': TextLoader, '.csv': CsvLoader,
 							'.xlsx': ExcelLoader, '.xls': ExcelLoader,
@@ -12343,17 +12342,8 @@ elif mode == 'File Upload':
 							'.json': JsonLoader, '.xml': XmlLoader,
 						}
 						throw_if( 'document_file', document_file )
-						with TemporaryDirectory( ) as directory:
-							path = Path( directory ) / f'uploaded{extension}'
-							path.write_bytes( document_file.getvalue( ) )
-							loader = loaders[ extension ]( )
-							if extension in ( '.xlsx', '.xls', '.docx', '.pptx', '.md', '.html', '.htm' ):
-								documents = loader.load( path=str( path ) )
-							else:
-								documents = loader.load( filepath=str( path ) )
-							for document in documents:
-								document.metadata[ 'source' ] = document_file.name
-							count = promote_loader_documents( documents, loader_name )
+						count = load_uploaded_document( document_file, loaders,
+							promote_loader_documents )
 						st.success( f'Loaded {count:,} document(s).' )
 					except Exception as exc:
 						st.error( f'Document loading failed: {exc}' )
