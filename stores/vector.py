@@ -12,8 +12,8 @@
     </summary>
     ******************************************************************************************
 '''
-from chunk_ids import vector_document_ids
 from __future__ import annotations
+from chunk_ids import vector_document_ids
 from pathlib import Path
 from typing import Any, List
 
