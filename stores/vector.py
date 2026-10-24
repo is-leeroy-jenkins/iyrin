@@ -12,6 +12,7 @@
     </summary>
     ******************************************************************************************
 '''
+from chunk_ids import vector_document_ids
 from __future__ import annotations
 from pathlib import Path
 from typing import Any, List
@@ -58,9 +59,7 @@ class ChromaStore( ):
 			collection_name=self.collection_name,
 			embedding_function=self.embedder,
 			persist_directory=self.persist_directory )
-		ids = [
-			str( ( document.metadata or { } ).get( 'chunk_id', f'chunk-{index:06d}' ) )
-			for index, document in enumerate( self.documents, start=1 ) ]
+		ids = vector_document_ids( self.documents )
 		self.vector_store.add_documents( documents=self.documents, ids=ids )
 		return self.vector_store
 
@@ -103,8 +102,6 @@ class PineconeStore( ):
 			index=index,
 			embedding=self.embedder,
 			namespace=self.namespace or None )
-		ids = [
-			str( ( document.metadata or { } ).get( 'chunk_id', f'chunk-{index:06d}' ) )
-			for index, document in enumerate( self.documents, start=1 ) ]
+		ids = vector_document_ids( self.documents )
 		self.vector_store.add_documents( documents=self.documents, ids=ids )
 		return self.vector_store
