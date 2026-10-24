@@ -2322,6 +2322,9 @@ def initialize_database( ) -> None:
 		
 		conn.commit( )
 
+# Initialize the writable database before the application reads its tables.
+initialize_database( )
+
 def create_connection( ) -> sqlite3.Connection:
 	return sqlite3.connect( cfg.DB_PATH )
 
@@ -3456,13 +3459,16 @@ with st.sidebar:
                                                  AND name NOT LIKE 'sqlite_%'
                                                ORDER BY name;
 					""", connection )
-				
-				df_default = pd.read_sql_query( f'SELECT * FROM "{cfg.DEFAULT_DATA}"',
-					connection )
-				
-				df_original = df_default.copy( )
-				st.session_state[ 'active_dataset_name' ] = cfg.DEFAULT_DATA
-				log_step( f'Loaded Database Table: {cfg.DEFAULT_DATA}' )
+				if cfg.DEFAULT_DATA in df_tables[ 'name' ].tolist( ):
+					df_default = pd.read_sql_query( f'SELECT * FROM "{cfg.DEFAULT_DATA}"',
+						connection )
+					df_original = df_default.copy( )
+					st.session_state[ 'active_dataset_name' ] = cfg.DEFAULT_DATA
+					log_step( f'Loaded Database Table: {cfg.DEFAULT_DATA}' )
+				else:
+					st.warning( f'Default dataset "{cfg.DEFAULT_DATA}" is not installed. '
+						'Choose Database or External to load an available dataset.' )
+					st.session_state[ 'active_dataset_name' ] = ''
 		
 		elif source == 'Database':
 			try:
@@ -3493,7 +3499,7 @@ with st.sidebar:
 			except Exception as ex:
 				st.error( f'Error loading database data: {ex}' )
 		
-		elif source == 'Custom':
+		elif source == 'External':
 			if uploaded is not None:
 				if uploaded.name.lower( ).endswith( ('.xlsx', '.xls') ):
 					df_default = pd.read_excel( uploaded )
