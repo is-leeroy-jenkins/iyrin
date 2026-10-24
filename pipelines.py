@@ -44,6 +44,7 @@
   </summary>
   ******************************************************************************************
 '''
+from chunk_ids import chunk_identifier
 from __future__ import annotations
 
 import json
@@ -144,7 +145,7 @@ def chunk_documents( documents: List[ Document ], chunk_size: int,
 	chunks = splitter.split_documents( documents )
 	for index, document in enumerate( chunks, start=1 ):
 		document.metadata = dict( document.metadata or { } )
-		document.metadata[ 'chunk_id' ] = f'chunk-{index:06d}'
+		document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )
 	return chunks
 
 def create_embeddings( chunks: List[ Document ], provider: str, model: str,
