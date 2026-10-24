@@ -88,5 +88,61 @@ class VectorPipelineIntegrationTests( unittest.TestCase ):
             self.assertEqual( { 'first.txt', 'second.txt' }, sources )
 
 
+    def test_identical_retry_does_not_duplicate_vectors( self ) -> None:
+        embedder = self.LocalEmbeddings( )
+        with TemporaryDirectory( ) as directory:
+            documents = [ self.Document( page_content='repeated source text',
+                metadata={ 'source': 'retry.txt' } ) ]
+            chunks = self.pipelines.chunk_documents( documents, 50, 5 )
+            self.pipelines.store_documents(
+                chunks, embedder, 'Chroma', 'iyrin-retry', directory, '' )
+            self.pipelines.store_documents(
+                chunks, embedder, 'Chroma', 'iyrin-retry', directory, '' )
+            reopened = self.Chroma( collection_name='iyrin-retry',
+                persist_directory=directory, embedding_function=embedder )
+            self.assertEqual( len( chunks ), reopened._collection.count( ) )
+            self.assertEqual( set( document.metadata[ 'chunk_id' ] for document in chunks ),
+                set( reopened.get( )[ 'ids' ] ) )
+
+    def test_search_filters_and_collection_isolation( self ) -> None:
+        embedder = self.LocalEmbeddings( )
+        with TemporaryDirectory( ) as directory:
+            first = [ self.Document( page_content='alpha source content',
+                metadata={ 'source': 'first.txt' } ) ]
+            second = [ self.Document( page_content='beta source content',
+                metadata={ 'source': 'second.txt' } ) ]
+            self.pipelines.store_documents(
+                first, embedder, 'Chroma', 'shared', directory, '' )
+            self.pipelines.store_documents(
+                second, embedder, 'Chroma', 'shared', directory, '' )
+            self.pipelines.store_documents(
+                first, embedder, 'Chroma', 'isolated', directory, '' )
+
+            shared = self.Chroma( collection_name='shared',
+                persist_directory=directory, embedding_function=embedder )
+            isolated = self.Chroma( collection_name='isolated',
+                persist_directory=directory, embedding_function=embedder )
+            results = shared.similarity_search( 'source', k=5,
+                filter={ 'source': 'second.txt' } )
+            self.assertEqual( 1, len( results ) )
+            self.assertEqual( 'second.txt', results[ 0 ].metadata[ 'source' ] )
+            self.assertEqual( 2, shared._collection.count( ) )
+            self.assertEqual( 1, isolated._collection.count( ) )
+
+    def test_duplicate_ids_are_rejected_before_storage( self ) -> None:
+        embedder = self.LocalEmbeddings( )
+        documents = [
+            self.Document( page_content='first', metadata={ 'chunk_id': 'duplicate' } ),
+            self.Document( page_content='second', metadata={ 'chunk_id': 'duplicate' } ),
+        ]
+        with TemporaryDirectory( ) as directory:
+            with self.assertRaisesRegex( ValueError, 'Duplicate chunk identifiers' ):
+                self.pipelines.store_documents(
+                    documents, embedder, 'Chroma', 'duplicate-check', directory, '' )
+            reopened = self.Chroma( collection_name='duplicate-check',
+                persist_directory=directory, embedding_function=embedder )
+            self.assertEqual( 0, reopened._collection.count( ) )
+
+
 if __name__ == '__main__':
     unittest.main( )
