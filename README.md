@@ -322,13 +322,15 @@ Additional map features are normalized as `Map Feature` entities and participate
 ## 📦 Installation
 
 ```powershell
- git clone https://github.com/is-leeroy-jenkins/iyr.git
- cd iyr
+ git clone https://github.com/is-leeroy-jenkins/iyrin.git
+ cd iyrin
  python -m venv .venv
  .\.venv\Scripts\Activate.ps1
  python -m pip install --upgrade pip
  pip install -r requirements.txt
 ```
+
+The runtime manifest includes the dependencies needed for the existing AWS S3, Google Cloud Storage, Google Speech-to-Text, and PowerPoint document loaders. To enable the optional Crawl4AI integration when installing from PyPI, use `pip install "iyrin-py[crawl]"`. Crawl4AI is not required for the requests-based crawler fallback; enhanced crawling may require additional browser setup and SDK compatibility testing.
 
 ## 🚀 Run
 
