@@ -490,11 +490,7 @@ def get_loader_documents( loader_name: str ) -> List[ Document ]:
 	matched = [
 		document for document in documents
 		if ( getattr( document, 'metadata', { } ) or { } ).get( 'loader' ) == loader_name ]
-	if matched:
-		return matched
-	if st.session_state.get( 'active_loader' ) == loader_name:
-		return list( documents )
-	return [ ]
+	return matched
 
 def render_document_processing_actions( loader_name: str, key_prefix: str ) -> None:
 	"""
@@ -549,6 +545,8 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 
 	if embed_run:
 		try:
+			if st.session_state.get( 'active_loader' ) != loader_name:
+				raise ValueError( f'Chunk documents from {loader_name} before embedding.' )
 			chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
 			throw_if( 'chunks', chunks )
 			embedder, vectors = create_embeddings( chunks, settings[ 'provider' ],
@@ -562,6 +560,8 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 
 	if store_run:
 		try:
+			if st.session_state.get( 'active_loader' ) != loader_name:
+				raise ValueError( f'Chunk and embed documents from {loader_name} before storing.' )
 			chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
 			embedder = st.session_state.get( 'embedder', None )
 			throw_if( 'chunks', chunks )
