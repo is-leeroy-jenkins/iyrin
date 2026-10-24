@@ -1689,8 +1689,7 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 		tooltip = {
 			'html': ''.join( tooltip_lines ),
 			'style': { 'backgroundColor': 'rgba(0, 0, 0, 0.85)', 'color': 'white',
-				'fontSize': '12px' },
-		}
+				'fontSize': '12px' }, }
 		set_blue_divider( )
 		deck = pdk.Deck( layers=layers, initial_view_state=view_state,
 			map_style=map_style, tooltip=tooltip )
