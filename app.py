@@ -381,7 +381,6 @@ initialize_loading_state( )
 # UTILITIES
 # ---------------------------------------------------------------------
 
-
 def throw_if( name: str, value: object ) -> None:
 	"""Throw if.
 
@@ -4155,7 +4154,6 @@ if mode == 'Document Data':
 				st.caption( 'API', help=cfg.NLTK_LOADER )
 				import nltk
 				from nltk.corpus import (brown, gutenberg, reuters, webtext, inaugural, state_union)
-				
 				st.markdown( '###### NLTK Corpora' )
 				file_ids = [ ]
 				nltk_c1, nltk_c2, = st.columns( 2 )
@@ -4472,10 +4470,10 @@ if mode == 'Document Data':
 									documents = loader.load( path )
 						
 						if documents:
-							raw_text = '\n\n'.join( d.page_content for d in documents if
-							                        hasattr( d, 'page_content' ) and isinstance(
-								                        d.page_content,
-								                        str ) and d.page_content.strip( ) )
+							raw_text = \
+								'\n\n'.join( d.page_content for d in documents if hasattr( d,
+									'page_content' ) and isinstance( d.page_content,
+									str ) and d.page_content.strip( ) )
 							
 							st.session_state.documents = documents
 							st.session_state.raw_documents = list( documents )
@@ -4852,11 +4850,10 @@ if mode == 'Document Data':
 					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
-					st.session_state.raw_text = "\n\n".join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+					st.session_state.raw_text = \
+						"\n\n".join( d.page_content for d in documents if hasattr( d,
+							'page_content' ) and isinstance( d.page_content,
+							str ) and d.page_content.strip( ) )
 					st.session_state.active_loader = 'PowerPointLoader'
 					st.success( f'Loaded {len( documents )} PowerPoint document(s).' )
 				
@@ -4940,18 +4937,17 @@ if mode == 'Document Data':
 					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
-					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+					st.session_state.raw_text = \
+						'\n\n'.join( d.page_content for d in documents if hasattr(
+							d, 'page_content' ) and isinstance(
+							d.page_content, str ) and d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
 					st.session_state.df_chunks = None
 					st.session_state.active_loader = 'JupyterNotebookLoader'
-					st.session_state[
-						'_loader_status' ] = f'Loaded {len( documents )} notebook document(s).'
+					st.session_state[ '_loader_status' ] = \
+						f'Loaded {len( documents )} notebook document(s).'
 				
 				render_document_processing_controls( 'JupyterNotebookLoader',
 					'loader_jupyter_notebook_loader' )
