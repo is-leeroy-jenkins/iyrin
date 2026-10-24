@@ -38,13 +38,13 @@ class CrawlerTests( unittest.TestCase ):
         }
         exec( compile( ast.fix_missing_locations( isolated ), '<crawler>', 'exec' ),
             environment )
+        instance = SimpleNamespace(
+            raw_url=None, raw_html=None, result=None, headers={ },
+            timeout=0, html_to_text=lambda html: html.replace( '<p>', '' ).replace(
+                '</p>', '' ) )
         return SimpleNamespace(
-            fetch=lambda url, time=10: environment[ 'fetch' ]( crawler, url, time ),
-            crawler=SimpleNamespace(
-                raw_url=None, raw_html=None, result=None, headers={ },
-                timeout=0, html_to_text=lambda html: html.replace( '<p>', '' ).replace(
-                    '</p>', '' ) ),
-        )
+            fetch=lambda url, time=10: environment[ 'fetch' ]( instance, url, time ),
+            crawler=instance )
 
     def test_async_crawl_success( self ) -> None:
         payload = SimpleNamespace( success=True, url='https://example.org/redirect',
