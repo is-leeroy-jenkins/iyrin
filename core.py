@@ -91,16 +91,30 @@ class Result( ):
 	status_code: Optional[ int ]
 	text: Optional[ str ]
 	encoding: Optional[ str ]
-	headers: Optional[ str ]
+	headers: Optional[ Dict[ str, str ] ]
+	html: Optional[ str ]
 	response: Optional[ Response ]
 
-	def __init__( self, response: Response ) -> None:
+	def __init__( self, response: Response=None, url: str='', status: int=0,
+			text: str='', html: str='', headers: Optional[ Dict[ str, str ] ]=None ) -> None:
+		"""Create a result from a requests response or extracted crawler content."""
+		if response is not None:
 			self.response = response
 			self.url = response.url
 			self.status_code = response.status_code
 			self.text = response.text
+			self.html = response.text if 'html' in response.headers.get(
+				'Content-Type', '' ).lower( ) else ''
 			self.encoding = response.encoding
-			self.headers = response.headers
+			self.headers = dict( response.headers )
+		else:
+			self.response = None
+			self.url = url
+			self.status_code = status
+			self.text = text
+			self.html = html
+			self.encoding = None
+			self.headers = dict( headers ) if headers is not None else { }
 
 	def __dir__( self ) -> list[ str ]:
 		"""
@@ -117,11 +131,13 @@ class Result( ):
 		return [ 'url',
 		         'status_code',
 		         'text',
+		         'html',
+		         'response',
 		         'encoding',
 		         'headers',
 		         'has_html',
 		         'to_dict',
-		         'from_response']
+		         'response']
 
 	def to_dict( self ) -> Dict[ str, Any ]:
 		"""
@@ -145,6 +161,7 @@ class Result( ):
 			'url': self.url,
 			'status_code': self.status_code,
 			'text': self.text,
+			'html': self.html,
 			'encoding': self.encoding,
 			'headers': dict( self.headers ),
 		}
@@ -166,5 +183,5 @@ class Result( ):
 			bool: True when html is a non-empty string; otherwise False.
 
 		"""
-		return isinstance( self.text, str )
+		return isinstance( self.html, str ) and bool( self.html.strip( ) )
 
