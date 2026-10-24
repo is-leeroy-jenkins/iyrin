@@ -12319,6 +12319,47 @@ elif mode == 'Artificial Intelligence':
 elif mode == 'File Upload':
 	left, center, right = st.columns( [ 0.05, 0.90, 0.05 ] )
 	with center:
+		# ------------------------------------------------------------------
+		# DOCUMENT UPLOAD AND PROCESSING
+		# ------------------------------------------------------------------
+		with st.expander( label='Document Processing', icon='📄', expanded=False ):
+			document_file = st.file_uploader(
+				'Upload Document',
+				type=[ 'txt', 'csv', 'xlsx', 'xls', 'pdf', 'docx', 'pptx',
+					'md', 'html', 'htm', 'json', 'xml' ],
+				key='file_upload_document' )
+			loader_name = 'File Upload'
+			if document_file is not None:
+				if st.button( 'Load Document', key='file_upload_document_load' ):
+					try:
+						from tempfile import TemporaryDirectory
+						extension = Path( document_file.name ).suffix.lower( )
+						loaders = {
+							'.txt': TextLoader, '.csv': CsvLoader,
+							'.xlsx': ExcelLoader, '.xls': ExcelLoader,
+							'.pdf': PdfLoader, '.docx': WordLoader,
+							'.pptx': PowerPointLoader, '.md': MarkdownLoader,
+							'.html': HtmlLoader, '.htm': HtmlLoader,
+							'.json': JsonLoader, '.xml': XmlLoader,
+						}
+						throw_if( 'document_file', document_file )
+						with TemporaryDirectory( ) as directory:
+							path = Path( directory ) / f'uploaded{extension}'
+							path.write_bytes( document_file.getvalue( ) )
+							loader = loaders[ extension ]( )
+							if extension in ( '.xlsx', '.xls', '.docx', '.pptx', '.md', '.html', '.htm' ):
+								documents = loader.load( path=str( path ) )
+							else:
+								documents = loader.load( filepath=str( path ) )
+							for document in documents:
+								document.metadata[ 'source' ] = document_file.name
+							count = promote_loader_documents( documents, loader_name )
+						st.success( f'Loaded {count:,} document(s).' )
+					except Exception as exc:
+						st.error( f'Document loading failed: {exc}' )
+			render_document_processing_controls( loader_name, 'file_upload_document' )
+			render_loading_tabs( )
+
 		st.subheader( 'Excel / CSV' )
 		st.divider( )
 		
