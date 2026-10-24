@@ -1,0 +1,41 @@
+"""Regression checks for multi-format File Upload processing."""
+import ast
+from pathlib import Path
+import unittest
+
+
+SOURCE = (Path( __file__ ).resolve( ).parents[ 1 ] / 'app.py').read_text(
+    encoding='utf-8' )
+TREE = ast.parse( SOURCE )
+
+
+class FileUploadTests( unittest.TestCase ):
+    def test_document_extensions_have_loader_dispatch( self ) -> None:
+        start = SOURCE.index( "# DOCUMENT UPLOAD AND PROCESSING" )
+        end = SOURCE.index( "st.subheader( 'Excel / CSV' )", start )
+        section = SOURCE[ start:end ]
+        for extension in ( '.txt', '.csv', '.xlsx', '.xls', '.pdf', '.docx',
+                '.pptx', '.md', '.html', '.htm', '.json', '.xml' ):
+            with self.subTest( extension=extension ):
+                self.assertIn( f"'{extension}'", section )
+
+    def test_shared_document_pipeline_is_connected( self ) -> None:
+        start = SOURCE.index( "# DOCUMENT UPLOAD AND PROCESSING" )
+        end = SOURCE.index( "st.subheader( 'Excel / CSV' )", start )
+        section = SOURCE[ start:end ]
+        for method in ( 'promote_loader_documents', 'render_document_processing_controls',
+                'render_loading_tabs' ):
+            self.assertIn( method + '( ', section )
+
+    def test_geocoding_upload_workflow_is_preserved( self ) -> None:
+        self.assertIn( "key='data_upload_enrich'", SOURCE )
+        self.assertIn( "key='data_upload_download'", SOURCE )
+        self.assertIn( "key='file_upload_document'", SOURCE )
+
+    def test_temp_files_are_cleanup_scoped( self ) -> None:
+        self.assertIn( 'with TemporaryDirectory( ) as directory:', SOURCE )
+        self.assertIn( "document_file.getvalue( )", SOURCE )
+
+
+if __name__ == '__main__':
+    unittest.main( )
