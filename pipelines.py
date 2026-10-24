@@ -44,8 +44,8 @@
   </summary>
   ******************************************************************************************
 '''
-from chunk_ids import chunk_identifier
 from __future__ import annotations
+from chunk_ids import chunk_identifier
 
 import json
 import math
