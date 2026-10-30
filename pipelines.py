@@ -527,19 +527,26 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 		use_container_width=True )
 
 	if chunk_run:
+		st.session_state[ 'chunked_documents' ] = [ ]
+		st.session_state[ 'chunk_loader' ] = None
+		st.session_state[ 'df_chunks' ] = pd.DataFrame( )
+		st.session_state[ 'embeddings' ] = [ ]
+		st.session_state[ 'embedder' ] = None
+		st.session_state[ 'vector_store' ] = None
 		try:
 			documents = get_loader_documents( loader_name )
 			throw_if( 'documents', documents )
 			chunks = chunk_documents( documents, settings[ 'chunk_size' ], settings[ 'chunk_overlap' ] )
-			st.session_state[ 'chunked_documents' ] = chunks
-			st.session_state[ 'chunk_loader' ] = loader_name
-			st.session_state[ 'df_chunks' ] = pd.DataFrame( [ {
+			chunk_rows = pd.DataFrame( [ {
 				'Chunk': index,
 				'Chunk ID': ( document.metadata or { } ).get( 'chunk_id', '' ),
 				'Source': ( document.metadata or { } ).get( 'source', '' ),
 				'Characters': len( document.page_content ),
 				'Text': document.page_content,
 			} for index, document in enumerate( chunks, start=1 ) ] )
+			st.session_state[ 'chunked_documents' ] = chunks
+			st.session_state[ 'chunk_loader' ] = loader_name
+			st.session_state[ 'df_chunks' ] = chunk_rows
 			st.session_state[ 'embeddings' ] = [ ]
 			st.session_state[ 'embedder' ] = None
 			st.session_state[ 'vector_store' ] = None
@@ -548,6 +555,9 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 			st.error( str( exc ) )
 
 	if embed_run:
+		st.session_state[ 'embeddings' ] = [ ]
+		st.session_state[ 'embedder' ] = None
+		st.session_state[ 'vector_store' ] = None
 		try:
 			if st.session_state.get( 'chunk_loader' ) != loader_name:
 				raise ValueError( f'Chunk documents from {loader_name} before embedding.' )
@@ -563,6 +573,7 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 			st.error( str( exc ) )
 
 	if store_run:
+		st.session_state[ 'vector_store' ] = None
 		try:
 			if st.session_state.get( 'chunk_loader' ) != loader_name:
 				raise ValueError( f'Chunk and embed documents from {loader_name} before storing.' )
