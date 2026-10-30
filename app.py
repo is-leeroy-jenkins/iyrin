@@ -58,7 +58,8 @@ from excel import Excel
 from caches import InMemoryCache, SQLiteCache
 from langchain_core.documents import Document
 from lxml import etree
-from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promote_loader_documents, initialize_loading_state, sync_mode_document,
+from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promote_loader_documents,
+                       initialize_loading_state, sync_mode_document,
                         rebuild_raw_text_from_documents, render_document_processing_actions,
                         render_document_processing_controls, render_document_processing_inputs,
                         render_loading_tabs, render_mode_document_tabs,
@@ -76,7 +77,9 @@ from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData
                       AirNow, UvIndex, OpenAQ, PurpleAir, EnviroFacts, Firms, EoNet,
                       USGSEarthquakes, USGSWaterData, USGSTheNationalMap, GlobalImagery,
                       NavalObservatory, SatelliteCenter, SpaceWeather, AstroCatalog, AstroQuery,
-                      StarMap, StarChart, WebFetcher, EarthObservatory, NearbyObjects, OpenScience, USGSScienceBase, CensusData, Socrata, HealthData, GlobalHealthData, UnitedNations, WorldPopulation, Wonder)
+                      StarMap, StarChart, WebFetcher, EarthObservatory, NearbyObjects, OpenScience,
+                      USGSScienceBase, CensusData, Socrata, HealthData, GlobalHealthData,
+                      UnitedNations, WorldPopulation, Wonder)
 
 # ---------------------------------------------------------------------
 # SESSION STATE INITIALIZATION
@@ -386,7 +389,8 @@ def throw_if( name: str, value: object ) -> None:
 	"""Throw if.
 
 	Purpose:
-	    Validates that a required argument contains a usable value so failures occur before provider, filesystem, or parsing work begins.
+	    Validates that a required argument contains a usable value so failures occur
+	    before provider, filesystem, or parsing work begins.
 
 	Args:
 	    name (str): Argument name included in validation error messages.
@@ -660,9 +664,7 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 		root = Path( asset_root )
 		index_path = root / 'index.html'
 		style_path = root / 'style.css'
-		
-		data_paths = {
-				'constellations': root / 'data' / 'constellations.json',
+		data_paths = { 'constellations': root / 'data' / 'constellations.json',
 				'lines': root / 'data' / 'constellations.lines.json',
 				'stars': root / 'data' / 'stars.6.json',
 				'dsos': root / 'data' / 'dsos.bright.json',
@@ -670,8 +672,7 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 				'planets': root / 'data' / 'planets.json',
 				'mw': root / 'data' / 'mw.json',
 				'constellationBorders': root / 'data' / 'constellations.borders.json',
-				'dsonames': root / 'data' / 'dsonames.json',
-		}
+				'dsonames': root / 'data' / 'dsonames.json', }
 		
 		module_paths = [
 				root / 'js' / 'modules' / 'CelestialMath.js',
@@ -681,8 +682,7 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 				root / 'js' / 'modules' / 'UIController.js',
 				root / 'js' / 'modules' / 'StarDetailsPanel.js',
 				root / 'js' / 'modules' / 'ImageExporter.js',
-				root / 'js' / 'main.js',
-		]
+				root / 'js' / 'main.js', ]
 		
 		required_paths = [ index_path, style_path, *data_paths.values( ), *module_paths ]
 		missing_paths = [ str( path ) for path in required_paths if not path.exists( ) ]
@@ -878,7 +878,6 @@ def set_coordinates( latitude: object, longitude: object ) -> None:
 	
 	lat_value = float( latitude )
 	lon_value = float( longitude )
-	
 	st.session_state[ 'latitude' ] = lat_value
 	st.session_state[ 'longitude' ] = lon_value
 	st.session_state[ 'coordinates' ] = (lat_value, lon_value)
@@ -1117,7 +1116,7 @@ def get_global_longitude_default( fallback: float = 0.0 ) -> float:
 	return float( fallback )
 
 def set_global_coordinates_from_result( latitude: object, longitude: object,
-		location: Optional[ str ] = None, description: Optional[ str ] = None ) -> None:
+		location: Optional[ str ]=None, description: Optional[ str ]=None ) -> None:
 	"""
 	
 		Purpose:
@@ -1139,10 +1138,7 @@ def set_global_coordinates_from_result( latitude: object, longitude: object,
 	if not has_valid_coordinates( latitude, longitude ):
 		return
 	
-	set_location_state(
-		location=location,
-		description=description,
-		latitude=float( latitude ),
+	set_location_state( location=location, description=description, latitude=float( latitude ),
 		longitude=float( longitude ) )
 
 def create_bounding_box_from_center( latitude: object, longitude: object,
@@ -1167,23 +1163,15 @@ def create_bounding_box_from_center( latitude: object, longitude: object,
 	"""
 	lat_value = get_global_latitude_default( )
 	lng_value = get_global_longitude_default( )
-	
 	if has_valid_coordinates( latitude, longitude ):
 		lat_value = float( latitude )
 		lng_value = float( longitude )
 	
-	return {
-			'west': lng_value - float( delta ),
-			'south': lat_value - float( delta ),
-			'east': lng_value + float( delta ),
-			'north': lat_value + float( delta ),
-			'nw_lng': lng_value - float( delta ),
-			'nw_lat': lat_value + float( delta ),
-			'se_lng': lng_value + float( delta ),
-			'se_lat': lat_value - float( delta ),
-			'center_lat': lat_value,
-			'center_lng': lng_value,
-	}
+	return { 'west': lng_value - float( delta ), 'south': lat_value - float( delta ),
+			'east': lng_value + float( delta ), 'north': lat_value + float( delta ),
+			'nw_lng': lng_value - float( delta ), 'nw_lat': lat_value + float( delta ),
+			'se_lng': lng_value + float( delta ), 'se_lat': lat_value - float( delta ),
+			'center_lat': lat_value, 'center_lng': lng_value, }
 
 # ------------- BROWSER GEOLOCATION UTILITIES
 
@@ -1210,7 +1198,6 @@ def get_geolocation_error_message( error_code: object, error_message: object ) -
 		code = -1
 	
 	message = str( error_message or '' ).strip( )
-	
 	if code == 0:
 		return f'Browser does not support geolocation. {message}'.strip( )
 	
@@ -1252,14 +1239,12 @@ def update_location_state_from_browser_geolocation( geo: Dict[ str, object ] ) -
 			error = geo.get( 'error', { } )
 			error_code = None
 			error_message = ''
-			
 			if isinstance( error, dict ):
 				error_code = error.get( 'code', None )
 				error_message = error.get( 'message', '' )
 			
 			st.session_state[ 'browser_geolocation_error' ] = get_geolocation_error_message(
-				error_code,
-				error_message )
+				error_code, error_message )
 			
 			if error_code == 1:
 				st.session_state[ 'browser_geolocation_permission_denied' ] = True
@@ -1349,7 +1334,6 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 		location_text = str( st.session_state.get( 'location', '' ) or '' ).strip( )
 		active_source = str( st.session_state.get( 'active_location_source', '' ) or '' ).strip( )
 		needs_resolution = (resolved_signature != signature or not location_text or active_source != 'browser')
-		
 		if needs_resolution:
 			try:
 				result = geocoder.reverse( latitude, longitude ) if geocoder is not None else { }
@@ -1362,22 +1346,16 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 					location_text = str( result.get( 'formatted_address', '' ) or '' ).strip( )
 				if not location_text:
 					location_text = f'{latitude:.6f}, {longitude:.6f}'
-				set_location_state(
-					location=location_text,
-					city=locality,
-					state=region,
+				set_location_state( location=location_text, city=locality, state=region,
 					country=str( result.get( 'country_code', '' ) or '' ).strip( ),
 					zipcode=str( result.get( 'postal_code', '' ) or '' ).strip( ),
 					description='Browser geolocation resolved by reverse geocoding.',
-					latitude=latitude,
-					longitude=longitude )
+					latitude=latitude, longitude=longitude )
 			except Exception:
-				set_location_state(
-					location=f'{latitude:.6f}, {longitude:.6f}',
+				set_location_state( location=f'{latitude:.6f}, {longitude:.6f}',
 					city='', state='', country='', zipcode='',
 					description='Browser geolocation coordinates.',
-					latitude=latitude,
-					longitude=longitude )
+					latitude=latitude, longitude=longitude )
 			
 			st.session_state[ 'browser_location_signature' ] = signature
 			st.session_state[ 'browser_geolocation_reverse_geocoded' ] = True
@@ -1390,7 +1368,6 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 		st.session_state[ 'browser_geolocation_permission_denied' ] = False
 		st.session_state[ 'browser_geolocation_error' ] = ''
 		st.session_state[ 'active_location_source' ] = 'browser'
-		
 		if state_changed:
 			st.rerun( )
 	
@@ -1446,8 +1423,7 @@ def ensure_active_location_state( ) -> None:
 		st.session_state[ 'active_location_source' ] = 'geocoding'
 		return
 	
-	set_location_state(
-		location='', city='', state='', country='', zipcode='', description='' )
+	set_location_state( location='', city='', state='', country='', zipcode='', description='' )
 	st.session_state[ 'coordinates' ] = ( )
 	st.session_state[ 'latitude' ] = 0.0
 	st.session_state[ 'longitude' ] = 0.0
@@ -1957,7 +1933,7 @@ def read_missing_report_locations( table_name: str, limit: Optional[ int ] = Non
 		return pd.DataFrame( )
 
 def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, places: Place,
-		use_places: bool = True, limit: Optional[ int ] = None ) -> pd.DataFrame:
+		use_places: bool = True, limit: Optional[ int ]=None ) -> pd.DataFrame:
 	"""
 	
 		Purpose:
@@ -3448,7 +3424,6 @@ with st.sidebar:
 			key='source_uploader' )
 		df_default = pd.DataFrame( )
 		df_original: pd.DataFrame | None = None
-		
 		if source == 'Default':
 			with sqlite3.connect( cfg.DB_PATH ) as connection:
 				df_tables = pd.read_sql_query( """
@@ -4124,7 +4099,8 @@ if mode == 'Document Data':
 	st.divider( )
 	
 	# ----------- LEFT COLUMN - LOADERS
-	document_loaders_column, document_results_column = st.columns( [ 0.4, 0.6 ], gap='xxsmall', border=True )
+	document_loaders_column, document_results_column = st.columns( [ 0.4, 0.6 ],
+		gap='xxsmall', border=True )
 	with document_loaders_column:
 		_loader_msg = st.session_state.pop( '_loader_status', None )
 		if isinstance( _loader_msg, str ) and _loader_msg.strip( ):
@@ -6465,9 +6441,7 @@ if mode == 'Document Data':
 				
 				render_document_processing_controls( 'SpfxLoader', 'loader_sharepoint_loader' )
 	
-	# ------------------------------------------------------------------
-	# RIGHT COLUMN — DOCUMENT RENDERING
-	# ------------------------------------------------------------------
+	# ----------- RIGHT COLUMN — DOCUMENT RENDERING
 	with document_results_column:
 		render_loading_tabs( )
 
@@ -6477,6 +6451,7 @@ if mode == 'Document Data':
 elif mode == 'Geoscience Data':
 	with st.expander( 'Geoscience Data', expanded=True ):
 		
+		# ----------- Weather Expander
 		with st.expander( 'Weather', expanded=True ):
 			left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
 			with center:
@@ -6912,7 +6887,8 @@ elif mode == 'Geoscience Data':
 						
 				with weather_c2:
 					render_mode_document_tabs( 'weather', '📄 Loaded' )
-
+		
+		# ----------- Environmental Expander
 		with st.expander( 'Environmental', expanded=False ):
 			left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
 			with center:
@@ -7796,25 +7772,22 @@ elif mode == 'Geoscience Data':
 				
 				with enviro_c2:
 					render_mode_document_tabs( 'env', '📄 Loaded' )
-
+		
+		# ----------- Geological Expander
 		with st.expander( 'Geological', expanded=False ):
 			left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
 			with center:
 				st.subheader( 'Geological Data' )
 				st.divider( )
-				
 				global_location = get_global_location_default( )
 				global_latitude = get_global_latitude_default( )
 				global_longitude = get_global_longitude_default( )
 				global_box = create_bounding_box_from_center( global_latitude, global_longitude )
-				
 				location_c1, location_c2, location_c3 = st.columns( 3, border=True )
 				location_c1.metric( 'Location', global_location )
 				location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
 				location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
-				
 				set_blue_divider( )
-				
 				geo_c1, geo_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
 				with geo_c1:
 					
@@ -8207,7 +8180,6 @@ elif mode == 'Geoscience Data':
 						render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
 							'USGS The National Map', 'geo_usgs_the_national_map' )
 				
-
 					# --------- USGS SCIENCEBASE
 					with st.expander( '🧭 USGS ScienceBase', expanded=False ):
 						sciencebase_mode = st.selectbox( 'Mode', options=[ 'items', 'item' ],
@@ -8272,18 +8244,14 @@ elif mode == 'Astronomical Data':
 	with center:
 		st.subheader( 'Astronomical Data' )
 		st.divider( )
-		
 		global_location = get_global_location_default( )
 		global_latitude = get_global_latitude_default( )
 		global_longitude = get_global_longitude_default( )
-		
 		location_c1, location_c2, location_c3 = st.columns( 3, border=True )
 		location_c1.metric( 'Observer Location', global_location )
 		location_c2.metric( 'Observer Latitude', f'{float( global_latitude ):.4f}' )
 		location_c3.metric( 'Observer Longitude', f'{float( global_longitude ):.4f}' )
-		
 		set_blue_divider( )
-		
 		astro_c1, astro_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
 		with astro_c1:
 			
