@@ -57,6 +57,7 @@
     "node.js.selected.package.jshint": "",
     "nodejs_package_manager_path": "npm",
     "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
+    "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "preferences.sourceCode.Python"
   }
 }]]></component>
@@ -101,15 +102,7 @@
       <workItem from="1792839849088" duration="19000" />
       <workItem from="1792839898022" duration="1568000" />
       <workItem from="1792845075438" duration="2825000" />
-      <workItem from="1793393851735" duration="2801000" />
-    </task>
-    <task id="LOCAL-00045" summary="updates">
-      <option name="closed" value="true" />
-      <created>1789424634134</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1789424634134</updated>
+      <workItem from="1793393851735" duration="6116000" />
     </task>
     <task id="LOCAL-00046" summary="updates">
       <option name="closed" value="true" />
@@ -495,7 +488,15 @@
       <option name="project" value="LOCAL" />
       <updated>1793398299278</updated>
     </task>
-    <option name="localTasksCounter" value="94" />
+    <task id="LOCAL-00094" summary="updates">
+      <option name="closed" value="true" />
+      <created>1793400045721</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1793400045721</updated>
+    </task>
+    <option name="localTasksCounter" value="95" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

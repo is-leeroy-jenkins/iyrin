@@ -621,7 +621,7 @@ def normalize( obj ):
 			return str( obj )
 	return str( obj )
 
-def set_blue_divider( ) -> None:
+def blue_divider( ) -> None:
 	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 def log_step( msg: str ) -> None:
@@ -1666,7 +1666,7 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 			'html': ''.join( tooltip_lines ),
 			'style': { 'backgroundColor': 'rgba(0, 0, 0, 0.85)', 'color': 'white',
 				'fontSize': '12px' }, }
-		set_blue_divider( )
+		blue_divider( )
 		deck = pdk.Deck( layers=layers, initial_view_state=view_state,
 			map_style=map_style, tooltip=tooltip )
 		st.pydeck_chart( deck, use_container_width=True )
@@ -1784,17 +1784,11 @@ def extract_coordinates( result: object ) -> Tuple[ Optional[ float ], Optional[
 	if result is None:
 		return None, None
 	
-	lat_paths = [
-			[ 'lat' ],
-			[ 'latitude' ],
-			[ 'location', 'lat' ],
-			[ 'location', 'latitude' ],
-			[ 'geometry', 'location', 'lat' ],
-			[ 'geometry', 'location', 'latitude' ],
+	lat_paths = [ [ 'lat' ], [ 'latitude' ], [ 'location', 'lat' ], [ 'location', 'latitude' ],
+			[ 'geometry', 'location', 'lat' ], [ 'geometry', 'location', 'latitude' ],
 			[ 'result', 'geometry', 'location', 'lat' ],
 			[ 'results', 0, 'geometry', 'location', 'lat' ],
-			[ 'candidates', 0, 'geometry', 'location', 'lat' ],
-	]
+			[ 'candidates', 0, 'geometry', 'location', 'lat' ], ]
 	
 	lon_paths = [
 			[ 'lng' ],
@@ -1813,7 +1807,6 @@ def extract_coordinates( result: object ) -> Tuple[ Optional[ float ], Optional[
 	
 	lat_value = None
 	lon_value = None
-	
 	for path in lat_paths:
 		lat_value = get_value_by_path( result, path )
 		if lat_value is not None:
@@ -2434,7 +2427,6 @@ def render_table( df: pd.DataFrame ) -> None:
 
 def make_display_safe( df: pd.DataFrame ) -> pd.DataFrame:
 	display_df = df.copy( )
-	
 	for col in display_df.columns:
 		display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
 	
@@ -2582,16 +2574,13 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 	"""
 	
-	set_blue_divider( )
-	
+	blue_divider( )
 	st.markdown( '##### Visualization Engine' )
-	
 	if df is None or df.empty:
 		st.info( 'No data available.' )
 		return
 	
 	df_plot = df.copy( )
-	
 	for col in df_plot.columns:
 		if df_plot[ col ].dtype == object:
 			df_plot[ col ] = df_plot[ col ].map( lambda x: '' if x is None else str( x ) )
@@ -2603,7 +2592,6 @@ def create_visualization( df: pd.DataFrame ) -> None:
 			numeric_cols.append( col )
 	
 	categorical_cols: List[ str ] = [ col for col in df_plot.columns if col not in numeric_cols ]
-	
 	chart = st.selectbox( 'Chart Type',
 		[ 'Histogram', 'Bar', 'Line', 'Scatter', 'Box', 'Pie', 'Correlation' ] )
 	
@@ -2614,7 +2602,6 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 		col = st.selectbox( 'Column', numeric_cols )
 		values = pd.to_numeric( df_plot[ col ], errors='coerce' ).dropna( ).tolist( )
-		
 		fig = go.Figure( data=[ go.Histogram( x=values ) ] )
 		fig.update_layout( xaxis_title=col, yaxis_title='Count' )
 		st.plotly_chart( fig, use_container_width=True )
@@ -2626,10 +2613,8 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 		x = st.selectbox( 'X', df_plot.columns )
 		y = st.selectbox( 'Y', numeric_cols )
-		
 		x_values = df_plot[ x ].astype( str ).tolist( )
 		y_values = pd.to_numeric( df_plot[ y ], errors='coerce' ).fillna( 0 ).tolist( )
-		
 		fig = go.Figure( data=[ go.Bar( x=x_values, y=y_values ) ] )
 		fig.update_layout( xaxis_title=x, yaxis_title=y )
 		st.plotly_chart( fig, use_container_width=True )
@@ -2641,10 +2626,8 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 		x = st.selectbox( 'X', df_plot.columns )
 		y = st.selectbox( 'Y', numeric_cols )
-		
 		x_values = df_plot[ x ].astype( str ).tolist( )
 		y_values = pd.to_numeric( df_plot[ y ], errors='coerce' ).fillna( 0 ).tolist( )
-		
 		fig = go.Figure( data=[ go.Scatter( x=x_values, y=y_values, mode='lines' ) ] )
 		fig.update_layout( xaxis_title=x, yaxis_title=y )
 		st.plotly_chart( fig, use_container_width=True )
@@ -2656,14 +2639,11 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 		x = st.selectbox( 'X', numeric_cols, key='viz_scatter_x' )
 		y = st.selectbox( 'Y', numeric_cols, key='viz_scatter_y' )
-		
 		x_series = pd.to_numeric( df_plot[ x ], errors='coerce' )
 		y_series = pd.to_numeric( df_plot[ y ], errors='coerce' )
 		mask = x_series.notna( ) & y_series.notna( )
-		
 		x_values = x_series[ mask ].tolist( )
 		y_values = y_series[ mask ].tolist( )
-		
 		fig = go.Figure( data=[ go.Scatter( x=x_values, y=y_values, mode='markers' ) ] )
 		fig.update_layout( xaxis_title=x, yaxis_title=y )
 		st.plotly_chart( fig, use_container_width=True )
@@ -2675,7 +2655,6 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 		col = st.selectbox( 'Column', numeric_cols, key='viz_box_col' )
 		values = pd.to_numeric( df_plot[ col ], errors='coerce' ).dropna( ).tolist( )
-		
 		fig = go.Figure( data=[ go.Box( y=values, name=col ) ] )
 		fig.update_layout( yaxis_title=col )
 		st.plotly_chart( fig, use_container_width=True )
@@ -2687,9 +2666,8 @@ def create_visualization( df: pd.DataFrame ) -> None:
 		
 		col = st.selectbox( 'Category Column', categorical_cols )
 		counts = df_plot[ col ].astype( str ).value_counts( )
-		
-		fig = go.Figure(
-			data=[ go.Pie( labels=counts.index.tolist( ), values=counts.values.tolist( ) ) ] )
+		fig = go.Figure( data=[ go.Pie( labels=counts.index.tolist( ),
+			values=counts.values.tolist( ) ) ] )
 		st.plotly_chart( fig, use_container_width=True )
 	
 	elif chart == 'Correlation':
@@ -2702,11 +2680,7 @@ def create_visualization( df: pd.DataFrame ) -> None:
 			corr_df[ col ] = pd.to_numeric( df_plot[ col ], errors='coerce' )
 		
 		corr = corr_df.corr( )
-		
-		fig = go.Figure(
-			data=[ go.Heatmap(
-				z=corr.values.tolist( ),
-				x=corr.columns.tolist( ),
+		fig = go.Figure( data=[ go.Heatmap( z=corr.values.tolist( ), x=corr.columns.tolist( ),
 				y=corr.index.tolist( ) ) ] )
 		st.plotly_chart( fig, use_container_width=True )
 
@@ -2718,7 +2692,6 @@ def convert_dataframe( table_name: str, df: pd.DataFrame ):
 		columns.append( f'{safe_col} {sql_type}' )
 	
 	create_stmt = f'CREATE TABLE IF NOT EXISTS {table_name} ({", ".join( columns )});'
-	
 	with create_connection( ) as conn:
 		conn.execute( create_stmt )
 		conn.commit( )
@@ -2726,10 +2699,8 @@ def convert_dataframe( table_name: str, df: pd.DataFrame ):
 def insert_data( table_name: str, df: pd.DataFrame ):
 	df = df.copy( )
 	df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
-	
 	placeholders = ', '.join( [ '?' ] * len( df.columns ) )
 	stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
-	
 	with create_connection( ) as conn:
 		conn.executemany( stmt, df.values.tolist( ) )
 		conn.commit( )
@@ -3272,7 +3243,6 @@ def _model_selector( key_prefix: str, label: str, options: list[ str ], default_
 		base_options.append( "Custom..." )
 	
 	idx_default = base_options.index( default_model ) if default_model in base_options else 0
-	
 	selected = st.selectbox( label=label, options=base_options, index=idx_default,
 		key=f"{key_prefix}_model_select", )
 	
@@ -3307,8 +3277,7 @@ def invoke_provider( provider: object, prompt: str, parameters: Dict[ str, objec
 		raise TypeError( 'Provider does not expose generate_text( ).' )
 
 	signature = inspect.signature( method )
-	accepted = {
-		name for name, parameter in signature.parameters.items( )
+	accepted = { name for name, parameter in signature.parameters.items( )
 		if parameter.kind in ( inspect.Parameter.POSITIONAL_OR_KEYWORD,
 			inspect.Parameter.KEYWORD_ONLY ) }
 	first_parameter = next( iter( signature.parameters ), '' )
@@ -3358,8 +3327,7 @@ def get_loaded_dataset( ) -> pd.DataFrame | None:
 	
 	return df_frame.copy( )
 
-def store_loaded_dataset( df_dataset: pd.DataFrame,
-                          df_original: pd.DataFrame | None=None ) -> None:
+def store_loaded_dataset( df_dataset: pd.DataFrame, df_original: pd.DataFrame | None=None ) -> None:
 	"""
 		Purpose:
 		--------
@@ -3398,7 +3366,7 @@ st.logo( cfg.LOGO, size='Large' )
 
 with st.sidebar:
 	# ------- Map Mode
-	set_blue_divider( )
+	blue_divider( )
 	st.markdown( '#### 🛰️ GIS Data' )
 	with st.expander( label='Pipelines', expanded=True ):
 		mode = st.radio( label='Mode', options=cfg.MODES, label_visibility='collapsed' )
@@ -3413,7 +3381,7 @@ with st.sidebar:
 			st.rerun( )
 		
 	# ------- Data
-	set_blue_divider( )
+	blue_divider( )
 	st.markdown( '#### 🏛️ Static Data' )
 	with st.expander( label='Source', expanded=False ):
 		st.caption( 'Sources' )
@@ -3492,7 +3460,7 @@ with st.sidebar:
 	render_live_world_sidebar( )
 	
 	# -------- Settings
-	set_blue_divider( )
+	blue_divider( )
 	st.markdown( '#### 🎚️ Configuration' )
 	
 	# ------- User Location
@@ -3540,7 +3508,7 @@ with st.sidebar:
 			cache = SQLiteCache( cache_path )
 	
 	# ------- Security
-	set_blue_divider( )
+	blue_divider( )
 	st.markdown( '#### 🔒 Credentials' )
 	with st.expander( label='API', expanded=False ):
 		init_env_state( 'openai_api_key', 'OPENAI_API_KEY', 'OPENAI_API_KEY' )
@@ -3785,9 +3753,8 @@ if mode == 'Mapping Tools':
 			status_c1.metric( 'Location', current_location if current_location else global_location )
 			status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 			status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-			set_blue_divider( )
+			blue_divider( )
 			dist_c1, dist_c2 = st.columns( [ 0.50, 0.50 ], border=True )
-
 			with dist_c1:
 				use_global_origin = st.checkbox( 'Use User-Location as Origin',
 					value=bool( current_location ), key='distance_use_global_origin' )
@@ -3845,7 +3812,7 @@ if mode == 'Mapping Tools':
 
 			result = st.session_state.get( 'distance_last_result', { } )
 			if result:
-				set_blue_divider( )
+				blue_divider( )
 				st.markdown( '##### Distance Result' )
 				st.data_editor( pd.DataFrame( [ result ] ), key='distance_result_table',
 					use_container_width=True, disabled=True )
@@ -3864,7 +3831,7 @@ if mode == 'Mapping Tools':
 			status_c1.metric( 'Location', compose_location_from_state( ) or global_location )
 			status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 			status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-			set_blue_divider( )
+			blue_divider( )
 			tz_c1, tz_c2 = st.columns( [ 0.50, 0.50 ], border=True )
 			with tz_c1:
 				use_global_coordinates = st.checkbox( 'User Location', value=has_global_coords,
@@ -3907,8 +3874,7 @@ if mode == 'Mapping Tools':
 
 			if run_timezone:
 				if use_global_coordinates and not has_global_coords:
-					st.warning(
-						'Global coordinates are not set. Resolve a location first or enter manually.' )
+					st.warning( 'Global coordinates are not set' )
 				elif not has_valid_coordinates( lat_tz, lng_tz ):
 					st.warning( 'Provide valid coordinates before looking up a time zone.' )
 				else:
@@ -3926,9 +3892,8 @@ if mode == 'Mapping Tools':
 						st.error( f'Time zone lookup failed: {ex}' )
 
 			result = st.session_state.get( 'timezone_last_result', { } )
-
 			if result:
-				set_blue_divider( )
+				blue_divider( )
 				st.markdown( '##### Time Zone Result' )
 				lat_c, lng_c = st.columns( 2 )
 				with lat_c:
@@ -3952,8 +3917,7 @@ if mode == 'Mapping Tools':
 			status_c1.metric( 'Location', compose_location_from_state( ) or global_location )
 			status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 			status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-			set_blue_divider( )
-
+			blue_divider( )
 			map_c1, map_c2 = st.columns( [ 0.50, 0.50 ], border=True )
 			with map_c1:
 				use_global_coordinates = st.checkbox( 'Use User-Location', value=has_global_coords,
@@ -4028,9 +3992,8 @@ if mode == 'Mapping Tools':
 						st.error( f'Static map generation failed: {ex}' )
 
 			map_url = st.session_state.get( 'maps_last_url', '' )
-
 			if map_url:
-				set_blue_divider( )
+				blue_divider( )
 				st.markdown( '##### Static Map Result' )
 				st.image( map_url )
 				st.code( map_url )
@@ -4915,11 +4878,8 @@ if mode == 'Document Data':
 				excel_file = st.file_uploader( 'Upload Excel file', type=[ 'xlsx', 'xls' ],
 					key='excel_upload' )
 				
-				load_mode = st.selectbox( 'Load Mode',
-					[ 'Tabular + SQLite', 'Unstructured Document' ], index=0, key='excel_load_mode',
-					help=(
-							'Use "Tabular + SQLite" to preserve the current sheet-to-SQLite workflow. '
-							'Use "Unstructured Document" to route through ExcelLoader.'), )
+				load_mode = st.selectbox( 'Load Mode', [ 'Tabular', 'Unstructured Document' ],
+					index=0, key='excel_load_mode',)
 				
 				sheet_name = st.text_input( 'Sheet name (leave blank for all sheets)',
 					key='excel_sheet' )
@@ -5073,7 +5033,6 @@ if mode == 'Document Data':
 				col_load, col_clear, col_save = st.columns( 3 )
 				load_md = col_load.button( 'Load', key='md_load', icon='📤', width='stretch' )
 				clear_md = col_clear.button( 'Clear', key='md_clear', icon='🧹', width='stretch' )
-				
 				can_save = (st.session_state.get( 'active_loader' ) == 'MarkdownLoader' \
 				            and isinstance( st.session_state.get( 'raw_text' ), str ) \
 				            and st.session_state.get( 'raw_text' ).strip( ))
@@ -6457,18 +6416,15 @@ elif mode == 'Geoscience Data':
 			with center:
 				st.subheader( 'Weather Data' )
 				st.divider( )
-				
 				global_location = get_global_location_default( )
 				global_latitude = get_global_latitude_default( )
 				global_longitude = get_global_longitude_default( )
-				
 				location_c1, location_c2, location_c3 = st.columns( 3, border=True )
 				location_c1.metric( 'Location', global_location )
 				location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
 				location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
 				
-				set_blue_divider( )
-				
+				blue_divider( )
 				weather_c1, weather_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
 				with weather_c1:
 					
@@ -6894,21 +6850,18 @@ elif mode == 'Geoscience Data':
 			with center:
 				st.subheader( 'Environmental Data' )
 				st.divider( )
-				
 				global_location = get_global_location_default( )
 				global_zipcode = get_global_zipcode_default( )
 				global_latitude = get_global_latitude_default( )
 				global_longitude = get_global_longitude_default( )
 				global_box = create_bounding_box_from_center( global_latitude, global_longitude )
-				
 				location_c1, location_c2, location_c3, location_c4 = st.columns( 4, border=True )
 				location_c1.metric( 'Location', global_location )
 				location_c2.metric( 'ZIP Code', global_zipcode )
 				location_c3.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
 				location_c4.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
 				
-				set_blue_divider( )
-				
+				blue_divider( )
 				enviro_c1, enviro_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
 				with enviro_c1:
 					
@@ -7161,45 +7114,25 @@ elif mode == 'Geoscience Data':
 							openaq_country_id = st.number_input( 'Country ID', min_value=0,
 								value=0, step=1, key='in_env_openaq_country_id' )
 							
-							openaq_coordinates = st.text_input(
-								'Coordinates',
+							openaq_coordinates = st.text_input( 'Coordinates',
 								value=f'{global_latitude:.6f},{global_longitude:.6f}',
 								help='OpenAQ expects a latitude,longitude string.',
 								key='env_openaq_coordinates' )
 							
-							openaq_radius = st.number_input(
-								'Radius',
-								min_value=1,
-								max_value=100000,
-								value=25000,
-								step=1000,
-								key='env_openaq_radius' )
+							openaq_radius = st.number_input( 'Radius', min_value=1,
+								max_value=100000, value=25000, step=1000, key='env_openaq_radius' )
 							
-							openaq_providers_id = st.text_input(
-								'Providers ID',
-								value='',
-								key='env_openaq_providers_id' )
+							openaq_providers_id = st.text_input( 'Providers ID',
+								value='', key='env_openaq_providers_id' )
 							
-							openaq_parameters_id = st.text_input(
-								'Parameters ID',
-								value='',
+							openaq_parameters_id = st.text_input( 'Parameters ID', value='',
 								key='env_openaq_parameters_id' )
 							
-							openaq_limit = st.number_input(
-								'Limit',
-								min_value=1,
-								max_value=1000,
-								value=25,
-								step=1,
-								key='env_openaq_limit' )
+							openaq_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
+								value=25, step=1, key='env_openaq_limit' )
 							
-							openaq_page = st.number_input(
-								'Page',
-								min_value=1,
-								max_value=10000,
-								value=1,
-								step=1,
-								key='env_openaq_page' )
+							openaq_page = st.number_input( 'Page', min_value=1, max_value=10000,
+								value=1, step=1, key='env_openaq_page' )
 							
 							openaq_location_id = None
 						
@@ -7212,21 +7145,15 @@ elif mode == 'Geoscience Data':
 							openaq_limit = 25
 							openaq_page = 1
 							
-							openaq_location_id = st.number_input(
-								'Location ID',
-								min_value=1,
-								value=1,
-								step=1,
-								key='env_openaq_location_id' )
+							openaq_location_id = st.number_input( 'Location ID', min_value=1,
+								value=1, step=1, key='env_openaq_location_id' )
 						
 						openaq_btn_c1, openaq_btn_c2 = st.columns( 2 )
-						
 						with openaq_btn_c1:
 							if st.button( label='Run', icon='🏃', key='env_openaq_run',
 									use_container_width=True ):
 								try:
 									service = OpenAQ( )
-									
 									if openaq_mode == 'Locations':
 										country_id_value = None
 										if int( openaq_country_id ) > 0:
@@ -7267,11 +7194,8 @@ elif mode == 'Geoscience Data':
 									st.session_state[ 'env_last_latitude' ] = lat_value
 									st.session_state[ 'env_last_longitude' ] = lng_value
 									
-									set_global_coordinates_from_result(
-										lat_value,
-										lng_value,
-										location=global_location,
-										description='OpenAQ coordinate result' )
+									set_global_coordinates_from_result( lat_value, lng_value,
+										location=global_location, description='OpenAQ result' )
 									
 									st.success( 'OpenAQ request completed.' )
 								
@@ -7287,80 +7211,54 @@ elif mode == 'Geoscience Data':
 								st.session_state[ 'env_last_longitude' ] = None
 					
 						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'OpenAQ', 'env_openaq' )
+						render_source_processing_controls( 'env', 'env_last_result',
+							'env_last_source', 'OpenAQ', 'env_openaq' )
 					
 					# --------- PURPLEAIR SENSORS
 					with st.expander( '🟣 PurpleAir Sensors', expanded=False ):
 						st.badge( label='About API', color='blue', help=cfg.PURPLE_AIR )
-						purple_mode = st.selectbox(
-							'Mode',
+						purple_mode = st.selectbox( 'Mode',
 							options=[ 'Sensors by Bounding Box', 'Single Sensor' ],
 							key='env_purple_mode' )
 						
-						purple_timeout = st.number_input(
-							'Timeout',
-							min_value=1,
-							max_value=60,
-							value=20,
-							step=1,
+						purple_timeout = st.number_input( 'Timeout', min_value=1,
+							max_value=60, value=20, step=1,
 							key='env_purple_timeout' )
 						
 						if purple_mode == 'Sensors by Bounding Box':
-							st.caption(
-								'Bounding box defaults are centered on the global latitude and longitude.' )
-							
+							st.caption( 'Centered on the global latitude and longitude.' )
 							purple_box_c1, purple_box_c2 = st.columns( 2 )
-							
 							with purple_box_c1:
-								purple_nwlng = st.number_input(
-									'NW Longitude',
+								purple_nwlng = st.number_input( 'NW Longitude',
 									value=float( global_box[ 'nw_lng' ] ),
-									format='%.6f',
-									key='env_purple_nwlng' )
+									format='%.6f', key='env_purple_nwlng' )
 								
-								purple_nwlat = st.number_input(
-									'NW Latitude',
+								purple_nwlat = st.number_input( 'NW Latitude',
 									value=float( global_box[ 'nw_lat' ] ),
-									format='%.6f',
-									key='env_purple_nwlat' )
+									format='%.6f', key='env_purple_nwlat' )
 							
 							with purple_box_c2:
-								purple_selng = st.number_input(
-									'SE Longitude',
+								purple_selng = st.number_input( 'SE Longitude',
 									value=float( global_box[ 'se_lng' ] ),
-									format='%.6f',
-									key='env_purple_selng' )
+									format='%.6f', key='env_purple_selng' )
 								
-								purple_selat = st.number_input(
-									'SE Latitude',
+								purple_selat = st.number_input( 'SE Latitude',
 									value=float( global_box[ 'se_lat' ] ),
-									format='%.6f',
-									key='env_purple_selat' )
+									format='%.6f', key='env_purple_selat' )
 							
-							purple_location_type = st.number_input(
-								'Location Type',
-								min_value=0,
-								max_value=1,
-								value=0,
-								step=1,
-								help='Public outdoor sensors are commonly 0.',
+							purple_location_type = st.number_input( 'Location Type',
+								min_value=0, max_value=1, value=0,
+								step=1, help='Public outdoor sensors are commonly 0.',
 								key='env_purple_location_type' )
 							
-							purple_max_age = st.number_input(
-								'Max Age',
-								min_value=0,
-								max_value=10080,
-								value=0,
-								step=10,
-								help='Maximum sensor age in minutes. 0 keeps the broad/default behavior.',
+							purple_max_age = st.number_input( 'Max Age', min_value=0,
+								max_value=10080, value=0, step=10,
+								help='Maximum sensor age in minutes. 0 keeps the default behavior.',
 								key='env_purple_max_age' )
 							
-							purple_modified_since = st.number_input(
-								'Modified Since',
-								min_value=0,
-								max_value=4102444800,
-								value=0,
-								step=1,
+							purple_modified_since = st.number_input( 'Modified Since',
+								min_value=0, max_value=4102444800,
+								value=0, step=1,
 								help='UNIX timestamp filter. 0 disables the filter.',
 								key='env_purple_modified_since' )
 							
@@ -7379,21 +7277,15 @@ elif mode == 'Geoscience Data':
 							purple_center_latitude = None
 							purple_center_longitude = None
 							
-							purple_sensor_index = st.number_input(
-								'Sensor Index',
-								min_value=1,
-								value=1,
-								step=1,
-								key='env_purple_sensor_index' )
+							purple_sensor_index = st.number_input( 'Sensor Index', min_value=1,
+								value=1, step=1, key='env_purple_sensor_index' )
 						
 						purple_btn_c1, purple_btn_c2 = st.columns( 2 )
-						
 						with purple_btn_c1:
 							if st.button( label='Run', icon='🏃', key='env_purple_run',
 									use_container_width=True ):
 								try:
 									service = PurpleAir( )
-									
 									if purple_mode == 'Sensors by Bounding Box':
 										result = service.fetch_sensors(
 											nwlng=float( purple_nwlng ),
@@ -7415,10 +7307,8 @@ elif mode == 'Geoscience Data':
 									st.session_state[ 'env_last_latitude' ] = purple_center_latitude
 									st.session_state[ 'env_last_longitude' ] = purple_center_longitude
 									
-									set_global_coordinates_from_result(
-										purple_center_latitude,
-										purple_center_longitude,
-										location=global_location,
+									set_global_coordinates_from_result( purple_center_latitude,
+										purple_center_longitude, location=global_location,
 										description='PurpleAir bounding-box center' )
 									
 									st.success( 'PurpleAir request completed.' )
@@ -7435,7 +7325,8 @@ elif mode == 'Geoscience Data':
 								st.session_state[ 'env_last_longitude' ] = None
 					
 						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'PurpleAir', 'env_purpleair' )
+						render_source_processing_controls( 'env', 'env_last_result',
+							'env_last_source', 'PurpleAir', 'env_purpleair' )
 					
 					# --------- ENVIROFACTS
 					with st.expander( '🏭 EPA EnviroFacts Facilities', expanded=False ):
@@ -7533,30 +7424,22 @@ elif mode == 'Geoscience Data':
 							firms_box_c1, firms_box_c2 = st.columns( 2 )
 							
 							with firms_box_c1:
-								firms_west = st.number_input(
-									'West',
+								firms_west = st.number_input( 'West',
 									value=float( global_box[ 'west' ] ),
-									format='%.6f',
-									key='env_firms_west' )
+									format='%.6f', key='env_firms_west' )
 								
-								firms_south = st.number_input(
-									'South',
+								firms_south = st.number_input( 'South',
 									value=float( global_box[ 'south' ] ),
-									format='%.6f',
-									key='env_firms_south' )
+									format='%.6f', key='env_firms_south' )
 							
 							with firms_box_c2:
-								firms_east = st.number_input(
-									'East',
+								firms_east = st.number_input( 'East',
 									value=float( global_box[ 'east' ] ),
-									format='%.6f',
-									key='env_firms_east' )
+									format='%.6f', key='env_firms_east' )
 								
-								firms_north = st.number_input(
-									'North',
+								firms_north = st.number_input( 'North',
 									value=float( global_box[ 'north' ] ),
-									format='%.6f',
-									key='env_firms_north' )
+									format='%.6f', key='env_firms_north' )
 							
 							firms_area_coordinates = (
 									f'{float( firms_west )},{float( firms_south )},'
@@ -7567,29 +7450,22 @@ elif mode == 'Geoscience Data':
 							firms_center_longitude = (float( firms_west ) + float( firms_east )) / 2.0
 						
 						firms_btn_c1, firms_btn_c2 = st.columns( 2 )
-						
 						with firms_btn_c1:
 							if st.button( label='Run', icon='🏃', key='btn_env_firms_run',
 									use_container_width=True ):
 								try:
 									service = Firms( )
-									
-									result = service.fetch_area(
-										source=firms_source,
+									result = service.fetch_area( source=firms_source,
 										area_coordinates=firms_area_coordinates,
 										day_range=int( firms_day_range ),
-										date=firms_date,
-										time=int( firms_timeout ) )
+										date=firms_date, time=int( firms_timeout ) )
 									
 									st.session_state[ 'env_last_source' ] = 'FIRMS'
 									st.session_state[ 'env_last_result' ] = result or { }
 									st.session_state[ 'env_last_latitude' ] = firms_center_latitude
 									st.session_state[ 'env_last_longitude' ] = firms_center_longitude
-									
-									set_global_coordinates_from_result(
-										firms_center_latitude,
-										firms_center_longitude,
-										location=global_location,
+									set_global_coordinates_from_result( firms_center_latitude,
+										firms_center_longitude, location=global_location,
 										description='FIRMS bounding-box center' )
 									
 									st.success( 'FIRMS request completed.' )
@@ -7606,7 +7482,8 @@ elif mode == 'Geoscience Data':
 								st.session_state[ 'env_last_longitude' ] = None
 					
 						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'FIRMS', 'env_firms' )
+						render_source_processing_controls( 'env', 'env_last_result',
+							'env_last_source', 'FIRMS', 'env_firms' )
 					
 					# --------- EONET NATURAL EVENTS
 					with st.expander( '🌎 NASA Earth Observatory Natural Events', expanded=False ):
@@ -7661,50 +7538,34 @@ elif mode == 'Geoscience Data':
 								key='env_eonet_use_bbox' )
 							
 							if eonet_use_bbox:
-								st.caption( 'Bounding box defaults are on the global latitude and longitude.' )
-								
+								st.caption( 'Defaults are on the global latitude and longitude.' )
 								eonet_box_c1, eonet_box_c2 = st.columns( 2 )
-								
 								with eonet_box_c1:
-									eonet_min_lon = st.number_input(
-										'Min Longitude',
+									eonet_min_lon = st.number_input( 'Min Longitude',
 										value=float( global_box[ 'west' ] ),
-										format='%.6f',
-										key='env_eonet_min_lon' )
+										format='%.6f', key='env_eonet_min_lon' )
 									
-									eonet_max_lat = st.number_input(
-										'Max Latitude',
+									eonet_max_lat = st.number_input( 'Max Latitude',
 										value=float( global_box[ 'north' ] ),
-										format='%.6f',
-										key='env_eonet_max_lat' )
+										format='%.6f', key='env_eonet_max_lat' )
 								
 								with eonet_box_c2:
-									eonet_max_lon = st.number_input(
-										'Max Longitude',
+									eonet_max_lon = st.number_input( 'Max Longitude',
 										value=float( global_box[ 'east' ] ),
-										format='%.6f',
-										key='env_eonet_max_lon' )
+										format='%.6f', key='env_eonet_max_lon' )
 									
-									eonet_min_lat = st.number_input(
-										'Min Latitude',
+									eonet_min_lat = st.number_input( 'Min Latitude',
 										value=float( global_box[ 'south' ] ),
-										format='%.6f',
-										key='env_eonet_min_lat' )
+										format='%.6f', key='env_eonet_min_lat' )
 								
-								eonet_bbox = (
-										f'{float( eonet_min_lon )},{float( eonet_max_lat )},'
-										f'{float( eonet_max_lon )},{float( eonet_min_lat )}'
-								)
+								eonet_bbox = ( f'{float( eonet_min_lon )},{float( eonet_max_lat )},'
+										f'{float( eonet_max_lon )},{float( eonet_min_lat )}' )
 								
-								eonet_center_latitude = (
-										                        float( eonet_min_lat ) + float(
-									                        eonet_max_lat )
-								                        ) / 2.0
+								eonet_center_latitude = ( float( eonet_min_lat ) + float(
+									                        eonet_max_lat ) ) / 2.0
 								
-								eonet_center_longitude = (
-										                         float( eonet_min_lon ) + float(
-									                         eonet_max_lon )
-								                         ) / 2.0
+								eonet_center_longitude = ( float( eonet_min_lon ) + float(
+									                         eonet_max_lon ) ) / 2.0
 							
 							else:
 								eonet_bbox = ''
@@ -7724,34 +7585,24 @@ elif mode == 'Geoscience Data':
 							eonet_center_longitude = None
 						
 						eonet_btn_c1, eonet_btn_c2 = st.columns( 2 )
-						
 						with eonet_btn_c1:
 							if st.button( label='Run', icon='🏃', key='env_eonet_run',
 									use_container_width=True ):
 								try:
 									service = EoNet( )
-									
-									result = service.fetch(
-										mode=eonet_mode,
-										source=eonet_source,
-										category=eonet_category,
-										status=eonet_status,
-										limit=int( eonet_limit ),
-										days=int( eonet_days ),
-										start_date=eonet_start_date,
-										end_date=eonet_end_date,
-										bbox=eonet_bbox,
-										time=int( eonet_timeout ) )
+									result = service.fetch( mode=eonet_mode, source=eonet_source,
+										category=eonet_category, status=eonet_status,
+										limit=int( eonet_limit ), days=int( eonet_days ),
+										start_date=eonet_start_date, end_date=eonet_end_date,
+										bbox=eonet_bbox, time=int( eonet_timeout ) )
 									
 									st.session_state[ 'env_last_source' ] = 'EONET'
 									st.session_state[ 'env_last_result' ] = result or { }
 									st.session_state[ 'env_last_latitude' ] = eonet_center_latitude
 									st.session_state[ 'env_last_longitude' ] = eonet_center_longitude
 									
-									set_global_coordinates_from_result(
-										eonet_center_latitude,
-										eonet_center_longitude,
-										location=global_location,
+									set_global_coordinates_from_result( eonet_center_latitude,
+										eonet_center_longitude, location=global_location,
 										description='EONET bounding-box center' )
 									
 									st.success( 'EONET request completed.' )
@@ -7768,7 +7619,8 @@ elif mode == 'Geoscience Data':
 								st.session_state[ 'env_last_longitude' ] = None
 				
 						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'EONET', 'env_eonet' )
+						render_source_processing_controls( 'env', 'env_last_result',
+							'env_last_source', 'EONET', 'env_eonet' )
 				
 				with enviro_c2:
 					render_mode_document_tabs( 'env', '📄 Loaded' )
@@ -7787,7 +7639,7 @@ elif mode == 'Geoscience Data':
 				location_c1.metric( 'Location', global_location )
 				location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
 				location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
-				set_blue_divider( )
+				blue_divider( )
 				geo_c1, geo_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
 				with geo_c1:
 					
@@ -8078,8 +7930,7 @@ elif mode == 'Geoscience Data':
 							tnm_center_latitude = None
 							tnm_center_longitude = None
 							
-							st.caption( 'Datasets mode lists available National Map datasets and does not use '
-								'global coordinates.' )
+							st.caption( 'Datasets mode lists does not use global coordinates.' )
 						
 						else:
 							tnm_dataset = st.text_input( 'Dataset', value='',
@@ -8101,7 +7952,6 @@ elif mode == 'Geoscience Data':
 									'longitude.' )
 								
 								tnm_box_c1, tnm_box_c2 = st.columns( 2 )
-								
 								with tnm_box_c1:
 									tnm_min_x = st.number_input( 'Min X / West Longitude',
 										value=float( global_box[ 'west' ] ), format='%.6f',
@@ -8144,7 +7994,6 @@ elif mode == 'Geoscience Data':
 								
 								try:
 									service = USGSTheNationalMap( )
-									
 									result = service.fetch( mode=tnm_mode, dataset=tnm_dataset, q=tnm_query,
 										bbox=tnm_bbox, prod_formats=tnm_prod_formats,
 										max_items=int( tnm_max_items ), offset=int( tnm_offset ),
@@ -8156,10 +8005,8 @@ elif mode == 'Geoscience Data':
 									st.session_state[ 'geo_last_longitude' ] = tnm_center_longitude
 									st.session_state[ 'geo_last_image_path' ] = ''
 									
-									set_global_coordinates_from_result(
-										tnm_center_latitude,
-										tnm_center_longitude,
-										location=global_location,
+									set_global_coordinates_from_result( tnm_center_latitude,
+										tnm_center_longitude, location=global_location,
 										description='USGS The National Map bounding-box center' )
 									
 									st.success( 'USGS The National Map request completed.' )
@@ -8251,7 +8098,7 @@ elif mode == 'Astronomical Data':
 		location_c1.metric( 'Observer Location', global_location )
 		location_c2.metric( 'Observer Latitude', f'{float( global_latitude ):.4f}' )
 		location_c3.metric( 'Observer Longitude', f'{float( global_longitude ):.4f}' )
-		set_blue_divider( )
+		blue_divider( )
 		astro_c1, astro_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
 		with astro_c1:
 			
@@ -8695,7 +8542,6 @@ elif mode == 'Astronomical Data':
 						value=2, step=1, key='astro_catalog_radius' )
 				
 				catalog_btn_c1, catalog_btn_c2 = st.columns( 2 )
-				
 				with catalog_btn_c1:
 					if st.button( label='Run', icon='🏃', key='astro_catalog_run',
 							use_container_width=True ):
@@ -8765,7 +8611,6 @@ elif mode == 'Astronomical Data':
 						options=[ 'deg', 'arcmin', 'arcsec' ], key='astro_astroquery_radius_unit' )
 				
 				astroquery_btn_c1, astroquery_btn_c2 = st.columns( 2 )
-				
 				with astroquery_btn_c1:
 					if st.button( label='Run', icon='🏃', key='astro_astroquery_run',
 							use_container_width=True ):
@@ -8800,13 +8645,13 @@ elif mode == 'Astronomical Data':
 						st.session_state[ 'astro_last_url' ] = ''
 			
 				st.divider( )
-				render_source_processing_controls( 'astro', 'astro_last_result', 'astro_last_source', 'AstroQuery / SIMBAD', 'astro_astroquery_simbad' )
+				render_source_processing_controls( 'astro', 'astro_last_result', 'astro_last_source',
+					'AstroQuery / SIMBAD', 'astro_astroquery_simbad' )
 			
 			# --------- STAR MAP
 			with st.expander( '🗺️ Star Map', expanded=False ):
 				st.caption( 'API', help=cfg.STAR_MAP )
-				starmap_mode = st.selectbox(
-					'Mode',
+				starmap_mode = st.selectbox( 'Mode',
 					options=[ 'object_link', 'coordinate_link', 'snapshot' ],
 					key='astro_starmap_mode' )
 				
@@ -9087,29 +8932,23 @@ elif mode == 'Celestial Map':
 	with center:
 		st.subheader( 'Celestial Map' )
 		st.divider( )
-		
 		global_location = get_global_location_default( )
 		location_state = get_location_state( )
 		has_global_coords = has_valid_global_coordinates( )
-		
 		status_c1, status_c2, status_c3 = st.columns( 3, border=True )
 		status_c1.metric( 'Location', compose_location_from_state( ) or global_location )
 		status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 		status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
 		
-		set_blue_divider( )
-		
+		blue_divider( )
 		control_c1, control_c2 = st.columns( [ 0.50, 0.50 ], border=True )
 		with control_c1:
-			use_global_coordinates = st.checkbox(
-				'Use User-Location',
-				value=has_global_coords,
-				key='celestial_use_global_coordinates' )
+			use_global_coordinates = st.checkbox( 'Use User-Location',
+				value=has_global_coords, key='celestial_use_global_coordinates' )
 			
 			if use_global_coordinates:
 				celestial_latitude = float( location_state[ 'latitude' ] )
 				celestial_longitude = float( location_state[ 'longitude' ] )
-				
 				coord_c1, coord_c2 = st.columns( 2 )
 				with coord_c1:
 					st.number_input( 'Latitude', value=celestial_latitude, format='%.6f',
@@ -9162,8 +9001,7 @@ elif mode == 'Celestial Map':
 				latitude=float( celestial_latitude ), longitude=float( celestial_longitude ) )
 			st.session_state[ 'zoom' ] = int( celestial_zoom )
 		
-		set_blue_divider( )
-		
+		blue_divider( )
 		render_celestial_map( asset_root='assets/starmap', height=1400,
 			latitude=float( celestial_latitude ), longitude=float( celestial_longitude ),
 			location=celestial_location, zoom=int( celestial_zoom ) )
@@ -9180,16 +9018,14 @@ elif mode == 'Public Health':
 	demo_c1.metric( 'Location', demographic_location )
 	demo_c2.metric( 'Latitude', f'{float( demographic_state[ "latitude" ] ):.4f}' )
 	demo_c3.metric( 'Longitude', f'{float( demographic_state[ "longitude" ] ):.4f}' )
-	set_blue_divider( )
+	blue_divider( )
 	left, right = st.columns( [ 0.4, 0.6 ], gap='xxsmall', border=True )
 	if 'demographic_active_source' not in st.session_state:
 		st.session_state[ 'demographic_active_source' ] = ''
 	
 	with left:
 		
-		# ---------------------
 		# ---- Expander U.S. Census Bureau
-		# ---------------------
 		with st.expander( label='U.S. Census Bureau (ACS)', icon='📊', expanded=False ):
 			CENSUS_MODES = [ 'variables', 'data' ]
 			st.caption( 'API', help=cfg.CENSUS_DATA )
@@ -9233,8 +9069,8 @@ elif mode == 'Public Health':
 				
 				return ','.join( fields )
 			
-			def _validate_census_geography_clause( name: str, value: object,
-			                                       required: bool = False ) -> str:
+			def _validate_census_geography_clause( name: str,
+			                                       value: object, required: bool = False ) -> str:
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -9344,9 +9180,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'census_results', 
 				'demographic_active_source', 'u_s_census_bureau', 'api_u_s_census_bureau' )
 		
-		# ---------------------
 		# ---- Expander CDC Open Data Portal
-		# ---------------------
 		with st.expander( label='CDC Open Data', icon='🩺', expanded=False ):
 			st.caption( 'API', help=cfg.CDC_SOCRATA )
 			SOCRATA_MODES = [ 'rows', 'metadata' ]
@@ -9487,9 +9321,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'socrata_results',
 				'demographic_active_source', 'cdc_socrata', 'api_cdc_socrata' )
 		
-		# ---------------------
 		# ---- Expander US Health Data
-		# ---------------------
 		with st.expander( label='U.S. Health', icon='🏥', expanded=False ):
 			st.caption( 'API', help=cfg.US_HEALTH_DATA )
 			HEALTHDATA_MODES = [ 'rows', 'metadata' ]
@@ -9630,9 +9462,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'healthdata_results',
 				'demographic_active_source', 'u_s_health', 'api_u_s_health' )
 		
-		# ---------------------
 		# ---- Expander WHO Global Health
-		# ---------------------
 		with st.expander( label='WHO Global', icon='🌍', expanded=False ):
 			st.caption( 'API', help=cfg.WHO_DATA )
 			WHO_MODES = [ 'indicator_registry', 'athena' ]
@@ -9752,9 +9582,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'who_results',
 				'demographic_active_source', 'who_global', 'api_who_global' )
 		
-		# ---------------------
 		# ---- Expander United Nations Data
-		# ---------------------
 		with st.expander( label='United Nations', icon='🇺🇳', expanded=False ):
 			st.caption( 'API', help=cfg.UN_DATA )
 			UN_MODES = [ 'datasets', 'sdmx_query' ]
@@ -9862,9 +9690,7 @@ elif mode == 'Public Health':
 			
 			render_source_processing_controls( 'demographic', 'un_results', 'demographic_active_source', 'united_nations', 'api_united_nations' )
 		
-		# ---------------------
 		# ---- Expander World Population
-		# ---------------------
 		with st.expander( label='World Population', icon='👥', expanded=False ):
 			st.caption( 'API', help=cfg.WORLD_POP_DATA )
 			WORLDPOP_MODES = [ 'catalog', 'search', 'raster_metadata' ]
@@ -10015,9 +9841,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'worldpop_results',
 				'demographic_active_source', 'world_population', 'api_world_population' )
 		
-		# ---------------------
 		# ---- Expander CDC WONDER
-		# ---------------------
 		with st.expander( label='CDC Wonder', icon='🧬', expanded=False ):
 			st.caption( 'API', help=cfg.CDC_WONDER )
 			WONDER_MODES = [ 'metadata_template', 'query_xml' ]
@@ -10142,9 +9966,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'wonder_results',
 				'demographic_active_source', 'cdc_wonder', 'api_cdc_wonder' )
 		
-		# ---------------------
 		# ---- Expander Pub Med
-		# ---------------------
 		with st.expander( label='Pub Med Search', icon='🏥', expanded=False ):
 			st.caption( 'API', help=cfg.PUB_MED_SEARCH_LOADER )
 			def _clear_pubmed_state( ) -> None:
@@ -10207,9 +10029,7 @@ elif mode == 'Public Health':
 			render_source_processing_controls( 'demographic', 'pubmed_results',
 				'demographic_active_source', 'pub_med_search', 'api_pub_med_search' )
 		
-		# ---------------------
 		# ---- Expander Open City
-		# ---------------------
 		with st.expander( label='Open City Data', icon='🏙️', expanded=False ):
 			st.caption( 'API', help=cfg.OPEN_CITY_DATA_LOADER )
 			OPEN_CITY_DOMAINS = [ 'data.sfgov.org', 'data.cityofnewyork.us',
@@ -10390,7 +10210,6 @@ elif mode == 'Public Health':
 				st.text( 'No results.' )
 			else:
 				render_result_metadata( result )
-				
 				if result.get( 'mode', '' ) == 'variables':
 					payload = result.get( 'data', { } ) if isinstance( result, dict ) else { }
 					variables = payload.get( 'variables', { } ) if isinstance( payload,
@@ -10507,8 +10326,7 @@ elif mode == 'Public Health':
 				if result.get( 'mode', '' ) == 'metadata':
 					payload = result.get( 'data', { } ) if isinstance( result, dict ) else { }
 					
-					render_summary_kv( '#### Summary',
-						{ 'Name': payload.get( 'name', '' ) if isinstance( payload, dict ) else '',
+					render_summary_kv( '#### Summary', { 'Name': payload.get( 'name', '' ) if isinstance( payload, dict ) else '',
 								'Description': payload.get( 'description', '' ) if isinstance(
 									payload, dict ) else '',
 								'RowsUpdatedAt': payload.get( 'rowsUpdatedAt', '' ) if isinstance(
@@ -10533,8 +10351,7 @@ elif mode == 'Public Health':
 				elif result.get( 'mode', '' ) == 'rows':
 					rows = result.get( 'data', [ ] ) if isinstance( result, dict ) else [ ]
 					
-					render_summary_kv( '#### Summary',
-						{ 'Domain': healthdata_domain, 'DatasetId': healthdata_dataset_id,
+					render_summary_kv( '#### Summary', { 'Domain': healthdata_domain, 'DatasetId': healthdata_dataset_id,
 						  'Limit': int( healthdata_limit ), 'Offset': int( healthdata_offset ),
 						  'RowCount': len( rows ) if isinstance( rows, list ) else 0, } )
 					render_rows_table( '#### Rows', rows if isinstance( rows, list ) else [ ] )
@@ -10679,7 +10496,6 @@ elif mode == 'Public Health':
 		elif active_source == 'world_population':
 			st.markdown( '##### World Population' )
 			result = st.session_state.get( 'worldpop_results', { } )
-			
 			if worldpop_submit:
 				try:
 					if worldpop_mode == 'search':
@@ -10712,7 +10528,6 @@ elif mode == 'Public Health':
 				st.text( 'No results.' )
 			else:
 				render_result_metadata( result )
-				
 				if result.get( 'mode', '' ) == 'catalog':
 					payload = result.get( 'data', { } ) if isinstance( result, dict ) else { }
 					
@@ -10733,8 +10548,7 @@ elif mode == 'Public Health':
 					if isinstance( payload, dict ) and isinstance( payload.get( 'results', [ ] ),
 							list ):
 						rows = payload.get( 'results', [ ] )
-						render_summary_kv( '#### Summary',
-							{ 'Query': st.session_state.get( 'worldpop_query', '' ),
+						render_summary_kv( '#### Summary', { 'Query': st.session_state.get( 'worldpop_query', '' ),
 									'Page': worldpop_page, 'PageSize': worldpop_page_size,
 									'ResultCount': len( rows ), } )
 						render_rows_table( '#### Search Results', rows )
@@ -10761,7 +10575,6 @@ elif mode == 'Public Health':
 		elif active_source == 'cdc_wonder':
 			st.markdown( '##### CDC Wonder' )
 			result = st.session_state.get( 'wonder_results', { } )
-			
 			if wonder_submit:
 				try:
 					selected_dataset_id = (
@@ -11111,9 +10924,7 @@ elif mode == 'Artificial Intelligence':
 	# ------------------------------------------------------------------
 	with left:
 		
-		# ---------------------
 		# ---- Expander GPT
-		# ---------------------
 		with st.expander( label='ChatGPT', expanded=True ):
 			CHAT_REASONING_EFFORTS = [ 'minimal', 'low', 'medium', 'high' ]
 			
@@ -11288,7 +11099,6 @@ elif mode == 'Artificial Intelligence':
 				chat_domains = ''
 			
 			btn_row = st.columns( 2 )
-			
 			with btn_row[ 0 ]:
 				chat_submit = st.button( 'Submit', key='chat_submit' )
 			
@@ -11339,9 +11149,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---------------------
 		# ---- Expander Groq
-		# ---------------------
 		with st.expander( label='Grok', expanded=False ):
 			GROK_REASONING_EFFORTS = [ 'none', 'low', 'medium', 'high' ]
 			
@@ -11451,7 +11259,6 @@ elif mode == 'Artificial Intelligence':
 			p_row3 = st.columns( 2 )
 			p_row4 = st.columns( 2 )
 			p_row5 = st.columns( 2 )
-			
 			with p_row1[ 0 ]:
 				_grok_models = cfg.GROK_MODELS
 				groq_model = _model_selector( key_prefix='groq', label='Model',
@@ -11536,16 +11343,13 @@ elif mode == 'Artificial Intelligence':
 				                                        'reasoning models.' )
 			
 			btn_row = st.columns( 2 )
-			
 			with btn_row[ 0 ]:
 				groq_submit = st.button( 'Submit', key='groq_submit' )
 			
 			with btn_row[ 1 ]:
 				st.button( 'Clear', key='groq_clear', on_click=_clear_grok_state )
 			
-			# -----------------------------
 			# Submit Button
-			# -----------------------------
 			if groq_submit:
 				try:
 					if not str( groq_prompt or '' ).strip( ):
@@ -11592,9 +11396,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---------------------
 		# ---- Expander Claude
-		# ---------------------
 		with st.expander( label='Claude', expanded=False ):
 			def _clear_claude_state( ) -> None:
 				'''
@@ -11729,9 +11531,7 @@ elif mode == 'Artificial Intelligence':
 				value=st.session_state.get( 'claude_prompt_chat', '' ), height=140,
 				key='claude_prompt_chat', )
 			
-			# -----------------------------
 			# Model / Output Controls
-			# -----------------------------
 			model_row = st.columns( [ 0.55, 0.45 ] )
 			
 			with model_row[ 0 ]:
@@ -11745,9 +11545,7 @@ elif mode == 'Artificial Intelligence':
 				claude_max_tokens = st.number_input( 'Max Tokens', min_value=1, max_value=65536,
 					value=2048, step=1, key='claude_max_tokens_chat', )
 			
-			# -----------------------------
 			# Sampling Controls
-			# -----------------------------
 			sampling_row = st.columns( 3 )
 			
 			with sampling_row[ 0 ]:
@@ -11762,11 +11560,8 @@ elif mode == 'Artificial Intelligence':
 				claude_top_k = st.number_input( 'Top-k', min_value=0, max_value=500, value=0,
 					step=1, key='claude_top_k_chat', )
 			
-			# -----------------------------
 			# Feature Toggles
-			# -----------------------------
 			option_row = st.columns( 2 )
-			
 			with option_row[ 0 ]:
 				claude_thinking = st.checkbox( 'Reasoning',
 					value=bool( st.session_state.get( 'claude_thinking_chat', False ) ),
@@ -11778,9 +11573,7 @@ elif mode == 'Artificial Intelligence':
 					value=bool( st.session_state.get( 'claude_web_search_chat', False ) ),
 					key='claude_web_search_chat', )
 			
-			# -----------------------------
 			# Reasoning Budget
-			# -----------------------------
 			if claude_thinking and int( claude_max_tokens ) <= 1024:
 				st.warning( 'Max Tokens must exceed 1024 for Claude reasoning.' )
 				claude_thinking_budget = None
@@ -11793,9 +11586,7 @@ elif mode == 'Artificial Intelligence':
 			else:
 				claude_thinking_budget = None
 			
-			# -----------------------------
 			# Instruction Controls
-			# -----------------------------
 			claude_system = st.text_area( 'System',
 				value=st.session_state.get( 'claude_system_chat', '' ), height=110,
 				key='claude_system_chat', )
@@ -11804,9 +11595,7 @@ elif mode == 'Artificial Intelligence':
 				value=st.session_state.get( 'claude_stop_chat', '' ), height=80,
 				key='claude_stop_chat', )
 			
-			# -----------------------------
 			# Web Search Controls
-			# -----------------------------
 			if claude_web_search:
 				search_row = st.columns( 2 )
 				
@@ -11837,43 +11626,40 @@ elif mode == 'Artificial Intelligence':
 			with btn_row[ 1 ]:
 				st.button( 'Clear', key='claude_clear_chat', on_click=_clear_claude_state,
 					use_container_width=True )
-		
+				
+			# Submit Button
+			if claude_submit:
+				try:
+					throw_if( 'claude_prompt', claude_prompt )
+					if not str( claude_prompt ).strip( ):
+						raise ValueError( 'Prompt cannot be empty.' )
+					if claude_thinking and int( claude_max_tokens ) <= 1024:
+						raise ValueError( 'Max Tokens must exceed 1024 for Claude reasoning.' )
+					if claude_thinking and int( claude_thinking_budget ) >= int( claude_max_tokens ):
+						raise ValueError( 'Thinking Budget must be less than Max Tokens.' )
+					fetcher = Claude( )
+					params = {
+						'model': claude_model,
+						'temperature': float( claude_temperature ),
+						'max_tokens': int( claude_max_tokens ),
+						'top_p': float( claude_top_p ),
+						'top_k': int( claude_top_k ) if int( claude_top_k ) > 0 else None,
+						'system': claude_system.strip( ) or None,
+						'stop_sequences': _normalize_claude_stop_lines( claude_stop ) or None,
+						'thinking': bool( claude_thinking ),
+						'thinking_budget': int( claude_thinking_budget ) if claude_thinking else None,
+						'web_search': bool( claude_web_search ),
+						'search_domains': _normalize_claude_domains( claude_domains ) if claude_web_search else None,
+						'blocked_domains': _normalize_claude_domains( claude_blocked_domains ) if claude_web_search else None,
+					}
+					with st.spinner( 'Generating Claude response...' ):
+						result = invoke_provider( fetcher, claude_prompt, params )
+					_promote_generation_result( 'Claude', result )
+					st.success( 'Claude response generated.' )
+				except Exception as ex:
+					st.error( f'Claude generation failed: {ex}' )
 
-		# ------ Claude Submit Button
-		if claude_submit:
-			try:
-				throw_if( 'claude_prompt', claude_prompt )
-				if not str( claude_prompt ).strip( ):
-					raise ValueError( 'Prompt cannot be empty.' )
-				if claude_thinking and int( claude_max_tokens ) <= 1024:
-					raise ValueError( 'Max Tokens must exceed 1024 for Claude reasoning.' )
-				if claude_thinking and int( claude_thinking_budget ) >= int( claude_max_tokens ):
-					raise ValueError( 'Thinking Budget must be less than Max Tokens.' )
-				fetcher = Claude( )
-				params = {
-					'model': claude_model,
-					'temperature': float( claude_temperature ),
-					'max_tokens': int( claude_max_tokens ),
-					'top_p': float( claude_top_p ),
-					'top_k': int( claude_top_k ) if int( claude_top_k ) > 0 else None,
-					'system': claude_system.strip( ) or None,
-					'stop_sequences': _normalize_claude_stop_lines( claude_stop ) or None,
-					'thinking': bool( claude_thinking ),
-					'thinking_budget': int( claude_thinking_budget ) if claude_thinking else None,
-					'web_search': bool( claude_web_search ),
-					'search_domains': _normalize_claude_domains( claude_domains ) if claude_web_search else None,
-					'blocked_domains': _normalize_claude_domains( claude_blocked_domains ) if claude_web_search else None,
-				}
-				with st.spinner( 'Generating Claude response...' ):
-					result = invoke_provider( fetcher, claude_prompt, params )
-				_promote_generation_result( 'Claude', result )
-				st.success( 'Claude response generated.' )
-			except Exception as ex:
-				st.error( f'Claude generation failed: {ex}' )
-
-		# ---------------------
 		# ---- Expander GEMINI
-		# ---------------------
 		with st.expander( label='Gemini', expanded=False ):
 			GEMINI_THINKING_LEVELS = [ 'minimal', 'low', 'medium', 'high' ]
 			
@@ -12134,9 +11920,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---------------------
 		# ---- Expander Mistral
-		# ---------------------
 		with st.expander( label='Mistral', expanded=False ):
 			def _clear_mistral_state( ) -> None:
 				st.session_state[ 'mistral_clear_request' ] = True
@@ -12217,7 +12001,6 @@ elif mode == 'Artificial Intelligence':
 			            'stop sequences require a later complete Mistral class replacement.' )
 			
 			btn_row = st.columns( 2 )
-			
 			with btn_row[ 0 ]:
 				mistral_submit = st.button( 'Submit', key='mistral_submit_chat' )
 			
@@ -12256,15 +12039,12 @@ elif mode == 'Artificial Intelligence':
 elif mode == 'File Upload':
 	left, center, right = st.columns( [ 0.05, 0.90, 0.05 ] )
 	with center:
-		# ------------------------------------------------------------------
-		# DOCUMENT UPLOAD AND PROCESSING
-		# ------------------------------------------------------------------
+		
+		# ---------- DOCUMENT UPLOAD AND PROCESSING
 		with st.expander( label='Document Processing', icon='📄', expanded=False ):
-			document_file = st.file_uploader(
-				'Upload Document',
+			document_file = st.file_uploader( 'Upload Document',
 				type=[ 'txt', 'csv', 'xlsx', 'xls', 'pdf', 'docx', 'pptx',
-					'md', 'html', 'htm', 'json', 'xml' ],
-				key='file_upload_document' )
+					'md', 'html', 'htm', 'json', 'xml' ], key='file_upload_document' )
 			loader_name = 'File Upload'
 			if document_file is not None:
 				if st.button( 'Load Document', key='file_upload_document_load' ):
@@ -12275,8 +12055,7 @@ elif mode == 'File Upload':
 							'.pdf': PdfLoader, '.docx': WordLoader,
 							'.pptx': PowerPointLoader, '.md': MarkdownLoader,
 							'.html': HtmlLoader, '.htm': HtmlLoader,
-							'.json': JsonLoader, '.xml': XmlLoader,
-						}
+							'.json': JsonLoader, '.xml': XmlLoader, }
 						throw_if( 'document_file', document_file )
 						count = load_uploaded_document( document_file, loaders,
 							promote_loader_documents )
@@ -12288,7 +12067,6 @@ elif mode == 'File Upload':
 
 		st.subheader( 'Excel / CSV' )
 		st.divider( )
-		
 		uploaded = st.file_uploader( 'Upload CSV or XLSX', type=[ 'csv', 'xlsx' ],
 			key='data_upload_file' )
 		
@@ -12320,7 +12098,6 @@ elif mode == 'File Upload':
 		if uploaded:
 			input_path = f'_input_{uploaded.name}'
 			output_path = f'_output_{uploaded.name}'
-			
 			with open( input_path, 'wb' ) as f:
 				f.write( uploaded.read( ) )
 			
@@ -12328,16 +12105,13 @@ elif mode == 'File Upload':
 				try:
 					excel = Excel( api=cfg.GOOGLE_API_KEY, cache=cache )
 					sheet_value = sheet_name if input_path.lower( ).endswith( '.xlsx' ) else None
-					
 					if enrichment_mode == 'City / State / Country':
 						excel.enrich( inpath=input_path, outpath=output_path, city=city_col,
-							state=state_col, cntry=country_col,
-							sheet=sheet_value )
+							state=state_col, cntry=country_col, sheet=sheet_value )
 					
 					else:
 						excel.enrich_from_address( inpath=input_path, outpath=output_path,
-							address=address_col, sheet=sheet_value,
-							cntry=country_col )
+							address=address_col, sheet=sheet_value, cntry=country_col )
 					
 					if output_path.lower( ).endswith( '.csv' ):
 						df_output = pd.read_csv( output_path )
@@ -12439,7 +12213,7 @@ elif mode == 'Data Management':
 			if tables:
 				table = st.selectbox( 'Table', tables, key='table_name' )
 				
-				set_blue_divider( )
+				blue_divider( )
 				
 				df = read_table( table )
 				st.data_editor( df, key='dm_browse_key' )
@@ -12471,7 +12245,7 @@ elif mode == 'Data Management':
 				with crud_header_c3:
 					st.metric( 'Columns', len( type_map ) )
 				
-				set_blue_divider( )
+				blue_divider( )
 				
 				insert_col, update_col = st.columns( [ 0.50, 0.50 ], border=True )
 				
@@ -12550,7 +12324,7 @@ elif mode == 'Data Management':
 						st.success( 'Row updated.' )
 						st.rerun( )
 				
-				set_blue_divider( )
+				blue_divider( )
 				
 				delete_col, preview_col = st.columns( [ 0.35, 0.65 ], border=True )
 				
@@ -12594,7 +12368,7 @@ elif mode == 'Data Management':
 					offset = (page - 1) * page_size
 					df_page = read_table( table, page_size, offset )
 				
-				set_blue_divider( )
+				blue_divider( )
 				
 				st.data_editor( data=df_page, num_rows='dynamic', hide_index=False )
 		
@@ -12617,7 +12391,7 @@ elif mode == 'Data Management':
 					if value:
 						df = df[ df[ column ].astype( str ).str.contains( value ) ]
 				
-				set_blue_divider( )
+				blue_divider( )
 				
 				st.data_editor( df, key='dm_filter_key' )
 		
@@ -12801,7 +12575,7 @@ elif mode == 'Data Management':
 			if tables:
 				table = st.selectbox( 'Table', tables, key='admin_table' )
 			
-			set_blue_divider( )
+			blue_divider( )
 			
 			st.markdown( '##### Data Profiling' )
 			tables = list_tables( )
@@ -12852,7 +12626,7 @@ elif mode == 'Data Management':
 					create_index( table, col )
 					st.success( 'Index created.' )
 			
-			set_blue_divider( )
+			blue_divider( )
 			
 			st.markdown( '##### Create Custom Table' )
 			new_table_name = st.text_input( 'Table Name' )
@@ -12886,7 +12660,7 @@ elif mode == 'Data Management':
 				except Exception as e:
 					st.error( f'Error: {e}' )
 			
-			set_blue_divider( )
+			blue_divider( )
 			st.markdown( '##### Schema Viewer' )
 			
 			tables = list_tables( )
@@ -12920,7 +12694,7 @@ elif mode == 'Data Management':
 				else:
 					st.info( "No indexes defined." )
 			
-			set_blue_divider( )
+			blue_divider( )
 			st.markdown( '##### ALTER TABLE Operations' )
 			
 			tables = list_tables( )
