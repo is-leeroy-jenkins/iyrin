@@ -3403,7 +3403,6 @@ def store_loaded_dataset( df_dataset: pd.DataFrame,
 	
 	df_source = df_dataset.copy( )
 	df_base = df_original.copy( ) if isinstance( df_original, pd.DataFrame ) else df_source.copy( )
-	
 	st.session_state[ 'df_raw' ] = df_source.copy( )
 	st.session_state[ 'df_original' ] = df_base.copy( )
 	st.session_state[ 'df_dataset' ] = df_source.copy( )
@@ -3457,8 +3456,7 @@ with st.sidebar:
                                                FROM sqlite_master
                                                WHERE type = 'table'
                                                  AND name NOT LIKE 'sqlite_%'
-                                               ORDER BY name;
-					""", connection )
+                                               ORDER BY name; """, connection )
 				if cfg.DEFAULT_DATA in df_tables[ 'name' ].tolist( ):
 					df_default = pd.read_sql_query( f'SELECT * FROM "{cfg.DEFAULT_DATA}"',
 						connection )
@@ -3478,8 +3476,7 @@ with st.sidebar:
                                                    FROM sqlite_master
                                                    WHERE type = 'table'
                                                      AND name NOT LIKE 'sqlite_%'
-                                                   ORDER BY name;
-						""", connection )
+                                                   ORDER BY name;""", connection )
 					
 					table_options = df_tables[ 'name' ].tolist( )
 					if table_options:
@@ -3576,50 +3573,43 @@ with st.sidebar:
 		init_env_state( 'xai_api_key', 'XAI_API_KEY', 'XAI_API_KEY' )
 		init_env_state( 'claude_api_key', 'CLAUDE_API_KEY', 'CLAUDE_API_KEY' )
 		init_env_state( 'mistral_api_key', 'MISTRAL_API_KEY', 'MISTRAL_API_KEY' )
-
 		openai_key = st.text_input( 'OpenAI API Key', type='password',
-			value=st.session_state.openai_api_key or '',
-			help='Overrides OPENAI_API_KEY from config.py for this session only.' )
+			value=st.session_state.openai_api_key or '', help='Overrides OPENAI_API_KEY.' )
 		if openai_key:
 			st.session_state.openai_api_key = openai_key
 			os.environ[ 'OPENAI_API_KEY' ] = openai_key
 			cfg.OPENAI_API_KEY = openai_key
 
 		gemini_key = st.text_input( 'Gemini API Key', type='password',
-			value=st.session_state.gemini_api_key or '',
-			help='Overrides GEMINI_API_KEY from config.py for this session only.' )
+			value=st.session_state.gemini_api_key or '', help='Overrides GEMINI_API_KEY.' )
 		if gemini_key:
 			st.session_state.gemini_api_key = gemini_key
 			os.environ[ 'GEMINI_API_KEY' ] = gemini_key
 			cfg.GEMINI_API_KEY = gemini_key
 
 		xai_key = st.text_input( 'Grok / xAI API Key', type='password',
-			value=st.session_state.xai_api_key or '',
-			help='Overrides XAI_API_KEY from config.py for this session only.' )
+			value=st.session_state.xai_api_key or '', help='Overrides XAI_API_KEY.' )
 		if xai_key:
 			st.session_state.xai_api_key = xai_key
 			os.environ[ 'XAI_API_KEY' ] = xai_key
 			cfg.XAI_API_KEY = xai_key
 
 		claude_key = st.text_input( 'Claude API Key', type='password',
-			value=st.session_state.claude_api_key or '',
-			help='Overrides CLAUDE_API_KEY from config.py for this session only.' )
+			value=st.session_state.claude_api_key or '', help='Overrides CLAUDE_API_KEY' )
 		if claude_key:
 			st.session_state.claude_api_key = claude_key
 			os.environ[ 'CLAUDE_API_KEY' ] = claude_key
 			cfg.CLAUDE_API_KEY = claude_key
 
 		mistral_key = st.text_input( 'Mistral API Key', type='password',
-			value=st.session_state.mistral_api_key or '',
-			help='Overrides MISTRAL_API_KEY from config.py for this session only.' )
+			value=st.session_state.mistral_api_key or '', help='Overrides MISTRAL_API_KEY.' )
 		if mistral_key:
 			st.session_state.mistral_api_key = mistral_key
 			os.environ[ 'MISTRAL_API_KEY' ] = mistral_key
 			cfg.MISTRAL_API_KEY = mistral_key
 
 		google_key = st.text_input( 'Google API Key', type='password',
-			value=st.session_state.google_api_key or '',
-			help='Overrides GOOGLE_API_KEY from config.py for this session only.' )
+			value=st.session_state.google_api_key or '', help='Overrides GOOGLE_API_KEY.' )
 		
 		if google_key:
 			st.session_state.google_api_key = google_key
@@ -3627,8 +3617,7 @@ with st.sidebar:
 			cfg.GOOGLE_API_KEY = google_key
 		
 		googlemaps_key = st.text_input( 'Google Maps API Key', type='password',
-			value=st.session_state.googlemaps_api_key or '',
-			help='Overrides GOOGLEMAPS_API_KEY from config.py for this session only.' )
+			value=st.session_state.googlemaps_api_key or '', help='Overrides GOOGLEMAPS_API_KEY.' )
 		
 		if googlemaps_key:
 			st.session_state.googlemaps_api_key = googlemaps_key
@@ -3637,7 +3626,7 @@ with st.sidebar:
 		
 		googleweather_key = st.text_input( 'Google Weather API Key', type='password',
 			value=st.session_state.google_weather_api_key or '',
-			help='Overrides GOOGLE_WEATHER_API_KEY from config.py for this session only.' )
+			help='Overrides GOOGLE_WEATHER_API_KEY.' )
 		
 		if googleweather_key:
 			st.session_state.google_weather_api_key = googleweather_key
@@ -3645,15 +3634,14 @@ with st.sidebar:
 		
 		geocoding_key = st.text_input( 'Geocoding API Key', type='password',
 			value=st.session_state.geocoding_api_key or '',
-			help='Overrides GEOCODING_API_KEY from config.py for this session only.' )
+			help='Overrides GEOCODING_API_KEY.' )
 		
 		if geocoding_key:
 			st.session_state.geocoding_api_key = geocoding_key
 			os.environ[ 'GEOCODING_API_KEY' ] = geocoding_key
 		
 		google_cse_id = st.text_input( 'Google Custom Search ID', type='password',
-			value=st.session_state.google_cse_id or '',
-			help='Overrides GOOGLE_CSE_ID from config.py for this session only.' )
+			value=st.session_state.google_cse_id or '', help='Overrides GOOGLE_CSE_ID.' )
 		
 		if google_cse_id:
 			st.session_state.google_cse_id = google_cse_id
@@ -3748,8 +3736,8 @@ ensure_active_location_state( )
 # Mapping Tools
 # ==============================================================================
 if mode == 'Mapping Tools':
-	geocoding_tab, distances_tab, timezones_tab, static_maps_tab = st.tabs(
-		[ 'Geocoding', 'Distances', 'Time Zones', 'Static Maps' ] )
+	geocoding_tab, distances_tab, timezones_tab, static_maps_tab = \
+		st.tabs( [ 'Geocoding', 'Distances', 'Time Zones', 'Static Maps' ] )
 
 	with geocoding_tab:
 		left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
@@ -3822,9 +3810,7 @@ if mode == 'Mapping Tools':
 			status_c1.metric( 'Location', current_location if current_location else global_location )
 			status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 			status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-
 			set_blue_divider( )
-
 			dist_c1, dist_c2 = st.columns( [ 0.50, 0.50 ], border=True )
 
 			with dist_c1:
@@ -3833,8 +3819,8 @@ if mode == 'Mapping Tools':
 
 				if use_global_origin:
 					origin = current_location
-					st.text_input( 'Origin', value=origin, key='distance_origin_display',
-						disabled=True )
+					st.text_input( 'Origin', value=origin,
+						key='distance_origin_display', disabled=True )
 				else:
 					origin_default = st.session_state.get( 'origin', '' ) or current_location
 					origin = st.text_input( 'Origin', value=origin_default,
@@ -3846,8 +3832,8 @@ if mode == 'Mapping Tools':
 
 				if use_global_destination:
 					destination = current_location
-					st.text_input( 'Destination', value=destination, key='distance_destination_display',
-						disabled=True )
+					st.text_input( 'Destination', value=destination,
+						key='distance_destination_display', disabled=True )
 				else:
 					destination_default = st.session_state.get( 'destination', '' )
 					destination = st.text_input( 'Destination', value=destination_default,
@@ -3899,14 +3885,11 @@ if mode == 'Mapping Tools':
 			global_location = get_global_location_default( )
 			location_state = get_location_state( )
 			has_global_coords = has_valid_global_coordinates( )
-
 			status_c1, status_c2, status_c3 = st.columns( 3, border=True )
 			status_c1.metric( 'Location', compose_location_from_state( ) or global_location )
 			status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 			status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-
 			set_blue_divider( )
-
 			tz_c1, tz_c2 = st.columns( [ 0.50, 0.50 ], border=True )
 			with tz_c1:
 				use_global_coordinates = st.checkbox( 'User Location', value=has_global_coords,
@@ -3915,7 +3898,6 @@ if mode == 'Mapping Tools':
 				if use_global_coordinates:
 					lat_tz = float( location_state[ 'latitude' ] )
 					lng_tz = float( location_state[ 'longitude' ] )
-
 					coord_c1, coord_c2 = st.columns( 2 )
 					with coord_c1:
 						st.number_input( 'Latitude', value=lat_tz, format='%.6f',
@@ -3960,7 +3942,6 @@ if mode == 'Mapping Tools':
 							set_coordinates( lat_tz, lng_tz )
 
 						result = timezone.lookup( float( lat_tz ), float( lng_tz ) )
-
 						st.session_state[ 'timezone_last_result' ] = result or { }
 						st.session_state[ 'timezone_last_latitude' ] = float( lat_tz )
 						st.session_state[ 'timezone_last_longitude' ] = float( lng_tz )
@@ -3974,7 +3955,6 @@ if mode == 'Mapping Tools':
 			if result:
 				set_blue_divider( )
 				st.markdown( '##### Time Zone Result' )
-
 				lat_c, lng_c = st.columns( 2 )
 				with lat_c:
 					st.metric( 'Latitude',
@@ -3990,16 +3970,13 @@ if mode == 'Mapping Tools':
 		with center:
 			st.subheader( 'Static Map' )
 			st.divider( )
-
 			global_location = get_global_location_default( )
 			location_state = get_location_state( )
 			has_global_coords = has_valid_global_coordinates( )
-
 			status_c1, status_c2, status_c3 = st.columns( 3, border=True )
 			status_c1.metric( 'Location', compose_location_from_state( ) or global_location )
 			status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 			status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-
 			set_blue_divider( )
 
 			map_c1, map_c2 = st.columns( [ 0.50, 0.50 ], border=True )
