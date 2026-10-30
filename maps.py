@@ -109,8 +109,9 @@ class Maps( ):
 	BASE = 'https://maps.googleapis.com/maps/api'
 	
 	def __init__( self, qps: Optional[ float ]=5.0, retries: int=5,
-			min: float=1.0, max: float=30.0, timeout: float=15.0 ) -> None:
-		self.api_key = cfg.GOOGLEMAPS_API_KEY
+			min: float=1.0, max: float=30.0, timeout: float=15.0,
+			api_key: Optional[ str ]=None ) -> None:
+		self.api_key = api_key if api_key is not None else cfg.GOOGLEMAPS_API_KEY
 		self.limiter = RateLimiter( qps )
 		self.retries = retries
 		self.min = min

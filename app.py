@@ -12103,7 +12103,7 @@ elif mode == 'File Upload':
 			
 			if st.button( 'Enrich File', key='data_upload_enrich' ):
 				try:
-					excel = Excel( api=cfg.GOOGLE_API_KEY, cache=cache )
+					excel = Excel( api=cfg.GOOGLEMAPS_API_KEY, cache=cache )
 					sheet_value = sheet_name if input_path.lower( ).endswith( '.xlsx' ) else None
 					if enrichment_mode == 'City / State / Country':
 						excel.enrich( inpath=input_path, outpath=output_path, city=city_col,
@@ -12406,21 +12406,24 @@ elif mode == 'Data Management':
 					table = st.selectbox( 'Table', tables, key='agg_table' )
 					df = read_table( table )
 					numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
-					with agg_c2:
-						if numeric_cols:
+					if not numeric_cols:
+						with agg_c2:
+							st.info( 'No numeric columns available.' )
+					else:
+						with agg_c2:
 							col = st.selectbox( 'Column', numeric_cols, key='selected_col' )
-					with agg_c3:
-						agg = st.selectbox( 'Function', [ 'SUM', 'AVG', 'COUNT' ] )
-					with agg_c4:
-						if agg == 'SUM':
-							st.metric( 'Result', df[ col ].sum( ), width='stretch',
-								format='accounting' )
-						elif agg == 'AVG':
-							st.metric( 'Result', df[ col ].mean( ), width='stretch',
-								format='accounting' )
-						elif agg == 'COUNT':
-							st.metric( 'Result', df[ col ].count( ), width='stretch',
-								format='accounting' )
+						with agg_c3:
+							agg = st.selectbox( 'Function', [ 'SUM', 'AVG', 'COUNT' ] )
+						with agg_c4:
+							if agg == 'SUM':
+								st.metric( 'Result', df[ col ].sum( ), width='stretch',
+									format='accounting' )
+							elif agg == 'AVG':
+								st.metric( 'Result', df[ col ].mean( ), width='stretch',
+									format='accounting' )
+							elif agg == 'COUNT':
+								st.metric( 'Result', df[ col ].count( ), width='stretch',
+									format='accounting' )
 		
 		# ------------------------------------------------------------------------------
 		# VISUALIZE
