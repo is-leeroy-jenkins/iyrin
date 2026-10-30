@@ -4344,9 +4344,7 @@ if mode == 'Document Data':
 			with st.expander( label='CSV Loader', icon='📑', expanded=False ):
 				st.caption( 'API', help=cfg.CSV_LOADER )
 				csv_file = st.file_uploader( label='Upload CSV', type=[ 'csv' ], key='csv_upload' )
-				
 				st.divider( )
-				
 				csv_c1, csv_c2 = st.columns( 2 )
 				with csv_c1:
 					delimiter = st.text_input( 'Delimiter', value=',', key='csv_delim', )
@@ -5151,7 +5149,6 @@ if mode == 'Document Data':
 			with st.expander( label='HTML Loader', icon='🌐', expanded=False ):
 				st.caption( 'API', help=cfg.HTML_LOADER )
 				html = st.file_uploader( 'Upload HTML', type=[ 'html', 'htm' ], key='html_upload' )
-				
 				render_document_processing_inputs( 'HtmlLoader', 'html' )
 				
 				# --------------------------------------------------
@@ -5209,7 +5206,6 @@ if mode == 'Document Data':
 			with st.expander( label='JSON Loader', icon='🧩', expanded=False ):
 				st.caption( 'API', help=cfg.JSON_LOADER )
 				js = st.file_uploader( 'Upload JSON', type=[ 'json', 'jsonl' ], key='json_upload', )
-				
 				jq_schema = st.text_input( 'jq Schema', value='.', key='json_jq_schema',
 					help='Examples: ., .[], .messages[], .content' )
 				
