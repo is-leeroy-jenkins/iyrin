@@ -1,6 +1,7 @@
 """Offline regression tests for Crawl4AI and HTTP fallback behavior."""
 import ast
 import asyncio
+from typing import Any
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -30,6 +31,7 @@ class CrawlerTests( unittest.TestCase ):
         isolated = ast.Module( body=[ method ], type_ignores=[ ] )
         environment = {
             'asyncio': asyncio,
+            'Any': Any,
             'crawl4ai': crawl4ai,
             'requests': SimpleNamespace( get=lambda url, headers, timeout: response ),
             'Result': FakeResult,
