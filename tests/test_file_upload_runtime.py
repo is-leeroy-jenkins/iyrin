@@ -53,6 +53,11 @@ class FileUploadRuntimeTests( unittest.TestCase ):
                             content = data
                         return [ Document( content ) ]
 
+                class HtmlLoader:
+                    def load( self, path: str ) -> list:
+                        observed[ 'temporary_path' ] = Path( path )
+                        return [ Document( Path( path ).read_text( encoding='utf-8' ) ) ]
+
                 class JsonLoader:
                     def load( self, filepath: str, is_text: bool=True ) -> list:
                         self_test.assertFalse( is_text )
@@ -66,7 +71,8 @@ class FileUploadRuntimeTests( unittest.TestCase ):
                     return len( documents )
 
                 self_test = self
-                loaders = { suffix: (JsonLoader if suffix == '.json' else Loader)
+                loaders = { suffix: (JsonLoader if suffix == '.json' else
+                    HtmlLoader if suffix == '.html' else Loader)
                     for suffix in ( '.txt', '.csv', '.json', '.xml', '.html' ) }
                 count = load_uploaded_document(
                     UploadedFile( filename, contents ), loaders, promote )
