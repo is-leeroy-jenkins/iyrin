@@ -8861,7 +8861,6 @@ elif mode == 'Celestial Map':
 		status_c1.metric( 'Location', compose_location_from_state( ) or global_location )
 		status_c2.metric( 'Latitude', f'{float( location_state[ "latitude" ] ):.4f}' )
 		status_c3.metric( 'Longitude', f'{float( location_state[ "longitude" ] ):.4f}' )
-		
 		blue_divider( )
 		control_c1, control_c2 = st.columns( [ 0.50, 0.50 ], border=True )
 		with control_c1:
