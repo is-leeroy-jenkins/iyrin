@@ -1,6 +1,6 @@
 '''
     ******************************************************************************************
-      Assembly:                Iyr
+      Assembly:                iyrin
       Filename:                embedders.py
       Author:                  Terry D. Eppler
       Created:                 09-08-2026
@@ -8,7 +8,7 @@
       Last Modified On:        09-08-2026
     ******************************************************************************************
     <summary>
-        LangChain embedding implementations used by Iyr document workflows.
+        LangChain embedding implementations used by iyrin document workflows.
     </summary>
     ******************************************************************************************
 '''
@@ -42,7 +42,6 @@ def throw_if( name: str, value: object ) -> None:
 
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
-
 
 class LocalEmbeddings( Embeddings ):
 	"""LangChain-compatible local GGUF embedding implementation."""
