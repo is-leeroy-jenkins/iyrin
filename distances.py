@@ -45,30 +45,32 @@ from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Union
 import pandas as pd
 from maps import Maps
-from boogr import Error
+from boogr import Error, Logger
+
 
 def throw_if( name: str, value: object ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Validate that a required value is not empty.
-		
-		Parameters:
-		-----------
-		name (str): Name of the argument being validated.
-		value (object): Value to validate.
-		
-		Returns:
-		--------
-		None
-		
+	"""Validate a required runtime value.
+
+	Purpose:
+		Ensures required embedding configuration and input values are present before provider or
+		local-model work begins.
+
+	Args:
+		name (str): Argument name included in validation errors.
+		value (object): Runtime value to validate.
+
+	Returns:
+		None: This function validates input and does not return a value.
 	"""
 	if value is None:
-		raise ValueError( f'Argument "{name}" cannot be None.' )
-	
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+
 	if isinstance( value, str ) and not value.strip( ):
-		raise ValueError( f'Argument "{name}" cannot be empty.' )
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+
+	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+
 
 Coord = Tuple[ float, float ]
 AddressOrCoord = Union[ str, Coord ]
@@ -137,9 +139,10 @@ class DistanceMatrix( ):
 			return value
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'normalize_mode( self, mode: str )'
+			Logger.write( exception )
 			raise exception
 	
 	def normalize_inputs( self, values: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | AddressOrCoord ) -> List[ AddressOrCoord ]:
@@ -168,9 +171,10 @@ class DistanceMatrix( ):
 			return [ values ]
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'normalize_inputs( self, values: object )'
+			Logger.write( exception )
 			raise exception
 	
 	def convert_distance( self, meters: int | float | None ) -> Dict[ str, float | None ]:
@@ -196,9 +200,10 @@ class DistanceMatrix( ):
 					'distance_miles': round( value / 1609.344, 3 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'convert_distance( self, meters: int | float | None )'
+			Logger.write( exception )
 			raise exception
 	
 	def convert_duration( self, seconds: int | float | None ) -> Dict[ str, float | None ]:
@@ -225,9 +230,10 @@ class DistanceMatrix( ):
 					'duration_hours': round( value / 3600.0, 3 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'convert_duration( self, seconds: int | float | None )'
+			Logger.write( exception )
 			raise exception
 	
 	def flatten_element( self, origin: str, destination: str, mode: str,
@@ -284,9 +290,10 @@ class DistanceMatrix( ):
 			return row
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'flatten_element( self, **arg )'
+			Logger.write( exception )
 			raise exception
 	
 	def matrix( self, origins: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | AddressOrCoord,
@@ -340,20 +347,19 @@ class DistanceMatrix( ):
 						else fmt( origin_values[ origin_index ] ) )
 				elements = row.get( 'elements' ) or [ ]
 				for destination_index, element in enumerate( elements ):
-					destination_label = (
-							destination_addresses[ destination_index ]
+					destination_label = ( destination_addresses[ destination_index ]
 							if destination_index < len( destination_addresses )
 							else fmt( destination_values[ destination_index ] ) )
 					output_rows.append( self.flatten_element( origin=origin_label,
 							destination=destination_label, mode=travel_mode, element=element ) )
 			self.rows = output_rows
 			return output_rows
-		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'matrix( self, **arg )'
+			Logger.write( exception )
 			raise exception
 	
 	def summary( self, origin: AddressOrCoord, destination: AddressOrCoord,
@@ -404,9 +410,10 @@ class DistanceMatrix( ):
 					'status': row.get( 'status' ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'summary( self, **kwargs) -> Dict[ str, Any ]'
+			Logger.write( exception )
 			raise exception
 	
 	def compare_modes( self, origin: AddressOrCoord, destination: AddressOrCoord,
@@ -476,4 +483,5 @@ class DistanceMatrix( ):
 			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'to_dataframe( self, **kwarg )'
+			Logger.write( exception )
 			raise exception

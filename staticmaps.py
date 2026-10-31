@@ -222,7 +222,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
-			exception.method = 'build_url( self, params: Dict )'
+			exception.method = 'build_url( self, params: Dict ) -> str'
 			Logger.write( exception )
 			raise exception
 	
@@ -251,6 +251,8 @@ class StaticMap( ):
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			latitude, longitude = self.validate_coordinate( lat, lng )
 			zoom_value = max( 1, min( int( zoom or 12 ), 20 ) )
 			size_value = size or '400x300'
@@ -302,6 +304,7 @@ class StaticMap( ):
 
 		"""
 		try:
+			throw_if( 'points', points )
 			coordinates = self.normalize_points( points )
 			zoom_value = int( zoom or 0 )
 			size_value = size or '600x400'
@@ -368,12 +371,12 @@ class StaticMap( ):
 
 		"""
 		try:
+			throw_if( 'points', points )
 			coordinates = self.normalize_points( points )
 			size_value = size or '600x400'
 			maptype_value = str( maptype or 'roadmap' ).strip( ).lower( )
 			color_value = color or '0x0000ff'
 			weight_value = max( 1, int( weight or 5 ) )
-			
 			if len( coordinates ) < 2:
 				raise ValueError( 'At least two coordinates are required for a path.' )
 			
@@ -385,11 +388,9 @@ class StaticMap( ):
 			self.maptype = maptype_value
 			self.color = color_value
 			self.weight = weight_value
-			
 			path_points = [ f'{lat},{lng}' for lat, lng in self.points ]
 			path_parts = [ f'color:{self.color}', f'weight:{self.weight}' ] + path_points
 			path_value = '|'.join( path_parts )
-			
 			self.params = {
 					'size': self.size,
 					'maptype': self.maptype,
@@ -402,7 +403,6 @@ class StaticMap( ):
 			}
 			
 			return self.build_url( self.params )
-		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'mappy'

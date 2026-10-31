@@ -37,29 +37,28 @@ from sgp4 import omm
 from sgp4.api import Satrec
 from websocket import WebSocket, WebSocketTimeoutException, create_connection
 
-
 def throw_if( name: str, value: object ) -> None:
-	'''
+	"""Validate a required runtime value.
 
-		Purpose:
-		--------
-		Validate a required runtime argument.
+	Purpose:
+		Ensures required embedding configuration and input values are present before provider or
+		local-model work begins.
 
-		Parameters:
-		-----------
-		name (str): Argument name.
-		value (object): Argument value.
+	Args:
+		name (str): Argument name included in validation errors.
+		value (object): Runtime value to validate.
 
-		Returns:
-		--------
-		None
-
-	'''
+	Returns:
+		None: This function validates input and does not return a value.
+	"""
 	if value is None:
-		raise ValueError( f'Argument "{name}" cannot be None.' )
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 	if isinstance( value, str ) and not value.strip( ):
-		raise ValueError( f'Argument "{name}" cannot be empty.' )
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+
+	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 class OpenSkyLive( ):
 	'''
@@ -149,10 +148,10 @@ class OpenSkyLive( ):
 			Dict[str, Any]: OpenSky state-vector payload.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_degrees', radius_degrees )
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			throw_if( 'radius_degrees', radius_degrees )
 			self.latitude = float( latitude )
 			self.longitude = float( longitude )
 			self.radius_degrees = float( radius_degrees )
@@ -236,10 +235,10 @@ class AdsbLolMilitary( ):
 			Dict[str, Any]: ADSB.lol payload containing only military-tagged aircraft.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_nm', radius_nm )
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			throw_if( 'radius_nm', radius_nm )
 			self.latitude = float( latitude )
 			self.longitude = float( longitude )
 			self.radius_nm = float( radius_nm )
@@ -333,12 +332,12 @@ class AisStreamLive( ):
 			List[Dict[str, Any]]: AIS Stream message envelopes containing vessel positions.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_degrees', radius_degrees )
-		throw_if( 'max_messages', max_messages )
-		throw_if( 'duration_seconds', duration_seconds )
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			throw_if( 'radius_degrees', radius_degrees )
+			throw_if( 'max_messages', max_messages )
+			throw_if( 'duration_seconds', duration_seconds )
 			self.latitude = float( latitude )
 			self.longitude = float( longitude )
 			self.radius_degrees = float( radius_degrees )
@@ -483,8 +482,8 @@ class CelesTrakLive( ):
 			List[Dict[str, Any]]: OMM records.
 
 		'''
-		throw_if( 'group', group )
 		try:
+			throw_if( 'group', group )
 			self.group = group
 			self.limit = int( limit )
 			self.params = { 'GROUP': self.group, 'FORMAT': 'JSON' }
@@ -520,9 +519,9 @@ class CelesTrakLive( ):
 			Dict[str, Any]: Propagated latitude, longitude, altitude, velocity, and identity.
 
 		'''
-		throw_if( 'record', record )
-		throw_if( 'when', when )
 		try:
+			throw_if( 'record', record )
+			throw_if( 'when', when )
 			self.record = record
 			self.when = when
 			self.satellite = Satrec( )
@@ -625,8 +624,8 @@ class OverpassClient( ):
 			Dict[str, Any]: Decoded Overpass JSON response.
 
 		'''
-		throw_if( 'query', query )
 		try:
+			throw_if( 'query', query )
 			transient_statuses = { 406, 429, 500, 502, 503, 504 }
 			errors: List[ str ] = [ ]
 			for endpoint in self.endpoints:
@@ -727,12 +726,12 @@ class OverpassInfrastructure( OverpassClient ):
 			Dict[str, Any]: Overpass elements with an added InfrastructureCategory field.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_km', radius_km )
-		throw_if( 'categories', categories )
-		throw_if( 'max_results', max_results )
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			throw_if( 'radius_km', radius_km )
+			throw_if( 'categories', categories )
+			throw_if( 'max_results', max_results )
 			self.latitude = float( latitude )
 			self.longitude = float( longitude )
 			self.radius_km = float( radius_km )
@@ -809,8 +808,8 @@ class OverpassInfrastructure( OverpassClient ):
 			str: Infrastructure category, or an empty string when unsupported.
 
 		'''
-		throw_if( 'tags', tags )
 		try:
+			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
 				return 'Airports'
 			if tags.get( 'harbour' ) == 'yes' or tags.get( 'amenity' ) == 'ferry_terminal':
@@ -889,12 +888,12 @@ class OverpassCameras( OverpassClient ):
 			Dict[str, Any]: Overpass elements with an added CameraCategory field.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_km', radius_km )
-		throw_if( 'categories', categories )
-		throw_if( 'max_results', max_results )
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			throw_if( 'radius_km', radius_km )
+			throw_if( 'categories', categories )
+			throw_if( 'max_results', max_results )
 			self.latitude = float( latitude )
 			self.longitude = float( longitude )
 			self.radius_km = float( radius_km )
@@ -971,8 +970,8 @@ class OverpassCameras( OverpassClient ):
 			str: Camera category, or an empty string when unsupported.
 
 		'''
-		throw_if( 'tags', tags )
 		try:
+			throw_if( 'tags', tags )
 			if tags.get( 'webcam' ) or tags.get( 'contact:webcam' ):
 				return 'Web Cameras'
 			if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
@@ -1049,12 +1048,12 @@ class OverpassMapLayers( OverpassClient ):
 			Dict[str, Any]: Overpass elements with an added MapLayerCategory field.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_km', radius_km )
-		throw_if( 'categories', categories )
-		throw_if( 'max_results', max_results )
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
+			throw_if( 'radius_km', radius_km )
+			throw_if( 'categories', categories )
+			throw_if( 'max_results', max_results )
 			self.latitude = float( latitude )
 			self.longitude = float( longitude )
 			self.radius_km = float( radius_km )
@@ -1131,8 +1130,8 @@ class OverpassMapLayers( OverpassClient ):
 			str: Contextual map category, or an empty string when unsupported.
 
 		'''
-		throw_if( 'tags', tags )
 		try:
+			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
 				return 'Launch Sites'
 			if tags.get( 'amenity' ) == 'bicycle_rental':

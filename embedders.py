@@ -114,10 +114,8 @@ class LocalEmbeddings( Embeddings ):
 			Logger( ).write( exception )
 			raise exception
 
-
 class EmbeddingFactory( ):
 	"""Factory for Iyr's supported LangChain embedding implementations."""
-
 	provider: str
 	model: str
 	model_path: str
