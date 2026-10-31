@@ -674,8 +674,7 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 				'constellationBorders': root / 'data' / 'constellations.borders.json',
 				'dsonames': root / 'data' / 'dsonames.json', }
 		
-		module_paths = [
-				root / 'js' / 'modules' / 'CelestialMath.js',
+		module_paths = [ root / 'js' / 'modules' / 'CelestialMath.js',
 				root / 'js' / 'modules' / 'StarData.js',
 				root / 'js' / 'modules' / 'MapRenderer.js',
 				root / 'js' / 'modules' / 'LocationPicker.js',
@@ -686,7 +685,6 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 		
 		required_paths = [ index_path, style_path, *data_paths.values( ), *module_paths ]
 		missing_paths = [ str( path ) for path in required_paths if not path.exists( ) ]
-		
 		if missing_paths:
 			st.error( 'Celestial Map assets are missing.' )
 			st.code( '\n'.join( missing_paths ) )
@@ -694,7 +692,6 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 		
 		html = index_path.read_text( encoding='utf-8' )
 		css = style_path.read_text( encoding='utf-8' )
-		
 		local_data: Dict[ str, object ] = { }
 		for key, path in data_paths.items( ):
 			local_data[ key ] = json.loads( path.read_text( encoding='utf-8' ) )
@@ -712,7 +709,6 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 			default_location = get_global_location_default( )
 		
 		default_zoom = int( zoom if zoom is not None else st.session_state.get( 'zoom', 8 ) or 8 )
-		
 		default_payload = { 'latitude': default_latitude, 'longitude': default_longitude,
 				'location': default_location, 'zoom': default_zoom, }
 		
@@ -723,24 +719,18 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 				'js/modules/MapRenderer.js', 'js/modules/LocationPicker.js',
 				'js/modules/UIController.js', 'js/modules/StarDetailsPanel.js',
 				'js/modules/ImageExporter.js', 'js/main.js', ]:
-			html = re.sub(
-				rf'\s*<script\s+src="{re.escape( relative_path )}"></script>',
-				'',
-				html,
-				flags=re.IGNORECASE )
+			html = re.sub( rf'\s*<script\s+src="{re.escape( relative_path )}"></script>', '',
+				html, flags=re.IGNORECASE )
 		
-		data_script = (
-				'<script>\n'
+		data_script = ( '<script>\n'
 				'window.StarMapApp = window.StarMapApp || {};\n'
 				f'window.StarMapApp.LOCAL_DATA = {json.dumps( local_data )};\n'
 				f'window.StarMapApp.DEFAULT_LOCATION = {json.dumps( default_payload )};\n'
 				'</script>' )
 		
 		inline_scripts = [ data_script ]
-		
 		for path in module_paths:
 			source = path.read_text( encoding='utf-8' )
-			
 			if path.name == 'main.js':
 				source = source.replace(
 					"this.locationPicker = new LocationPicker('locationPicker', {\n"
@@ -753,8 +743,7 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 					"                onLocationChange: (lat, lon) => this.handleLocationChange(lat, lon)\n"
 					"            });" )
 				
-				source = source.replace(
-					"this.selectedCoords = { lat: 30.0444, lon: 31.2357 };",
+				source = source.replace( "this.selectedCoords = { lat: 30.0444, lon: 31.2357 };",
 					"this.selectedCoords = {\n"
 					"                lat: Number(defaultLocation.latitude || 30.0444),\n"
 					"                lon: Number(defaultLocation.longitude || 31.2357)\n"
@@ -991,7 +980,6 @@ def compose_location_from_state( ) -> str:
 	for key in [ 'city', 'state', 'zipcode', 'country' ]:
 		value = st.session_state.get( key, '' )
 		text = str( value ).strip( )
-		
 		if text and text.lower( ) not in [ 'nan', 'none', 'null' ]:
 			parts.append( text )
 	
@@ -1051,7 +1039,7 @@ def get_global_location_default( fallback: str = '' ) -> str:
 	
 	return fallback
 
-def get_global_zipcode_default( fallback: str = '20001' ) -> str:
+def get_global_zipcode_default( fallback: str='20001' ) -> str:
 	"""
 	
 		Purpose:
@@ -1073,7 +1061,7 @@ def get_global_zipcode_default( fallback: str = '20001' ) -> str:
 	
 	return fallback
 
-def get_global_latitude_default( fallback: float = 0.0 ) -> float:
+def get_global_latitude_default( fallback: float=0.0 ) -> float:
 	"""
 	
 		Purpose:
@@ -1094,7 +1082,7 @@ def get_global_latitude_default( fallback: float = 0.0 ) -> float:
 	
 	return float( fallback )
 
-def get_global_longitude_default( fallback: float = 0.0 ) -> float:
+def get_global_longitude_default( fallback: float=0.0 ) -> float:
 	"""
 	
 		Purpose:
@@ -1926,7 +1914,7 @@ def read_missing_report_locations( table_name: str, limit: Optional[ int ] = Non
 		return pd.DataFrame( )
 
 def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, places: Place,
-		use_places: bool = True, limit: Optional[ int ]=None ) -> pd.DataFrame:
+		use_places: bool=True, limit: Optional[ int ]=None ) -> pd.DataFrame:
 	"""
 	
 		Purpose:
@@ -1950,19 +1938,15 @@ def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, plac
 	try:
 		throw_if( 'table_name', table_name )
 		throw_if( 'geocoder', geocoder )
-		
 		df_locations = read_missing_report_locations( table_name, limit )
-		
 		if df_locations.empty:
 			return pd.DataFrame( )
 		
 		records: List[ Dict[ str, object ] ] = [ ]
-		
 		for row in df_locations.itertuples( index=False ):
 			query = compose_location_query( row.City, row.State, row.Country )
 			
-			record = {
-					'City': row.City,
+			record = { 'City': row.City,
 					'State': row.State,
 					'Country': row.Country,
 					'Query': query,
@@ -1971,8 +1955,7 @@ def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, plac
 					'Longitude': None,
 					'Source': '',
 					'Status': '',
-					'Message': '',
-			}
+					'Message': '', }
 			
 			if not query:
 				record[ 'Status' ] = 'Skipped'
@@ -1983,7 +1966,6 @@ def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, plac
 			try:
 				result = geocoder.freeform( query )
 				latitude, longitude = extract_coordinates( result )
-				
 				if latitude is None or longitude is None:
 					raise NotFound( 'No usable coordinates returned by Geocoder.' )
 				
