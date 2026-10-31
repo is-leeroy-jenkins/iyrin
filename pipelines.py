@@ -772,14 +772,9 @@ def render_web_document_processing( ) -> None:
 			if not documents:
 				st.info( 'Fetch a URL to load a LangChain document.' )
 			else:
-				rows = [ {
-					'Document': index,
-					'Source': ( document.metadata or { } ).get( 'source', '' ),
-					'Characters': len( document.page_content ),
-					'Metadata': document.metadata or { },
-					'Text': document.page_content,
-				} for index, document in enumerate( documents, start=1 ) ]
-				st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
+				text = '\\n\\n'.join( document.page_content for document in documents )
+				st.text_area( 'Scraped Text', value=text, height=500,
+					disabled=True, key='web_scraped_text' )
 		with chunks_tab:
 			chunks = st.session_state[ 'web_chunks' ]
 			if not chunks:
