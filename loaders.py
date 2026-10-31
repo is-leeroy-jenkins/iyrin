@@ -1,6 +1,6 @@
 '''
   ******************************************************************************************
-      Assembly:                Iyrin
+      Assembly:                iyrin
       Filename:                laoders.py
       Author:                  Terry D. Eppler
       Created:                 05-31-2022
@@ -4371,7 +4371,6 @@ class GoogleBucketLoader( Loader ):
 			self.loader = GCSDirectoryLoader( **kwargs )
 			self.documents = self.loader.load( )
 			return self.documents
-		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'loaders'
@@ -4471,13 +4470,13 @@ class AwsBucketLoader( Loader ):
 			'aws_secret_access_key', 'aws_session_token', 'region_name', 'endpoint_url',
 			'chunk_size', 'overlap_amount', 'load', 'split', 'split_documents', ]
 	
-	def load( self, bucket: str, prefix: Optional[ str ] = None,
-		aws_access_key_id: Optional[ str ] = None,
-		aws_secret_access_key: Optional[ str ] = None,
-		aws_session_token: Optional[ str ] = None,
-		region_name: Optional[ str ] = None, endpoint_url: Optional[ str ] = None,
-		api_version: Optional[ str ] = None, use_ssl: bool = True,
-		verify: str | bool | None = None ) -> List[ Document ] | None:
+	def load( self, bucket: str, prefix: Optional[ str ]=None,
+		aws_access_key_id: Optional[ str ]=None,
+		aws_secret_access_key: Optional[ str ]=None,
+		aws_session_token: Optional[ str ]=None,
+		region_name: Optional[ str ]=None, endpoint_url: Optional[ str ]=None,
+		api_version: Optional[ str ]=None, use_ssl: bool=True,
+		verify: str | bool | None=None ) -> List[ Document ] | None:
 		"""Load an Amazon S3 directory.
 
 		Purpose:
@@ -4514,14 +4513,9 @@ class AwsBucketLoader( Loader ):
 			self.api_version = api_version
 			self.use_ssl = use_ssl
 			self.verify = verify
-			self.loader = S3DirectoryLoader(
-				self.bucket,
-				prefix=self.prefix or '',
-				region_name=self.region_name,
-				api_version=self.api_version,
-				use_ssl=self.use_ssl,
-				verify=self.verify,
-				endpoint_url=self.endpoint_url,
+			self.loader = S3DirectoryLoader( self.bucket, prefix=self.prefix or '',
+				region_name=self.region_name, api_version=self.api_version,
+				use_ssl=self.use_ssl, verify=self.verify, endpoint_url=self.endpoint_url,
 				aws_access_key_id=self.aws_access_key_id,
 				aws_secret_access_key=self.aws_secret_access_key,
 				aws_session_token=self.aws_session_token )
