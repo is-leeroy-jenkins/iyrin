@@ -323,14 +323,9 @@ def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) 
 		if not documents:
 			st.info( 'Run a source request to load a document.' )
 		else:
-			rows = [ {
-				'Document': index,
-				'Source': ( document.metadata or { } ).get( 'source', '' ),
-				'Characters': len( document.page_content ),
-				'Metadata': document.metadata or { },
-				'Text': document.page_content,
-			} for index, document in enumerate( documents, start=1 ) ]
-			st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
+			text = '\n\n'.join( document.page_content for document in documents )
+			st.text_area( 'Loaded Document Text', value=text, height=500,
+				disabled=True )
 
 	with chunks_tab:
 		chunks = st.session_state[ f'{prefix}_chunks' ]
