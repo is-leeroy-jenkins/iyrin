@@ -3385,8 +3385,8 @@ with st.sidebar:
 	st.markdown( '#### 🏛️ Static Data' )
 	with st.expander( label='Source', expanded=False ):
 		st.caption( 'Sources' )
-		source = st.selectbox( label='Select',
-			options=[ 'Default', 'Database', 'External' ], key='source_selectbox' )
+		source = st.selectbox( label='Select', options=[ 'Default', 'Database', 'External' ],
+			key='source_selectbox' )
 		
 		uploaded = st.file_uploader( label='Upload Spreadsheet', type=[ 'xlsx', 'xls', 'csv' ],
 			key='source_uploader' )
@@ -3823,7 +3823,6 @@ if mode == 'Mapping Tools':
 		with center:
 			st.subheader( 'Time Zone Lookup' )
 			st.divider( )
-
 			global_location = get_global_location_default( )
 			location_state = get_location_state( )
 			has_global_coords = has_valid_global_coordinates( )
