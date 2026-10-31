@@ -62,7 +62,7 @@ from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promo
                        initialize_loading_state, sync_mode_document,
                         rebuild_raw_text_from_documents, render_document_processing_actions,
                         render_document_processing_controls, render_document_processing_inputs,
-                        render_loading_tabs, render_mode_document_tabs,
+                        render_loading_tabs, render_mode_document_tabs, initialize_mode_document_state,
                         render_source_processing_controls, reset_document_processing_controls,
                         render_web_document_processing)
 from world import render_live_world_map, render_live_world_sidebar
@@ -6432,10 +6432,24 @@ elif mode == 'Geoscience Data':
 						with google_btn_c2:
 							if st.button( label='Clear', icon='🧹', key='weather_google_clear',
 									use_container_width=True ):
-								st.session_state[ 'weather_last_source' ] = ''
-								st.session_state[ 'weather_last_result' ] = { }
-								st.session_state[ 'weather_last_latitude' ] = None
-								st.session_state[ 'weather_last_longitude' ] = None
+								if st.session_state.get( 'weather_last_source' ) == 'Google Weather':
+									initialize_mode_document_state( 'weather' )
+									for key, value in {
+										'weather_documents': [ ], 'weather_chunks': [ ],
+										'weather_embeddings': [ ], 'weather_embedder': None,
+										'weather_vector_store': None,
+										'weather_document_signature': '',
+										'weather_chunk_size_used': 0,
+										'weather_chunk_overlap_used': 0,
+										'weather_embedding_provider_used': '',
+										'weather_embedding_model_used': '',
+										'weather_embedding_model_path_used': '',
+									}.items( ):
+										st.session_state[ key ] = value
+									st.session_state[ 'weather_last_source' ] = ''
+									st.session_state[ 'weather_last_result' ] = { }
+									st.session_state[ 'weather_last_latitude' ] = None
+									st.session_state[ 'weather_last_longitude' ] = None
 					
 						st.divider( )
 						render_source_processing_controls( 'weather', 'weather_last_result',
