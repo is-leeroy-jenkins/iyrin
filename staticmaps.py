@@ -43,7 +43,7 @@
   '''
 from typing import Optional, Dict
 from urllib.parse import urlencode
-from boogr import Error
+from boogr import Error, Logger
 import config as cfg
 
 def throw_if( name: str, value: object ) -> None:
@@ -148,6 +148,7 @@ class StaticMap( ):
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
 			exception.method = 'validate_coordinate( self, *args )'
+			Logger.write( exception )
 			raise exception
 	
 	def normalize_points( self, points: list ) -> list:
@@ -193,6 +194,7 @@ class StaticMap( ):
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
 			exception.method = 'normalize_points( self, points: list )'
+			Logger.write( exception )
 			raise exception
 	
 	def build_url( self, params: Dict ) -> str | None:
@@ -221,6 +223,7 @@ class StaticMap( ):
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
 			exception.method = 'build_url( self, params: Dict )'
+			Logger.write( exception )
 			raise exception
 	
 	def pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None:
@@ -257,18 +260,15 @@ class StaticMap( ):
 			self.zoom = zoom_value
 			self.size = size_value
 			self.markers = marker_value			
-			self.params = {
-					'center': f'{self.latitude},{self.longitude}',
-					'zoom': str( self.zoom ),
-					'size': self.size,
-					'markers': self.markers
-			}			
+			self.params = { 'center': f'{self.latitude},{self.longitude}',
+					'zoom': str( self.zoom ), 'size': self.size, 'markers': self.markers }
 			return self.build_url( self.params )		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
 			exception.method = 'pin( self, *args )'
+			Logger.write( exception )
 			raise exception
 	
 	def pins( self, points: list, zoom: int=0, size: int='600x400',
@@ -335,6 +335,7 @@ class StaticMap( ):
 			exception.module = 'mappy'
 			exception.cause = 'StaticMapUrl'
 			exception.method = 'pins( self, *args )'
+			Logger.write( exception )
 			raise exception
 	
 	def path( self, points: list, size: int='600x400', maptype: int='roadmap',
@@ -407,6 +408,7 @@ class StaticMap( ):
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
 			exception.method = 'path( self, points: list, size: str=600x400 )'
+			Logger.write( exception )
 			raise exception
 	
 	def bbox( self, west: float, south: float, east: float, north: float,
@@ -445,19 +447,16 @@ class StaticMap( ):
 			throw_if( 'south', south )
 			throw_if( 'east', east )
 			throw_if( 'north', north )
-			
 			west_value = float( west )
 			south_value = float( south )
 			east_value = float( east )
 			north_value = float( north )
 			size_value = size or '600x400'
 			maptype_value = maptype or 'roadmap'
-			
 			southwest = self.validate_coordinate( south_value, west_value )
 			northwest = self.validate_coordinate( north_value, west_value )
 			northeast = self.validate_coordinate( north_value, east_value )
 			southeast = self.validate_coordinate( south_value, east_value )
-			
 			self.west = west_value
 			self.south = south_value
 			self.east = east_value
@@ -466,16 +465,13 @@ class StaticMap( ):
 			self.maptype = maptype_value
 			self.points = [ southwest, northwest, northeast, southeast, southwest ]
 			
-			return self.path(
-				points=self.points,
-				size=self.size,
-				maptype=self.maptype,
-				color='0xff0000',
-				weight=3 )
+			return self.path( points=self.points, size=self.size, maptype=self.maptype,
+				color='0xff0000', weight=3 )
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'mappy'
 			exception.cause = 'StaticMap'
 			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
+			Logger.write( exception )
 			raise exception

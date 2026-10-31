@@ -44,7 +44,7 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 
-class LocalGGUFEmbeddings( Embeddings ):
+class LocalEmbeddings( Embeddings ):
 	"""LangChain-compatible local GGUF embedding implementation."""
 
 	model_path: str
@@ -159,7 +159,7 @@ class EmbeddingFactory( ):
 	
 			if self.provider == 'Local GGUF':
 				throw_if( 'model_path', self.model_path )
-				return LocalGGUFEmbeddings( model_path=self.model_path )
+				return LocalEmbeddings( model_path=self.model_path )
 	
 			raise ValueError( f'Unsupported embedding provider: {self.provider}' )
 		except Exception as e:

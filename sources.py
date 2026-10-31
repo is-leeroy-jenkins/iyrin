@@ -1,27 +1,28 @@
 '''
-******************************************************************************************
- Assembly:                iyr
- Filename:                sources.py
- Author:                  Terry D. Eppler / Assistant
- Created:                 09-12-2026
-
- Last Modified By:        Terry D. Eppler / Assistant
- Last Modified On:        09-12-2026
-******************************************************************************************
-
-Purpose:
-    Provider clients used by Iyr Live World Data for real-time aircraft state vectors,
-    military aircraft, maritime AIS positions, current satellite orbital elements, public infrastructure, and public camera features.
-    OpenSky access uses the current OAuth2 client-credentials flow when API-client
-    credentials are available. ADSB.lol provides public military-tagged aircraft data.
-    AIS Stream provides server-side WebSocket maritime position events. CelesTrak data is
-    requested in OMM JSON format and propagated with SGP4 before conversion to Earth-fixed
-    coordinates.
-******************************************************************************************
+	******************************************************************************************
+	 Assembly:                iyrin
+	 Filename:                sources.py
+	 Author:                  Terry D. Eppler
+	 Created:                 09-12-2026
+	
+	 Last Modified By:        Terry D. Eppler
+	 Last Modified On:        09-12-2026
+	******************************************************************************************
+	
+	Purpose:
+	    Provider clients used by Iyr Live World Data for real-time aircraft state vectors,
+	    military aircraft, maritime AIS positions, current satellite orbital elements, public
+	    infrastructure, and public camera features.
+	    OpenSky access uses the current OAuth2 client-credentials flow when API-client
+	    credentials are available. ADSB.lol provides public military-tagged aircraft data.
+	    AIS Stream provides server-side WebSocket maritime position events. CelesTrak data is
+	    requested in OMM JSON format and propagated with SGP4 before conversion to Earth-fixed
+	    coordinates.
+	******************************************************************************************
 '''
 
 from __future__ import annotations
-
+from boogr import Error, Logger
 import datetime as dt
 import json
 import math
@@ -157,28 +158,36 @@ class OpenSkyLive:
 		throw_if( 'latitude', latitude )
 		throw_if( 'longitude', longitude )
 		throw_if( 'radius_degrees', radius_degrees )
-		self.latitude = float( latitude )
-		self.longitude = float( longitude )
-		self.radius_degrees = float( radius_degrees )
-		self.lamin = max( -90.0, self.latitude - self.radius_degrees )
-		self.lamax = min( 90.0, self.latitude + self.radius_degrees )
-		self.lomin = max( -180.0, self.longitude - self.radius_degrees )
-		self.lomax = min( 180.0, self.longitude + self.radius_degrees )
-		self.params = {
-			'lamin': self.lamin,
-			'lomin': self.lomin,
-			'lamax': self.lamax,
-			'lomax': self.lomax,
-		}
-		self.headers: Dict[ str, str ] = { }
-		self.access_token = self.get_access_token( )
-		if self.access_token:
-			self.headers[ 'Authorization' ] = f'Bearer {self.access_token}'
-
-		self.response = requests.get( self.states_url, params=self.params,
-			headers=self.headers, timeout=self.timeout )
-		self.response.raise_for_status( )
-		return self.response.json( ) or { }
+		try:
+			self.latitude = float( latitude )
+			self.longitude = float( longitude )
+			self.radius_degrees = float( radius_degrees )
+			self.lamin = max( -90.0, self.latitude - self.radius_degrees )
+			self.lamax = min( 90.0, self.latitude + self.radius_degrees )
+			self.lomin = max( -180.0, self.longitude - self.radius_degrees )
+			self.lomax = min( 180.0, self.longitude + self.radius_degrees )
+			self.params = {
+				'lamin': self.lamin,
+				'lomin': self.lomin,
+				'lamax': self.lamax,
+				'lomax': self.lomax,
+			}
+			self.headers: Dict[ str, str ] = { }
+			self.access_token = self.get_access_token( )
+			if self.access_token:
+				self.headers[ 'Authorization' ] = f'Bearer {self.access_token}'
+	
+			self.response = requests.get( self.states_url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
+			self.response.raise_for_status( )
+			return self.response.json( ) or { }
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'mappy'
+			exception.cause = 'StaticMap'
+			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
+			Logger.write( exception )
+			raise exception
 
 
 class AdsbLolMilitary:
@@ -236,22 +245,28 @@ class AdsbLolMilitary:
 		throw_if( 'latitude', latitude )
 		throw_if( 'longitude', longitude )
 		throw_if( 'radius_nm', radius_nm )
-		self.latitude = float( latitude )
-		self.longitude = float( longitude )
-		self.radius_nm = float( radius_nm )
-		self.request_url = (
-			f'{self.url}/{self.latitude:.6f}/{self.longitude:.6f}/{self.radius_nm:.1f}' )
-		self.response = requests.get( self.request_url, timeout=self.timeout )
-		self.response.raise_for_status( )
-		payload = self.response.json( ) or { }
-		if not isinstance( payload, dict ):
-			raise TypeError( 'ADSB.lol point response must be a dictionary.' )
-		aircraft = payload.get( 'ac', [ ] ) or [ ]
-		payload[ 'ac' ] = [
-			row for row in aircraft
-			if isinstance( row, dict ) and int( row.get( 'dbFlags', 0 ) or 0 ) & 1
-		]
-		return payload
+		try:
+			self.latitude = float( latitude )
+			self.longitude = float( longitude )
+			self.radius_nm = float( radius_nm )
+			self.request_url = (
+				f'{self.url}/{self.latitude:.6f}/{self.longitude:.6f}/{self.radius_nm:.1f}' )
+			self.response = requests.get( self.request_url, timeout=self.timeout )
+			self.response.raise_for_status( )
+			payload = self.response.json( ) or { }
+			if not isinstance( payload, dict ):
+				raise TypeError( 'ADSB.lol point response must be a dictionary.' )
+			aircraft = payload.get( 'ac', [ ] ) or [ ]
+			payload[ 'ac' ] = [ row for row in aircraft
+				if isinstance( row, dict ) and int( row.get( 'dbFlags', 0 ) or 0 ) & 1 ]
+			return payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'source'
+			exception.cause = 'SAdsbLolMilitary'
+			exception.method = 'fetch_militar( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
 
 class AisStreamLive:
@@ -334,96 +349,101 @@ class AisStreamLive:
 		throw_if( 'radius_degrees', radius_degrees )
 		throw_if( 'max_messages', max_messages )
 		throw_if( 'duration_seconds', duration_seconds )
-		self.latitude = float( latitude )
-		self.longitude = float( longitude )
-		self.radius_degrees = float( radius_degrees )
-		self.max_messages = int( max_messages )
-		self.duration_seconds = float( duration_seconds )
-		self.north = min( 90.0, self.latitude + self.radius_degrees )
-		self.south = max( -90.0, self.latitude - self.radius_degrees )
-		self.west = max( -180.0, self.longitude - self.radius_degrees )
-		self.east = min( 180.0, self.longitude + self.radius_degrees )
-		self.subscription = {
-			'APIKey': self.api_key,
-			'BoundingBoxes': [ [ [ self.north, self.west ], [ self.south, self.east ] ] ],
-			'FilterMessageTypes': [
-				'PositionReport',
-				'StandardClassBPositionReport',
-				'ExtendedClassBPositionReport',
-				'LongRangeAisBroadcastMessage',
-			],
-		}
-		messages: List[ Dict[ str, Any ] ] = [ ]
-		started = time.monotonic( )
-		last_error = ''
-
-		for attempt in range( self.max_retries + 1 ):
-			remaining_window = self.duration_seconds - (time.monotonic( ) - started)
-			if remaining_window <= 0.0:
-				break
-
-			try:
-				self.socket = create_connection( self.url, timeout=self.timeout )
-				self.socket.send( json.dumps( self.subscription ) )
-
-				while len( messages ) < self.max_messages:
+		try:
+			self.latitude = float( latitude )
+			self.longitude = float( longitude )
+			self.radius_degrees = float( radius_degrees )
+			self.max_messages = int( max_messages )
+			self.duration_seconds = float( duration_seconds )
+			self.north = min( 90.0, self.latitude + self.radius_degrees )
+			self.south = max( -90.0, self.latitude - self.radius_degrees )
+			self.west = max( -180.0, self.longitude - self.radius_degrees )
+			self.east = min( 180.0, self.longitude + self.radius_degrees )
+			self.subscription = { 'APIKey': self.api_key,
+				'BoundingBoxes': [ [ [ self.north, self.west ], [ self.south, self.east ] ] ],
+				'FilterMessageTypes': [
+					'PositionReport',
+					'StandardClassBPositionReport',
+					'ExtendedClassBPositionReport',
+					'LongRangeAisBroadcastMessage', ], }
+			messages: List[ Dict[ str, Any ] ] = [ ]
+			started = time.monotonic( )
+			last_error = ''
+	
+			for attempt in range( self.max_retries + 1 ):
+				remaining_window = self.duration_seconds - (time.monotonic( ) - started)
+				if remaining_window <= 0.0:
+					break
+	
+				try:
+					self.socket = create_connection( self.url, timeout=self.timeout )
+					self.socket.send( json.dumps( self.subscription ) )
+	
+					while len( messages ) < self.max_messages:
+						remaining = self.duration_seconds - (time.monotonic( ) - started)
+						if remaining <= 0.0:
+							return messages
+	
+						self.socket.settimeout( min( 1.0, max( 0.1, remaining ) ) )
+						try:
+							frame = self.socket.recv( )
+						except WebSocketTimeoutException:
+							continue
+	
+						if frame is None or frame == '':
+							raise ConnectionError( 'AIS Stream closed the WebSocket connection.' )
+						if isinstance( frame, bytes ):
+							frame = frame.decode( 'utf-8' )
+						try:
+							payload = json.loads( frame )
+						except json.JSONDecodeError:
+							continue
+						if not isinstance( payload, dict ):
+							continue
+						provider_error = str( payload.get( 'Error', payload.get( 'error', '' ) ) or '' )
+						if provider_error:
+							raise RuntimeError( f'AIS Stream rejected the subscription: {provider_error}' )
+						if payload.get( 'MessageType' ) == 'SubscriptionConfirmation':
+							continue
+						metadata = payload.get( 'MetaData', { } ) or { }
+						if metadata.get( 'Latitude' ) is None or metadata.get( 'Longitude' ) is None:
+							continue
+						messages.append( payload )
+	
+					return messages
+	
+				except Exception as ex:
+					last_error = str( ex )
+	
+				finally:
+					if self.socket is not None:
+						try:
+							self.socket.close( )
+						except Exception:
+							pass
+						self.socket = None
+	
+				if attempt < self.max_retries:
 					remaining = self.duration_seconds - (time.monotonic( ) - started)
 					if remaining <= 0.0:
-						return messages
-
-					self.socket.settimeout( min( 1.0, max( 0.1, remaining ) ) )
-					try:
-						frame = self.socket.recv( )
-					except WebSocketTimeoutException:
-						continue
-
-					if frame is None or frame == '':
-						raise ConnectionError( 'AIS Stream closed the WebSocket connection.' )
-					if isinstance( frame, bytes ):
-						frame = frame.decode( 'utf-8' )
-					try:
-						payload = json.loads( frame )
-					except json.JSONDecodeError:
-						continue
-					if not isinstance( payload, dict ):
-						continue
-					provider_error = str( payload.get( 'Error', payload.get( 'error', '' ) ) or '' )
-					if provider_error:
-						raise RuntimeError( f'AIS Stream rejected the subscription: {provider_error}' )
-					if payload.get( 'MessageType' ) == 'SubscriptionConfirmation':
-						continue
-					metadata = payload.get( 'MetaData', { } ) or { }
-					if metadata.get( 'Latitude' ) is None or metadata.get( 'Longitude' ) is None:
-						continue
-					messages.append( payload )
-
+						break
+					delay = min( self.retry_delay * (2 ** attempt), remaining )
+					if delay > 0.0:
+						time.sleep( delay )
+	
+			if messages:
 				return messages
-
-			except Exception as ex:
-				last_error = str( ex )
-
-			finally:
-				if self.socket is not None:
-					try:
-						self.socket.close( )
-					except Exception:
-						pass
-					self.socket = None
-
-			if attempt < self.max_retries:
-				remaining = self.duration_seconds - (time.monotonic( ) - started)
-				if remaining <= 0.0:
-					break
-				delay = min( self.retry_delay * (2 ** attempt), remaining )
-				if delay > 0.0:
-					time.sleep( delay )
-
-		if messages:
+			if last_error:
+				raise RuntimeError(
+					f'AIS Stream failed after {self.max_retries + 1} connection attempts: {last_error}' )
 			return messages
-		if last_error:
-			raise RuntimeError(
-				f'AIS Stream failed after {self.max_retries + 1} connection attempts: {last_error}' )
-		return messages
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'source'
+			exception.cause = 'AisStreamLive'
+			exception.method = 'fetch_positions( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
 
 class CelesTrakLive:

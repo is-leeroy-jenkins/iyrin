@@ -43,7 +43,7 @@
   '''
 import time
 from typing import Optional
-from boogr import Error
+from boogr import Error, Logger
 
 def throw_if( name: str, value: object ) -> None:
 	"""
@@ -135,4 +135,5 @@ class RateLimiter:
 			exception.module = 'Iyrin'
 			exception.cause = 'RateLimiter'
 			exception.method = 'wait( self )'
+			Logger.write( exception )
 			raise exception
