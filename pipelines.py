@@ -598,14 +598,8 @@ def render_loading_tabs( ) -> None:
 		if not documents:
 			st.info( 'Load a document to display its content.' )
 		else:
-			rows = [ {
-				'Document': index,
-				'Loader': ( document.metadata or { } ).get( 'loader', '' ),
-				'Source': ( document.metadata or { } ).get( 'source', '' ),
-				'Characters': len( document.page_content ),
-				'Text': document.page_content,
-			} for index, document in enumerate( documents, start=1 ) ]
-			st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True,
+			text = '\n\n'.join( document.page_content for document in documents )
+			st.text_area( 'Loaded Document Text', value=text, height=500,
 				disabled=True )
 	with chunks_tab:
 		df_chunks = st.session_state.get( 'df_chunks', pd.DataFrame( ) )
