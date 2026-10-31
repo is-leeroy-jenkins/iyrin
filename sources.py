@@ -116,17 +116,25 @@ class OpenSkyLive( ):
 			str: Bearer access token, or an empty string when credentials were not supplied.
 
 		'''
-		if not self.client_id or not self.client_secret:
-			return ''
-
-		data = { 'grant_type': 'client_credentials', 'client_id': self.client_id,
-			'client_secret': self.client_secret, }
-		self.response = requests.post( self.token_url, data=data, timeout=self.timeout )
-		self.response.raise_for_status( )
-		payload = self.response.json( ) or { }
-		self.access_token = str( payload.get( 'access_token', '' ) or '' )
-		throw_if( 'access_token', self.access_token )
-		return self.access_token
+		try:
+			if not self.client_id or not self.client_secret:
+				return ''
+	
+			data = { 'grant_type': 'client_credentials', 'client_id': self.client_id,
+				'client_secret': self.client_secret, }
+			self.response = requests.post( self.token_url, data=data, timeout=self.timeout )
+			self.response.raise_for_status( )
+			payload = self.response.json( ) or { }
+			self.access_token = str( payload.get( 'access_token', '' ) or '' )
+			throw_if( 'access_token', self.access_token )
+			return self.access_token
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'mappy'
+			exception.cause = 'StaticMap'
+			exception.method = 'get_access_token( self ) -> str'
+			Logger.write( exception )
+			raise exception
 
 	def fetch_states( self, latitude: float, longitude: float,
 			radius_degrees: float=2.0 ) -> Dict[ str, Any ]:
