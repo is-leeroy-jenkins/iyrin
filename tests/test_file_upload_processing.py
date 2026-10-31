@@ -11,7 +11,7 @@ TREE = ast.parse( SOURCE )
 
 class FileUploadTests( unittest.TestCase ):
     def test_document_extensions_have_loader_dispatch( self ) -> None:
-        start = SOURCE.index( "# DOCUMENT UPLOAD AND PROCESSING" )
+        start = SOURCE.index( "with st.expander( label='Document Processing'" )
         end = SOURCE.index( "st.subheader( 'Excel / CSV' )", start )
         section = SOURCE[ start:end ]
         for extension in ( '.txt', '.csv', '.xlsx', '.xls', '.pdf', '.docx',
@@ -20,11 +20,12 @@ class FileUploadTests( unittest.TestCase ):
                 self.assertIn( f"'{extension}'", section )
 
     def test_shared_document_pipeline_is_connected( self ) -> None:
-        start = SOURCE.index( "# DOCUMENT UPLOAD AND PROCESSING" )
+        start = SOURCE.index( "with st.expander( label='Document Processing'" )
         end = SOURCE.index( "st.subheader( 'Excel / CSV' )", start )
         section = SOURCE[ start:end ]
-        for method in ( 'promote_loader_documents', 'render_document_processing_controls',
-                'render_loading_tabs' ):
+        self.assertIn( 'load_uploaded_document( ', section )
+        self.assertIn( 'promote_loader_documents )', section )
+        for method in ( 'render_document_processing_controls', 'render_loading_tabs' ):
             self.assertIn( method + '( ', section )
 
     def test_geocoding_upload_workflow_is_preserved( self ) -> None:
