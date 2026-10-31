@@ -772,7 +772,7 @@ def render_web_document_processing( ) -> None:
 			if not documents:
 				st.info( 'Fetch a URL to load a LangChain document.' )
 			else:
-				text = '\\n\\n'.join( document.page_content for document in documents )
+				text = '\n\n'.join( document.page_content for document in documents )
 				st.text_area( 'Scraped Text', value=text, height=500,
 					disabled=True, key='web_scraped_text' )
 		with chunks_tab:
