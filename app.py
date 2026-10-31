@@ -5409,7 +5409,7 @@ if mode == 'Document Data':
 				can_save = (st.session_state.get(
 					'active_loader' ) == 'OutlookLoader' and isinstance(
 					st.session_state.get( 'raw_text' ), str ) and st.session_state.get(
-					'raw_text' ).strip( ))
+					'raw_text' ).strip( ) )
 				
 				if can_save:
 					col_save.download_button( 'Save', data=st.session_state.get( 'raw_text' ),

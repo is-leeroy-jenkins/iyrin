@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="f430359c-24d3-4e3f-b230-7043fd529607" name="Changes" comment="updates">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/embedders.py" beforeDir="false" afterPath="$PROJECT_DIR$/embedders.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rates.py" beforeDir="false" afterPath="$PROJECT_DIR$/rates.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sources.py" beforeDir="false" afterPath="$PROJECT_DIR$/sources.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/staticmaps.py" beforeDir="false" afterPath="$PROJECT_DIR$/staticmaps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stores/sqlite/data.db" beforeDir="false" afterPath="$PROJECT_DIR$/stores/sqlite/data.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stores/sqlite/data.db-shm" beforeDir="false" afterPath="$PROJECT_DIR$/stores/sqlite/data.db-shm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stores/sqlite/data.db-wal" beforeDir="false" afterPath="$PROJECT_DIR$/stores/sqlite/data.db-wal" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,15 +107,7 @@
       <workItem from="1792839898022" duration="1568000" />
       <workItem from="1792845075438" duration="2825000" />
       <workItem from="1793393851735" duration="6953000" />
-      <workItem from="1793404046772" duration="4510000" />
-    </task>
-    <task id="LOCAL-00050" summary="updates">
-      <option name="closed" value="true" />
-      <created>1789470379095</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1789470379095</updated>
+      <workItem from="1793404046772" duration="7409000" />
     </task>
     <task id="LOCAL-00051" summary="updates">
       <option name="closed" value="true" />
@@ -500,7 +493,15 @@
       <option name="project" value="LOCAL" />
       <updated>1793408891768</updated>
     </task>
-    <option name="localTasksCounter" value="99" />
+    <task id="LOCAL-00099" summary="updates">
+      <option name="closed" value="true" />
+      <created>1793410989068</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1793410989068</updated>
+    </task>
+    <option name="localTasksCounter" value="100" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

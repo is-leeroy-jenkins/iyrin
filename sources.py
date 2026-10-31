@@ -28,7 +28,6 @@ import json
 import math
 import time
 from typing import Any, Dict, List
-
 import requests
 from astropy import units as u
 from astropy.coordinates import CartesianRepresentation, EarthLocation, ITRS, TEME
@@ -62,8 +61,7 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, str ) and not value.strip( ):
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
-
-class OpenSkyLive:
+class OpenSkyLive( ):
 	'''
 
 		Purpose:
@@ -101,8 +99,7 @@ class OpenSkyLive:
 		self.client_id = client_id
 		self.client_secret = client_secret
 		self.timeout = timeout
-		self.token_url = (
-			'https://auth.opensky-network.org/auth/realms/opensky-network/'
+		self.token_url = ( 'https://auth.opensky-network.org/auth/realms/opensky-network/'
 			'protocol/openid-connect/token' )
 		self.states_url = 'https://opensky-network.org/api/states/all'
 		self.access_token = ''
@@ -123,11 +120,8 @@ class OpenSkyLive:
 		if not self.client_id or not self.client_secret:
 			return ''
 
-		data = {
-			'grant_type': 'client_credentials',
-			'client_id': self.client_id,
-			'client_secret': self.client_secret,
-		}
+		data = { 'grant_type': 'client_credentials', 'client_id': self.client_id,
+			'client_secret': self.client_secret, }
 		self.response = requests.post( self.token_url, data=data, timeout=self.timeout )
 		self.response.raise_for_status( )
 		payload = self.response.json( ) or { }
@@ -190,7 +184,7 @@ class OpenSkyLive:
 			raise exception
 
 
-class AdsbLolMilitary:
+class AdsbLolMilitary( ):
 	'''
 
 		Purpose:
@@ -268,8 +262,7 @@ class AdsbLolMilitary:
 			Logger.write( exception )
 			raise exception
 
-
-class AisStreamLive:
+class AisStreamLive( ):
 	'''
 
 		Purpose:
@@ -304,10 +297,6 @@ class AisStreamLive:
 			None
 
 		'''
-		throw_if( 'api_key', api_key )
-		throw_if( 'timeout', timeout )
-		throw_if( 'max_retries', max_retries )
-		throw_if( 'retry_delay', retry_delay )
 		self.api_key = api_key
 		self.timeout = int( timeout )
 		self.max_retries = int( max_retries )
@@ -369,7 +358,6 @@ class AisStreamLive:
 			messages: List[ Dict[ str, Any ] ] = [ ]
 			started = time.monotonic( )
 			last_error = ''
-	
 			for attempt in range( self.max_retries + 1 ):
 				remaining_window = self.duration_seconds - (time.monotonic( ) - started)
 				if remaining_window <= 0.0:
@@ -378,7 +366,6 @@ class AisStreamLive:
 				try:
 					self.socket = create_connection( self.url, timeout=self.timeout )
 					self.socket.send( json.dumps( self.subscription ) )
-	
 					while len( messages ) < self.max_messages:
 						remaining = self.duration_seconds - (time.monotonic( ) - started)
 						if remaining <= 0.0:
@@ -402,19 +389,17 @@ class AisStreamLive:
 							continue
 						provider_error = str( payload.get( 'Error', payload.get( 'error', '' ) ) or '' )
 						if provider_error:
-							raise RuntimeError( f'AIS Stream rejected the subscription: {provider_error}' )
+							raise RuntimeError( f'Rejected the subscription: {provider_error}' )
 						if payload.get( 'MessageType' ) == 'SubscriptionConfirmation':
 							continue
 						metadata = payload.get( 'MetaData', { } ) or { }
 						if metadata.get( 'Latitude' ) is None or metadata.get( 'Longitude' ) is None:
 							continue
 						messages.append( payload )
-	
 					return messages
 	
 				except Exception as ex:
 					last_error = str( ex )
-	
 				finally:
 					if self.socket is not None:
 						try:
@@ -434,19 +419,19 @@ class AisStreamLive:
 			if messages:
 				return messages
 			if last_error:
-				raise RuntimeError(
-					f'AIS Stream failed after {self.max_retries + 1} connection attempts: {last_error}' )
+				_alert = f'Failed after {self.max_retries + 1} connection attempts: {last_error}'
+				raise RuntimeError( _alert )
 			return messages
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'source'
+			exception.module = 'sources'
 			exception.cause = 'AisStreamLive'
 			exception.method = 'fetch_positions( self, **args ) -> Dict[ str, Any ]'
 			Logger.write( exception )
 			raise exception
 
 
-class CelesTrakLive:
+class CelesTrakLive( ):
 	'''
 
 		Purpose:
@@ -499,19 +484,25 @@ class CelesTrakLive:
 
 		'''
 		throw_if( 'group', group )
-		throw_if( 'limit', limit )
-		self.group = group
-		self.limit = int( limit )
-		self.params = { 'GROUP': self.group, 'FORMAT': 'JSON' }
-		self.response = requests.get( self.url, params=self.params, timeout=self.timeout )
-		self.response.raise_for_status( )
-		payload = self.response.json( ) or [ ]
-		if not isinstance( payload, list ):
-			raise TypeError( 'CelesTrak GP JSON response must be a list.' )
-		return payload[ :self.limit ]
+		try:
+			self.group = group
+			self.limit = int( limit )
+			self.params = { 'GROUP': self.group, 'FORMAT': 'JSON' }
+			self.response = requests.get( self.url, params=self.params, timeout=self.timeout )
+			self.response.raise_for_status( )
+			payload = self.response.json( ) or [ ]
+			if not isinstance( payload, list ):
+				raise TypeError( 'CelesTrak GP JSON response must be a list.' )
+			return payload[ :self.limit ]
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'CelesTrakLive'
+			exception.method = 'fetch_group( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
-	def propagate( self, record: Dict[ str, Any ],
-			when: dt.datetime ) -> Dict[ str, Any ]:
+	def propagate( self, record: Dict[ str, Any ], when: dt.datetime ) -> Dict[ str, Any ]:
 		'''
 
 			Purpose:
@@ -531,42 +522,43 @@ class CelesTrakLive:
 		'''
 		throw_if( 'record', record )
 		throw_if( 'when', when )
-		self.record = record
-		self.when = when
-		self.satellite = Satrec( )
-		omm.initialize( self.satellite, self.record )
-		self.obstime = Time( self.when )
-		error, position, velocity = self.satellite.sgp4(
-			self.obstime.jd1, self.obstime.jd2 )
-		if error != 0:
-			raise RuntimeError( f'SGP4 propagation failed with error code {error}.' )
+		try:
+			self.record = record
+			self.when = when
+			self.satellite = Satrec( )
+			omm.initialize( self.satellite, self.record )
+			self.obstime = Time( self.when )
+			error, position, velocity = self.satellite.sgp4( self.obstime.jd1, self.obstime.jd2 )
+			if error != 0:
+				raise RuntimeError( f'SGP4 propagation failed with error code {error}.' )
+	
+			self.teme = TEME( CartesianRepresentation( position[ 0 ] * u.km, position[ 1 ] * u.km,
+					position[ 2 ] * u.km ), obstime=self.obstime )
+			self.itrs = self.teme.transform_to( ITRS( obstime=self.obstime ) )
+			self.location = EarthLocation.from_geocentric( self.itrs.cartesian.x,
+				self.itrs.cartesian.y, self.itrs.cartesian.z )
+			self.speed = math.sqrt( float( velocity[ 0 ] ) ** 2 + float( velocity[ 1 ] ) ** 2
+				+ float( velocity[ 2 ] ) ** 2 )
+	
+			return { 'Name': str( self.record.get( 'OBJECT_NAME', '' ) or '' ),
+				'CatalogNumber': str( self.record.get( 'NORAD_CAT_ID', '' ) or '' ),
+				'ObjectId': str( self.record.get( 'OBJECT_ID', '' ) or '' ),
+				'Latitude': float( self.location.lat.deg ),
+				'Longitude': float( self.location.lon.deg ),
+				'Altitude': float( self.location.height.to( u.km ).value ),
+				'Velocity': float( self.speed ),
+				'Epoch': str( self.record.get( 'EPOCH', '' ) or '' ),
+				'Classification': str( self.record.get( 'CLASSIFICATION_TYPE', '' ) or '' ), }
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'CelesTrakLive'
+			exception.method = 'propagate( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
-		self.teme = TEME(
-			CartesianRepresentation( position[ 0 ] * u.km, position[ 1 ] * u.km,
-				position[ 2 ] * u.km ),
-			obstime=self.obstime )
-		self.itrs = self.teme.transform_to( ITRS( obstime=self.obstime ) )
-		self.location = EarthLocation.from_geocentric(
-			self.itrs.cartesian.x, self.itrs.cartesian.y, self.itrs.cartesian.z )
-		self.speed = math.sqrt(
-			float( velocity[ 0 ] ) ** 2
-			+ float( velocity[ 1 ] ) ** 2
-			+ float( velocity[ 2 ] ) ** 2 )
 
-		return {
-			'Name': str( self.record.get( 'OBJECT_NAME', '' ) or '' ),
-			'CatalogNumber': str( self.record.get( 'NORAD_CAT_ID', '' ) or '' ),
-			'ObjectId': str( self.record.get( 'OBJECT_ID', '' ) or '' ),
-			'Latitude': float( self.location.lat.deg ),
-			'Longitude': float( self.location.lon.deg ),
-			'Altitude': float( self.location.height.to( u.km ).value ),
-			'Velocity': float( self.speed ),
-			'Epoch': str( self.record.get( 'EPOCH', '' ) or '' ),
-			'Classification': str( self.record.get( 'CLASSIFICATION_TYPE', '' ) or '' ),
-		}
-
-
-class OverpassClient:
+class OverpassClient( ):
 	'''
 
 		Purpose:
@@ -582,8 +574,7 @@ class OverpassClient:
 	headers: Dict[ str, str ]
 	response: Response | None
 
-	def __init__( self, timeout: int=30, retries: int=2,
-			retry_delay: float=0.75 ) -> None:
+	def __init__( self, timeout: int=30, retries: int=2, retry_delay: float=0.75 ) -> None:
 		'''
 
 			Purpose:
@@ -601,9 +592,6 @@ class OverpassClient:
 			None
 
 		'''
-		throw_if( 'timeout', timeout )
-		throw_if( 'retries', retries )
-		throw_if( 'retry_delay', retry_delay )
 		self.timeout = int( timeout )
 		self.retries = int( retries )
 		self.retry_delay = float( retry_delay )
@@ -613,16 +601,11 @@ class OverpassClient:
 			raise ValueError( 'Argument "retries" cannot be negative.' )
 		if self.retry_delay < 0.0:
 			raise ValueError( 'Argument "retry_delay" cannot be negative.' )
-		self.endpoints = [
-			'https://overpass-api.de/api/interpreter',
-			'https://overpass.kumi.systems/api/interpreter',
-		]
+		self.endpoints = [ 'https://overpass-api.de/api/interpreter',
+			'https://overpass.kumi.systems/api/interpreter', ]
 		self.url = self.endpoints[ 0 ]
-		self.headers = {
-			'User-Agent': 'Iyrin/1.0 (+https://github.com/is-leeroy-jenkins/iyr)',
-			'Accept': 'application/json',
-			'Content-Type': 'application/x-www-form-urlencoded',
-		}
+		self.headers = { 'User-Agent': 'Iyrin/1.0 (+https://github.com/is-leeroy-jenkins/iyr)',
+			'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded', }
 		self.response = None
 
 	def execute( self, query: str ) -> Dict[ str, Any ]:
@@ -643,42 +626,47 @@ class OverpassClient:
 
 		'''
 		throw_if( 'query', query )
-		transient_statuses = { 406, 429, 500, 502, 503, 504 }
-		errors: List[ str ] = [ ]
-
-		for endpoint in self.endpoints:
-			for attempt in range( self.retries + 1 ):
-				try:
-					self.url = endpoint
-					self.response = None
-					self.response = requests.post(
-						self.url, data={ 'data': query }, headers=self.headers,
-						timeout=self.timeout )
-					status_code = int( self.response.status_code )
-					if status_code in transient_statuses and attempt < self.retries:
-						delay = self.retry_delay * (2 ** attempt)
-						if delay > 0.0:
-							time.sleep( delay )
-						continue
-					self.response.raise_for_status( )
-					payload = self.response.json( ) or { }
-					if not isinstance( payload, dict ):
-						raise TypeError( 'Overpass response must be a dictionary.' )
-					return payload
-
-				except ( requests.RequestException, TypeError, ValueError ) as ex:
-					errors.append( f'{endpoint}: {ex}' )
-					status_code = int( self.response.status_code ) if self.response is not None else 0
-					if status_code and status_code not in transient_statuses:
-						break
-					if attempt < self.retries:
-						delay = self.retry_delay * (2 ** attempt)
-						if delay > 0.0:
-							time.sleep( delay )
-
-		detail = ' | '.join( errors[ -6: ] )
-		raise RuntimeError( f'Overpass request failed across configured endpoints: {detail}' )
-
+		try:
+			transient_statuses = { 406, 429, 500, 502, 503, 504 }
+			errors: List[ str ] = [ ]
+			for endpoint in self.endpoints:
+				for attempt in range( self.retries + 1 ):
+					try:
+						self.url = endpoint
+						self.response = None
+						self.response = requests.post( self.url, data={ 'data': query }, headers=self.headers,
+							timeout=self.timeout )
+						status_code = int( self.response.status_code )
+						if status_code in transient_statuses and attempt < self.retries:
+							delay = self.retry_delay * (2 ** attempt)
+							if delay > 0.0:
+								time.sleep( delay )
+							continue
+						self.response.raise_for_status( )
+						payload = self.response.json( ) or { }
+						if not isinstance( payload, dict ):
+							raise TypeError( 'Overpass response must be a dictionary.' )
+						return payload
+	
+					except ( requests.RequestException, TypeError, ValueError ) as ex:
+						errors.append( f'{endpoint}: {ex}' )
+						status_code = int( self.response.status_code ) if self.response is not None else 0
+						if status_code and status_code not in transient_statuses:
+							break
+						if attempt < self.retries:
+							delay = self.retry_delay * (2 ** attempt)
+							if delay > 0.0:
+								time.sleep( delay )
+	
+			detail = ' | '.join( errors[ -6: ] )
+			raise RuntimeError( f'Overpass request failed across configured endpoints: {detail}' )
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassClient'
+			exception.method = 'execute( self, **args ) -> None'
+			Logger.write( exception )
+			raise exception
 
 class OverpassInfrastructure( OverpassClient ):
 	'''
@@ -711,14 +699,12 @@ class OverpassInfrastructure( OverpassClient ):
 
 		'''
 		super( ).__init__( timeout=timeout )
-		self.category_filters = {
-			'Airports': [ '["aeroway"="aerodrome"]', '["aeroway"="heliport"]' ],
+		self.category_filters = { 'Airports': [ '["aeroway"="aerodrome"]', '["aeroway"="heliport"]' ],
 			'Ports': [ '["harbour"="yes"]', '["amenity"="ferry_terminal"]' ],
 			'Power Plants': [ '["power"="plant"]' ],
 			'Dams': [ '["waterway"="dam"]' ],
 			'Data Centers': [ '["telecom"="data_center"]', '["building"="data_center"]' ],
-			'Military Installations': [ '["landuse"="military"]', '["military"]' ],
-		}
+			'Military Installations': [ '["landuse"="military"]', '["military"]' ], }
 
 	def fetch_infrastructure( self, latitude: float, longitude: float,
 			radius_km: float, categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
@@ -746,58 +732,66 @@ class OverpassInfrastructure( OverpassClient ):
 		throw_if( 'radius_km', radius_km )
 		throw_if( 'categories', categories )
 		throw_if( 'max_results', max_results )
-		self.latitude = float( latitude )
-		self.longitude = float( longitude )
-		self.radius_km = float( radius_km )
-		self.categories = list( categories )
-		self.max_results = int( max_results )
-		if self.latitude < -90.0 or self.latitude > 90.0:
-			raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
-		if self.longitude < -180.0 or self.longitude > 180.0:
-			raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
-		if self.radius_km <= 0.0:
-			raise ValueError( 'Argument "radius_km" must be greater than zero.' )
-		if self.max_results < 1:
-			raise ValueError( 'Argument "max_results" must be greater than zero.' )
-		for category in self.categories:
-			if category not in self.category_filters:
-				raise ValueError( f'Unsupported infrastructure category: {category}' )
-
-		radius_meters = int( self.radius_km * 1000.0 )
-		selectors: List[ str ] = [ ]
-		for category in self.categories:
-			for tag_filter in self.category_filters[ category ]:
-				selectors.append(
-					f'nwr(around:{radius_meters},{self.latitude:.6f},{self.longitude:.6f})'
-					f'{tag_filter};' )
-		query = '[out:json][timeout:25];(' + ''.join( selectors ) + ');out center tags qt;'
-		payload = self.execute( query )
-		if not isinstance( payload, dict ):
-			raise TypeError( 'Overpass response must be a dictionary.' )
-		elements = payload.get( 'elements', [ ] ) or [ ]
-		if not isinstance( elements, list ):
-			raise TypeError( 'Overpass elements must be a list.' )
-
-		rows: List[ Dict[ str, Any ] ] = [ ]
-		seen: set[ str ] = set( )
-		for element in elements:
-			if not isinstance( element, dict ):
-				continue
-			tags = element.get( 'tags', { } ) or { }
-			category = self.classify_infrastructure( tags )
-			if not category or category not in self.categories:
-				continue
-			entity_key = f'{element.get( "type", "" )}:{element.get( "id", "" )}'
-			if entity_key in seen:
-				continue
-			seen.add( entity_key )
-			row = dict( element )
-			row[ 'InfrastructureCategory' ] = category
-			rows.append( row )
-			if len( rows ) >= self.max_results:
-				break
-		payload[ 'elements' ] = rows
-		return payload
+		try:
+			self.latitude = float( latitude )
+			self.longitude = float( longitude )
+			self.radius_km = float( radius_km )
+			self.categories = list( categories )
+			self.max_results = int( max_results )
+			if self.latitude < -90.0 or self.latitude > 90.0:
+				raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
+			if self.longitude < -180.0 or self.longitude > 180.0:
+				raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
+			if self.radius_km <= 0.0:
+				raise ValueError( 'Argument "radius_km" must be greater than zero.' )
+			if self.max_results < 1:
+				raise ValueError( 'Argument "max_results" must be greater than zero.' )
+			for category in self.categories:
+				if category not in self.category_filters:
+					raise ValueError( f'Unsupported infrastructure category: {category}' )
+	
+			radius_meters = int( self.radius_km * 1000.0 )
+			selectors: List[ str ] = [ ]
+			for category in self.categories:
+				for tag_filter in self.category_filters[ category ]:
+					selectors.append(
+						f'nwr(around:{radius_meters},{self.latitude:.6f},{self.longitude:.6f})'
+						f'{tag_filter};' )
+			query = '[out:json][timeout:25];(' + ''.join( selectors ) + ');out center tags qt;'
+			payload = self.execute( query )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'Overpass response must be a dictionary.' )
+			elements = payload.get( 'elements', [ ] ) or [ ]
+			if not isinstance( elements, list ):
+				raise TypeError( 'Overpass elements must be a list.' )
+	
+			rows: List[ Dict[ str, Any ] ] = [ ]
+			seen: set[ str ] = set( )
+			for element in elements:
+				if not isinstance( element, dict ):
+					continue
+				tags = element.get( 'tags', { } ) or { }
+				category = self.classify_infrastructure( tags )
+				if not category or category not in self.categories:
+					continue
+				entity_key = f'{element.get( "type", "" )}:{element.get( "id", "" )}'
+				if entity_key in seen:
+					continue
+				seen.add( entity_key )
+				row = dict( element )
+				row[ 'InfrastructureCategory' ] = category
+				rows.append( row )
+				if len( rows ) >= self.max_results:
+					break
+			payload[ 'elements' ] = rows
+			return payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassInfrastructure'
+			exception.method = 'fetch_infrastructure( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
 	def classify_infrastructure( self, tags: Dict[ str, Any ] ) -> str:
 		'''
@@ -816,19 +810,27 @@ class OverpassInfrastructure( OverpassClient ):
 
 		'''
 		throw_if( 'tags', tags )
-		if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
-			return 'Airports'
-		if tags.get( 'harbour' ) == 'yes' or tags.get( 'amenity' ) == 'ferry_terminal':
-			return 'Ports'
-		if tags.get( 'power' ) == 'plant':
-			return 'Power Plants'
-		if tags.get( 'waterway' ) == 'dam':
-			return 'Dams'
-		if tags.get( 'telecom' ) == 'data_center' or tags.get( 'building' ) == 'data_center':
-			return 'Data Centers'
-		if tags.get( 'landuse' ) == 'military' or 'military' in tags:
-			return 'Military Installations'
-		return ''
+		try:
+			if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
+				return 'Airports'
+			if tags.get( 'harbour' ) == 'yes' or tags.get( 'amenity' ) == 'ferry_terminal':
+				return 'Ports'
+			if tags.get( 'power' ) == 'plant':
+				return 'Power Plants'
+			if tags.get( 'waterway' ) == 'dam':
+				return 'Dams'
+			if tags.get( 'telecom' ) == 'data_center' or tags.get( 'building' ) == 'data_center':
+				return 'Data Centers'
+			if tags.get( 'landuse' ) == 'military' or 'military' in tags:
+				return 'Military Installations'
+			return ''
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassInfrastructure'
+			exception.method = 'classify_infrastructure( self, **args ) -> str'
+			Logger.write( exception )
+			raise exception
 
 class OverpassCameras( OverpassClient ):
 	'''
@@ -862,10 +864,9 @@ class OverpassCameras( OverpassClient ):
 		'''
 		super( ).__init__( timeout=timeout )
 		self.category_filters = {
-			'CCTV / Surveillance': [
-				'["man_made"="surveillance"]', '["surveillance:type"="camera"]' ],
-			'Web Cameras': [ '["webcam"]', '["contact:webcam"]' ],
-		}
+				'CCTV / Surveillance': [ '["man_made"="surveillance"]',
+				                         '["surveillance:type"="camera"]' ],
+			'Web Cameras': [ '["webcam"]', '["contact:webcam"]' ], }
 
 	def fetch_cameras( self, latitude: float, longitude: float, radius_km: float,
 			categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
@@ -893,58 +894,66 @@ class OverpassCameras( OverpassClient ):
 		throw_if( 'radius_km', radius_km )
 		throw_if( 'categories', categories )
 		throw_if( 'max_results', max_results )
-		self.latitude = float( latitude )
-		self.longitude = float( longitude )
-		self.radius_km = float( radius_km )
-		self.categories = list( categories )
-		self.max_results = int( max_results )
-		if self.latitude < -90.0 or self.latitude > 90.0:
-			raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
-		if self.longitude < -180.0 or self.longitude > 180.0:
-			raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
-		if self.radius_km <= 0.0:
-			raise ValueError( 'Argument "radius_km" must be greater than zero.' )
-		if self.max_results < 1:
-			raise ValueError( 'Argument "max_results" must be greater than zero.' )
-		for category in self.categories:
-			if category not in self.category_filters:
-				raise ValueError( f'Unsupported camera category: {category}' )
-
-		radius_meters = int( self.radius_km * 1000.0 )
-		selectors: List[ str ] = [ ]
-		for category in self.categories:
-			for tag_filter in self.category_filters[ category ]:
-				selectors.append(
-					f'nwr(around:{radius_meters},{self.latitude:.6f},{self.longitude:.6f})'
-					f'{tag_filter};' )
-		query = '[out:json][timeout:25];(' + ''.join( selectors ) + ');out center tags qt;'
-		payload = self.execute( query )
-		if not isinstance( payload, dict ):
-			raise TypeError( 'Overpass camera response must be a dictionary.' )
-		elements = payload.get( 'elements', [ ] ) or [ ]
-		if not isinstance( elements, list ):
-			raise TypeError( 'Overpass camera elements must be a list.' )
-
-		rows: List[ Dict[ str, Any ] ] = [ ]
-		seen: set[ str ] = set( )
-		for element in elements:
-			if not isinstance( element, dict ):
-				continue
-			tags = element.get( 'tags', { } ) or { }
-			category = self.classify_camera( tags )
-			if not category or category not in self.categories:
-				continue
-			entity_key = f'{element.get( "type", "" )}:{element.get( "id", "" )}'
-			if entity_key in seen:
-				continue
-			seen.add( entity_key )
-			row = dict( element )
-			row[ 'CameraCategory' ] = category
-			rows.append( row )
-			if len( rows ) >= self.max_results:
-				break
-		payload[ 'elements' ] = rows
-		return payload
+		try:
+			self.latitude = float( latitude )
+			self.longitude = float( longitude )
+			self.radius_km = float( radius_km )
+			self.categories = list( categories )
+			self.max_results = int( max_results )
+			if self.latitude < -90.0 or self.latitude > 90.0:
+				raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
+			if self.longitude < -180.0 or self.longitude > 180.0:
+				raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
+			if self.radius_km <= 0.0:
+				raise ValueError( 'Argument "radius_km" must be greater than zero.' )
+			if self.max_results < 1:
+				raise ValueError( 'Argument "max_results" must be greater than zero.' )
+			for category in self.categories:
+				if category not in self.category_filters:
+					raise ValueError( f'Unsupported camera category: {category}' )
+	
+			radius_meters = int( self.radius_km * 1000.0 )
+			selectors: List[ str ] = [ ]
+			for category in self.categories:
+				for tag_filter in self.category_filters[ category ]:
+					selectors.append(
+						f'nwr(around:{radius_meters},{self.latitude:.6f},{self.longitude:.6f})'
+						f'{tag_filter};' )
+			query = '[out:json][timeout:25];(' + ''.join( selectors ) + ');out center tags qt;'
+			payload = self.execute( query )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'Overpass camera response must be a dictionary.' )
+			elements = payload.get( 'elements', [ ] ) or [ ]
+			if not isinstance( elements, list ):
+				raise TypeError( 'Overpass camera elements must be a list.' )
+	
+			rows: List[ Dict[ str, Any ] ] = [ ]
+			seen: set[ str ] = set( )
+			for element in elements:
+				if not isinstance( element, dict ):
+					continue
+				tags = element.get( 'tags', { } ) or { }
+				category = self.classify_camera( tags )
+				if not category or category not in self.categories:
+					continue
+				entity_key = f'{element.get( "type", "" )}:{element.get( "id", "" )}'
+				if entity_key in seen:
+					continue
+				seen.add( entity_key )
+				row = dict( element )
+				row[ 'CameraCategory' ] = category
+				rows.append( row )
+				if len( rows ) >= self.max_results:
+					break
+			payload[ 'elements' ] = rows
+			return payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassCamera'
+			exception.method = 'fetch_cameras( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
 	def classify_camera( self, tags: Dict[ str, Any ] ) -> str:
 		'''
@@ -963,11 +972,19 @@ class OverpassCameras( OverpassClient ):
 
 		'''
 		throw_if( 'tags', tags )
-		if tags.get( 'webcam' ) or tags.get( 'contact:webcam' ):
-			return 'Web Cameras'
-		if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
-			return 'CCTV / Surveillance'
-		return ''
+		try:
+			if tags.get( 'webcam' ) or tags.get( 'contact:webcam' ):
+				return 'Web Cameras'
+			if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
+				return 'CCTV / Surveillance'
+			return ''
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassCameras'
+			exception.method = 'classify_camera( self, **args ) -> str'
+			Logger.write( exception )
+			raise exception
 
 class OverpassMapLayers( OverpassClient ):
 	'''
@@ -1037,58 +1054,66 @@ class OverpassMapLayers( OverpassClient ):
 		throw_if( 'radius_km', radius_km )
 		throw_if( 'categories', categories )
 		throw_if( 'max_results', max_results )
-		self.latitude = float( latitude )
-		self.longitude = float( longitude )
-		self.radius_km = float( radius_km )
-		self.categories = list( categories )
-		self.max_results = int( max_results )
-		if self.latitude < -90.0 or self.latitude > 90.0:
-			raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
-		if self.longitude < -180.0 or self.longitude > 180.0:
-			raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
-		if self.radius_km <= 0.0:
-			raise ValueError( 'Argument "radius_km" must be greater than zero.' )
-		if self.max_results < 1:
-			raise ValueError( 'Argument "max_results" must be greater than zero.' )
-		for category in self.categories:
-			if category not in self.category_filters:
-				raise ValueError( f'Unsupported map layer category: {category}' )
-
-		radius_meters = int( self.radius_km * 1000.0 )
-		selectors: List[ str ] = [ ]
-		for category in self.categories:
-			for tag_filter in self.category_filters[ category ]:
-				selectors.append(
-					f'nwr(around:{radius_meters},{self.latitude:.6f},{self.longitude:.6f})'
-					f'{tag_filter};' )
-		query = '[out:json][timeout:25];(' + ''.join( selectors ) + ');out center tags qt;'
-		payload = self.execute( query )
-		if not isinstance( payload, dict ):
-			raise TypeError( 'Overpass map-layer response must be a dictionary.' )
-		elements = payload.get( 'elements', [ ] ) or [ ]
-		if not isinstance( elements, list ):
-			raise TypeError( 'Overpass map-layer elements must be a list.' )
-
-		rows: List[ Dict[ str, Any ] ] = [ ]
-		seen: set[ str ] = set( )
-		for element in elements:
-			if not isinstance( element, dict ):
-				continue
-			tags = element.get( 'tags', { } ) or { }
-			category = self.classify_feature( tags )
-			if not category or category not in self.categories:
-				continue
-			entity_key = f'{element.get( "type", "" )}:{element.get( "id", "" )}'
-			if entity_key in seen:
-				continue
-			seen.add( entity_key )
-			row = dict( element )
-			row[ 'MapLayerCategory' ] = category
-			rows.append( row )
-			if len( rows ) >= self.max_results:
-				break
-		payload[ 'elements' ] = rows
-		return payload
+		try:
+			self.latitude = float( latitude )
+			self.longitude = float( longitude )
+			self.radius_km = float( radius_km )
+			self.categories = list( categories )
+			self.max_results = int( max_results )
+			if self.latitude < -90.0 or self.latitude > 90.0:
+				raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
+			if self.longitude < -180.0 or self.longitude > 180.0:
+				raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
+			if self.radius_km <= 0.0:
+				raise ValueError( 'Argument "radius_km" must be greater than zero.' )
+			if self.max_results < 1:
+				raise ValueError( 'Argument "max_results" must be greater than zero.' )
+			for category in self.categories:
+				if category not in self.category_filters:
+					raise ValueError( f'Unsupported map layer category: {category}' )
+	
+			radius_meters = int( self.radius_km * 1000.0 )
+			selectors: List[ str ] = [ ]
+			for category in self.categories:
+				for tag_filter in self.category_filters[ category ]:
+					selectors.append(
+						f'nwr(around:{radius_meters},{self.latitude:.6f},{self.longitude:.6f})'
+						f'{tag_filter};' )
+			query = '[out:json][timeout:25];(' + ''.join( selectors ) + ');out center tags qt;'
+			payload = self.execute( query )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'Overpass map-layer response must be a dictionary.' )
+			elements = payload.get( 'elements', [ ] ) or [ ]
+			if not isinstance( elements, list ):
+				raise TypeError( 'Overpass map-layer elements must be a list.' )
+	
+			rows: List[ Dict[ str, Any ] ] = [ ]
+			seen: set[ str ] = set( )
+			for element in elements:
+				if not isinstance( element, dict ):
+					continue
+				tags = element.get( 'tags', { } ) or { }
+				category = self.classify_feature( tags )
+				if not category or category not in self.categories:
+					continue
+				entity_key = f'{element.get( "type", "" )}:{element.get( "id", "" )}'
+				if entity_key in seen:
+					continue
+				seen.add( entity_key )
+				row = dict( element )
+				row[ 'MapLayerCategory' ] = category
+				rows.append( row )
+				if len( rows ) >= self.max_results:
+					break
+			payload[ 'elements' ] = rows
+			return payload
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassMapLayers'
+			exception.method = 'fetch_features( self, **args ) -> Dict[ str, Any ]'
+			Logger.write( exception )
+			raise exception
 
 	def classify_feature( self, tags: Dict[ str, Any ] ) -> str:
 		'''
@@ -1107,20 +1132,28 @@ class OverpassMapLayers( OverpassClient ):
 
 		'''
 		throw_if( 'tags', tags )
-		if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
-			return 'Launch Sites'
-		if tags.get( 'amenity' ) == 'bicycle_rental':
-			return 'Bike Share'
-		if tags.get( 'amenity' ) in [ 'police', 'fire_station' ]:
-			return 'Emergency Services'
-		if tags.get( 'amenity' ) in [ 'hospital', 'clinic' ]:
-			return 'Healthcare'
-		if tags.get( 'amenity' ) == 'charging_station':
-			return 'EV Charging'
-		if tags.get( 'public_transport' ) == 'station' or tags.get( 'railway' ) == 'station':
-			return 'Public Transit'
-		if (tags.get( 'man_made' ) in [ 'tower', 'mast' ]
-				and tags.get( 'tower:type' ) == 'communication'):
-			return 'Communications'
-		return ''
+		try:
+			if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
+				return 'Launch Sites'
+			if tags.get( 'amenity' ) == 'bicycle_rental':
+				return 'Bike Share'
+			if tags.get( 'amenity' ) in [ 'police', 'fire_station' ]:
+				return 'Emergency Services'
+			if tags.get( 'amenity' ) in [ 'hospital', 'clinic' ]:
+				return 'Healthcare'
+			if tags.get( 'amenity' ) == 'charging_station':
+				return 'EV Charging'
+			if tags.get( 'public_transport' ) == 'station' or tags.get( 'railway' ) == 'station':
+				return 'Public Transit'
+			if (tags.get( 'man_made' ) in [ 'tower', 'mast' ]
+					and tags.get( 'tower:type' ) == 'communication'):
+				return 'Communications'
+			return ''
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'sources'
+			exception.cause = 'OverpassMapLayers'
+			exception.method = 'classify_feature( self, **args ) -> str'
+			Logger.write( exception )
+			raise exception
 
