@@ -71,8 +71,8 @@ class LocalEmbeddings( Embeddings ):
 
 	def embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]:
 		"""Create embeddings for document text."""
-		throw_if( 'texts', texts )
 		try:
+			throw_if( 'texts', texts )
 			values: List[ str ] = [ ]
 			for text in texts:
 				throw_if( 'text', text )
@@ -101,8 +101,8 @@ class LocalEmbeddings( Embeddings ):
 
 	def embed_query( self, text: str ) -> List[ float ]:
 		"""Create an embedding for query text."""
-		throw_if( 'text', text )
 		try:
+			throw_if( 'text', text )
 			if not isinstance( text, str ):
 				raise TypeError( 'Argument "text" must be a string.' )
 			return self.embed_documents( [ text ] )[ 0 ]
@@ -128,13 +128,12 @@ class EmbeddingFactory( ):
 
 	def create( self, provider: str, model: str, model_path: str = '' ) -> Embeddings:
 		"""Create the selected LangChain embedding implementation."""
-		throw_if( 'provider', provider )
-		throw_if( 'model', model )
 		try:
+			throw_if( 'provider', provider )
+			throw_if( 'model', model )
 			self.provider = provider
 			self.model = model
 			self.model_path = model_path
-	
 			if self.provider == 'OpenAI':
 				throw_if( 'model', self.model )
 				from langchain_openai import OpenAIEmbeddings
