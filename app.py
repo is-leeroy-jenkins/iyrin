@@ -11970,8 +11970,7 @@ elif mode == 'File Upload':
 			if document_file is not None:
 				if st.button( 'Load Document', key='file_upload_document_load' ):
 					try:
-						loaders = {
-							'.txt': TextLoader, '.csv': CsvLoader,
+						loaders = { '.txt': TextLoader, '.csv': CsvLoader,
 							'.xlsx': ExcelLoader, '.xls': ExcelLoader,
 							'.pdf': PdfLoader, '.docx': WordLoader,
 							'.pptx': PowerPointLoader, '.md': MarkdownLoader,
