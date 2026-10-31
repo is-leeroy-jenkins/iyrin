@@ -3349,7 +3349,7 @@ st.logo( cfg.LOGO, size='Large' )
 with st.sidebar:
 	# ------- Map Mode
 	blue_divider( )
-	st.markdown( '#### 🛰️ GIS Data' )
+	st.markdown( '#### 🛰️ Map Data' )
 	with st.expander( label='Pipelines', expanded=True ):
 		mode = st.radio( label='Mode', options=cfg.MODES, label_visibility='collapsed' )
 		if mode:
@@ -3377,7 +3377,6 @@ with st.sidebar:
 		dataset_signature = None
 		db_path = Path( cfg.DB_PATH )
 		db_version = db_path.stat( ).st_mtime_ns if db_path.exists( ) else None
-
 		if source in ( 'Default', 'Database' ):
 			try:
 				with sqlite3.connect( cfg.DB_PATH ) as connection:
@@ -4033,8 +4032,7 @@ if mode == 'Local Data':
 	st.divider( )
 	
 	# ----------- LEFT COLUMN - LOADERS
-	document_loaders_column, document_results_column = st.columns( [ 0.4, 0.6 ],
-		gap='xxsmall', border=True )
+	document_loaders_column, document_results_column = st.columns( [ 0.4, 0.6 ] )
 	with document_loaders_column:
 		_loader_msg = st.session_state.pop( '_loader_status', None )
 		if isinstance( _loader_msg, str ) and _loader_msg.strip( ):
