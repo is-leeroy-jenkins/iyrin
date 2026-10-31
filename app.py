@@ -3392,68 +3392,65 @@ with st.sidebar:
 			key='source_uploader' )
 		df_default = pd.DataFrame( )
 		df_original: pd.DataFrame | None = None
-		if source == 'Default':
-			with sqlite3.connect( cfg.DB_PATH ) as connection:
-				df_tables = pd.read_sql_query( """
+		dataset_signature = None
+		db_path = Path( cfg.DB_PATH )
+		db_version = db_path.stat( ).st_mtime_ns if db_path.exists( ) else None
+
+		if source in ( 'Default', 'Database' ):
+			try:
+				with sqlite3.connect( cfg.DB_PATH ) as connection:
+					df_tables = pd.read_sql_query( """
                                                SELECT name
                                                FROM sqlite_master
                                                WHERE type = 'table'
                                                  AND name NOT LIKE 'sqlite_%'
                                                ORDER BY name; """, connection )
-				if cfg.DEFAULT_DATA in df_tables[ 'name' ].tolist( ):
-					df_default = pd.read_sql_query( f'SELECT * FROM "{cfg.DEFAULT_DATA}"',
-						connection )
-					df_original = df_default.copy( )
-					st.session_state[ 'active_dataset_name' ] = cfg.DEFAULT_DATA
-					log_step( f'Loaded Database Table: {cfg.DEFAULT_DATA}' )
-				else:
-					st.warning( f'Default dataset "{cfg.DEFAULT_DATA}" is not installed. '
-						'Choose Database or External to load an available dataset.' )
-					st.session_state[ 'active_dataset_name' ] = ''
-		
-		elif source == 'Database':
-			try:
-				with sqlite3.connect( cfg.DB_PATH ) as connection:
-					df_tables = pd.read_sql_query( """
-                                                   SELECT name
-                                                   FROM sqlite_master
-                                                   WHERE type = 'table'
-                                                     AND name NOT LIKE 'sqlite_%'
-                                                   ORDER BY name;""", connection )
-					
 					table_options = df_tables[ 'name' ].tolist( )
-					if table_options:
-						selected_table = st.selectbox( label='Select Database Table',
-							options=table_options, key='database_table_selectbox' )
-						
-						if selected_table:
+					selected_table = cfg.DEFAULT_DATA if source == 'Default' else None
+					if source == 'Database':
+						if table_options:
+							selected_table = st.selectbox( label='Select Database Table',
+								options=table_options, key='database_table_selectbox' )
+						else:
+							st.warning( 'No tables were found in the database.' )
+					elif selected_table not in table_options:
+						st.warning( f'Default dataset "{cfg.DEFAULT_DATA}" is not installed. '
+							'Choose Database or External to load an available dataset.' )
+						st.session_state[ 'active_dataset_name' ] = ''
+						selected_table = None
+
+					if selected_table:
+						dataset_signature = (source, str( db_path.resolve( ) ),
+							selected_table, db_version)
+						if st.session_state.get( '_sidebar_dataset_signature' ) != dataset_signature:
 							df_default = pd.read_sql_query( f'SELECT * FROM "{selected_table}"',
 								connection )
-							
 							df_original = df_default.copy( )
-							st.session_state[ 'active_dataset_name' ] = selected_table
+						if source == 'Database':
 							st.session_state[ 'map_mode_table' ] = selected_table
-							log_step( f'Loaded Database Table: {selected_table}' )
-					else:
-						st.warning( 'No tables were found in the database.' )
+						st.session_state[ 'active_dataset_name' ] = selected_table
 			except Exception as ex:
 				st.error( f'Error loading database data: {ex}' )
-		
+
 		elif source == 'External':
 			if uploaded is not None:
-				if uploaded.name.lower( ).endswith( ('.xlsx', '.xls') ):
-					df_default = pd.read_excel( uploaded )
-				else:
-					df_default = pd.read_csv( uploaded )
-				
-				df_original = df_default.copy( )
+				import hashlib
+				file_signature = hashlib.sha256( uploaded.getvalue( ) ).hexdigest( )
+				dataset_signature = (source, uploaded.name, file_signature)
+				if st.session_state.get( '_sidebar_dataset_signature' ) != dataset_signature:
+					if uploaded.name.lower( ).endswith( ('.xlsx', '.xls') ):
+						df_default = pd.read_excel( uploaded )
+					else:
+						df_default = pd.read_csv( uploaded )
+					df_original = df_default.copy( )
 				st.session_state[ 'active_dataset_name' ] = uploaded.name
-				log_step( f'Loaded uploaded file: {uploaded.name}' )
 			else:
 				st.info( 'Upload a spreadsheet to load data.' )
-		
-		if has_loaded_dataset( df_default ):
+
+		if dataset_signature is not None and has_loaded_dataset( df_default ):
 			store_loaded_dataset( df_default, df_original )
+			st.session_state[ '_sidebar_dataset_signature' ] = dataset_signature
+			log_step( f'Loaded dataset: {st.session_state[ "active_dataset_name" ]}' )
 
 	# ------- Live World Data
 	st.markdown( '#### 📡 Live Data' )
@@ -12146,7 +12143,8 @@ elif mode == 'Data Management':
 	with center:
 		st.subheader( 'Data Management' )
 		tabs = st.tabs( [ 'Import', 'Browse', 'CRUD', 'Explore', 'Filter',
-		                  'Aggregate', 'Visualize', 'Geocode', 'Admin', 'SQL' ] )
+		                  'Aggregate', 'Visualize', 'Geocode', 'Admin', 'SQL' ],
+			on_change='rerun', key='data_management_active_tab' )
 		 
 		tables = list_tables( )
 		if not tables:
@@ -12155,642 +12153,652 @@ elif mode == 'Data Management':
 		# ------------------------------------------------------------------------------
 		# UPLOAD TAB
 		# ------------------------------------------------------------------------------
-		with tabs[ 0 ]:
-			upl_c1, upl_c2 = st.columns( [ 0.70, 0.30 ] )
-			with upl_c1:
-				uploaded_file = st.file_uploader( 'Upload Excel File', type=[ 'xlsx' ] )
-			with upl_c2:
-				overwrite = st.checkbox( 'Overwrite existing tables', value=True )
+		if tabs[ 0 ].open:
+			with tabs[ 0 ]:
+				upl_c1, upl_c2 = st.columns( [ 0.70, 0.30 ] )
+				with upl_c1:
+					uploaded_file = st.file_uploader( 'Upload Excel File', type=[ 'xlsx' ] )
+				with upl_c2:
+					overwrite = st.checkbox( 'Overwrite existing tables', value=True )
 				
-			if uploaded_file:
-				try:
-					sheets = pd.read_excel( uploaded_file, sheet_name=None )
-					with create_connection( ) as conn:
-						conn.execute( 'BEGIN' )
-						for sheet_name, df in sheets.items( ):
-							table_name = create_identifier( sheet_name )
-							if overwrite:
-								conn.execute( f'DROP TABLE IF EXISTS "{table_name}"' )
-							
-							# --- Create Table ---
-							columns = [ ]
-							df.columns = [ create_identifier( c ) for c in df.columns ]
-							for col in df.columns:
-								sql_type = get_sqlite_type( df[ col ].dtype )
-								columns.append( f'"{col}" {sql_type}' )
-							
-							create_stmt = ( f'CREATE TABLE "{table_name}" '
-									f'({", ".join( columns )});' )
-							
-							conn.execute( create_stmt )
-							
-							# --- Insert Data ---
-							placeholders = ", ".join( [ "?" ] * len( df.columns ) )
-							insert_stmt = (
-									f'INSERT INTO "{table_name}" '
-									f'VALUES ({placeholders});' )
-							
-							conn.executemany( insert_stmt,
-								df.where( pd.notnull( df ), None ).values.tolist( ) )
-						
-						conn.commit( )
-					
-					st.success( 'Import completed successfully (transaction committed).' )
-					st.rerun( )
-				except Exception as e:
+				if uploaded_file:
 					try:
-						conn.rollback( )
-					except:
-						pass
-					st.error( f'Import failed — transaction rolled back.\n\n{e}' )
-		
-		# ------------------------------------------------------------------------------
-		# BROWSE TAB
-		# ------------------------------------------------------------------------------
-		with tabs[ 1 ]:
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Table', tables, key='table_name' )
-				
-				blue_divider( )
-				
-				df = read_table( table )
-				st.data_editor( df, key='dm_browse_key' )
-			else:
-				st.info( 'No tables available.' )
-		
-		# ------------------------------------------------------------------------------
-		# CRUD
-		# ------------------------------------------------------------------------------
-		with tabs[ 2 ]:
-			tables = list_tables( )
-			if not tables:
-				st.info( 'No tables available.' )
-			else:
-				crud_header_c1, crud_header_c2, crud_header_c3 = st.columns( [ 0.45, 0.25, 0.30 ],
-					border=True )
-				
-				with crud_header_c1:
-					table = st.selectbox( 'Select Table', tables, key='crud_table' )
-				
-				df = read_table( table )
-				schema = create_schema( table )
-				
-				type_map = { col[ 1 ]: col[ 2 ].upper( ) for col in schema if col[ 1 ] != 'rowid' }
-				
-				with crud_header_c2:
-					st.metric( 'Rows', len( df.index ) )
-				
-				with crud_header_c3:
-					st.metric( 'Columns', len( type_map ) )
-				
-				blue_divider( )
-				
-				insert_col, update_col = st.columns( [ 0.50, 0.50 ], border=True )
-				
-				# ------------------------------------------------------------------
-				# INSERT
-				# ------------------------------------------------------------------
-				with insert_col:
-					st.markdown( '##### Insert Row' )
-					insert_data = { }
-					for column, col_type in type_map.items( ):
-						if 'INT' in col_type:
-							insert_data[ column ] = st.number_input( column, step=1,
-								key=f'ins_{table}_{column}' )
-						elif 'REAL' in col_type:
-							insert_data[ column ] = st.number_input( column, format='%.6f',
-								key=f'ins_{table}_{column}' )
-						elif 'BOOL' in col_type:
-							insert_data[ column ] = 1 if st.checkbox( column,
-								key=f'ins_{table}_{column}' ) else 0
-						else:
-							insert_data[ column ] = st.text_input( column,
-								key=f'ins_{table}_{column}' )
-					
-					if st.button( 'Insert Row', key=f'insert_row_{table}',
-							use_container_width=True ):
-						cols = list( insert_data.keys( ) )
-						quoted_cols = [ f'"{c}"' for c in cols ]
-						placeholders = ', '.join( [ '?' ] * len( cols ) )
-						stmt = ( f'INSERT INTO "{table}" ({", ".join( quoted_cols )}) '
-								f'VALUES ({placeholders});')
-						
+						sheets = pd.read_excel( uploaded_file, sheet_name=None )
 						with create_connection( ) as conn:
-							conn.execute( stmt, list( insert_data.values( ) ) )
+							conn.execute( 'BEGIN' )
+							for sheet_name, df in sheets.items( ):
+								table_name = create_identifier( sheet_name )
+								if overwrite:
+									conn.execute( f'DROP TABLE IF EXISTS "{table_name}"' )
+							
+								# --- Create Table ---
+								columns = [ ]
+								df.columns = [ create_identifier( c ) for c in df.columns ]
+								for col in df.columns:
+									sql_type = get_sqlite_type( df[ col ].dtype )
+									columns.append( f'"{col}" {sql_type}' )
+							
+								create_stmt = ( f'CREATE TABLE "{table_name}" '
+										f'({", ".join( columns )});' )
+							
+								conn.execute( create_stmt )
+							
+								# --- Insert Data ---
+								placeholders = ", ".join( [ "?" ] * len( df.columns ) )
+								insert_stmt = (
+										f'INSERT INTO "{table_name}" '
+										f'VALUES ({placeholders});' )
+							
+								conn.executemany( insert_stmt,
+									df.where( pd.notnull( df ), None ).values.tolist( ) )
+						
 							conn.commit( )
-						
-						st.success( 'Row inserted.' )
+					
+						st.success( 'Import completed successfully (transaction committed).' )
 						st.rerun( )
-				
-				# ------------------------------------------------------------------
-				# UPDATE
-				# ------------------------------------------------------------------
-				with update_col:
-					st.markdown( '##### Update Row' )
-					rowid = st.number_input( 'Row ID', min_value=1, step=1,
-						key=f'crud_update_rowid_{table}' )
-					
-					update_data = { }
-					
-					for column, col_type in type_map.items( ):
-						if 'INT' in col_type:
-							val = st.number_input( column, step=1, key=f'upd_{table}_{column}' )
-							update_data[ column ] = val
-						
-						elif 'REAL' in col_type:
-							val = st.number_input( column, format='%.6f', key=f'upd_{table}_{column}' )
-							update_data[ column ] = val
-						
-						elif 'BOOL' in col_type:
-							val = 1 if st.checkbox( column,
-								key=f'upd_{table}_{column}' ) else 0
-							update_data[ column ] = val
-						
-						else:
-							val = st.text_input( column, key=f'upd_{table}_{column}' )
-							update_data[ column ] = val
-					
-					if st.button( 'Update Row', key=f'update_row_{table}',
-							use_container_width=True ):
-						set_clause = ', '.join( [ f'"{c}"=?' for c in update_data ] )
-						stmt = f'UPDATE "{table}" SET {set_clause} WHERE rowid=?;'
-						
-						with create_connection( ) as conn:
-							conn.execute( stmt, list( update_data.values( ) ) + [ rowid ] )
-							conn.commit( )
-						
-						st.success( 'Row updated.' )
-						st.rerun( )
-				
-				blue_divider( )
-				
-				delete_col, preview_col = st.columns( [ 0.35, 0.65 ], border=True )
-				
-				# ------------------------------------------------------------------
-				# DELETE
-				# ------------------------------------------------------------------
-				with delete_col:
-					st.markdown( '##### Delete Row' )
-					delete_id = st.number_input( 'Row ID to Delete', min_value=1, step=1,
-						key=f'crud_delete_rowid_{table}' )
-					
-					if st.button( 'Delete Row', key=f'delete_row_{table}', use_container_width=True ):
-						with create_connection( ) as conn:
-							conn.execute( f'DELETE FROM "{table}" WHERE rowid=?;', (delete_id,) )
-							conn.commit( )
-						
-						st.success( 'Row deleted.' )
-						st.rerun( )
-				
-				# ------------------------------------------------------------------
-				# PREVIEW
-				# ------------------------------------------------------------------
-				with preview_col:
-					st.markdown( '##### Current Data Preview' )
-					st.data_editor( df.head( 25 ), key=f'dm_crud_preview_{table}',
-						use_container_width=True, disabled=True )
+					except Exception as e:
+						try:
+							conn.rollback( )
+						except:
+							pass
+						st.error( f'Import failed — transaction rolled back.\n\n{e}' )
 		
-		# ------------------------------------------------------------------------------
-		# EXPLORE
-		# ------------------------------------------------------------------------------
-		with tabs[ 3 ]:
-			tables = list_tables( )
-			if tables:
-				exp_c1, exp_c2, exp_c3 = st.columns( [ 0.4, 0.4, 0.2 ], border=True )
-				with exp_c1:
-					table = st.selectbox( 'Table', tables, key='explore_table' )
-				with exp_c2:
-					page_size = st.slider( 'Rows per page', 10, 500, 50 )
-				with exp_c3:
-					page = st.number_input( 'Page', min_value=1, step=1 )
-					offset = (page - 1) * page_size
-					df_page = read_table( table, page_size, offset )
+			# ------------------------------------------------------------------------------
+			# BROWSE TAB
+			# ------------------------------------------------------------------------------
+		if tabs[ 1 ].open:
+			with tabs[ 1 ]:
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Table', tables, key='table_name' )
 				
-				blue_divider( )
+					blue_divider( )
 				
-				st.data_editor( data=df_page, num_rows='dynamic', hide_index=False )
-		
-		# ------------------------------------------------------------------------------
-		# FILTER
-		# ------------------------------------------------------------------------------
-		with tabs[ 4 ]:
-			tables = list_tables( )
-			if tables:
-				tbl_c1, tbl_c2, tbl_c3 = st.columns( [ 0.25, 0.25, 0.5 ], border=True )
-				with tbl_c1:
-					table = st.selectbox( 'Select Table', tables, key='filter_table' )
 					df = read_table( table )
-					
-				with tbl_c2:
-					column = st.selectbox( 'Select Field', df.columns, key='selected_column' )
-					
-				with tbl_c3:
-					value = st.text_input( 'Contains', placeholder='Enter Text for Lookup' )
-					if value:
-						df = df[ df[ column ].astype( str ).str.contains( value ) ]
-				
-				blue_divider( )
-				
-				st.data_editor( df, key='dm_filter_key' )
-		
-		# ------------------------------------------------------------------------------
-		# AGGREGATE
-		# ------------------------------------------------------------------------------
-		with tabs[ 5 ]:
-			tables = list_tables( )
-			if tables:
-				agg_c1, agg_c2, agg_c3, agg_c4 = st.columns( [ 0.2, 0.2, 0.2, 0.4 ], border=True )
-				with agg_c1:
-					table = st.selectbox( 'Table', tables, key='agg_table' )
-					df = read_table( table )
-					numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
-					if not numeric_cols:
-						with agg_c2:
-							st.info( 'No numeric columns available.' )
-					else:
-						with agg_c2:
-							col = st.selectbox( 'Column', numeric_cols, key='selected_col' )
-						with agg_c3:
-							agg = st.selectbox( 'Function', [ 'SUM', 'AVG', 'COUNT' ] )
-						with agg_c4:
-							if agg == 'SUM':
-								st.metric( 'Result', df[ col ].sum( ), width='stretch',
-									format='accounting' )
-							elif agg == 'AVG':
-								st.metric( 'Result', df[ col ].mean( ), width='stretch',
-									format='accounting' )
-							elif agg == 'COUNT':
-								st.metric( 'Result', df[ col ].count( ), width='stretch',
-									format='accounting' )
-		
-		# ------------------------------------------------------------------------------
-		# VISUALIZE
-		# ------------------------------------------------------------------------------
-		with tabs[ 6 ]:
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Table', tables, key='viz_table' )
-				df = read_table( table )
-				create_visualization( df )
-		
-		# ------------------------------------------------------------------------------
-		# GEOCODE
-		# ------------------------------------------------------------------------------
-		with tabs[ 7 ]:
-			st.subheader( 'Geocode Missing Report Coordinates' )
-			
-			tables = list_tables( )
-			
-			if not tables:
-				st.info( 'No tables available.' )
-			else:
-				default_table = resolve_table_name( cfg.DEFAULT_DATA, tables )
-				if default_table is None:
-					default_table = tables[ 0 ]
-				
-				default_index = tables.index( default_table )
-				
-				control_c1, control_c2, control_c3, control_c4 = st.columns(
-					[ 0.25, 0.25, 0.25, 0.25 ], border=True )
-				
-				with control_c1:
-					table = st.selectbox( 'Table', tables, index=default_index,
-						key='reports_geocode_table' )
-				
-				with control_c2:
-					use_places = st.checkbox( 'Use Places Fallback', value=True,
-						key='reports_geocode_use_places' )
-				
-				with control_c3:
-					limit_enabled = st.checkbox( 'Limit Locations', value=True,
-						key='reports_geocode_limit_enabled' )
-				
-				with control_c4:
-					limit = st.number_input( 'Location Limit', min_value=1, max_value=10000,
-						value=100, step=25, key='reports_geocode_limit' )
-				
-				location_limit = int( limit ) if limit_enabled else None
-				
-				required_cols = [ 'City', 'State', 'Country', 'Latitude', 'Longitude' ]
-				schema = create_schema( table )
-				table_cols = [ row[ 1 ] for row in schema ]
-				missing_cols = [ col for col in required_cols if col not in table_cols ]
-				
-				if missing_cols:
-					st.warning(
-						f'Table is missing required column(s): {", ".join( missing_cols )}' )
+					st.data_editor( df, key='dm_browse_key' )
 				else:
-					missing_rows = count_missing_report_coordinate_rows( table )
-					df_locations = read_missing_report_locations( table, location_limit )
-					distinct_total = len( read_missing_report_locations( table, None ) )
+					st.info( 'No tables available.' )
+		
+			# ------------------------------------------------------------------------------
+			# CRUD
+			# ------------------------------------------------------------------------------
+		if tabs[ 2 ].open:
+			with tabs[ 2 ]:
+				tables = list_tables( )
+				if not tables:
+					st.info( 'No tables available.' )
+				else:
+					crud_header_c1, crud_header_c2, crud_header_c3 = st.columns( [ 0.45, 0.25, 0.30 ],
+						border=True )
+				
+					with crud_header_c1:
+						table = st.selectbox( 'Select Table', tables, key='crud_table' )
+				
+					df = read_table( table )
+					schema = create_schema( table )
+				
+					type_map = { col[ 1 ]: col[ 2 ].upper( ) for col in schema if col[ 1 ] != 'rowid' }
+				
+					with crud_header_c2:
+						st.metric( 'Rows', len( df.index ) )
+				
+					with crud_header_c3:
+						st.metric( 'Columns', len( type_map ) )
+				
+					blue_divider( )
+				
+					insert_col, update_col = st.columns( [ 0.50, 0.50 ], border=True )
+				
+					# ------------------------------------------------------------------
+					# INSERT
+					# ------------------------------------------------------------------
+					with insert_col:
+						st.markdown( '##### Insert Row' )
+						insert_data = { }
+						for column, col_type in type_map.items( ):
+							if 'INT' in col_type:
+								insert_data[ column ] = st.number_input( column, step=1,
+									key=f'ins_{table}_{column}' )
+							elif 'REAL' in col_type:
+								insert_data[ column ] = st.number_input( column, format='%.6f',
+									key=f'ins_{table}_{column}' )
+							elif 'BOOL' in col_type:
+								insert_data[ column ] = 1 if st.checkbox( column,
+									key=f'ins_{table}_{column}' ) else 0
+							else:
+								insert_data[ column ] = st.text_input( column,
+									key=f'ins_{table}_{column}' )
 					
-					status_c1, status_c2, status_c3, status_c4 = st.columns( 4 )
-					status_c1.metric( 'Rows Missing Coordinates', f'{missing_rows:,}' )
-					status_c2.metric( 'Distinct Locations', f'{distinct_total:,}' )
-					status_c3.metric( 'Preview Locations', f'{len( df_locations ):,}' )
-					status_c4.metric( 'Fallback', 'Enabled' if use_places else 'Disabled' )
+						if st.button( 'Insert Row', key=f'insert_row_{table}',
+								use_container_width=True ):
+							cols = list( insert_data.keys( ) )
+							quoted_cols = [ f'"{c}"' for c in cols ]
+							placeholders = ', '.join( [ '?' ] * len( cols ) )
+							stmt = ( f'INSERT INTO "{table}" ({", ".join( quoted_cols )}) '
+									f'VALUES ({placeholders});')
+						
+							with create_connection( ) as conn:
+								conn.execute( stmt, list( insert_data.values( ) ) )
+								conn.commit( )
+						
+							st.success( 'Row inserted.' )
+							st.rerun( )
+				
+					# ------------------------------------------------------------------
+					# UPDATE
+					# ------------------------------------------------------------------
+					with update_col:
+						st.markdown( '##### Update Row' )
+						rowid = st.number_input( 'Row ID', min_value=1, step=1,
+							key=f'crud_update_rowid_{table}' )
 					
-					with st.expander( 'Distinct Locations Missing Coordinates', expanded=False ):
-						if df_locations.empty:
-							st.info( 'No missing coordinate locations found.' )
+						update_data = { }
+					
+						for column, col_type in type_map.items( ):
+							if 'INT' in col_type:
+								val = st.number_input( column, step=1, key=f'upd_{table}_{column}' )
+								update_data[ column ] = val
+						
+							elif 'REAL' in col_type:
+								val = st.number_input( column, format='%.6f', key=f'upd_{table}_{column}' )
+								update_data[ column ] = val
+						
+							elif 'BOOL' in col_type:
+								val = 1 if st.checkbox( column,
+									key=f'upd_{table}_{column}' ) else 0
+								update_data[ column ] = val
+						
+							else:
+								val = st.text_input( column, key=f'upd_{table}_{column}' )
+								update_data[ column ] = val
+					
+						if st.button( 'Update Row', key=f'update_row_{table}',
+								use_container_width=True ):
+							set_clause = ', '.join( [ f'"{c}"=?' for c in update_data ] )
+							stmt = f'UPDATE "{table}" SET {set_clause} WHERE rowid=?;'
+						
+							with create_connection( ) as conn:
+								conn.execute( stmt, list( update_data.values( ) ) + [ rowid ] )
+								conn.commit( )
+						
+							st.success( 'Row updated.' )
+							st.rerun( )
+				
+					blue_divider( )
+				
+					delete_col, preview_col = st.columns( [ 0.35, 0.65 ], border=True )
+				
+					# ------------------------------------------------------------------
+					# DELETE
+					# ------------------------------------------------------------------
+					with delete_col:
+						st.markdown( '##### Delete Row' )
+						delete_id = st.number_input( 'Row ID to Delete', min_value=1, step=1,
+							key=f'crud_delete_rowid_{table}' )
+					
+						if st.button( 'Delete Row', key=f'delete_row_{table}', use_container_width=True ):
+							with create_connection( ) as conn:
+								conn.execute( f'DELETE FROM "{table}" WHERE rowid=?;', (delete_id,) )
+								conn.commit( )
+						
+							st.success( 'Row deleted.' )
+							st.rerun( )
+				
+					# ------------------------------------------------------------------
+					# PREVIEW
+					# ------------------------------------------------------------------
+					with preview_col:
+						st.markdown( '##### Current Data Preview' )
+						st.data_editor( df.head( 25 ), key=f'dm_crud_preview_{table}',
+							use_container_width=True, disabled=True )
+		
+			# ------------------------------------------------------------------------------
+			# EXPLORE
+			# ------------------------------------------------------------------------------
+		if tabs[ 3 ].open:
+			with tabs[ 3 ]:
+				tables = list_tables( )
+				if tables:
+					exp_c1, exp_c2, exp_c3 = st.columns( [ 0.4, 0.4, 0.2 ], border=True )
+					with exp_c1:
+						table = st.selectbox( 'Table', tables, key='explore_table' )
+					with exp_c2:
+						page_size = st.slider( 'Rows per page', 10, 500, 50 )
+					with exp_c3:
+						page = st.number_input( 'Page', min_value=1, step=1 )
+						offset = (page - 1) * page_size
+						df_page = read_table( table, page_size, offset )
+				
+					blue_divider( )
+				
+					st.data_editor( data=df_page, num_rows='dynamic', hide_index=False )
+		
+			# ------------------------------------------------------------------------------
+			# FILTER
+			# ------------------------------------------------------------------------------
+		if tabs[ 4 ].open:
+			with tabs[ 4 ]:
+				tables = list_tables( )
+				if tables:
+					tbl_c1, tbl_c2, tbl_c3 = st.columns( [ 0.25, 0.25, 0.5 ], border=True )
+					with tbl_c1:
+						table = st.selectbox( 'Select Table', tables, key='filter_table' )
+						df = read_table( table )
+					
+					with tbl_c2:
+						column = st.selectbox( 'Select Field', df.columns, key='selected_column' )
+					
+					with tbl_c3:
+						value = st.text_input( 'Contains', placeholder='Enter Text for Lookup' )
+						if value:
+							df = df[ df[ column ].astype( str ).str.contains( value ) ]
+				
+					blue_divider( )
+				
+					st.data_editor( df, key='dm_filter_key' )
+		
+			# ------------------------------------------------------------------------------
+			# AGGREGATE
+			# ------------------------------------------------------------------------------
+		if tabs[ 5 ].open:
+			with tabs[ 5 ]:
+				tables = list_tables( )
+				if tables:
+					agg_c1, agg_c2, agg_c3, agg_c4 = st.columns( [ 0.2, 0.2, 0.2, 0.4 ], border=True )
+					with agg_c1:
+						table = st.selectbox( 'Table', tables, key='agg_table' )
+						df = read_table( table )
+						numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
+						if not numeric_cols:
+							with agg_c2:
+								st.info( 'No numeric columns available.' )
 						else:
+							with agg_c2:
+								col = st.selectbox( 'Column', numeric_cols, key='selected_col' )
+							with agg_c3:
+								agg = st.selectbox( 'Function', [ 'SUM', 'AVG', 'COUNT' ] )
+							with agg_c4:
+								if agg == 'SUM':
+									st.metric( 'Result', df[ col ].sum( ), width='stretch',
+										format='accounting' )
+								elif agg == 'AVG':
+									st.metric( 'Result', df[ col ].mean( ), width='stretch',
+										format='accounting' )
+								elif agg == 'COUNT':
+									st.metric( 'Result', df[ col ].count( ), width='stretch',
+										format='accounting' )
+		
+			# ------------------------------------------------------------------------------
+			# VISUALIZE
+			# ------------------------------------------------------------------------------
+		if tabs[ 6 ].open:
+			with tabs[ 6 ]:
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Table', tables, key='viz_table' )
+					df = read_table( table )
+					create_visualization( df )
+		
+			# ------------------------------------------------------------------------------
+			# GEOCODE
+			# ------------------------------------------------------------------------------
+		if tabs[ 7 ].open:
+			with tabs[ 7 ]:
+				st.subheader( 'Geocode Missing Report Coordinates' )
+			
+				tables = list_tables( )
+			
+				if not tables:
+					st.info( 'No tables available.' )
+				else:
+					default_table = resolve_table_name( cfg.DEFAULT_DATA, tables )
+					if default_table is None:
+						default_table = tables[ 0 ]
+				
+					default_index = tables.index( default_table )
+				
+					control_c1, control_c2, control_c3, control_c4 = st.columns(
+						[ 0.25, 0.25, 0.25, 0.25 ], border=True )
+				
+					with control_c1:
+						table = st.selectbox( 'Table', tables, index=default_index,
+							key='reports_geocode_table' )
+				
+					with control_c2:
+						use_places = st.checkbox( 'Use Places Fallback', value=True,
+							key='reports_geocode_use_places' )
+				
+					with control_c3:
+						limit_enabled = st.checkbox( 'Limit Locations', value=True,
+							key='reports_geocode_limit_enabled' )
+				
+					with control_c4:
+						limit = st.number_input( 'Location Limit', min_value=1, max_value=10000,
+							value=100, step=25, key='reports_geocode_limit' )
+				
+					location_limit = int( limit ) if limit_enabled else None
+				
+					required_cols = [ 'City', 'State', 'Country', 'Latitude', 'Longitude' ]
+					schema = create_schema( table )
+					table_cols = [ row[ 1 ] for row in schema ]
+					missing_cols = [ col for col in required_cols if col not in table_cols ]
+				
+					if missing_cols:
+						st.warning(
+							f'Table is missing required column(s): {", ".join( missing_cols )}' )
+					else:
+						missing_rows = count_missing_report_coordinate_rows( table )
+						df_locations = read_missing_report_locations( table, location_limit )
+						distinct_total = len( read_missing_report_locations( table, None ) )
+					
+						status_c1, status_c2, status_c3, status_c4 = st.columns( 4 )
+						status_c1.metric( 'Rows Missing Coordinates', f'{missing_rows:,}' )
+						status_c2.metric( 'Distinct Locations', f'{distinct_total:,}' )
+						status_c3.metric( 'Preview Locations', f'{len( df_locations ):,}' )
+						status_c4.metric( 'Fallback', 'Enabled' if use_places else 'Disabled' )
+					
+						with st.expander( 'Distinct Locations Missing Coordinates', expanded=False ):
+							if df_locations.empty:
+								st.info( 'No missing coordinate locations found.' )
+							else:
+								st.data_editor(
+									df_locations,
+									key='reports_geocode_locations',
+									use_container_width=True,
+									disabled=True )
+					
+						action_c1, action_c2, action_c3 = st.columns( [ 0.25, 0.25, 0.50 ] )
+					
+						with action_c1:
+							if st.button( 'Preview Geocoding', key='reports_geocode_preview_button',
+									width='stretch' ):
+								df_preview = preview_report_coordinate_updates(
+									table_name=table,
+									geocoder=geocoder,
+									places=places,
+									use_places=use_places,
+									limit=location_limit )
+							
+								st.session_state[ 'df_reports_geocode_preview' ] = df_preview
+					
+						with action_c2:
+							if st.button( 'Clear', icon='🧹', key='reports_geocode_clear_button',
+									width='stretch' ):
+								st.session_state[ 'df_reports_geocode_preview' ] = pd.DataFrame( )
+					
+						df_preview = st.session_state.get( 'df_reports_geocode_preview',
+							pd.DataFrame( ) )
+					
+						if df_preview is not None and not df_preview.empty:
+							status_series = df_preview[ 'Status' ].astype( str ).str.lower( )
+							matched_count = int( (status_series == 'matched').sum( ) )
+							failed_count = int( (status_series == 'failed').sum( ) )
+							skipped_count = int( (status_series == 'skipped').sum( ) )
+						
+							matched_rows = int(
+								df_preview.loc[ status_series == 'matched', 'RowCount' ].sum( ) )
+						
+							result_c1, result_c2, result_c3, result_c4 = st.columns( 4 )
+							result_c1.metric( 'Matched Locations', f'{matched_count:,}' )
+							result_c2.metric( 'Failed Locations', f'{failed_count:,}' )
+							result_c3.metric( 'Skipped Locations', f'{skipped_count:,}' )
+							result_c4.metric( 'Rows Eligible For Update', f'{matched_rows:,}' )
+						
 							st.data_editor(
-								df_locations,
-								key='reports_geocode_locations',
+								df_preview,
+								key='reports_geocode_preview_table',
 								use_container_width=True,
 								disabled=True )
-					
-					action_c1, action_c2, action_c3 = st.columns( [ 0.25, 0.25, 0.50 ] )
-					
-					with action_c1:
-						if st.button( 'Preview Geocoding', key='reports_geocode_preview_button',
-								width='stretch' ):
-							df_preview = preview_report_coordinate_updates(
-								table_name=table,
-								geocoder=geocoder,
-								places=places,
-								use_places=use_places,
-								limit=location_limit )
-							
-							st.session_state[ 'df_reports_geocode_preview' ] = df_preview
-					
-					with action_c2:
-						if st.button( 'Clear', icon='🧹', key='reports_geocode_clear_button',
-								width='stretch' ):
-							st.session_state[ 'df_reports_geocode_preview' ] = pd.DataFrame( )
-					
-					df_preview = st.session_state.get( 'df_reports_geocode_preview',
-						pd.DataFrame( ) )
-					
-					if df_preview is not None and not df_preview.empty:
-						status_series = df_preview[ 'Status' ].astype( str ).str.lower( )
-						matched_count = int( (status_series == 'matched').sum( ) )
-						failed_count = int( (status_series == 'failed').sum( ) )
-						skipped_count = int( (status_series == 'skipped').sum( ) )
 						
-						matched_rows = int(
-							df_preview.loc[ status_series == 'matched', 'RowCount' ].sum( ) )
+							st.warning(
+								'Apply Updates writes Latitude and Longitude values back to SQLite '
+								'for all missing-coordinate rows matching the previewed City, State, '
+								'and Country combinations. Review the preview before applying.' )
 						
-						result_c1, result_c2, result_c3, result_c4 = st.columns( 4 )
-						result_c1.metric( 'Matched Locations', f'{matched_count:,}' )
-						result_c2.metric( 'Failed Locations', f'{failed_count:,}' )
-						result_c3.metric( 'Skipped Locations', f'{skipped_count:,}' )
-						result_c4.metric( 'Rows Eligible For Update', f'{matched_rows:,}' )
+							apply_c1, apply_c2 = st.columns( [ 0.25, 0.75 ] )
 						
-						st.data_editor(
-							df_preview,
-							key='reports_geocode_preview_table',
-							use_container_width=True,
-							disabled=True )
+							with apply_c1:
+								apply_updates = st.checkbox( 'Confirm Apply Updates',
+									value=False, key='reports_geocode_confirm_apply' )
 						
-						st.warning(
-							'Apply Updates writes Latitude and Longitude values back to SQLite '
-							'for all missing-coordinate rows matching the previewed City, State, '
-							'and Country combinations. Review the preview before applying.' )
-						
-						apply_c1, apply_c2 = st.columns( [ 0.25, 0.75 ] )
-						
-						with apply_c1:
-							apply_updates = st.checkbox( 'Confirm Apply Updates',
-								value=False, key='reports_geocode_confirm_apply' )
-						
-						with apply_c2:
-							if st.button( 'Apply Updates', key='reports_geocode_apply_button',
-									width='stretch', disabled=not apply_updates ):
-								updated_count = apply_report_coordinate_updates( table, df_preview )
+							with apply_c2:
+								if st.button( 'Apply Updates', key='reports_geocode_apply_button',
+										width='stretch', disabled=not apply_updates ):
+									updated_count = apply_report_coordinate_updates( table, df_preview )
 								
-								if updated_count:
-									st.success(
-										f'Updated {updated_count:,} report coordinate row(s).' )
-									st.session_state[
-										'df_reports_geocode_preview' ] = pd.DataFrame( )
-									st.rerun( )
-								else:
-									st.info( 'No rows were updated.' )
+									if updated_count:
+										st.success(
+											f'Updated {updated_count:,} report coordinate row(s).' )
+										st.session_state[
+											'df_reports_geocode_preview' ] = pd.DataFrame( )
+										st.rerun( )
+									else:
+										st.info( 'No rows were updated.' )
 									
-		# ------------------------------------------------------------------------------
-		# ADMIN
-		# ------------------------------------------------------------------------------
-		with tabs[ 8 ]:
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Table', tables, key='admin_table' )
+			# ------------------------------------------------------------------------------
+			# ADMIN
+			# ------------------------------------------------------------------------------
+		if tabs[ 8 ].open:
+			with tabs[ 8 ]:
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Table', tables, key='admin_table' )
 			
-			blue_divider( )
+				blue_divider( )
 			
-			st.markdown( '##### Data Profiling' )
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Select Table', tables, key='profile_table' )
-				if st.button( 'Generate Profile' ):
-					profile_df = create_profile_table( table )
-					render_table( profile_df )
+				st.markdown( '##### Data Profiling' )
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Select Table', tables, key='profile_table' )
+					if st.button( 'Generate Profile' ):
+						profile_df = create_profile_table( table )
+						render_table( profile_df )
 			
-			st.markdown( '##### Drop Table' )
+				st.markdown( '##### Drop Table' )
 			
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Select Table to Drop', tables, key='admin_drop_table' )
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Select Table to Drop', tables, key='admin_drop_table' )
 				
-				# Initialize confirmation state
-				if 'dm_confirm_drop' not in st.session_state:
-					st.session_state.dm_confirm_drop = False
-				
-				# Step 1: Initial Drop click
-				if st.button( 'Drop Table', key='admin_drop_button' ):
-					st.session_state.dm_confirm_drop = True
-				
-				# Step 2: Confirmation UI
-				if st.session_state.dm_confirm_drop:
-					st.warning( f'You are about to permanently delete table {table}. '
-					            'This action cannot be undone.' )
-					
-					col1, col2 = st.columns( 2 )
-					if col1.button( 'Confirm Drop', key='admin_confirm_drop' ):
-						try:
-							drop_table( table )
-							st.success( f'Table {table} dropped successfully.' )
-						except Exception as e:
-							st.error( f'Drop failed: {e}' )
-						
+					# Initialize confirmation state
+					if 'dm_confirm_drop' not in st.session_state:
 						st.session_state.dm_confirm_drop = False
-						st.rerun( )
+				
+					# Step 1: Initial Drop click
+					if st.button( 'Drop Table', key='admin_drop_button' ):
+						st.session_state.dm_confirm_drop = True
+				
+					# Step 2: Confirmation UI
+					if st.session_state.dm_confirm_drop:
+						st.warning( f'You are about to permanently delete table {table}. '
+						            'This action cannot be undone.' )
 					
-					if col2.button( 'Cancel', key='admin_cancel_drop' ):
-						st.session_state.dm_confirm_drop = False
-						st.rerun( )
-				
-				df = read_table( table )
-				col = st.selectbox( 'Create Index On', df.columns, key='df_key' )
-				
-				if st.button( 'Create Index' ):
-					create_index( table, col )
-					st.success( 'Index created.' )
-			
-			blue_divider( )
-			
-			st.markdown( '##### Create Custom Table' )
-			new_table_name = st.text_input( 'Table Name' )
-			column_count = st.number_input( 'Number of Columns', min_value=1,
-				max_value=20, value=1 )
-			
-			columns = [ ]
-			for i in range( column_count ):
-				st.markdown( f'##### Column {i + 1}' )
-				col_name = st.text_input( 'Column Name', key=f'col_name_{i}' )
-				col_type = st.selectbox( 'Column Type', [ 'INTEGER', 'REAL', 'TEXT' ],
-					key=f'col_type_{i}' )
-				
-				not_null = st.checkbox( 'NOT NULL', key=f'not_null_{i}' )
-				primary_key = st.checkbox( 'PRIMARY KEY', key=f'pk_{i}' )
-				auto_inc = st.checkbox( 'AUTOINCREMENT (INTEGER only)', key=f'ai_{i}' )
-				
-				columns.append( {
-						'name': col_name,
-						'type': col_type,
-						'not_null': not_null,
-						'primary_key': primary_key,
-						'auto_increment': auto_inc } )
-			
-			if st.button( 'Create Table' ):
-				try:
-					create_custom_table( new_table_name, columns )
-					st.success( 'Table created successfully.' )
-					st.rerun( )
-				
-				except Exception as e:
-					st.error( f'Error: {e}' )
-			
-			blue_divider( )
-			st.markdown( '##### Schema Viewer' )
-			
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Select Table', tables, key='schema_view_table' )
-				
-				# Column schema
-				schema = create_schema( table )
-				schema_df = pd.DataFrame( schema,
-					columns=[ 'cid', 'name', 'type', 'notnull', 'default', 'pk' ] )
-				
-				st.markdown( "##### Columns" )
-				st.data_editor( make_display_safe( schema_df ), hide_index=True,
-					use_container_width=True, disabled=True )
-				
-				# Row count
-				with create_connection( ) as conn:
-					count = conn.execute( f'SELECT COUNT(*) FROM "{table}"' ).fetchone( )[ 0 ]
-				
-				st.metric( "Row Count", f"{count:,}" )
-				
-				# Indexes
-				indexes = get_indexes( table )
-				if indexes:
-					idx_df = pd.DataFrame( indexes,
-						columns=[ 'seq', 'name', 'unique', 'origin', 'partial' ] )
-					
-					st.markdown( "##### Indexes" )
-					st.data_editor( make_display_safe( idx_df ), hide_index=True,
-						use_container_width=True, disabled=True )
-				else:
-					st.info( "No indexes defined." )
-			
-			blue_divider( )
-			st.markdown( '##### ALTER TABLE Operations' )
-			
-			tables = list_tables( )
-			if tables:
-				table = st.selectbox( 'Select Table', tables, key='alter_table_select' )
-				operation = st.selectbox( 'Operation',
-					[ 'Add Column', 'Rename Column', 'Rename Table', 'Drop Column' ], key='op_key' )
-				
-				if operation == 'Add Column':
-					new_col = st.text_input( 'Column Name' )
-					col_type = st.selectbox( 'Column Type', [ 'INTEGER', 'REAL', 'TEXT' ],
-						key='key_type' )
-					
-					if st.button( 'Add Column' ):
-						add_column( table, new_col, col_type )
-						st.success( 'Column added.' )
-						st.rerun( )
-				
-				elif operation == 'Rename Column':
-					schema = create_schema( table )
-					col_names = [ col[ 1 ] for col in schema ]
-					
-					old_col = st.selectbox( 'Column to Rename', col_names, key='old_key' )
-					new_col = st.text_input( 'New Column Name' )
-					
-					if st.button( 'Rename Column' ):
-						rename_column( table, old_col, new_col )
-						st.success( 'Column renamed.' )
-						st.rerun( )
-				
-				elif operation == 'Rename Table':
-					new_name = st.text_input( 'New Table Name' )
-					
-					if st.button( 'Rename Table' ):
-						rename_table( table, new_name )
-						st.success( 'Table renamed.' )
-						st.rerun( )
-				
-				elif operation == 'Drop Column':
-					schema = create_schema( table )
-					col_names = [ col[ 1 ] for col in schema ]
-					
-					drop_col = st.selectbox( 'Column to Drop', col_names, key='drop_key' )
-					
-					if st.button( 'Drop Column' ):
-						drop_column( table, drop_col )
-						st.success( 'Column dropped.' )
-						st.rerun( )
-		
-		# ------------------------------------------------------------------------------
-		# SQL
-		# ------------------------------------------------------------------------------
-		with tabs[ 9 ]:
-			st.subheader( 'SQL Console' )
-			query = st.text_area( 'Enter SQL Query' )
-			if st.button( label='Run', icon='🏃', ):
-				if not is_safe_query( query ):
-					st.error( 'Query blocked: Only read-only SELECT statements are allowed.' )
-				else:
-					try:
-						start_time = time.perf_counter( )
-						with create_connection( ) as conn:
-							result = pd.read_sql_query( query, conn )
-						
-						end_time = time.perf_counter( )
-						elapsed = end_time - start_time
-						
-						# ----------------------------------------------------------
-						# Display Results
-						# ----------------------------------------------------------
-						st.dataframe( result, use_container_width=True )
-						row_count = len( result )
-						
-						# ----------------------------------------------------------
-						# Execution Metrics
-						# ----------------------------------------------------------
 						col1, col2 = st.columns( 2 )
-						col1.metric( 'Rows Returned', f'{row_count:,}' )
-						col2.metric( 'Execution Time (seconds)', f'{elapsed:.6f}' )
+						if col1.button( 'Confirm Drop', key='admin_confirm_drop' ):
+							try:
+								drop_table( table )
+								st.success( f'Table {table} dropped successfully.' )
+							except Exception as e:
+								st.error( f'Drop failed: {e}' )
 						
-						# Optional slow query warning
-						if elapsed > 2.0:
-							st.warning( 'Slow query detected (> 2 seconds). Consider indexing.' )
-						
-						# ----------------------------------------------------------
-						# Download
-						# ----------------------------------------------------------
-						if not result.empty:
-							csv = result.to_csv( index=False ).encode( 'utf-8' )
-							st.download_button( 'Download CSV', csv,
-								'query_results.csv', 'text/csv' )
+							st.session_state.dm_confirm_drop = False
+							st.rerun( )
 					
+						if col2.button( 'Cancel', key='admin_cancel_drop' ):
+							st.session_state.dm_confirm_drop = False
+							st.rerun( )
+				
+					df = read_table( table )
+					col = st.selectbox( 'Create Index On', df.columns, key='df_key' )
+				
+					if st.button( 'Create Index' ):
+						create_index( table, col )
+						st.success( 'Index created.' )
+			
+				blue_divider( )
+			
+				st.markdown( '##### Create Custom Table' )
+				new_table_name = st.text_input( 'Table Name' )
+				column_count = st.number_input( 'Number of Columns', min_value=1,
+					max_value=20, value=1 )
+			
+				columns = [ ]
+				for i in range( column_count ):
+					st.markdown( f'##### Column {i + 1}' )
+					col_name = st.text_input( 'Column Name', key=f'col_name_{i}' )
+					col_type = st.selectbox( 'Column Type', [ 'INTEGER', 'REAL', 'TEXT' ],
+						key=f'col_type_{i}' )
+				
+					not_null = st.checkbox( 'NOT NULL', key=f'not_null_{i}' )
+					primary_key = st.checkbox( 'PRIMARY KEY', key=f'pk_{i}' )
+					auto_inc = st.checkbox( 'AUTOINCREMENT (INTEGER only)', key=f'ai_{i}' )
+				
+					columns.append( {
+							'name': col_name,
+							'type': col_type,
+							'not_null': not_null,
+							'primary_key': primary_key,
+							'auto_increment': auto_inc } )
+			
+				if st.button( 'Create Table' ):
+					try:
+						create_custom_table( new_table_name, columns )
+						st.success( 'Table created successfully.' )
+						st.rerun( )
+				
 					except Exception as e:
-						st.error( f'Execution failed: {e}' )
+						st.error( f'Error: {e}' )
+			
+				blue_divider( )
+				st.markdown( '##### Schema Viewer' )
+			
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Select Table', tables, key='schema_view_table' )
+				
+					# Column schema
+					schema = create_schema( table )
+					schema_df = pd.DataFrame( schema,
+						columns=[ 'cid', 'name', 'type', 'notnull', 'default', 'pk' ] )
+				
+					st.markdown( "##### Columns" )
+					st.data_editor( make_display_safe( schema_df ), hide_index=True,
+						use_container_width=True, disabled=True )
+				
+					# Row count
+					with create_connection( ) as conn:
+						count = conn.execute( f'SELECT COUNT(*) FROM "{table}"' ).fetchone( )[ 0 ]
+				
+					st.metric( "Row Count", f"{count:,}" )
+				
+					# Indexes
+					indexes = get_indexes( table )
+					if indexes:
+						idx_df = pd.DataFrame( indexes,
+							columns=[ 'seq', 'name', 'unique', 'origin', 'partial' ] )
+					
+						st.markdown( "##### Indexes" )
+						st.data_editor( make_display_safe( idx_df ), hide_index=True,
+							use_container_width=True, disabled=True )
+					else:
+						st.info( "No indexes defined." )
+			
+				blue_divider( )
+				st.markdown( '##### ALTER TABLE Operations' )
+			
+				tables = list_tables( )
+				if tables:
+					table = st.selectbox( 'Select Table', tables, key='alter_table_select' )
+					operation = st.selectbox( 'Operation',
+						[ 'Add Column', 'Rename Column', 'Rename Table', 'Drop Column' ], key='op_key' )
+				
+					if operation == 'Add Column':
+						new_col = st.text_input( 'Column Name' )
+						col_type = st.selectbox( 'Column Type', [ 'INTEGER', 'REAL', 'TEXT' ],
+							key='key_type' )
+					
+						if st.button( 'Add Column' ):
+							add_column( table, new_col, col_type )
+							st.success( 'Column added.' )
+							st.rerun( )
+				
+					elif operation == 'Rename Column':
+						schema = create_schema( table )
+						col_names = [ col[ 1 ] for col in schema ]
+					
+						old_col = st.selectbox( 'Column to Rename', col_names, key='old_key' )
+						new_col = st.text_input( 'New Column Name' )
+					
+						if st.button( 'Rename Column' ):
+							rename_column( table, old_col, new_col )
+							st.success( 'Column renamed.' )
+							st.rerun( )
+				
+					elif operation == 'Rename Table':
+						new_name = st.text_input( 'New Table Name' )
+					
+						if st.button( 'Rename Table' ):
+							rename_table( table, new_name )
+							st.success( 'Table renamed.' )
+							st.rerun( )
+				
+					elif operation == 'Drop Column':
+						schema = create_schema( table )
+						col_names = [ col[ 1 ] for col in schema ]
+					
+						drop_col = st.selectbox( 'Column to Drop', col_names, key='drop_key' )
+					
+						if st.button( 'Drop Column' ):
+							drop_column( table, drop_col )
+							st.success( 'Column dropped.' )
+							st.rerun( )
+		
+			# ------------------------------------------------------------------------------
+			# SQL
+			# ------------------------------------------------------------------------------
+		if tabs[ 9 ].open:
+			with tabs[ 9 ]:
+				st.subheader( 'SQL Console' )
+				query = st.text_area( 'Enter SQL Query' )
+				if st.button( label='Run', icon='🏃', ):
+					if not is_safe_query( query ):
+						st.error( 'Query blocked: Only read-only SELECT statements are allowed.' )
+					else:
+						try:
+							start_time = time.perf_counter( )
+							with create_connection( ) as conn:
+								result = pd.read_sql_query( query, conn )
+						
+							end_time = time.perf_counter( )
+							elapsed = end_time - start_time
+						
+							# ----------------------------------------------------------
+							# Display Results
+							# ----------------------------------------------------------
+							st.dataframe( result, use_container_width=True )
+							row_count = len( result )
+						
+							# ----------------------------------------------------------
+							# Execution Metrics
+							# ----------------------------------------------------------
+							col1, col2 = st.columns( 2 )
+							col1.metric( 'Rows Returned', f'{row_count:,}' )
+							col2.metric( 'Execution Time (seconds)', f'{elapsed:.6f}' )
+						
+							# Optional slow query warning
+							if elapsed > 2.0:
+								st.warning( 'Slow query detected (> 2 seconds). Consider indexing.' )
+						
+							# ----------------------------------------------------------
+							# Download
+							# ----------------------------------------------------------
+							if not result.empty:
+								csv = result.to_csv( index=False ).encode( 'utf-8' )
+								st.download_button( 'Download CSV', csv,
+									'query_results.csv', 'text/csv' )
+					
+						except Exception as e:
+							st.error( f'Execution failed: {e}' )
 
 # ==============================================================================
 # LIVE DATA
