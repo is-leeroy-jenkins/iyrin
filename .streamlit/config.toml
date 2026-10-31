@@ -1,6 +1,6 @@
 [server]
 enableStaticServing = true
-
+fileWatcherType = "none"
 
 [[theme.fontFaces]]
 family = "gi-font"

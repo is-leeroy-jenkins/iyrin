@@ -1826,39 +1826,49 @@ class GoogleMaps( Fetcher ):
 			self.headers[ 'User-Agent' ] = self.agents
 	
 	def geocode_location( self, address: str ) -> Tuple[ float, float ]:
-		'''Uses gmaps to get coordinates from a given address.
+		'''
+			Purpose:
+			--------
+			Resolve an address to latitude and longitude using Google Geocoding.
 
 			Parameters:
 			-----------
-			address (str): address
+			address (str): Location or address to geocode.
 
 			Returns:
 			--------
-			Tuple[ float, float ] - a tuple of floats representing latitude and longitude (lat, lng)
-
+			Tuple[float, float]: Latitude and longitude.
 		'''
 		try:
 			throw_if( 'address', address )
 			self.address = address
-			self.url = "https://maps.googleapis.com/maps/api/geocode/json"
-			self.params = { 'address': self.address, 'key': self.api_key, 'headers': self.headers }
-			self.response = requests.get( url=self.url, params=self.params )
+			self.api_key = cfg.GOOGLEMAPS_API_KEY
+			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
+			self.params = { 'address': self.address, 'key': self.api_key, }
+			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
+				timeout=10, )
+			
 			self.response.raise_for_status( )
-			_response = self.response.json( )
-			_result = _response[ 'results' ][ 0 ]
-			_geo = _result[ 'geometry' ]
-			_loc = _geo[ 'location' ]
-			_lat = _loc[ 'lat' ]
-			_lng = _loc[ 'lng' ]
-			return ( _lat, _lng )
-		except Exception as e:
-			exception = Error( e )
+			result = self.response.json( )
+			status = result.get( 'status', '' )
+			results = result.get( 'results', [ ] )
+			if status != 'OK' or not results:
+				message = result.get( 'error_message', '' )
+				raise RuntimeError(
+					f'Google Geocoding failed: {status or "EMPTY_RESPONSE"}. {message}' )
+			
+			location = results[ 0 ][ 'geometry' ][ 'location' ]
+			self.latitude = float( location[ 'lat' ] )
+			self.longitude = float( location[ 'lng' ] )
+			self.coordinates = (self.latitude, self.longitude)
+			return self.coordinates
+		except Exception as exc:
+			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'fetch_location( self, address: str ) -> Tuple[ float, float ]'
+			exception.method = ('geocode_location( self, address: str ) -> Tuple[ float, float ]')
 			raise exception
-			
-
+	
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
 		'''Uses the Google Maps API to get address from coordinates.
 

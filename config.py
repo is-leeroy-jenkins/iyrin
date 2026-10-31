@@ -116,9 +116,9 @@ SKYMAP_TOKEN = os.getenv( 'SKY_MAP_TOKEN' )
 
 # -------------- SETTINGS
 
-MODES = [ 'Mapping Tools', 'Interactive Map', 'Site Crawler',
-          'Document Data', 'Geoscience Data', 'Astronomical Data', 'Celestial Map',
-          'Public Health', 'Artificial Intelligence', 'File Upload', 'Data Management' ]
+MODES = [ 'Mapping Tools', 'Interactive Map', 'Local Data', 'Geoscience Data',
+          'Astronomical Data', 'Celestial Map', 'Public Health', 'Artificial Intelligence',
+          'File Upload', 'Data Management' ]
 
 
 AGENTS = ( 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -168,6 +168,16 @@ to apply different unstructured settings.
 https://reference.langchain.com/python/langchain-community/document_loaders/html/UnstructuredHTMLLoader
 '''
 
+EMAIL_LOADER = r'''Uses Langchain's UnstructuredEmail Loader to parse Email files into document
+objects. You can run the loader in one of two modes: "single" and "elements".
+If you use "single" mode, the document will be returned as a single langchain Document object.
+If you use "elements" mode, the unstructured library will split the document into elements
+such as Title and NarrativeText. You can pass in additional unstructured kwargs after mode
+to apply different unstructured settings.
+
+https://reference.langchain.com/python/langchain-community/document_loaders/email/UnstructuredEmailLoader
+'''
+
 WEB_CRAWLER = r'''Web fetching with optional Playwright-backed page rendering.
 '''
 
@@ -203,6 +213,12 @@ PDF_LOADER = r'''Public, SDK-oriented PDF loader with: Page-aware metadata, Two-
 Configurable chunk profiles, Table isolation, Optional OCR fallback.
 
 https://reference.langchain.com/python/langchain-community/document_loaders/pdf/PyPDFLoader
+'''
+
+PUBMED_LOADER = r'''A document loader class designed to fetch up to a specified number of documents
+directly from the PubMed biomedical library into LangChain Document objects.
+
+https://reference.langchain.com/python/langchain-community/document_loaders/pubmed/PubMedLoader
 '''
 
 EXCEL_LOADER = r'''Provides LangChain's UnstructuredExcelLoader functionality
@@ -293,6 +309,14 @@ to read files directly from an Amazon AWS S3 bucket. It is commonly used in tool
 Community S3FileLoader and PyTorch DataPipe S3FileLoader to parse text, PDFs, or binary data for applications
 
 https://reference.langchain.com/python/langchain-community/document_loaders/s3_file/S3FileLoader
+'''
+
+ONEDRIVE_LOADER = r'''A document laoder in LangChain is a specialized tool designed to load and
+parse One Drive files into standardized LangChain Document objects to extract text content and
+preserve document structure for use in downstream LLM
+applications like RAG.
+
+https://reference.langchain.com/python/langchain-community/document_loaders/onedrive/OneDriveLoader
 '''
 
 # --------------- API
