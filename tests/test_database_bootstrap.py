@@ -50,7 +50,11 @@ class BootstrapTests( unittest.TestCase ):
         self.assertNotIn( "elif source == 'Custom':", self.source )
 
     def test_default_query_is_guarded_by_table_existence( self ) -> None:
-        self.assertIn( "if cfg.DEFAULT_DATA in df_tables[ 'name' ].tolist( ):", self.source )
+        self.assertIn( "selected_table = cfg.DEFAULT_DATA if source == 'Default' else None",
+            self.source )
+        self.assertIn( "elif selected_table not in table_options:", self.source )
+        self.assertIn( "selected_table = None", self.source )
+        self.assertIn( "if selected_table:", self.source )
 
 
 if __name__ == '__main__':
