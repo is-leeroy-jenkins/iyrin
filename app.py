@@ -66,7 +66,8 @@ from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promo
                         render_source_processing_controls, reset_document_processing_controls,
                         render_web_document_processing)
 from world import render_live_world_map, render_live_world_sidebar
-from loaders import (TextLoader, CsvLoader, PdfLoader, ExcelLoader, MarkdownLoader,
+from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoader,
+	ExcelLoader, MarkdownLoader,
 	HtmlLoader, JsonLoader, WikiLoader, GithubLoader, WebLoader, ArXivLoader,
 	XmlLoader, PubMedSearchLoader, OpenCityLoader,
 	AwsFileLoader, OneDriveDocLoader, GoogleCloudFileLoader, GoogleSpeechToTextLoader,
