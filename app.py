@@ -11964,18 +11964,17 @@ elif mode == 'File Upload':
 		# ---------- DOCUMENT UPLOAD AND PROCESSING
 		with st.expander( label='Document Processing', icon='📄', expanded=False ):
 			document_file = st.file_uploader( 'Upload Document',
-				type=[ 'txt', 'csv', 'xlsx', 'xls', 'pdf', 'docx', 'pptx',
-					'md', 'html', 'htm', 'json', 'xml' ], key='file_upload_document' )
+				type=[ 'txt', 'csv', 'xlsx', 'xls', 'pdf', 'docx', 'pptx', 'md', 'html', 'htm',
+				       'json', 'xml' ], key='file_upload_document' )
 			loader_name = 'File Upload'
 			if document_file is not None:
 				if st.button( 'Load Document', key='file_upload_document_load' ):
 					try:
-						loaders = { '.txt': TextLoader, '.csv': CsvLoader,
-							'.xlsx': ExcelLoader, '.xls': ExcelLoader,
-							'.pdf': PdfLoader, '.docx': WordLoader,
-							'.pptx': PowerPointLoader, '.md': MarkdownLoader,
-							'.html': HtmlLoader, '.htm': HtmlLoader,
-							'.json': JsonLoader, '.xml': XmlLoader, }
+						loaders = { '.txt': TextLoader, '.csv': CsvLoader, '.xlsx': ExcelLoader,
+						            '.xls': ExcelLoader, '.pdf': PdfLoader, '.docx': WordLoader,
+						            '.pptx': PowerPointLoader, '.md': MarkdownLoader,
+						            '.html': HtmlLoader, '.htm': HtmlLoader, '.json': JsonLoader,
+						            '.xml': XmlLoader, }
 						throw_if( 'document_file', document_file )
 						count = load_uploaded_document( document_file, loaders,
 							promote_loader_documents )
