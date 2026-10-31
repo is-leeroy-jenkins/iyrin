@@ -50,6 +50,7 @@
 '''
 import arxiv
 import docx2txt
+from bs4 import BeautifulSoup
 
 from boogr import Error, Logger
 import config as cfg
@@ -107,6 +108,28 @@ def throw_if( name: str, value: object ) -> None:
 	
 	if isinstance( value, (list, tuple, dict, set) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
+
+
+def extract_web_text( html: str ) -> str:
+	"""Extract readable webpage text for LangChain documents.
+
+	Purpose:
+	    Removes HTML infrastructure and preserves page content for retrieval.
+
+	Args:
+	    html (str): HTML supplied by the recursive URL loader.
+
+	Returns:
+	    str: Human-readable text without HTML markup.
+	"""
+	throw_if( 'html', html )
+	soup = BeautifulSoup( html, 'html.parser' )
+	for element in soup.find_all( [ 'script', 'style', 'noscript', 'template',
+		'svg', 'meta', 'link', 'nav', 'footer' ] ):
+		element.decompose( )
+	content = soup.find( 'main' ) or soup.find( 'article' ) or soup.body or soup
+	lines = ( line.strip( ) for line in content.get_text( separator='\n' ).splitlines( ) )
+	return '\n'.join( line for line in lines if line )
 
 class Loader( ):
 	"""Loader component.
@@ -2736,7 +2759,7 @@ class WebCrawler( Loader ):
 		self.prevent_outside = prevent_outside
 		self.loader = RecursiveUrlLoader( url=self.url, max_depth=self.max_depth,
 			timeout=self.timeout, continue_on_failure=self.ignore,
-			prevent_outside=self.prevent_outside )
+			prevent_outside=self.prevent_outside, extractor=extract_web_text )
 	
 	def __dir__( self ) -> list[ str ]:
 		"""Return visible member names.
@@ -2864,7 +2887,7 @@ class WebCrawler( Loader ):
 			
 			self.loader = RecursiveUrlLoader( url=self.url, max_depth=self.max_depth,
 				timeout=self.timeout, continue_on_failure=self.ignore,
-				prevent_outside=self.prevent_outside )
+				prevent_outside=self.prevent_outside, extractor=extract_web_text )
 			
 			self.documents = self.loader.load( )
 			return self.documents
