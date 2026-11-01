@@ -3904,7 +3904,6 @@ if mode == 'Mapping Tools':
 				if use_global_coordinates:
 					lat = float( location_state[ 'latitude' ] )
 					lng = float( location_state[ 'longitude' ] )
-
 					coord_c1, coord_c2 = st.columns( 2 )
 					with coord_c1:
 						st.number_input( 'Latitude', value=lat, format='%.4f',
@@ -3934,7 +3933,6 @@ if mode == 'Mapping Tools':
 				zoom_default = int( st.session_state.get( 'zoom', 8 ) or 8 )
 				size_default = str( st.session_state.get( 'map_size', '600x400' ) or '600x400' )
 				size_options = [ '400x400', '600x400', '800x600' ]
-
 				if size_default not in size_options:
 					size_default = '600x400'
 
