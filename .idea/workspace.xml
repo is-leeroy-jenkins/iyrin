@@ -21,15 +21,85 @@
     &quot;assignee&quot;: &quot;is-leeroy-jenkins&quot;
   }
 }</component>
+  <component name="GitToolBoxStore">
+    <option name="largeFiles">
+      <LargeFiles>
+        <option name="unlockedFilePaths">
+          <set>
+            <option value="$PROJECT_DIR$/app.py" />
+          </set>
+        </option>
+      </LargeFiles>
+    </option>
+  </component>
   <component name="GithubDefaultAccount">
     <option name="defaultAccountId" value="78145f30-18cb-443d-a346-237522922b0e" />
   </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;git@github.com:is-leeroy-jenkins/ayin.git&quot;,
+    &quot;url&quot;: &quot;https://github.com/is-leeroy-jenkins/Iyrin.git&quot;,
     &quot;accountId&quot;: &quot;78145f30-18cb-443d-a346-237522922b0e&quot;
   }
 }</component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.0" />
+      <entry key="M10" value="1.0" />
+      <entry key="M15" value="1.0" />
+      <entry key="M30" value="1.0" />
+      <entry key="H1" value="1.0" />
+      <entry key="H2" value="1.0" />
+      <entry key="H4" value="1.0" />
+      <entry key="D1" value="1.0" />
+      <entry key="W1" value="1.0" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.15283003471150855" />
+      <entry key="MS500" value="0.6868181167148112" />
+      <entry key="S2" value="0.9103542741636313" />
+      <entry key="S5" value="0.9631283668225656" />
+      <entry key="S10" value="0.9813910366528551" />
+      <entry key="S30" value="0.9937581323690469" />
+      <entry key="S60" value="0.9968741808117245" />
+      <entry key="M2" value="0.9984358671500762" />
+      <entry key="M5" value="0.9993740530334857" />
+      <entry key="M10" value="0.999686977525208" />
+      <entry key="M15" value="0.999791307461616" />
+      <entry key="M30" value="0.999895648286168" />
+      <entry key="H1" value="0.9999478227818529" />
+      <entry key="H2" value="0.9999739110506098" />
+      <entry key="H4" value="0.9999869554402246" />
+      <entry key="D1" value="0.9999978258948873" />
+      <entry key="W1" value="0.9999996894132659" />
+    </decayedShown>
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -57,7 +127,7 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
     &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.Python&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -70,8 +140,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-PY-262.10968.92" />
-        <option value="bundled-python-sdk-73a66231627c-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.10968.92" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-PY-262.11879.98" />
+        <option value="bundled-python-sdk-ebb3072d7bdf-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.11879.98" />
       </set>
     </attachedChunks>
   </component>
@@ -103,22 +173,12 @@
       <workItem from="1792845075438" duration="2825000" />
       <workItem from="1793393851735" duration="6953000" />
       <workItem from="1793404046772" duration="19631000" />
-    </task>
-    <task id="LOCAL-00067" summary="updates">
-      <option name="closed" value="true" />
-      <created>1789588579167</created>
-      <option name="number" value="00067" />
-      <option name="presentableId" value="LOCAL-00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1789588579167</updated>
-    </task>
-    <task id="LOCAL-00068" summary="updates">
-      <option name="closed" value="true" />
-      <created>1789592367764</created>
-      <option name="number" value="00068" />
-      <option name="presentableId" value="LOCAL-00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1789592367764</updated>
+      <workItem from="1793475213105" duration="2821000" />
+      <workItem from="1793534182007" duration="300000" />
+      <workItem from="1793534595163" duration="18000" />
+      <workItem from="1793534679995" duration="603000" />
+      <workItem from="1793544089505" duration="164000" />
+      <workItem from="1793544336218" duration="4230000" />
     </task>
     <task id="LOCAL-00069" summary="updates">
       <option name="closed" value="true" />
@@ -496,7 +556,23 @@
       <option name="project" value="LOCAL" />
       <updated>1793473476236</updated>
     </task>
-    <option name="localTasksCounter" value="116" />
+    <task id="LOCAL-00116" summary="updates">
+      <option name="closed" value="true" />
+      <created>1793532348600</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1793532348604</updated>
+    </task>
+    <task id="LOCAL-00117" summary="updates">
+      <option name="closed" value="true" />
+      <created>1793533614638</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1793533614638</updated>
+    </task>
+    <option name="localTasksCounter" value="118" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
