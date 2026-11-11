@@ -41,12 +41,13 @@
   </summary>
   ******************************************************************************************
 '''
+import math
 import time
 from typing import Dict, Optional
 import requests
 from exceptions import GatewayError
 from rates import RateLimiter
-from boogr import Error
+from boogr import Error, Logger
 import config as cfg
 
 def throw_if( name: str, value: object ) -> None:
@@ -111,6 +112,18 @@ class Maps( ):
 	def __init__( self, qps: Optional[ float ]=5.0, retries: int=5,
 			min: float=1.0, max: float=30.0, timeout: float=15.0,
 			api_key: Optional[ str ]=None ) -> None:
+		if qps is not None and (
+				type( qps ) not in (int, float) or not math.isfinite( qps )):
+			raise ValueError( 'qps must be a finite number or None.' )
+		if type( retries ) is not int or retries < 0:
+			raise ValueError( 'retries must be a nonnegative integer.' )
+		if (type( min ) not in (int, float) or not math.isfinite( min ) or min < 0 or
+				type( max ) not in (int, float) or not math.isfinite( max ) or max < min):
+			raise ValueError( 'Backoff bounds must be finite and satisfy 0 <= min <= max.' )
+		if type( timeout ) not in (int, float) or not math.isfinite( timeout ) or timeout <= 0:
+			raise ValueError( 'timeout must be a positive finite number.' )
+		if api_key is not None and not isinstance( api_key, str ):
+			raise TypeError( 'api_key must be a string or None.' )
 		self.api_key = api_key if api_key is not None else cfg.GOOGLEMAPS_API_KEY
 		self.limiter = RateLimiter( qps )
 		self.retries = retries
@@ -152,6 +165,13 @@ class Maps( ):
 		try:
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'params', params )
+			throw_if( 'api_key', self.api_key )
+			if not isinstance( endpoint, str ):
+				raise TypeError( 'endpoint must be a string.' )
+			if not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary.' )
+			if not isinstance( self.api_key, str ):
+				raise TypeError( 'api_key must be a string.' )
 			self.endpoint = endpoint
 			self.params = params
 			self.url = f'{self.base_url}/{self.endpoint}'
@@ -160,10 +180,12 @@ class Maps( ):
 			backoff = self.min
 			while True:
 				self.limiter.wait( )
+				retryable_failure = False
 				try:
-					self.query = dict( self.params or { } )
+					self.query = dict( self.params )
 					self.query[ 'key' ]=self.api_key
-					self.last_query = dict( self.query )
+					self.last_query = { key: value for key, value in self.query.items( )
+						if key != 'key' }
 					start = time.perf_counter( )
 					self.response = self.session.get( self.url, params=self.query,
 						timeout=self.timeout )
@@ -172,6 +194,7 @@ class Maps( ):
 					self.last_status = self.response.status_code
 					if self.last_status != 200:
 						if self.last_status in (408, 429, 500, 502, 503, 504):
+							retryable_failure = True
 							raise GatewayError( f'Transient HTTP {self.last_status}: '
 								f'{self.response.text[ :200 ]}' )
 						
@@ -197,6 +220,7 @@ class Maps( ):
 						if payload_status in hard_failures:
 							message = payload_error or f'Google API status: {payload_status}'
 							if payload_status in ('OVER_QUERY_LIMIT', 'UNKNOWN_ERROR'):
+								retryable_failure = True
 								raise GatewayError(
 									f'Transient Google API status {payload_status}: {message}' )
 							
@@ -204,6 +228,8 @@ class Maps( ):
 					
 					return payload
 				except (requests.Timeout, requests.ConnectionError, GatewayError) as ex:
+					if isinstance( ex, GatewayError ) and not retryable_failure:
+						raise
 					attempt += 1
 					if attempt > self.retries:
 						raise GatewayError( f'Exceeded retries: {ex}' ) from ex
@@ -215,4 +241,5 @@ class Maps( ):
 			exception.module = 'Iyrin'
 			exception.cause = 'Maps'
 			exception.method = 'request( self, endpoint: str, params: Dict[ str, str ] )'
-			raise exception
+			Logger( ).write( exception )
+			raise exception from e

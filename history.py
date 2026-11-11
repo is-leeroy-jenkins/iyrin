@@ -21,6 +21,8 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import json
+import math
+import numbers
 import sqlite3
 from pathlib import Path
 from typing import Dict, List
@@ -118,9 +120,9 @@ def initialize_live_world_history( ) -> None:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'initialize_live_world_history( self, **args ) -> None'
+	    exception.method = 'initialize_live_world_history( ) -> None'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def create_live_world_history_fingerprint( row: pd.Series ) -> str:
     '''
@@ -141,6 +143,8 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
     '''
     try:
 	    throw_if( 'row', row )
+	    if not isinstance( row, pd.Series ):
+	        raise TypeError( 'row must be a pandas Series.' )
 	    metadata = row.get( 'Metadata', { } )
 	    metadata_value = metadata if isinstance( metadata, dict ) else { }
 	    state = {
@@ -165,9 +169,9 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'create_live_world_fingerprint( self, **args ) -> None'
+	    exception.method = 'create_live_world_history_fingerprint( row: pd.Series ) -> str'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
         observed_at: str, max_rows_per_source: int=5000 ) -> int:
@@ -195,11 +199,21 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    throw_if( 'refresh_id', refresh_id )
 	    throw_if( 'observed_at', observed_at )
 	    throw_if( 'max_rows_per_source', max_rows_per_source )
-	    if max_rows_per_source < 1:
-	        raise ValueError( 'Argument "max_rows_per_source" must be greater than zero.' )
+	    if not isinstance( df_entities, pd.DataFrame ):
+	        raise TypeError( 'df_entities must be a pandas DataFrame.' )
+	    if not isinstance( refresh_id, str ) or not isinstance( observed_at, str ):
+	        raise TypeError( 'refresh_id and observed_at must be strings.' )
+	    if type( max_rows_per_source ) is not int or max_rows_per_source < 1:
+	        raise ValueError( 'max_rows_per_source must be a positive integer.' )
+	    timestamp = dt.datetime.fromisoformat( observed_at.replace( 'Z', '+00:00' ) )
+	    if timestamp.tzinfo is None or timestamp.utcoffset( ) != dt.timedelta( 0 ):
+	        raise ValueError( 'observed_at must be an ISO 8601 UTC timestamp.' )
 	    initialize_live_world_history( )
 	    if df_entities.empty:
 	        return 0
+	    required_columns = { 'EntityType', 'EntityId', 'Name', 'Latitude', 'Longitude', 'Source' }
+	    if not required_columns.issubset( df_entities.columns ):
+	        raise ValueError( 'df_entities is missing required history columns.' )
 	
 	    source_counts: Dict[ str, int ] = { }
 	    inserted = 0
@@ -207,10 +221,17 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	        for _, row in df_entities.iterrows( ):
 	            entity_type = str( row.get( 'EntityType', '' ) )
 	            entity_id = str( row.get( 'EntityId', '' ) )
+	            latitude = row[ 'Latitude' ]
+	            longitude = row[ 'Longitude' ]
+	            if (not isinstance( latitude, numbers.Real ) or
+	                    not isinstance( longitude, numbers.Real ) or
+	                    isinstance( latitude, bool ) or isinstance( longitude, bool ) or
+	                    not math.isfinite( latitude ) or not math.isfinite( longitude ) or
+	                    not -90 <= latitude <= 90 or not -180 <= longitude <= 180):
+	                raise ValueError( 'History coordinates must be finite and within valid ranges.' )
 	            source_counts[ entity_type ] = source_counts.get( entity_type, 0 )
 	            if source_counts[ entity_type ] >= max_rows_per_source:
 	                continue
-	            source_counts[ entity_type ] += 1
 	
 	            fingerprint = ''
 	            if entity_type in HISTORY_DEDUP_ENTITY_TYPES:
@@ -238,8 +259,8 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	                entity_id,
 	                entity_type,
 	                str( row.get( 'Name', '' ) ),
-	                float( row.get( 'Latitude', 0.0 ) ),
-	                float( row.get( 'Longitude', 0.0 ) ),
+	                float( latitude ),
+	                float( longitude ),
 	                float( row.get( 'Altitude', 0.0 ) )
 	                    if pd.notna( row.get( 'Altitude', 0.0 ) ) else None,
 	                float( row.get( 'Heading', 0.0 ) )
@@ -253,6 +274,7 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	            if cursor.rowcount != 1:
 	                continue
 	            inserted += 1
+	            source_counts[ entity_type ] += 1
 	
 	            if fingerprint:
 	                conn.execute( f'''
@@ -269,9 +291,9 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'persist_live_world_history( self, **args ) -> None'
+	    exception.method = 'persist_live_world_history( df_entities, refresh_id, observed_at, max_rows_per_source=5000 ) -> int'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def purge_live_world_history( retention_days: int ) -> int:
     '''
@@ -292,8 +314,8 @@ def purge_live_world_history( retention_days: int ) -> int:
     '''
     try:
 	    throw_if( 'retention_days', retention_days )
-	    if retention_days < 1:
-	        raise ValueError( 'Argument "retention_days" must be greater than zero.' )
+	    if type( retention_days ) is not int or retention_days < 1:
+	        raise ValueError( 'retention_days must be a positive integer.' )
 	    initialize_live_world_history( )
 	    cutoff = dt.datetime.now( dt.timezone.utc ) - dt.timedelta( days=retention_days )
 	    with sqlite3.connect( cfg.DB_PATH ) as conn:
@@ -312,9 +334,9 @@ def purge_live_world_history( retention_days: int ) -> int:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'purge_live_world_history( self, **args ) -> None'
+	    exception.method = 'purge_live_world_history( retention_days: int ) -> int'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def clear_live_world_history( ) -> int:
     '''
@@ -339,9 +361,9 @@ def clear_live_world_history( ) -> int:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'clear_live_world_history( self, **args ) -> None'
+	    exception.method = 'clear_live_world_history( ) -> int'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
     '''
@@ -361,8 +383,8 @@ def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
     '''
     try:
 	    throw_if( 'hours', hours )
-	    if hours < 0:
-	        raise ValueError( 'Argument "hours" cannot be negative.' )
+	    if type( hours ) is not int or hours < 0:
+	        raise ValueError( 'hours must be a nonnegative integer.' )
 	    initialize_live_world_history( )
 	    query = f'SELECT DISTINCT ObservedAt FROM {HISTORY_TABLE}'
 	    parameters: tuple = ( )
@@ -377,9 +399,9 @@ def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'get_live_world_history_snapshots( self, **args ) -> None'
+	    exception.method = 'get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: str,
         limit: int=5000 ) -> pd.DataFrame:
@@ -407,10 +429,18 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 	    throw_if( 'entity_types', entity_types )
 	    throw_if( 'snapshot', snapshot )
 	    throw_if( 'limit', limit )
-	    if hours < 0:
-	        raise ValueError( 'Argument "hours" cannot be negative.' )
-	    if limit < 1:
-	        raise ValueError( 'Argument "limit" must be greater than zero.' )
+	    if type( hours ) is not int or hours < 0:
+	        raise ValueError( 'hours must be a nonnegative integer.' )
+	    if type( limit ) is not int or limit < 1:
+	        raise ValueError( 'limit must be a positive integer.' )
+	    if not isinstance( entity_types, list ) or any(
+	            not isinstance( item, str ) or not item.strip( ) for item in entity_types ):
+	        raise TypeError( 'entity_types must be a list of nonempty strings.' )
+	    if not isinstance( snapshot, str ):
+	        raise TypeError( 'snapshot must be a string.' )
+	    snapshot_time = dt.datetime.fromisoformat( snapshot.replace( 'Z', '+00:00' ) )
+	    if snapshot_time.tzinfo is None or snapshot_time.utcoffset( ) != dt.timedelta( 0 ):
+	        raise ValueError( 'snapshot must be an ISO 8601 UTC timestamp.' )
 	    if not entity_types:
 	        return pd.DataFrame( columns=HISTORY_COLUMNS )
 	    initialize_live_world_history( )
@@ -446,9 +476,9 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'load_live_world_history( self, **args ) -> None'
+	    exception.method = 'load_live_world_history( hours, entity_types, snapshot, limit: int=5000 ) -> pd.DataFrame'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
 
 def get_live_world_history_summary( ) -> Dict[ str, object ]:
     '''
@@ -479,6 +509,6 @@ def get_live_world_history_summary( ) -> Dict[ str, object ]:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'get_live_world_summary( self, **args ) -> None'
+	    exception.method = 'get_live_world_history_summary( ) -> Dict[ str, object ]'
 	    Logger( ).write( exception )
-	    raise exception
+	    raise exception from e
