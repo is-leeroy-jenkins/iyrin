@@ -1903,13 +1903,13 @@ class GoogleMaps( Fetcher ):
 
 		'''
 		try:
-			throw_if( 'latitiude', lat )
-			throw_if( 'longitude', long )
+			throw_if( 'lat', lat )
 			self.latitude = lat
+			throw_if( 'long', long )
 			self.longitude = long
-			self.coordinates =  ( lat, long )
+			self.coordinates = (self.latitude, self.longitude)
 			self.url = r'https://maps.googleapis.com/maps/api/geocode/json?latlng='
-			self.url += f'{lat},' + f'{long}' + f'&key={self.api_key}'
+			self.url += f'{self.latitude},' + f'{self.longitude}' + f'&key={self.api_key}'
 			_response = requests.get( self.url ).json( )
 			_address = _response[ 'results' ][0][ 'formatted_address' ]
 			return _address
@@ -4979,7 +4979,7 @@ class SpaceWeather( Fetcher ):
 				'create_schema'
 		]
 	
-	def fetch_endpoint( self, endpoint: str, start_date: str, end_date: str,
+	def fetch_endpoint( self, endpoint: str, start_date: str='', end_date: str='',
 			time: int=20, location: str='', catalog: str='',
 			notification_type: str='', most_accurate_only: bool=True,
 			complete_entry_only: bool=True, speed: int=0,
@@ -5038,19 +5038,22 @@ class SpaceWeather( Fetcher ):
 		try:
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
-			throw_if( 'start_date', start_date )
-			throw_if( 'end_date', end_date )
+			self.start_date = start_date
+			self.end_date = end_date
 			
 			active_key = str( api_key or self.api_key or '' ).strip( )
 			if not active_key:
 				raise ValueError( 'NASA API key is required for DONKI requests.' )
 			
+			self.start_date = self.start_date.strip( )
+			self.end_date = self.end_date.strip( )
+			if bool( self.start_date ) != bool( self.end_date ):
+				raise ValueError( 'start_date and end_date must be supplied together.' )
 			self.url = f'{self.base_url}/{self.endpoint}'
-			self.params = {
-					'startDate': start_date.strip( ),
-					'endDate': end_date.strip( ),
-					'api_key': active_key
-			}
+			self.params = { 'api_key': active_key }
+			if self.start_date:
+				self.params[ 'startDate' ] = self.start_date
+				self.params[ 'endDate' ] = self.end_date
 			
 			if self.endpoint == 'IPS' and location.strip( ):
 				self.params[ 'location' ] = location.strip( )
@@ -5095,7 +5098,7 @@ class SpaceWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'SpaceWeather'
 			exception.method = (
-					'fetch_endpoint( self, endpoint: str, start_date: str, end_date: str, '
+					'fetch_endpoint( self, endpoint: str, start_date: str='', end_date: str='', '
 					'time: int=20, location: str=, catalog: str=, notification_type: str=, '
 					'most_accurate_only: bool=True, complete_entry_only: bool=True, '
 					'speed: int=0, half_angle: int=0, keyword: str=, '
