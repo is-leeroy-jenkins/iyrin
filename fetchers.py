@@ -776,13 +776,20 @@ class WebFetcher( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
+			if not isinstance( self.parameters, dict ):
 				msg = 'parameters must be a dict of param_name → schema definitions.'
 				raise ValueError( msg )
 			func_name = self.function.strip( )
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			_schema  = \
 			{
 				'name': func_name,
@@ -2129,13 +2136,20 @@ class GoogleMaps( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
+			if not isinstance( self.parameters, dict ):
 				msg = 'parameters must be a dict of param_name → schema definitions.'
 				raise ValueError( msg )
 			func_name = self.function.strip( )
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			_schema  = \
 			{
 				'name': func_name,
@@ -2283,9 +2297,15 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
-			self.params = params
 			throw_if( 'path', path )
+			if not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary.' )
+			if not isinstance( path, str ):
+				raise TypeError( 'path must be a string.' )
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
 			self.path = path
+			self.params = params
 			active_key = (self.api_key or '').strip( )
 			if not active_key:
 				raise ValueError( 'Google Weather API key is required.' )
@@ -2777,8 +2797,15 @@ class NavalObservatory( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -3467,9 +3494,16 @@ class EarthObservatory( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -4322,9 +4356,16 @@ class NearbyObjects( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -4842,9 +4883,16 @@ class OpenScience( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -5329,9 +5377,16 @@ class SpaceWeather( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -7178,9 +7233,16 @@ class GovData( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -7998,8 +8060,15 @@ class StarChart( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -9117,9 +9186,16 @@ class Congress( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -9509,9 +9585,16 @@ class InternetArchive( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -10273,9 +10356,16 @@ class OpenWeather( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -10800,9 +10890,16 @@ class HistoricalWeather( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -11226,6 +11323,13 @@ class Grokipedia( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -11233,7 +11337,7 @@ class Grokipedia( Fetcher ):
 				)
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -11429,8 +11533,13 @@ class GoogleGeocoding( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
+			if not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary.' )
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
 			self.params = params
-			request_params = dict( self.params or { } )
+			self.timeout = time
+			request_params = dict( self.params )
 			request_params[ 'key' ] = self._resolve_api_key( api_key=api_key )
 			
 			self.params = request_params
@@ -11438,7 +11547,7 @@ class GoogleGeocoding( Fetcher ):
 				url=self.url,
 				params=self.params,
 				headers=self.headers,
-				timeout=time
+				timeout=self.timeout
 			)
 			self.response.raise_for_status( )
 			
@@ -11802,9 +11911,16 @@ class GoogleGeocoding( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -12356,6 +12472,13 @@ class CensusData( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -12367,7 +12490,7 @@ class CensusData( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -12873,6 +12996,13 @@ class Socrata( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -12884,7 +13014,7 @@ class Socrata( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -13401,6 +13531,13 @@ class HealthData( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -13412,7 +13549,7 @@ class HealthData( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -13761,6 +13898,13 @@ class GlobalHealthData( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -13772,7 +13916,7 @@ class GlobalHealthData( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -14116,6 +14260,13 @@ class UnitedNations( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -14127,7 +14278,7 @@ class UnitedNations( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -14566,6 +14717,13 @@ class WorldPopulation( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -14577,7 +14735,7 @@ class WorldPopulation( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -14978,6 +15136,13 @@ class Wonder( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if not isinstance( self.parameters, dict ):
 				raise ValueError(
@@ -14989,7 +15154,7 @@ class Wonder( Fetcher ):
 			desc = self.description.strip( )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
@@ -15614,9 +15779,16 @@ class USGSEarthquakes( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -16558,9 +16730,16 @@ class USGSWaterData( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -17180,9 +17359,16 @@ class USGSTheNationalMap( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -17810,9 +17996,16 @@ class USGSScienceBase( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -18520,9 +18713,16 @@ class AirNow( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -19119,9 +19319,16 @@ class ClimateData( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -19719,9 +19926,16 @@ class EoNet( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -20224,9 +20438,16 @@ class EnviroFacts( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -20913,9 +21134,16 @@ class TidesAndCurrents( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -21516,9 +21744,16 @@ class UvIndex( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -22172,9 +22407,16 @@ class PurpleAir( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -22817,9 +23059,16 @@ class OpenAQ( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return {
 					'name': self.function.strip( ),
@@ -23373,9 +23622,16 @@ class Firms( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
+				raise TypeError( 'parameters must be a dictionary.' )
+			if self.required is not None:
+				if not isinstance( self.required, list ) or any(
+					not isinstance( name, str ) or name not in self.parameters
+					for name in self.required ):
+					raise ValueError( 'required must contain declared parameter names.' )
 			
 			if self.required is None:
-				required = list( self.parameters.keys( ) )
+				self.required = list( self.parameters.keys( ) )
 			
 			return { 'name': self.function.strip( ),
 					'description': (
