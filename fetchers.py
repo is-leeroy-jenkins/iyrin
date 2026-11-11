@@ -23571,10 +23571,7 @@ class OpenSky( Fetcher ):
 		data: Any ) -> Dict[ str, Any ]:
 		"""Build the common structured result returned by demographic API fetchers."""
 		throw_if( 'source', source )
-		self.source = source
 		throw_if( 'mode', mode )
-		self.mode = mode
 		throw_if( 'url', url )
-		self.url = url
-		return { 'source': self.source, 'mode': self.mode, 'url': self.url, 'status': status, 'data': data }
+		return { 'source': source, 'mode': mode, 'url': url, 'status': status, 'data': data }
 
