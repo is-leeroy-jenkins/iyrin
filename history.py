@@ -22,6 +22,7 @@ import datetime as dt
 import hashlib
 import json
 import math
+import numbers
 import sqlite3
 from pathlib import Path
 from typing import Dict, List
@@ -222,8 +223,8 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	            entity_id = str( row.get( 'EntityId', '' ) )
 	            latitude = row[ 'Latitude' ]
 	            longitude = row[ 'Longitude' ]
-	            if (not isinstance( latitude, (int, float) ) or
-	                    not isinstance( longitude, (int, float) ) or
+	            if (not isinstance( latitude, numbers.Real ) or
+	                    not isinstance( longitude, numbers.Real ) or
 	                    isinstance( latitude, bool ) or isinstance( longitude, bool ) or
 	                    not math.isfinite( latitude ) or not math.isfinite( longitude ) or
 	                    not -90 <= latitude <= 90 or not -180 <= longitude <= 180):
