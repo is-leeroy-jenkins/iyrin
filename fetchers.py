@@ -1189,7 +1189,8 @@ class GoogleDrive( Fetcher ):
 		
 		'''
 		try:
-			throw_if( 'question', question )
+			if not isinstance( question, str ):
+				raise TypeError( 'question must be a string.' )
 			throw_if( 'folder_id', folder_id )
 			throw_if( 'template', template )
 			throw_if( 'mode', mode )
