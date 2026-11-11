@@ -4012,7 +4012,8 @@ class GoogleCloudFileLoader( Loader ):
 		    List[Document] | None: LangChain documents produced or transformed by the operation.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata,
+		        writes it to the application logger, and re-raises it.
 		"""
 		try:
 			throw_if( 'documents', self.documents )
@@ -4025,8 +4026,7 @@ class GoogleCloudFileLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'GoogleCloudStorageFileLoader'
-			exception.method = (
-				'split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None')
+			exception.method = 'split( self, **args ) -> List[ Document ] | None'
 			Logger( ).write( exception )
 			raise exception
 
@@ -4088,8 +4088,7 @@ class AwsFileLoader( Loader ):
 			'overlap_amount', 'load', 'split', 'split_documents', ]
 	
 	def load( self, bucket: str, key: str, aws_access_key_id: Optional[ str ] = None,
-		aws_secret_access_key: Optional[ str ] = None,
-		aws_session_token: Optional[ str ] = None,
+		aws_secret_access_key: Optional[ str ] = None, aws_session_token: Optional[ str ] = None,
 		region_name: Optional[ str ] = None, api_version: Optional[ str ] = None,
 		use_ssl: bool = True, verify: str | bool | None = None,
 		endpoint_url: Optional[ str ] = None ) -> List[ Document ] | None:

@@ -26,19 +26,8 @@ import streamlit as st
 
 from history import get_live_world_history_summary, load_live_world_history
 
-
-LIVE_WORLD_ENTITY_TYPES: List[ str ] = [
-    'Aircraft',
-    'Military Aircraft',
-    'Satellite',
-    'Vessel',
-    'Earthquake',
-    'Fire',
-    'Infrastructure',
-    'Camera',
-    'Map Feature',
-]
-
+LIVE_WORLD_ENTITY_TYPES: List[ str ] = [ 'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel',
+		'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature', ]
 
 def throw_if( name: str, value: object ) -> None:
     '''
@@ -62,7 +51,6 @@ def throw_if( name: str, value: object ) -> None:
 
     if isinstance( value, str ) and not value.strip( ):
         raise ValueError( f'Argument "{name}" cannot be empty.' )
-
 
 def calculate_distance_nm( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
@@ -93,7 +81,6 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
     arc = 2.0 * math.atan2( math.sqrt( value ), math.sqrt( 1.0 - value ) )
     return 3440.065 * arc
 
-
 def calculate_bearing( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
     '''
@@ -122,7 +109,6 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
         - math.sin( lat_a ) * math.cos( lat_b ) * math.cos( delta_lon ))
     return (math.degrees( math.atan2( y, x ) ) + 360.0) % 360.0
 
-
 def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
     '''
 
@@ -150,7 +136,6 @@ def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
         else:
             record[ str( key ) ] = value
     return record
-
 
 def get_live_world_status( ) -> Dict[ str, object ]:
     '''
@@ -183,7 +168,6 @@ def get_live_world_status( ) -> Dict[ str, object ]:
         'GeofencingEnabled': bool( st.session_state.get( 'live_world_geofencing', False ) ),
     }
 
-
 def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     '''
 
@@ -214,7 +198,6 @@ def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str,
     if entity_type != 'All':
         df_result = df_result[ df_result[ 'EntityType' ].astype( str ) == entity_type ].copy( )
     return [ make_entity_record( row ) for _, row in df_result.head( limit ).iterrows( ) ]
-
 
 def search_live_world_entities( query: str, entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     '''
@@ -254,7 +237,6 @@ def search_live_world_entities( query: str, entity_type: str, limit: int ) -> Li
             search_text, regex=False, na=False ))
     df_result = df_result[ mask ].head( limit )
     return [ make_entity_record( row ) for _, row in df_result.iterrows( ) ]
-
 
 def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float,
         entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
@@ -316,7 +298,6 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
     records.sort( key=lambda value: float( value[ 'DistanceNM' ] ) )
     return records[ :limit ]
 
-
 def get_live_world_geofence_status( ) -> Dict[ str, object ]:
     '''
 
@@ -341,7 +322,6 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
         'EventCount': len( events ),
         'Events': events,
     }
-
 
 def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
     '''
@@ -370,7 +350,6 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
         'Stale': bool( stale.get( key, False ) ),
     } for key in keys ]
 
-
 def get_live_world_analysis_status( ) -> Dict[ str, object ]:
     '''
 
@@ -390,7 +369,6 @@ def get_live_world_analysis_status( ) -> Dict[ str, object ]:
         'EntityTypes': list( st.session_state.get( 'live_world_analysis_entity_types', [ ] ) or [ ] ),
         'Limit': int( st.session_state.get( 'live_world_analysis_limit', 100 ) ),
     }
-
 
 def get_live_world_history_status( ) -> Dict[ str, object ]:
     '''
@@ -417,7 +395,6 @@ def get_live_world_history_status( ) -> Dict[ str, object ]:
         'LastError': str( st.session_state.get( 'live_world_history_last_error', '' ) ),
         'Summary': summary,
     }
-
 
 def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         limit: int ) -> List[ Dict[ str, object ] ]:
