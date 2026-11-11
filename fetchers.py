@@ -766,6 +766,7 @@ class WebFetcher( Fetcher ):
 
 		"""
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -780,7 +781,7 @@ class WebFetcher( Fetcher ):
 			func_name = self.function.strip( )
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			_schema  = \
 			{
@@ -790,7 +791,7 @@ class WebFetcher( Fetcher ):
 				{
 					'type': 'object',
 					'properties': self.parameters,
-					'required': required
+					'required': self.required
 				}
 			}
 			return _schema
@@ -1188,10 +1189,11 @@ class GoogleDrive( Fetcher ):
 		
 		'''
 		try:
+			self.question = question
 			throw_if( 'template', template )
 			throw_if( 'folder_id', folder_id )
 			
-			self.query = (question or '').strip( )
+			self.query = (self.question or '').strip( )
 			self.folder_id = folder_id.strip( ) if folder_id else 'root'
 			self.num_results = max( 1, min( results, 100 ) )
 			self.template = template.strip( )
@@ -2064,6 +2066,7 @@ class GoogleMaps( Fetcher ):
 
 		"""
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -2078,7 +2081,7 @@ class GoogleMaps( Fetcher ):
 			func_name = self.function.strip( )
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			_schema  = \
 			{
@@ -2088,7 +2091,7 @@ class GoogleMaps( Fetcher ):
 				{
 					'type': 'object',
 					'properties': self.parameters,
-					'required': required
+					'required': self.required
 				}
 			}
 			return _schema
@@ -2227,6 +2230,7 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
+			self.params = params
 			throw_if( 'path', path )
 			self.path = path
 			active_key = (self.api_key or '').strip( )
@@ -2234,7 +2238,7 @@ class GoogleWeather( Fetcher ):
 				raise ValueError( 'Google Weather API key is required.' )
 			
 			self.timeout = time
-			request_params = dict( params or { } )
+			request_params = dict( self.params or { } )
 			request_params[ 'key' ] = active_key
 			request_url = f'{self.url}/{self.path}'
 			self.response = requests.get( url=request_url, params=request_params,
@@ -2605,6 +2609,8 @@ class NavalObservatory( Fetcher ):
 			
 		'''
 		try:
+			throw_if( 'longitude', longitude )
+			self.longitude = longitude
 			throw_if( 'date_value', date_value )
 			self.date_value = date_value
 			throw_if( 'time_value', time_value )
@@ -2614,7 +2620,7 @@ class NavalObservatory( Fetcher ):
 			self.date_value = self.validate_date( self.date_value )
 			self.time_value = self.validate_time( self.time_value )
 			self.latitude, self.longitude = self.validate_coordinates( latitude=self.latitude,
-				longitude=longitude )
+				longitude=self.longitude )
 			self.location_label = str( location_label or '' ).strip( )
 			self.url = f'{self.base_url}/celnav'
 			self.params = { 'date': self.date_value, 'time': self.time_value,
@@ -2709,6 +2715,7 @@ class NavalObservatory( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -2717,7 +2724,7 @@ class NavalObservatory( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -2729,7 +2736,7 @@ class NavalObservatory( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -3398,6 +3405,7 @@ class EarthObservatory( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -3407,7 +3415,7 @@ class EarthObservatory( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -3416,7 +3424,7 @@ class EarthObservatory( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -4252,6 +4260,7 @@ class NearbyObjects( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -4261,7 +4270,7 @@ class NearbyObjects( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -4270,7 +4279,7 @@ class NearbyObjects( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -4399,7 +4408,8 @@ class OpenScience( Fetcher ):
 			str
 		'''
 		try:
-			value = str( format_value or 'json' ).strip( ).lower( )
+			self.format_value = format_value
+			value = str( self.format_value or 'json' ).strip( ).lower( )
 			
 			allowed = { 'json', 'csv', 'tsv', 'browser' }
 			if value not in allowed:
@@ -4770,6 +4780,7 @@ class OpenScience( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -4779,7 +4790,7 @@ class OpenScience( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -4791,7 +4802,7 @@ class OpenScience( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -5256,6 +5267,7 @@ class SpaceWeather( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -5265,7 +5277,7 @@ class SpaceWeather( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -5274,7 +5286,7 @@ class SpaceWeather( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -5364,12 +5376,13 @@ class AstroCatalog( Fetcher ):
 			---------
 			band=R,time,e_magnitude,complete
 		"""
+		self.argument_string = argument_string
 		params: Dict[ str, Any ] = { }
 		
-		if not argument_string or not argument_string.strip( ):
+		if not self.argument_string or not self.argument_string.strip( ):
 			return params
 		
-		raw_items = re.split( r'[\n,]+', argument_string )
+		raw_items = re.split( r'[\n,]+', self.argument_string )
 		items = [ item.strip( ) for item in raw_items if item and item.strip( ) ]
 		
 		for item in items:
@@ -5635,13 +5648,14 @@ class AstroQuery( Fetcher ):
 
 		"""
 		try:
-			if table is None:
+			self.table = table
+			if self.table is None:
 				return [ ]
 			
 			records: List[ Dict[ str, Any ] ] = [ ]
-			for row in table:
+			for row in self.table:
 				record: Dict[ str, Any ] = { }
-				for col in table.colnames:
+				for col in self.table.colnames:
 					try:
 						value = row[ col ]
 						if hasattr( value, 'item' ):
@@ -6045,7 +6059,9 @@ class StarMap( Fetcher ):
 			str
 
 		'''
-		return '1' if value else '0'
+		throw_if( 'value', value )
+		self.value = value
+		return '1' if self.value else '0'
 	
 	def _extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]:
 		'''
@@ -6068,18 +6084,21 @@ class StarMap( Fetcher ):
 
 		'''
 		try:
+			self.html = html
+			throw_if( 'base_url', base_url )
+			self.base_url = base_url
 			links: Dict[ str, str ] = { }
-			if not html or not isinstance( html, str ):
+			if not self.html or not isinstance( self.html, str ):
 				return links
 			
 			pattern = re.compile(
 				r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>\s*(jpeg|png|gif|bmp|tiff)\s*</a>',
 				flags=re.IGNORECASE )
 			
-			for match in pattern.finditer( html ):
+			for match in pattern.finditer( self.html ):
 				href = match.group( 1 )
 				label = match.group( 2 ).lower( )
-				links[ label ] = urllib.parse.urljoin( base_url, href )
+				links[ label ] = urllib.parse.urljoin( self.base_url, href )
 			
 			return links
 		
@@ -6714,7 +6733,8 @@ class GovData( Fetcher ):
 			str
 		'''
 		try:
-			value = str( sort_field or 'score' ).strip( )
+			self.sort_field = sort_field
+			value = str( self.sort_field or 'score' ).strip( )
 			allowed = { 'score', 'lastModified' }
 			
 			if value not in allowed:
@@ -6747,7 +6767,8 @@ class GovData( Fetcher ):
 			str
 		'''
 		try:
-			value = str( sort_order or 'DESC' ).strip( ).upper( )
+			self.sort_order = sort_order
+			value = str( self.sort_order or 'DESC' ).strip( ).upper( )
 			allowed = { 'ASC', 'DESC' }
 			
 			if value not in allowed:
@@ -7095,6 +7116,7 @@ class GovData( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -7104,7 +7126,7 @@ class GovData( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -7116,7 +7138,7 @@ class GovData( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -7914,6 +7936,7 @@ class StarChart( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -7922,7 +7945,7 @@ class StarChart( Fetcher ):
 			self.description = description
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -7931,7 +7954,7 @@ class StarChart( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -9032,6 +9055,7 @@ class Congress( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -9041,7 +9065,7 @@ class Congress( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -9053,7 +9077,7 @@ class Congress( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -9201,7 +9225,9 @@ class InternetArchive( Fetcher ):
 			int
 		'''
 		try:
-			value = rows
+			throw_if( 'rows', rows )
+			self.rows = rows
+			value = self.rows
 			if value < 1 or value > 100:
 				raise ValueError( 'rows must be between 1 and 100.' )
 			
@@ -9331,7 +9357,9 @@ class InternetArchive( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			self.keywords = keywords.strip( )
+			throw_if( 'keywords', keywords )
+			self.keywords = keywords
+			self.keywords = self.keywords.strip( )
 			throw_if( 'keywords', self.keywords )
 			
 			self.timeout = time
@@ -9419,6 +9447,7 @@ class InternetArchive( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -9428,7 +9457,7 @@ class InternetArchive( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -9440,7 +9469,7 @@ class InternetArchive( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -10182,6 +10211,7 @@ class OpenWeather( Fetcher ):
 
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -10191,7 +10221,7 @@ class OpenWeather( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -10200,7 +10230,7 @@ class OpenWeather( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -10708,6 +10738,7 @@ class HistoricalWeather( Fetcher ):
 
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -10717,7 +10748,7 @@ class HistoricalWeather( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -10726,7 +10757,7 @@ class HistoricalWeather( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -11133,6 +11164,7 @@ class Grokipedia( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -11147,7 +11179,7 @@ class Grokipedia( Fetcher ):
 					'parameters must be a dict of param_name → schema definitions.'
 				)
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -11159,7 +11191,7 @@ class Grokipedia( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -11344,7 +11376,8 @@ class GoogleGeocoding( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			request_params = dict( params or { } )
+			self.params = params
+			request_params = dict( self.params or { } )
 			request_params[ 'key' ] = self._resolve_api_key( api_key=api_key )
 			
 			self.params = request_params
@@ -11707,6 +11740,7 @@ class GoogleGeocoding( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -11716,7 +11750,7 @@ class GoogleGeocoding( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -11728,7 +11762,7 @@ class GoogleGeocoding( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -11924,8 +11958,9 @@ class CensusData( Fetcher ):
 
 		'''
 		try:
+			self.predicates = predicates
 			output: Dict[ str, Any ] = { }
-			text = str( predicates or '' ).strip( )
+			text = str( self.predicates or '' ).strip( )
 			if not text:
 				return output
 			
@@ -11975,15 +12010,16 @@ class CensusData( Fetcher ):
 
 		'''
 		try:
-			if not isinstance( rows, list ) or not rows:
+			self.rows = rows
+			if not isinstance( self.rows, list ) or not self.rows:
 				return {
 						'columns': [ ],
 						'rows': [ ],
 						'count': 0,
 				}
 			
-			headers = [ str( h ) for h in rows[ 0 ] ] if isinstance( rows[ 0 ], list ) else [ ]
-			data_rows = rows[ 1: ] if len( rows ) > 1 else [ ]
+			headers = [ str( h ) for h in self.rows[ 0 ] ] if isinstance( self.rows[ 0 ], list ) else [ ]
+			data_rows = self.rows[ 1: ] if len( self.rows ) > 1 else [ ]
 			records: List[ Dict[ str, Any ] ] = [ ]
 			
 			for row in data_rows:
@@ -12258,6 +12294,7 @@ class CensusData( Fetcher ):
 
 		"""
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -12276,7 +12313,7 @@ class CensusData( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -12285,7 +12322,7 @@ class CensusData( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -12606,10 +12643,12 @@ class Socrata( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'domain', domain )
+			self.domain = domain
 			throw_if( 'dataset_id', dataset_id )
 			self.dataset_id = dataset_id
 			self.mode = 'rows'
-			self.domain = self._normalize_domain( domain )
+			self.domain = self._normalize_domain( self.domain )
 			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
 			self.select_clause = str( select or '' ).strip( )
 			self.where_clause = str( where or '' ).strip( )
@@ -12772,6 +12811,7 @@ class Socrata( Fetcher ):
 
 		"""
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -12790,7 +12830,7 @@ class Socrata( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -12799,7 +12839,7 @@ class Socrata( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -13122,10 +13162,12 @@ class HealthData( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'domain', domain )
+			self.domain = domain
 			throw_if( 'dataset_id', dataset_id )
 			self.dataset_id = dataset_id
 			self.mode = 'rows'
-			self.domain = self._normalize_domain( domain )
+			self.domain = self._normalize_domain( self.domain )
 			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
 			self.select_clause = str( select or '' ).strip( )
 			self.where_clause = str( where or '' ).strip( )
@@ -13297,6 +13339,7 @@ class HealthData( Fetcher ):
 
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -13315,7 +13358,7 @@ class HealthData( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -13324,7 +13367,7 @@ class HealthData( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -13656,6 +13699,7 @@ class GlobalHealthData( Fetcher ):
 			description: str, parameters: dict,
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -13674,7 +13718,7 @@ class GlobalHealthData( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -13683,7 +13727,7 @@ class GlobalHealthData( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -14010,6 +14054,7 @@ class UnitedNations( Fetcher ):
 
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -14028,7 +14073,7 @@ class UnitedNations( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -14037,7 +14082,7 @@ class UnitedNations( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -14459,6 +14504,7 @@ class WorldPopulation( Fetcher ):
 
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -14477,7 +14523,7 @@ class WorldPopulation( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -14486,7 +14532,7 @@ class WorldPopulation( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -14870,6 +14916,7 @@ class Wonder( Fetcher ):
 
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -14888,7 +14935,7 @@ class Wonder( Fetcher ):
 			tool_name = self.tool.strip( )
 			desc = self.description.strip( )
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			_schema = {
@@ -14897,7 +14944,7 @@ class Wonder( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required,
+							'required': self.required,
 					}
 			}
 			
@@ -15062,9 +15109,10 @@ class USGSEarthquakes( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.features = features
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for feature in features or [ ]:
+			for feature in self.features or [ ]:
 				properties = feature.get( 'properties', { } ) or { }
 				geometry = feature.get( 'geometry', { } ) or { }
 				coordinates = geometry.get( 'coordinates', [ ] ) or [ ]
@@ -15142,12 +15190,13 @@ class USGSEarthquakes( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_magnitude = None
 			strongest_place = ''
 			most_recent = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				magnitude = row.get( 'Magnitude', None )
 				
 				if magnitude is not None:
@@ -15503,6 +15552,7 @@ class USGSEarthquakes( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -15512,7 +15562,7 @@ class USGSEarthquakes( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -15524,7 +15574,7 @@ class USGSEarthquakes( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -15687,14 +15737,15 @@ class USGSWaterData( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
-			if isinstance( payload, list ):
-				return [ item for item in payload if isinstance( item, dict ) ]
+			self.payload = payload
+			if isinstance( self.payload, list ):
+				return [ item for item in self.payload if isinstance( item, dict ) ]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'features', 'value', 'items', 'data' ]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				if isinstance( value, list ):
 					return [ item for item in value if isinstance( item, dict ) ]
 			
@@ -15788,9 +15839,10 @@ class USGSWaterData( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				properties = item.get( 'properties', { } ) or item
 				geometry = item.get( 'geometry', { } ) or { }
 				coordinates = geometry.get( 'coordinates', [ ] ) or [ ]
@@ -15880,9 +15932,10 @@ class USGSWaterData( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				properties = item.get( 'properties', { } ) or item
 				
 				rows.append(
@@ -15952,9 +16005,10 @@ class USGSWaterData( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				properties = item.get( 'properties', { } ) or item
 				
 				rows.append(
@@ -16030,18 +16084,19 @@ class USGSWaterData( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_site = ''
 			first_parameter = ''
 			first_value = ''
 			
-			if rows:
+			if self.rows:
 				first_site = str(
-					rows[ 0 ].get( 'Name', '' ) or
-					rows[ 0 ].get( 'Monitoring Location ID', '' ) or ''
+					self.rows[ 0 ].get( 'Name', '' ) or
+					self.rows[ 0 ].get( 'Monitoring Location ID', '' ) or ''
 				)
-				first_parameter = str( rows[ 0 ].get( 'Parameter Name', '' ) or '' )
-				first_value = str( rows[ 0 ].get( 'Value', '' ) or '' )
+				first_parameter = str( self.rows[ 0 ].get( 'Parameter Name', '' ) or '' )
+				first_value = str( self.rows[ 0 ].get( 'Value', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -16441,6 +16496,7 @@ class USGSWaterData( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -16450,7 +16506,7 @@ class USGSWaterData( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -16462,7 +16518,7 @@ class USGSWaterData( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -16645,14 +16701,15 @@ class USGSTheNationalMap( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
-			if isinstance( payload, list ):
-				return [ item for item in payload if isinstance( item, dict ) ]
+			self.payload = payload
+			if isinstance( self.payload, list ):
+				return [ item for item in self.payload if isinstance( item, dict ) ]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'items', 'datasets', 'data', 'results' ]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				if isinstance( value, list ):
 					return [ item for item in value if isinstance( item, dict ) ]
 			
@@ -16682,9 +16739,10 @@ class USGSTheNationalMap( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Id': item.get( 'id', '' ),
@@ -16735,9 +16793,10 @@ class USGSTheNationalMap( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				download_url = (
 						item.get( 'downloadURL', None ) or
 						item.get( 'downloadUrl', None ) or
@@ -16813,16 +16872,17 @@ class USGSTheNationalMap( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_title = ''
 			first_dataset = ''
 			
-			if rows:
+			if self.rows:
 				first_title = str(
-					rows[ 0 ].get( 'Title', '' ) or
-					rows[ 0 ].get( 'Name', '' ) or ''
+					self.rows[ 0 ].get( 'Title', '' ) or
+					self.rows[ 0 ].get( 'Name', '' ) or ''
 				)
-				first_dataset = str( rows[ 0 ].get( 'Dataset', '' ) or '' )
+				first_dataset = str( self.rows[ 0 ].get( 'Dataset', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -17058,6 +17118,7 @@ class USGSTheNationalMap( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -17067,7 +17128,7 @@ class USGSTheNationalMap( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -17079,7 +17140,7 @@ class USGSTheNationalMap( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -17260,19 +17321,20 @@ class USGSScienceBase( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
-			if isinstance( payload, list ):
-				return [ item for item in payload if isinstance( item, dict ) ]
+			self.payload = payload
+			if isinstance( self.payload, list ):
+				return [ item for item in self.payload if isinstance( item, dict ) ]
 			
-			if not isinstance( payload, dict ):
+			if not isinstance( self.payload, dict ):
 				return [ ]
 			
 			for key in [ 'items', 'results', 'data' ]:
-				value = payload.get( key, None )
+				value = self.payload.get( key, None )
 				if isinstance( value, list ):
 					return [ item for item in value if isinstance( item, dict ) ]
 			
-			if 'id' in payload and isinstance( payload.get( 'id' ), str ):
-				return [ payload ]
+			if 'id' in self.payload and isinstance( self.payload.get( 'id' ), str ):
+				return [ self.payload ]
 			
 			return [ ]
 		
@@ -17300,9 +17362,10 @@ class USGSScienceBase( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				title = item.get( 'title', '' )
 				item_id = item.get( 'id', '' )
 				item_type = item.get( 'itemType', '' )
@@ -17380,32 +17443,33 @@ class USGSScienceBase( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			files_value = item.get( 'files', [ ] ) or [ ]
+			self.item = item
+			files_value = self.item.get( 'files', [ ] ) or [ ]
 			file_count = len( files_value ) if isinstance( files_value, list ) else 0
 			
-			web_links = item.get( 'webLinks', [ ] ) or [ ]
+			web_links = self.item.get( 'webLinks', [ ] ) or [ ]
 			link_count = len( web_links ) if isinstance( web_links, list ) else 0
 			
-			contacts = item.get( 'contacts', [ ] ) or [ ]
+			contacts = self.item.get( 'contacts', [ ] ) or [ ]
 			contact_count = len( contacts ) if isinstance( contacts, list ) else 0
 			
 			return {
-					'Id': item.get( 'id', '' ),
-					'Title': item.get( 'title', '' ),
-					'Type': item.get( 'itemType', '' ),
+					'Id': self.item.get( 'id', '' ),
+					'Title': self.item.get( 'title', '' ),
+					'Type': self.item.get( 'itemType', '' ),
 					'Updated': (
-							item.get( 'dateUpdated', None ) or
-							item.get( 'lastUpdated', '' )
+							self.item.get( 'dateUpdated', None ) or
+							self.item.get( 'lastUpdated', '' )
 					),
 					'Summary': (
-							item.get( 'summary', None ) or
-							item.get( 'body', '' )
+							self.item.get( 'summary', None ) or
+							self.item.get( 'body', '' )
 					),
-					'Has Spatial Metadata': item.get( 'spatial', None ) is not None,
+					'Has Spatial Metadata': self.item.get( 'spatial', None ) is not None,
 					'File Count': file_count,
 					'Web Link Count': link_count,
 					'Contact Count': contact_count,
-					'Raw Item': item
+					'Raw Item': self.item
 			}
 		
 		except Exception as e:
@@ -17434,18 +17498,19 @@ class USGSScienceBase( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_title = ''
 			first_type = ''
 			spatial_count = 0
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if row.get( 'Has Spatial Metadata', False ):
 					spatial_count += 1
 			
-			if rows:
-				first_title = str( rows[ 0 ].get( 'Title', '' ) or '' )
-				first_type = str( rows[ 0 ].get( 'Type', '' ) or '' )
+			if self.rows:
+				first_title = str( self.rows[ 0 ].get( 'Title', '' ) or '' )
+				first_type = str( self.rows[ 0 ].get( 'Type', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -17683,6 +17748,7 @@ class USGSScienceBase( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -17692,7 +17758,7 @@ class USGSScienceBase( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -17704,7 +17770,7 @@ class USGSScienceBase( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -17924,9 +17990,10 @@ class AirNow( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Date Observed': item.get( 'DateObserved', '' ),
@@ -17976,13 +18043,14 @@ class AirNow( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_aqi = None
 			dominant_parameter = ''
 			top_category = ''
 			reporting_area = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if not reporting_area and row.get( 'Reporting Area', '' ):
 					reporting_area = str( row.get( 'Reporting Area', '' ) )
 				
@@ -18390,6 +18458,7 @@ class AirNow( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -18399,7 +18468,7 @@ class AirNow( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -18411,7 +18480,7 @@ class AirNow( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -18600,9 +18669,10 @@ class ClimateData( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Id': item.get( 'id', '' ),
@@ -18651,9 +18721,10 @@ class ClimateData( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				row: Dict[ str, Any ] = { }
 				
 				for key, value in item.items( ):
@@ -18690,19 +18761,20 @@ class ClimateData( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_title = ''
 			first_dataset = ''
 			
-			if rows:
+			if self.rows:
 				first_title = str(
-					rows[ 0 ].get( 'Title', '' ) or
-					rows[ 0 ].get( 'Station', '' ) or
-					rows[ 0 ].get( 'Date', '' ) or ''
+					self.rows[ 0 ].get( 'Title', '' ) or
+					self.rows[ 0 ].get( 'Station', '' ) or
+					self.rows[ 0 ].get( 'Date', '' ) or ''
 				)
 				first_dataset = str(
-					rows[ 0 ].get( 'Dataset', '' ) or
-					rows[ 0 ].get( 'Datatype', '' ) or ''
+					self.rows[ 0 ].get( 'Dataset', '' ) or
+					self.rows[ 0 ].get( 'Datatype', '' ) or ''
 				)
 			
 			return {
@@ -18985,6 +19057,7 @@ class ClimateData( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -18994,7 +19067,7 @@ class ClimateData( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -19006,7 +19079,7 @@ class ClimateData( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -19191,9 +19264,10 @@ class EoNet( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				categories = item.get( 'categories', [ ] ) or [ ]
 				sources = item.get( 'sources', [ ] ) or [ ]
 				geometry = item.get( 'geometry', [ ] ) or [ ]
@@ -19270,9 +19344,10 @@ class EoNet( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				rows.append(
 					{
 							'Id': item.get( 'id', '' ),
@@ -19310,18 +19385,19 @@ class EoNet( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			open_count = 0
 			first_title = ''
 			first_categories = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if str( row.get( 'Status', '' ) ).lower( ) == 'open':
 					open_count += 1
 			
-			if rows:
-				first_title = str( rows[ 0 ].get( 'Title', '' ) or '' )
-				first_categories = str( rows[ 0 ].get( 'Categories', '' ) or '' )
+			if self.rows:
+				first_title = str( self.rows[ 0 ].get( 'Title', '' ) or '' )
+				first_categories = str( self.rows[ 0 ].get( 'Categories', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -19581,6 +19657,7 @@ class EoNet( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -19590,7 +19667,7 @@ class EoNet( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -19602,7 +19679,7 @@ class EoNet( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -19841,9 +19918,10 @@ class EnviroFacts( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				row: Dict[ str, Any ] = { }
 				
 				for key, value in item.items( ):
@@ -19880,20 +19958,21 @@ class EnviroFacts( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_facility = ''
 			first_state = ''
 			
-			if rows:
+			if self.rows:
 				first_facility = str(
-					rows[ 0 ].get( 'Facility Name', '' ) or
-					rows[ 0 ].get( 'Primary Name', '' ) or
-					rows[ 0 ].get( 'Name', '' ) or ''
+					self.rows[ 0 ].get( 'Facility Name', '' ) or
+					self.rows[ 0 ].get( 'Primary Name', '' ) or
+					self.rows[ 0 ].get( 'Name', '' ) or ''
 				)
 				
 				first_state = str(
-					rows[ 0 ].get( 'State', '' ) or
-					rows[ 0 ].get( 'State Abbr', '' ) or ''
+					self.rows[ 0 ].get( 'State', '' ) or
+					self.rows[ 0 ].get( 'State Abbr', '' ) or ''
 				)
 			
 			return {
@@ -20083,6 +20162,7 @@ class EnviroFacts( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -20092,7 +20172,7 @@ class EnviroFacts( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -20104,7 +20184,7 @@ class EnviroFacts( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -20289,13 +20369,14 @@ class TidesAndCurrents( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
-			station = payload.get( 'stations', None )
+			self.payload = payload
+			station = self.payload.get( 'stations', None )
 			
 			if isinstance( station, list ) and station:
 				station = station[ 0 ]
 			
 			if not isinstance( station, dict ):
-				station = payload
+				station = self.payload
 			
 			row: Dict[ str, Any ] = {
 					'Station Id': station.get( 'id', '' ),
@@ -20337,11 +20418,12 @@ class TidesAndCurrents( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
-			records = payload.get( 'data', None )
+			records = self.payload.get( 'data', None )
 			
 			if records is None:
-				records = payload.get( 'predictions', [ ] )
+				records = self.payload.get( 'predictions', [ ] )
 			
 			for item in records or [ ]:
 				row: Dict[ str, Any ] = { }
@@ -20380,24 +20462,25 @@ class TidesAndCurrents( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_time = ''
 			first_value = ''
 			first_station = ''
 			
-			if rows:
+			if self.rows:
 				first_time = str(
-					rows[ 0 ].get( 'T', '' ) or
-					rows[ 0 ].get( 'Time', '' ) or ''
+					self.rows[ 0 ].get( 'T', '' ) or
+					self.rows[ 0 ].get( 'Time', '' ) or ''
 				)
 				first_value = str(
-					rows[ 0 ].get( 'V', '' ) or
-					rows[ 0 ].get( 'Value', '' ) or
-					rows[ 0 ].get( 'Type', '' ) or ''
+					self.rows[ 0 ].get( 'V', '' ) or
+					self.rows[ 0 ].get( 'Value', '' ) or
+					self.rows[ 0 ].get( 'Type', '' ) or ''
 				)
 				first_station = str(
-					rows[ 0 ].get( 'Name', '' ) or
-					rows[ 0 ].get( 'Station Id', '' ) or ''
+					self.rows[ 0 ].get( 'Name', '' ) or
+					self.rows[ 0 ].get( 'Station Id', '' ) or ''
 				)
 			
 			return {
@@ -20768,6 +20851,7 @@ class TidesAndCurrents( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -20777,7 +20861,7 @@ class TidesAndCurrents( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -20789,7 +20873,7 @@ class TidesAndCurrents( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -20952,9 +21036,10 @@ class UvIndex( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
-			for item in records or [ ]:
+			for item in self.records or [ ]:
 				row: Dict[ str, Any ] = { }
 				
 				for key, value in item.items( ):
@@ -20991,12 +21076,13 @@ class UvIndex( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_uv = None
 			first_location = ''
 			first_alert = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if not first_location:
 					first_location = str(
 						row.get( 'City', '' ) or
@@ -21368,6 +21454,7 @@ class UvIndex( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -21377,7 +21464,7 @@ class UvIndex( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -21389,7 +21476,7 @@ class UvIndex( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -21621,9 +21708,10 @@ class PurpleAir( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
-			fields = payload.get( 'fields', [ ] ) or [ ]
-			data = payload.get( 'data', [ ] ) or [ ]
+			fields = self.payload.get( 'fields', [ ] ) or [ ]
+			data = self.payload.get( 'data', [ ] ) or [ ]
 			
 			for record in data:
 				row_map: Dict[ str, Any ] = { }
@@ -21677,7 +21765,8 @@ class PurpleAir( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
-			sensor = payload.get( 'sensor', { } ) or { }
+			self.payload = payload
+			sensor = self.payload.get( 'sensor', { } ) or { }
 			
 			row: Dict[ str, Any ] = {
 					'Sensor Index': sensor.get( 'sensor_index', '' ),
@@ -21724,11 +21813,12 @@ class PurpleAir( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			max_pm25 = None
 			first_name = ''
 			
-			for row in rows or [ ]:
+			for row in self.rows or [ ]:
 				if not first_name:
 					first_name = str( row.get( 'Name', '' ) or row.get( 'Sensor Index', '' ) or '' )
 				
@@ -22020,6 +22110,7 @@ class PurpleAir( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -22029,7 +22120,7 @@ class PurpleAir( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -22041,7 +22132,7 @@ class PurpleAir( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -22271,8 +22362,9 @@ class OpenAQ( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
-			results = payload.get( 'results', [ ] ) or [ ]
+			results = self.payload.get( 'results', [ ] ) or [ ]
 			
 			for item in results:
 				country = item.get( 'country', { } ) or { }
@@ -22325,8 +22417,9 @@ class OpenAQ( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
+			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
-			results = payload.get( 'results', [ ] ) or [ ]
+			results = self.payload.get( 'results', [ ] ) or [ ]
 			
 			for item in results:
 				parameter = item.get( 'parameter', { } ) or { }
@@ -22384,20 +22477,21 @@ class OpenAQ( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_name = ''
 			first_country = ''
 			first_parameter = ''
 			
-			if rows:
+			if self.rows:
 				first_name = str(
-					rows[ 0 ].get( 'Name', '' ) or
-					rows[ 0 ].get( 'Location Id', '' ) or ''
+					self.rows[ 0 ].get( 'Name', '' ) or
+					self.rows[ 0 ].get( 'Location Id', '' ) or ''
 				)
-				first_country = str( rows[ 0 ].get( 'Country', '' ) or '' )
+				first_country = str( self.rows[ 0 ].get( 'Country', '' ) or '' )
 				first_parameter = str(
-					rows[ 0 ].get( 'Parameter', '' ) or
-					rows[ 0 ].get( 'Parameter Name', '' ) or ''
+					self.rows[ 0 ].get( 'Parameter', '' ) or
+					self.rows[ 0 ].get( 'Parameter Name', '' ) or ''
 				)
 			
 			return {
@@ -22661,6 +22755,7 @@ class OpenAQ( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -22670,7 +22765,7 @@ class OpenAQ( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return {
@@ -22682,7 +22777,7 @@ class OpenAQ( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -22892,10 +22987,11 @@ class Firms( Fetcher ):
 			List[Dict[str, Any]]
 		'''
 		try:
-			if csv_text is None or not csv_text.strip( ):
+			self.csv_text = csv_text
+			if self.csv_text is None or not self.csv_text.strip( ):
 				return [ ]
 			
-			df_csv = pd.read_csv( io.StringIO( csv_text ) )
+			df_csv = pd.read_csv( io.StringIO( self.csv_text ) )
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
 			for _, item in df_csv.iterrows( ):
@@ -22934,18 +23030,19 @@ class Firms( Fetcher ):
 			Dict[str, Any]
 		'''
 		try:
-			count = len( rows or [ ] )
+			self.rows = rows
+			count = len( self.rows or [ ] )
 			first_date = ''
 			first_lat = ''
 			first_lon = ''
 			
-			if rows:
+			if self.rows:
 				first_date = str(
-					rows[ 0 ].get( 'Acq Date', '' ) or
-					rows[ 0 ].get( 'Date', '' ) or ''
+					self.rows[ 0 ].get( 'Acq Date', '' ) or
+					self.rows[ 0 ].get( 'Date', '' ) or ''
 				)
-				first_lat = str( rows[ 0 ].get( 'Latitude', '' ) or '' )
-				first_lon = str( rows[ 0 ].get( 'Longitude', '' ) or '' )
+				first_lat = str( self.rows[ 0 ].get( 'Latitude', '' ) or '' )
+				first_lon = str( self.rows[ 0 ].get( 'Longitude', '' ) or '' )
 			
 			return {
 					'count': count,
@@ -23201,6 +23298,7 @@ class Firms( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
+			self.required = required
 			throw_if( 'function', function )
 			self.function = function
 			throw_if( 'tool', tool )
@@ -23210,7 +23308,7 @@ class Firms( Fetcher ):
 			throw_if( 'parameters', parameters )
 			self.parameters = parameters
 			
-			if required is None:
+			if self.required is None:
 				required = list( self.parameters.keys( ) )
 			
 			return { 'name': self.function.strip( ),
@@ -23221,7 +23319,7 @@ class Firms( Fetcher ):
 					'parameters': {
 							'type': 'object',
 							'properties': self.parameters,
-							'required': required
+							'required': self.required
 					}
 			}
 		
@@ -23381,6 +23479,7 @@ class OpenSky( Fetcher ):
 	
 		'''
 		try:
+			self.params = params
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -23391,7 +23490,7 @@ class OpenSky( Fetcher ):
 				request_headers[ 'Authorization' ] = f'Bearer {token}'
 			
 			clean_params = {
-					k: v for k, v in (params or { }).items( )
+					k: v for k, v in (self.params or { }).items( )
 					if v is not None and v != ''
 			}
 			
@@ -23437,7 +23536,8 @@ class OpenSky( Fetcher ):
 		
 		'''
 		try:
-			if not payload:
+			self.payload = payload
+			if not self.payload:
 				return {
 						'mode': 'states_bbox',
 						'time': None,
@@ -23445,7 +23545,7 @@ class OpenSky( Fetcher ):
 						'items': [ ],
 				}
 			
-			rows = payload.get( 'states' ) or [ ]
+			rows = self.payload.get( 'states' ) or [ ]
 			items: List[ Dict[ str, Any ] ] = [ ]
 			
 			for row in rows:
@@ -23472,7 +23572,7 @@ class OpenSky( Fetcher ):
 			
 			return {
 					'mode': 'states_bbox',
-					'time': payload.get( 'time' ),
+					'time': self.payload.get( 'time' ),
 					'count': len( items ),
 					'items': items,
 			}
@@ -23489,7 +23589,10 @@ class OpenSky( Fetcher ):
 			payload: List[ Dict[ str, Any ] ] | None,
 			mode: str ) -> Dict[ str, Any ] | None:
 		try:
-			rows = payload or [ ]
+			self.payload = payload
+			throw_if( 'mode', mode )
+			self.mode = mode
+			rows = self.payload or [ ]
 			items: List[ Dict[ str, Any ] ] = [ ]
 			
 			for row in rows:
@@ -23517,7 +23620,7 @@ class OpenSky( Fetcher ):
 				)
 			
 			return {
-					'mode': mode,
+					'mode': self.mode,
 					'count': len( items ),
 					'items': items,
 			}
@@ -23534,7 +23637,8 @@ class OpenSky( Fetcher ):
 	
 	def normalize_track( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
 		try:
-			if not payload:
+			self.payload = payload
+			if not self.payload:
 				return {
 						'mode': 'track_aircraft',
 						'icao24': None,
@@ -23545,7 +23649,7 @@ class OpenSky( Fetcher ):
 						'items': [ ],
 				}
 			
-			path = payload.get( 'path' ) or [ ]
+			path = self.payload.get( 'path' ) or [ ]
 			items: List[ Dict[ str, Any ] ] = [ ]
 			for row in path:
 				items.append(
@@ -23561,10 +23665,10 @@ class OpenSky( Fetcher ):
 			
 			return {
 					'mode': 'track_aircraft',
-					'icao24': payload.get( 'icao24' ),
-					'callsign': payload.get( 'callsign' ) or payload.get( 'calllsign' ),
-					'start_time': payload.get( 'startTime' ),
-					'end_time': payload.get( 'endTime' ),
+					'icao24': self.payload.get( 'icao24' ),
+					'callsign': self.payload.get( 'callsign' ) or self.payload.get( 'calllsign' ),
+					'start_time': self.payload.get( 'startTime' ),
+					'end_time': self.payload.get( 'endTime' ),
 					'count': len( items ),
 					'items': items,
 			}
