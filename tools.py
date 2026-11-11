@@ -433,8 +433,6 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         return [ ]
     return [ make_entity_record( row ) for _, row in df_history.iterrows( ) ]
 
-
-
 def get_live_world_tracking_status( ) -> Dict[ str, object ]:
     '''
 
@@ -456,7 +454,6 @@ def get_live_world_tracking_status( ) -> Dict[ str, object ]:
         'TrailPointCount': len( history ),
         'Trail': history,
     }
-
 
 LIVE_WORLD_AGENT_TOOLS: Dict[ str, object ] = {
     'get_live_world_status': get_live_world_status,
