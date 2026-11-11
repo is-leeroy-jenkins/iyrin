@@ -2606,8 +2606,8 @@ class Chat( Generator ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def build_text_format( self, response_format: str | Dict[ str, Any ] = None,
-			json_schema: Dict[ str, Any ] = None, schema_name: str='structured_response',
+	def build_text_format( self, response_format: str | Dict[ str, Any ]=None,
+			json_schema: Dict[ str, Any ]=None, schema_name: str='structured_response',
 			schema_description: str='Structured JSON response.' ) -> Dict[ str, Any ] | None:
 		"""Build text format.
 
@@ -2723,8 +2723,7 @@ class Chat( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
-			if response is None:
-				return ''
+			throw_if( 'response', response )
 			
 			if hasattr( response, 'output_text' ) and response.output_text:
 				return str( response.output_text )

@@ -254,8 +254,8 @@ class Excel:
 			exception.method = 'create_outputs( self )'
 			raise exception
 	
-	def append_empty( self, outputs: Dict[ str, List ], status: str = 'skipped_empty',
-			error: Optional[ str ] = None ) -> None:
+	def append_empty( self, outputs: Dict[ str, List ], status: str='skipped_empty',
+			error: Optional[ str ]=None ) -> None:
 		"""
 
 			Purpose:
@@ -419,35 +419,11 @@ class Excel:
 			
 			return {
 					'address': find_first(
-						[
-								'address',
-								'street address',
-								'full address',
-								'location',
-								'mailing address'
-						] ),
-					'city': find_first(
-						[
-								'city',
-								'town',
-								'locality',
-								'municipality'
-						] ),
-					'state': find_first(
-						[
-								'state',
-								'st',
-								'province',
-								'region',
-								'admin_level_1'
-						] ),
-					'country': find_first(
-						[
-								'country',
-								'country_code',
-								'cntry',
-								'nation'
-						] )
+						[ 'address', 'street address', 'full address', 'location',
+								'mailing address' ] ),
+					'city': find_first( [ 'city', 'town', 'locality', 'municipality' ] ),
+					'state': find_first( [ 'state', 'st', 'province', 'region', 'admin_level_1' ] ),
+					'country': find_first( [ 'country', 'country_code', 'cntry', 'nation' ] )
 			}
 		
 		except Exception as e:
