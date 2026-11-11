@@ -391,7 +391,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			blocks = [ p.get_text( ' ', strip=True ) for p in self.soup.find_all( 'p' ) ]
@@ -423,7 +424,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			items = [ li.get_text( ' ', strip=True ) for li in self.soup.find_all( 'li' ) ]
@@ -456,7 +458,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			_results: List[ str ] = [ ]
@@ -496,7 +499,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			blocks = [ art.get_text( " ", strip=True ) for art in self.soup.find_all( 'article' ) ]
@@ -528,7 +532,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( "uri", uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, "html.parser" )
 			heading_tags = [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ]
@@ -561,7 +566,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			blocks = [ div.get_text( " ", strip=True ) for div in self.soup.find_all( 'div' ) ]
@@ -593,7 +599,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			blocks = [ sec.get_text( ' ', strip=True ) for sec in self.soup.find_all( 'section' ) ]
@@ -626,7 +633,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			blocks = [ bq.get_text( ' ', strip=True ) for bq in self.soup.find_all( 'blockquote' ) ]
@@ -658,7 +666,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			links = [ a.get( 'href' ) for a in self.soup.find_all( 'a' ) if a.get( 'href' ) ]
@@ -690,7 +699,8 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'uri', uri )
-			self.response = requests.get( uri, timeout=10 )
+			self.uri = uri
+			self.response = requests.get( self.uri, timeout=10 )
 			self.response.raise_for_status( )
 			self.soup = BeautifulSoup( self.response.text, 'html.parser' )
 			images = [ img.get( 'src' ) for img in self.soup.find_all( 'img' ) if img.get( 'src' ) ]
@@ -756,17 +766,21 @@ class WebFetcher( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
+			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
 				msg = 'parameters must be a dict of param_name → schema definitions.'
 				raise ValueError( msg )
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			_schema  = \
 			{
 				'name': func_name,
@@ -774,7 +788,7 @@ class WebFetcher( Fetcher ):
 				'parameters':
 				{
 					'type': 'object',
-					'properties': parameters,
+					'properties': self.parameters,
 					'required': required
 				}
 			}
@@ -1919,10 +1933,11 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'address', address )
+			self.address = address
 			url = 'https://addressvalidation.googleapis.com/v1:validateAddress'
 			payload = \
 			{
-				'address': { 'addressLines': address, }
+				'address': { 'addressLines': self.address, }
 			}
 			
 			self.params = \
@@ -1964,13 +1979,15 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'origin', origin )
+			self.origin = origin
 			throw_if( 'destination', destination )
+			self.destination = destination
 			self.mode = mode
 			self.url = "https://maps.googleapis.com/maps/api/directions/json"
 			self.params = \
 			{
-				'origin': origin,
-				'destination': destination,
+				'origin': self.origin,
+				'destination': self.destination,
 				'mode': self.mode,
 				'key': self.api_key
 			}
@@ -2042,17 +2059,21 @@ class GoogleMaps( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
-			if not isinstance( parameters, dict ):
+			self.parameters = parameters
+			if not isinstance( self.parameters, dict ):
 				msg = 'parameters must be a dict of param_name → schema definitions.'
 				raise ValueError( msg )
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			_schema  = \
 			{
 				'name': func_name,
@@ -2060,7 +2081,7 @@ class GoogleMaps( Fetcher ):
 				'parameters':
 				{
 					'type': 'object',
-					'properties': parameters,
+					'properties': self.parameters,
 					'required': required
 				}
 			}
@@ -2165,7 +2186,8 @@ class GoogleWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'address', address )
-			self.address = address.strip( )
+			self.address = address
+			self.address = self.address.strip( )
 			lat, lng = self.gmaps.geocode_location( address=self.address )
 			self.latitude = lat
 			self.longitude = lng
@@ -2658,21 +2680,25 @@ class NavalObservatory( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
+							f'{self.description.strip( )} '
+							f'This function uses the {self.tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -3340,19 +3366,23 @@ class EarthObservatory( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
-					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
+					'name': self.function.strip( ),
+					'description': f'{self.description.strip( )} This function uses the {self.tool.strip( )} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -3751,10 +3781,12 @@ class NearbyObjects( Fetcher ):
 		'''
 		try:
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			self.mode = 'close_approaches'
-			self.start_date = start_date.strip( )
-			self.end_date = end_date.strip( )
+			self.start_date = self.start_date.strip( )
+			self.end_date = self.end_date.strip( )
 			self.dist_max = str( dist_max or '10LD' ).strip( )
 			self.body = str( body or 'Earth' ).strip( )
 			self.sort = str( sort or 'date' ).strip( )
@@ -3832,9 +3864,10 @@ class NearbyObjects( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			throw_if( 'query_type', query_type )
 			self.mode = 'object_lookup'
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			active_type = query_type.strip( ).lower( )
 			if active_type not in [ 'sstr', 'spk', 'des' ]:
 				raise ValueError( "query_type must be 'sstr', 'spk', or 'des'." )
@@ -3961,8 +3994,9 @@ class NearbyObjects( Fetcher ):
 		'''
 		try:
 			throw_if( 'designation', designation )
+			self.designation = designation
 			self.mode = 'nhats_object'
-			self.query = designation.strip( )
+			self.query = self.designation.strip( )
 			self.url = f'{self.base_url}/nhats.api'
 			self.params = {
 					'des': self.query,
@@ -4186,19 +4220,23 @@ class NearbyObjects( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
-					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
+					'name': self.function.strip( ),
+					'description': f'{self.description.strip( )} This function uses the {self.tool.strip( )} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -4398,7 +4436,8 @@ class OpenScience( Fetcher ):
 		'''
 		try:
 			throw_if( 'accession', accession )
-			value = accession.strip( )
+			self.accession = accession
+			value = self.accession.strip( )
 			self.endpoint = f'/v2/dataset/{value}/'
 			self.url = f'{self.base_url}{self.endpoint}'
 			self.params = { }
@@ -4443,7 +4482,8 @@ class OpenScience( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
-			self.query_text = query.strip( )
+			self.query = query
+			self.query_text = self.query.strip( )
 			self.format_value = self._validate_format( format_value )
 			self.endpoint = '/v2/query/metadata/'
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -4496,8 +4536,9 @@ class OpenScience( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
-			self.query_text = query.strip( )
+			self.query_text = self.query.strip( )
 			self.format_value = self._validate_format( format_value )
 			self.endpoint = '/v2/query/assays/'
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -4551,8 +4592,9 @@ class OpenScience( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
-			self.query_text = query.strip( )
+			self.query_text = self.query.strip( )
 			self.format_value = self._validate_format( format_value )
 			self.endpoint = '/v2/query/data/'
 			self.url = f'{self.base_url}{self.endpoint}'
@@ -4694,22 +4736,26 @@ class OpenScience( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
+							f'{self.description.strip( )} '
+							f'This function uses the {self.tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -4956,6 +5002,7 @@ class SpaceWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			throw_if( 'start_date', start_date )
 			throw_if( 'end_date', end_date )
 			
@@ -4963,20 +5010,20 @@ class SpaceWeather( Fetcher ):
 			if not active_key:
 				raise ValueError( 'NASA API key is required for DONKI requests.' )
 			
-			self.url = f'{self.base_url}/{endpoint}'
+			self.url = f'{self.base_url}/{self.endpoint}'
 			self.params = {
 					'startDate': start_date.strip( ),
 					'endDate': end_date.strip( ),
 					'api_key': active_key
 			}
 			
-			if endpoint == 'IPS' and location.strip( ):
+			if self.endpoint == 'IPS' and location.strip( ):
 				self.params[ 'location' ] = location.strip( )
 			
-			if endpoint == 'IPS' and catalog.strip( ):
+			if self.endpoint == 'IPS' and catalog.strip( ):
 				self.params[ 'catalog' ] = catalog.strip( )
 			
-			if endpoint == 'CMEAnalysis':
+			if self.endpoint == 'CMEAnalysis':
 				self.params[ 'mostAccurateOnly' ] = str( most_accurate_only ).lower( )
 				self.params[ 'completeEntryOnly' ] = str( complete_entry_only ).lower( )
 				self.params[ 'speed' ] = speed
@@ -4988,7 +5035,7 @@ class SpaceWeather( Fetcher ):
 				if keyword.strip( ):
 					self.params[ 'keyword' ] = keyword.strip( )
 			
-			if endpoint == 'notifications' and notification_type.strip( ):
+			if self.endpoint == 'notifications' and notification_type.strip( ):
 				self.params[ 'type' ] = notification_type.strip( )
 			
 			self.response = requests.get(
@@ -5002,7 +5049,7 @@ class SpaceWeather( Fetcher ):
 			
 			return {
 					'mode': self.mode,
-					'endpoint': endpoint,
+					'endpoint': self.endpoint,
 					'url': self.url,
 					'params': self.params,
 					'data': payload
@@ -5172,19 +5219,23 @@ class SpaceWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
-					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
+					'name': self.function.strip( ),
+					'description': f'{self.description.strip( )} This function uses the {self.tool.strip( )} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -5342,7 +5393,8 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
+			self.name = name
+			self.name = self.name.strip( )
 			self.format = (data_format or 'json').strip( ).lower( )
 			
 			route_parts = [ urllib.parse.quote( self.name ) ]
@@ -5381,10 +5433,12 @@ class AstroCatalog( Fetcher ):
 		"""
 		try:
 			throw_if( 'ra', ra )
+			self.ra = ra
 			throw_if( 'dec', dec )
+			self.dec = dec
 			
-			self.right_ascension = ra.strip( )
-			self.declination = dec.strip( )
+			self.right_ascension = self.ra.strip( )
+			self.declination = self.dec.strip( )
 			self.radius = max( 1, radius )
 			self.format = (data_format or 'json').strip( ).lower( )
 			
@@ -6700,8 +6754,9 @@ class GovData( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.page_size = self._validate_page_size( page_size )
 			self.offset_mark = str( offset_mark or '*' ).strip( )
 			self.sort_field = self._validate_sort_field( sort_field )
@@ -6772,7 +6827,8 @@ class GovData( Fetcher ):
 		'''
 		try:
 			throw_if( 'package_id', package_id )
-			self.package_id = package_id.strip( )
+			self.package_id = package_id
+			self.package_id = self.package_id.strip( )
 			self.url = f'{self.base_url}/packages/{self.package_id}/summary'
 			self.params = { 'api_key': self._resolve_api_key( ) }
 			self.payload = { }
@@ -6826,10 +6882,12 @@ class GovData( Fetcher ):
 		'''
 		try:
 			throw_if( 'collection', collection )
+			self.collection = collection
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			
-			self.collection = collection.strip( )
-			self.start_date = start_date.strip( )
+			self.collection = self.collection.strip( )
+			self.start_date = self.start_date.strip( )
 			self.page_size = self._validate_page_size( page_size )
 			self.offset_mark = str( offset_mark or '*' ).strip( )
 			
@@ -6991,22 +7049,26 @@ class GovData( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
+							f'{self.description.strip( )} '
+							f'This function uses the {self.tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -7312,7 +7374,8 @@ class StarChart( Fetcher ):
 		'''
 		try:
 			throw_if( 'name', name )
-			self.query = name.strip( )
+			self.name = name
+			self.query = self.name.strip( )
 			self.url = self.search_url
 			self.params = { 'star': self.query }
 			
@@ -7404,8 +7467,9 @@ class StarChart( Fetcher ):
 		'''
 		try:
 			throw_if( 'name', name )
+			self.name = name
 			self.mode = 'object_chart'
-			self.query = name.strip( )
+			self.query = self.name.strip( )
 			self.zoom = zoom
 			self.box_color = str( box_color or 'yellow' ).strip( )
 			self.show_box = show_box
@@ -7794,18 +7858,22 @@ class StarChart( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
-					'description': f'{description.strip( )} This function uses the {tool.strip( )} service.',
+					'name': self.function.strip( ),
+					'description': f'{self.description.strip( )} This function uses the {self.tool.strip( )} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -8379,10 +8447,11 @@ class Congress( Fetcher ):
 		try:
 			throw_if( 'congress', congress )
 			throw_if( 'bill_type', bill_type )
+			self.bill_type = bill_type
 			throw_if( 'bill_number', bill_number )
 			
 			self.congress_number = congress
-			self.bill_type = self._normalize_bill_type( bill_type )
+			self.bill_type = self._normalize_bill_type( self.bill_type )
 			self.bill_number = bill_number
 			
 			self.url = (
@@ -8520,10 +8589,11 @@ class Congress( Fetcher ):
 		try:
 			throw_if( 'congress', congress )
 			throw_if( 'law_type', law_type )
+			self.law_type = law_type
 			throw_if( 'law_number', law_number )
 			
 			self.congress_number = congress
-			self.law_type = self._normalize_law_type( law_type )
+			self.law_type = self._normalize_law_type( self.law_type )
 			self.law_number = law_number
 			
 			self.url = (
@@ -8670,10 +8740,11 @@ class Congress( Fetcher ):
 		try:
 			throw_if( 'congress', congress )
 			throw_if( 'report_type', report_type )
+			self.report_type = report_type
 			throw_if( 'report_number', report_number )
 			
 			self.congress_number = congress
-			self.report_type = self._normalize_report_type( report_type )
+			self.report_type = self._normalize_report_type( self.report_type )
 			self.report_number = report_number
 			
 			self.url = (
@@ -8895,22 +8966,26 @@ class Congress( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
+							f'{self.description.strip( )} '
+							f'This function uses the {self.tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -9125,8 +9200,9 @@ class InternetArchive( Fetcher ):
 		'''
 		try:
 			throw_if( 'keywords', keywords )
+			self.keywords = keywords
 			
-			parts: List[ str ] = [ f'({keywords.strip( )})' ]
+			parts: List[ str ] = [ f'({self.keywords.strip( )})' ]
 			
 			if media_type and media_type.strip( ):
 				parts.append( f'AND mediatype:({media_type.strip( )})' )
@@ -9275,22 +9351,26 @@ class InternetArchive( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
+							f'{self.description.strip( )} '
+							f'This function uses the {self.tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -9594,7 +9674,8 @@ class OpenWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'location', location )
-			self.location = location.strip( )
+			self.location = location
+			self.location = self.location.strip( )
 			self.geocode_params = {
 					'name': self.location,
 					'count': count
@@ -9927,14 +10008,15 @@ class OpenWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'location', location )
+			self.location = location
 			throw_if( 'mode', mode )
 			throw_if( 'zone', zone )
 			
-			selected = self.geocode_location( location=location, count=count )
+			selected = self.geocode_location( location=self.location, count=count )
 			
 			if not selected:
 				return {
-						'location': location,
+						'location': self.location,
 						'mode': mode,
 						'message': 'No geocoding results found.',
 						'data': { }
@@ -9945,7 +10027,7 @@ class OpenWeather( Fetcher ):
 			
 			if lat is None or long is None:
 				return {
-						'location': location,
+						'location': self.location,
 						'mode': mode,
 						'message': 'Geocoding returned no usable coordinates.',
 						'geocoding': selected,
@@ -10032,19 +10114,23 @@ class OpenWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
-					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
+					'name': self.function.strip( ),
+					'description': f"{self.description.strip( )} This function uses the {self.tool.strip( )} service.",
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -10311,7 +10397,8 @@ class HistoricalWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'location', location )
-			self.location = location.strip( )
+			self.location = location
+			self.location = self.location.strip( )
 			self.geocode_params = {
 					'name': self.location,
 					'count': count
@@ -10472,14 +10559,15 @@ class HistoricalWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'location', location )
+			self.location = location
 			throw_if( 'date', date )
 			throw_if( 'zone', zone )
 			
-			selected = self.geocode_location( location=location, count=count )
+			selected = self.geocode_location( location=self.location, count=count )
 			
 			if not selected:
 				return {
-						'location': location,
+						'location': self.location,
 						'date': date.isoformat( ),
 						'message': 'No geocoding results found.',
 						'data': { }
@@ -10490,7 +10578,7 @@ class HistoricalWeather( Fetcher ):
 			
 			if lat is None or long is None:
 				return {
-						'location': location,
+						'location': self.location,
 						'date': date.isoformat( ),
 						'message': 'Geocoding returned no usable coordinates.',
 						'geocoding': selected,
@@ -10551,19 +10639,23 @@ class HistoricalWeather( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
-					'description': f"{description.strip( )} This function uses the {tool.strip( )} service.",
+					'name': self.function.strip( ),
+					'description': f"{self.description.strip( )} This function uses the {self.tool.strip( )} service.",
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -10840,8 +10932,9 @@ class Grokipedia( Fetcher ):
 		'''
 		try:
 			throw_if( 'page', page )
+			self.page = page
 			
-			self.page = page.strip( )
+			self.page = self.page.strip( )
 			self.include_content = include_content
 			self.client = self._get_client( )
 			self.params = {
@@ -10966,27 +11059,31 @@ class Grokipedia( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name → schema definitions.'
 				)
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f'{description.strip( )} '
-							f'This function uses the {tool.strip( )} service.'
+							f'{self.description.strip( )} '
+							f'This function uses the {self.tool.strip( )} service.'
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -11236,9 +11333,10 @@ class GoogleGeocoding( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
 			self.mode = 'forward'
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.language = str( language or 'en' ).strip( )
 			self.region = str( region or '' ).strip( )
 			
@@ -11370,9 +11468,10 @@ class GoogleGeocoding( Fetcher ):
 		'''
 		try:
 			throw_if( 'place_id', place_id )
+			self.place_id = place_id
 			
 			self.mode = 'place'
-			self.place_id = place_id.strip( )
+			self.place_id = self.place_id.strip( )
 			self.language = str( language or 'en' ).strip( )
 			self.region = str( region or '' ).strip( )
 			
@@ -11530,22 +11629,26 @@ class GoogleGeocoding( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -11712,7 +11815,8 @@ class CensusData( Fetcher ):
 		'''
 		try:
 			throw_if( 'fields', fields )
-			parts = [ p.strip( ) for p in fields.split( ',' ) if p.strip( ) ]
+			self.fields = fields
+			parts = [ p.strip( ) for p in self.fields.split( ',' ) if p.strip( ) ]
 			if not parts:
 				raise ValueError( "Argument 'fields' cannot be empty!" )
 			self.fields = parts
@@ -11848,11 +11952,13 @@ class CensusData( Fetcher ):
 		'''
 		try:
 			throw_if( 'year', year )
+			self.year = year
 			throw_if( 'dataset', dataset )
+			self.dataset = dataset
 			
 			self.mode = 'variables'
-			self.year = year.strip( )
-			self.dataset = dataset.strip( ).strip( '/' )
+			self.year = self.year.strip( )
+			self.dataset = self.dataset.strip( ).strip( '/' )
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}/variables.json'
 			self.params = { }
 			api_key = self._resolve_api_key( )
@@ -11920,18 +12026,21 @@ class CensusData( Fetcher ):
 		'''
 		try:
 			throw_if( 'year', year )
+			self.year = year
 			throw_if( 'dataset', dataset )
+			self.dataset = dataset
 			throw_if( 'fields', fields )
+			self.fields = fields
 			
 			self.mode = 'data'
-			self.year = year.strip( )
-			self.dataset = dataset.strip( ).strip( '/' )
+			self.year = self.year.strip( )
+			self.dataset = self.dataset.strip( ).strip( '/' )
 			self.geography_for = str( geography_for or '' ).strip( )
 			self.geography_in = str( geography_in or '' ).strip( )
 			self.predicates = self._parse_predicates( predicates )
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}'
 			self.params = {
-					'get': self._normalize_fields( fields ),
+					'get': self._normalize_fields( self.fields ),
 			}
 			
 			if self.geography_for:
@@ -12071,28 +12180,32 @@ class CensusData( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -12266,7 +12379,8 @@ class Socrata( Fetcher ):
 		'''
 		try:
 			throw_if( 'domain', domain )
-			value = domain.strip( )
+			self.domain = domain
+			value = self.domain.strip( )
 			value = value.replace( 'https://', '' ).replace( 'http://', '' ).strip( '/' )
 			if not value:
 				raise ValueError( "Argument 'domain' cannot be empty!" )
@@ -12295,7 +12409,8 @@ class Socrata( Fetcher ):
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
-			value = dataset_id.strip( )
+			self.dataset_id = dataset_id
+			value = self.dataset_id.strip( )
 			value = value.replace( '.json', '' ).strip( '/' )
 			if not value:
 				raise ValueError( "Argument 'dataset_id' cannot be empty!" )
@@ -12573,28 +12688,32 @@ class Socrata( Fetcher ):
 		"""
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -12769,7 +12888,8 @@ class HealthData( Fetcher ):
 		'''
 		try:
 			throw_if( 'domain', domain )
-			value = domain.strip( )
+			self.domain = domain
+			value = self.domain.strip( )
 			value = value.replace( 'https://', '' ).replace( 'http://', '' ).strip( '/' )
 			if not value:
 				raise ValueError( "Argument 'domain' cannot be empty!" )
@@ -12799,7 +12919,8 @@ class HealthData( Fetcher ):
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
-			value = dataset_id.strip( )
+			self.dataset_id = dataset_id
+			value = self.dataset_id.strip( )
 			value = value.replace( '.json', '' ).strip( '/' )
 			if not value:
 				raise ValueError( "Argument 'dataset_id' cannot be empty!" )
@@ -13086,28 +13207,32 @@ class HealthData( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -13244,7 +13369,8 @@ class GlobalHealthData( Fetcher ):
 		'''
 		try:
 			throw_if( 'query_path', query_path )
-			value = query_path.strip( )
+			self.query_path = query_path
+			value = self.query_path.strip( )
 			value = value.lstrip( '/' )
 			if not value:
 				raise ValueError( "Argument 'query_path' cannot be empty!" )
@@ -13438,28 +13564,32 @@ class GlobalHealthData( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -13583,7 +13713,8 @@ class UnitedNations( Fetcher ):
 		'''
 		try:
 			throw_if( 'query_path', query_path )
-			value = query_path.strip( )
+			self.query_path = query_path
+			value = self.query_path.strip( )
 			value = value.lstrip( '/' )
 			if not value:
 				raise ValueError( "Argument 'query_path' cannot be empty!" )
@@ -13785,28 +13916,32 @@ class UnitedNations( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -13937,7 +14072,8 @@ class WorldPopulation( Fetcher ):
 		'''
 		try:
 			throw_if( 'asset_path', asset_path )
-			value = asset_path.strip( )
+			self.asset_path = asset_path
+			value = self.asset_path.strip( )
 			value = value.lstrip( '/' )
 			if not value:
 				raise ValueError( "Argument 'asset_path' cannot be empty!" )
@@ -14227,28 +14363,32 @@ class WorldPopulation( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -14376,7 +14516,8 @@ class Wonder( Fetcher ):
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
-			value = dataset_id.strip( ).upper( )
+			self.dataset_id = dataset_id
+			value = self.dataset_id.strip( ).upper( )
 			if not value:
 				raise ValueError( "Argument 'dataset_id' cannot be empty!" )
 			return value
@@ -14505,11 +14646,13 @@ class Wonder( Fetcher ):
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			throw_if( 'request_xml', request_xml )
+			self.request_xml = request_xml
 			
 			self.mode = 'query_xml'
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
-			self.request_xml = request_xml.strip( )
+			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
+			self.request_xml = self.request_xml.strip( )
 			self.url = f'{self.base_url}/{self.dataset_id}'
 			
 			self.params = {
@@ -14631,28 +14774,32 @@ class Wonder( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
-			if not isinstance( parameters, dict ):
+			if not isinstance( self.parameters, dict ):
 				raise ValueError(
 					'parameters must be a dict of param_name -> schema definition.'
 				)
 			
-			func_name = function.strip( )
-			tool_name = tool.strip( )
-			desc = description.strip( )
+			func_name = self.function.strip( )
+			tool_name = self.tool.strip( )
+			desc = self.description.strip( )
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			_schema = {
 					'name': func_name,
 					'description': f'{desc} This function uses the {tool_name} service.',
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required,
 					}
 			}
@@ -15057,11 +15204,13 @@ class USGSEarthquakes( Fetcher ):
 		'''
 		try:
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'search'
-			self.start_date = start_date.strip( )
-			self.end_date = end_date.strip( )
+			self.start_date = self.start_date.strip( )
+			self.end_date = self.end_date.strip( )
 			self.min_magnitude = min_magnitude
 			self.max_magnitude = max_magnitude
 			self.limit = max( 1, limit )
@@ -15258,22 +15407,26 @@ class USGSEarthquakes( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -15482,8 +15635,9 @@ class USGSWaterData( Fetcher ):
 		'''
 		try:
 			throw_if( 'collection', collection )
+			self.collection = collection
 			
-			self.url = f'{self.base_url}/collections/{collection.strip( )}'
+			self.url = f'{self.base_url}/collections/{self.collection.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -16191,22 +16345,26 @@ class USGSWaterData( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -16335,8 +16493,9 @@ class USGSTheNationalMap( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			self.url = f'{self.base_url}/{endpoint.strip( )}'
+			self.url = f'{self.base_url}/{self.endpoint.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -16803,22 +16962,26 @@ class USGSTheNationalMap( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -16945,8 +17108,9 @@ class USGSScienceBase( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			self.url = f'{self.base_url}/{endpoint.strip( )}'
+			self.url = f'{self.base_url}/{self.endpoint.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -17288,10 +17452,11 @@ class USGSScienceBase( Fetcher ):
 		'''
 		try:
 			throw_if( 'item_id', item_id )
+			self.item_id = item_id
 			
 			self.mode = 'item'
 			base = self.request(
-				endpoint=f'item/{item_id.strip( )}',
+				endpoint=f'item/{self.item_id.strip( )}',
 				params={ },
 				time=time
 			) or { }
@@ -17422,22 +17587,26 @@ class USGSScienceBase( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -17596,13 +17765,14 @@ class AirNow( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
 			if self.api_key is None or not str( self.api_key ).strip( ):
 				raise ValueError(
 					'AirNow API key not found. Set AIRNOW_API_KEY or EPA_AIRNOW_API_KEY.'
 				)
 			
-			self.url = f'{self.base_url}/{endpoint.strip( )}'
+			self.url = f'{self.base_url}/{self.endpoint.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -17771,12 +17941,13 @@ class AirNow( Fetcher ):
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
 			self.mode = 'current-zip'
 			base = self.request(
 				endpoint='observation/zipCode/current/',
 				params={
-						'zipCode': zip_code.strip( ),
+						'zipCode': self.zip_code.strip( ),
 						'distance': max( 0, distance )
 				},
 				time=time
@@ -17890,14 +18061,16 @@ class AirNow( Fetcher ):
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			throw_if( 'date', date )
+			self.date = date
 			
 			self.mode = 'forecast-zip'
 			base = self.request(
 				endpoint='forecast/zipCode/',
 				params={
-						'zipCode': zip_code.strip( ),
-						'date': date.strip( ),
+						'zipCode': self.zip_code.strip( ),
+						'date': self.date.strip( ),
 						'distance': max( 0, distance )
 				},
 				time=time
@@ -17955,6 +18128,7 @@ class AirNow( Fetcher ):
 		'''
 		try:
 			throw_if( 'date', date )
+			self.date = date
 			
 			self.mode = 'forecast-latlon'
 			base = self.request(
@@ -17962,7 +18136,7 @@ class AirNow( Fetcher ):
 				params={
 						'latitude': latitude,
 						'longitude': longitude,
-						'date': date.strip( ),
+						'date': self.date.strip( ),
 						'distance': max( 0, distance )
 				},
 				time=time
@@ -18112,22 +18286,26 @@ class AirNow( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -18543,16 +18721,19 @@ class ClimateData( Fetcher ):
 		'''
 		try:
 			throw_if( 'dataset', dataset )
+			self.dataset = dataset
 			throw_if( 'start_date', start_date )
+			self.start_date = start_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'data'
 			base = self.request(
 				url=self.data_url,
 				params={
-						'dataset': dataset.strip( ),
-						'startDate': start_date.strip( ),
-						'endDate': end_date.strip( ),
+						'dataset': self.dataset.strip( ),
+						'startDate': self.start_date.strip( ),
+						'endDate': self.end_date.strip( ),
 						'stations': stations.strip( ),
 						'dataTypes': data_types.strip( ),
 						'format': 'json',
@@ -18699,22 +18880,26 @@ class ClimateData( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -18845,8 +19030,9 @@ class EoNet( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
-			self.url = f'{self.base_url}/{endpoint.strip( )}'
+			self.url = f'{self.base_url}/{self.endpoint.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -19290,22 +19476,26 @@ class EoNet( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -19436,8 +19626,9 @@ class EnviroFacts( Fetcher ):
 		'''
 		try:
 			throw_if( 'table_name', table_name )
+			self.table_name = table_name
 			
-			table_value = table_name.strip( ).upper( )
+			table_value = self.table_name.strip( ).upper( )
 			state_value = state_code.strip( ).upper( )
 			facility_value = facility_name.strip( ).upper( )
 			row_limit = max( 1, limit )
@@ -19785,22 +19976,26 @@ class EnviroFacts( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -20134,10 +20329,11 @@ class TidesAndCurrents( Fetcher ):
 		'''
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			
 			self.mode = 'station'
 			base = self.request(
-				url=f'{self.metadata_url}/stations/{station_id.strip( )}.json',
+				url=f'{self.metadata_url}/stations/{self.station_id.strip( )}.json',
 				params={ },
 				time=time
 			) or { }
@@ -20147,7 +20343,7 @@ class TidesAndCurrents( Fetcher ):
 			
 			return {
 					'mode': self.mode,
-					'station_id': station_id.strip( ),
+					'station_id': self.station_id.strip( ),
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
 					'summary': self._summarize_rows( rows ),
@@ -20202,8 +20398,11 @@ class TidesAndCurrents( Fetcher ):
 		'''
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			throw_if( 'begin_date', begin_date )
+			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'water-level'
 			base = self.request(
@@ -20211,9 +20410,9 @@ class TidesAndCurrents( Fetcher ):
 				params={
 						'product': 'water_level',
 						'application': 'Foo',
-						'station': station_id.strip( ),
-						'begin_date': begin_date.strip( ),
-						'end_date': end_date.strip( ),
+						'station': self.station_id.strip( ),
+						'begin_date': self.begin_date.strip( ),
+						'end_date': self.end_date.strip( ),
 						'datum': datum.strip( ),
 						'units': units.strip( ),
 						'time_zone': time_zone.strip( ),
@@ -20227,7 +20426,7 @@ class TidesAndCurrents( Fetcher ):
 			
 			return {
 					'mode': self.mode,
-					'station_id': station_id.strip( ),
+					'station_id': self.station_id.strip( ),
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
 					'summary': self._summarize_rows( rows ),
@@ -20287,8 +20486,11 @@ class TidesAndCurrents( Fetcher ):
 		'''
 		try:
 			throw_if( 'station_id', station_id )
+			self.station_id = station_id
 			throw_if( 'begin_date', begin_date )
+			self.begin_date = begin_date
 			throw_if( 'end_date', end_date )
+			self.end_date = end_date
 			
 			self.mode = 'tide-predictions'
 			base = self.request(
@@ -20296,9 +20498,9 @@ class TidesAndCurrents( Fetcher ):
 				params={
 						'product': 'predictions',
 						'application': 'Foo',
-						'station': station_id.strip( ),
-						'begin_date': begin_date.strip( ),
-						'end_date': end_date.strip( ),
+						'station': self.station_id.strip( ),
+						'begin_date': self.begin_date.strip( ),
+						'end_date': self.end_date.strip( ),
 						'datum': datum.strip( ),
 						'units': units.strip( ),
 						'time_zone': time_zone.strip( ),
@@ -20313,7 +20515,7 @@ class TidesAndCurrents( Fetcher ):
 			
 			return {
 					'mode': self.mode,
-					'station_id': station_id.strip( ),
+					'station_id': self.station_id.strip( ),
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
 					'summary': self._summarize_rows( rows ),
@@ -20458,22 +20660,26 @@ class TidesAndCurrents( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -20736,10 +20942,11 @@ class UvIndex( Fetcher ):
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
 			self.mode = 'daily-zip'
 			base = self.request(
-				url=f'{self.base_url}/getEnvirofactsUVDAILY/ZIP/{zip_code.strip( )}/JSON',
+				url=f'{self.base_url}/getEnvirofactsUVDAILY/ZIP/{self.zip_code.strip( )}/JSON',
 				time=time
 			) or { }
 			
@@ -20750,7 +20957,7 @@ class UvIndex( Fetcher ):
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
-					'params': { 'zip_code': zip_code.strip( ) },
+					'params': { 'zip_code': self.zip_code.strip( ) },
 					'summary': self._summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
@@ -20790,13 +20997,15 @@ class UvIndex( Fetcher ):
 		'''
 		try:
 			throw_if( 'city', city )
+			self.city = city
 			throw_if( 'state', state )
+			self.state = state
 			
 			self.mode = 'daily-city-state'
 			base = self.request(
 				url=(
 						f'{self.base_url}/getEnvirofactsUVDAILY/CITY/'
-						f'{city.strip( )}/STATE/{state.strip( )}/JSON'
+						f'{self.city.strip( )}/STATE/{self.state.strip( )}/JSON'
 				),
 				time=time
 			) or { }
@@ -20809,8 +21018,8 @@ class UvIndex( Fetcher ):
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': {
-							'city': city.strip( ),
-							'state': state.strip( ).upper( )
+							'city': self.city.strip( ),
+							'state': self.state.strip( ).upper( )
 					},
 					'summary': self._summarize_rows( rows ),
 					'rows': rows,
@@ -20848,10 +21057,11 @@ class UvIndex( Fetcher ):
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
+			self.zip_code = zip_code
 			
 			self.mode = 'hourly-zip'
 			base = self.request(
-				url=f'{self.base_url}/getEnvirofactsUVHOURLY/ZIP/{zip_code.strip( )}/JSON',
+				url=f'{self.base_url}/getEnvirofactsUVHOURLY/ZIP/{self.zip_code.strip( )}/JSON',
 				time=time
 			) or { }
 			
@@ -20862,7 +21072,7 @@ class UvIndex( Fetcher ):
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
-					'params': { 'zip_code': zip_code.strip( ) },
+					'params': { 'zip_code': self.zip_code.strip( ) },
 					'summary': self._summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
@@ -20902,13 +21112,15 @@ class UvIndex( Fetcher ):
 		'''
 		try:
 			throw_if( 'city', city )
+			self.city = city
 			throw_if( 'state', state )
+			self.state = state
 			
 			self.mode = 'hourly-city-state'
 			base = self.request(
 				url=(
 						f'{self.base_url}/getEnvirofactsUVHOURLY/CITY/'
-						f'{city.strip( )}/STATE/{state.strip( )}/JSON'
+						f'{self.city.strip( )}/STATE/{self.state.strip( )}/JSON'
 				),
 				time=time
 			) or { }
@@ -20921,8 +21133,8 @@ class UvIndex( Fetcher ):
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': {
-							'city': city.strip( ),
-							'state': state.strip( ).upper( )
+							'city': self.city.strip( ),
+							'state': self.state.strip( ).upper( )
 					},
 					'summary': self._summarize_rows( rows ),
 					'rows': rows,
@@ -21047,22 +21259,26 @@ class UvIndex( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -21234,6 +21450,7 @@ class PurpleAir( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
 			if self.api_key is None or not str( self.api_key ).strip( ):
 				raise ValueError(
@@ -21241,7 +21458,7 @@ class PurpleAir( Fetcher ):
 					'PURPLE_AIR_API_KEY.'
 				)
 			
-			self.url = f'{self.base_url}/{endpoint.strip( )}'
+			self.url = f'{self.base_url}/{self.endpoint.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -21684,22 +21901,26 @@ class PurpleAir( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -21870,13 +22091,14 @@ class OpenAQ( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
+			self.endpoint = endpoint
 			
 			if self.api_key is None or not str( self.api_key ).strip( ):
 				raise ValueError(
 					'OpenAQ API key not found. Set OPENAQ_API_KEY or OPEN_AQ_API_KEY.'
 				)
 			
-			self.url = f'{self.base_url}/{endpoint.strip( )}'
+			self.url = f'{self.base_url}/{self.endpoint.strip( )}'
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -22318,22 +22540,26 @@ class OpenAQ( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
 			return {
-					'name': function.strip( ),
+					'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -22654,9 +22880,10 @@ class Firms( Fetcher ):
 		'''
 		try:
 			throw_if( 'source', source )
+			self.source = source
 			
 			self.mode = 'area'
-			source_value = source.strip( ).upper( )
+			source_value = self.source.strip( ).upper( )
 			area_value = area_coordinates.strip( )
 			range_value = max( 1, min( 5, day_range ) )
 			
@@ -22852,21 +23079,25 @@ class Firms( Fetcher ):
 		'''
 		try:
 			throw_if( 'function', function )
+			self.function = function
 			throw_if( 'tool', tool )
+			self.tool = tool
 			throw_if( 'description', description )
+			self.description = description
 			throw_if( 'parameters', parameters )
+			self.parameters = parameters
 			
 			if required is None:
-				required = list( parameters.keys( ) )
+				required = list( self.parameters.keys( ) )
 			
-			return { 'name': function.strip( ),
+			return { 'name': self.function.strip( ),
 					'description': (
-							f"{description.strip( )} This function uses the "
-							f"{tool.strip( )} service."
+							f"{self.description.strip( )} This function uses the "
+							f"{self.tool.strip( )} service."
 					),
 					'parameters': {
 							'type': 'object',
-							'properties': parameters,
+							'properties': self.parameters,
 							'required': required
 					}
 			}
@@ -22966,9 +23197,11 @@ class OpenSky( Fetcher ):
 		'''
 		try:
 			throw_if( 'client_id', client_id )
+			self.client_id = client_id
 			throw_if( 'client_secret', client_secret )
-			self.client_id = client_id.strip( )
-			self.client_secret = client_secret.strip( )
+			self.client_secret = client_secret
+			self.client_id = self.client_id.strip( )
+			self.client_secret = self.client_secret.strip( )
 			response = requests.post(
 				self.token_url,
 				headers={ 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -23026,7 +23259,8 @@ class OpenSky( Fetcher ):
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
-			self.url = f'{self.base_url}{endpoint}'
+			self.endpoint = endpoint
+			self.url = f'{self.base_url}{self.endpoint}'
 			
 			request_headers = dict( self.headers or { } )
 			if client_id and client_secret:
@@ -23046,7 +23280,7 @@ class OpenSky( Fetcher ):
 			)
 			
 			if self.response.status_code == 404:
-				return [ ] if '/flights/' in endpoint else { }
+				return [ ] if '/flights/' in self.endpoint else { }
 			
 			self.response.raise_for_status( )
 			return self.response.json( )
@@ -23337,7 +23571,10 @@ class OpenSky( Fetcher ):
 		data: Any ) -> Dict[ str, Any ]:
 		"""Build the common structured result returned by demographic API fetchers."""
 		throw_if( 'source', source )
+		self.source = source
 		throw_if( 'mode', mode )
+		self.mode = mode
 		throw_if( 'url', url )
-		return { 'source': source, 'mode': mode, 'url': url, 'status': status, 'data': data }
+		self.url = url
+		return { 'source': self.source, 'mode': self.mode, 'url': self.url, 'status': status, 'data': data }
 
