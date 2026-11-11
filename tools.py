@@ -102,6 +102,7 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
         exception.method = 'calculate_distance_nm'
         Logger( ).write( exception )
         raise exception from exc
+
 def calculate_bearing( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
     '''
@@ -148,6 +149,7 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
         exception.method = 'calculate_bearing'
         Logger( ).write( exception )
         raise exception from exc
+
 def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
     '''
 
@@ -192,6 +194,7 @@ def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
         exception.method = 'make_entity_record'
         Logger( ).write( exception )
         raise exception from exc
+
 def get_live_world_status( ) -> Dict[ str, object ]:
     '''
 
@@ -232,6 +235,7 @@ def get_live_world_status( ) -> Dict[ str, object ]:
         exception.method = 'get_live_world_status'
         Logger( ).write( exception )
         raise exception from exc
+
 def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     '''
 
@@ -274,6 +278,7 @@ def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str,
         exception.method = 'list_live_world_entities'
         Logger( ).write( exception )
         raise exception from exc
+
 def search_live_world_entities( query: str, entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     '''
 
@@ -324,6 +329,7 @@ def search_live_world_entities( query: str, entity_type: str, limit: int ) -> Li
         exception.method = 'search_live_world_entities'
         Logger( ).write( exception )
         raise exception from exc
+
 def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float,
         entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     '''
@@ -360,10 +366,6 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
             raise ValueError( 'radius_nm must be a finite number.' )
         if not isinstance( entity_type, str ):
             raise TypeError( 'entity_type must be a string.' )
-        if latitude < -90.0 or latitude > 90.0:
-            raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
-        if longitude < -180.0 or longitude > 180.0:
-            raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
         if radius_nm <= 0.0:
             raise ValueError( 'Argument "radius_nm" must be greater than zero.' )
         if entity_type != 'All' and entity_type not in LIVE_WORLD_ENTITY_TYPES:
@@ -402,6 +404,7 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
         exception.method = 'find_live_world_nearest'
         Logger( ).write( exception )
         raise exception from exc
+
 def get_live_world_geofence_status( ) -> Dict[ str, object ]:
     '''
 
@@ -436,6 +439,7 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
         exception.method = 'get_live_world_geofence_status'
         Logger( ).write( exception )
         raise exception from exc
+
 def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
     '''
 
@@ -472,6 +476,7 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
         exception.method = 'get_live_world_source_status'
         Logger( ).write( exception )
         raise exception from exc
+
 def get_live_world_analysis_status( ) -> Dict[ str, object ]:
     '''
 
@@ -501,6 +506,7 @@ def get_live_world_analysis_status( ) -> Dict[ str, object ]:
         exception.method = 'get_live_world_analysis_status'
         Logger( ).write( exception )
         raise exception from exc
+
 def get_live_world_history_status( ) -> Dict[ str, object ]:
     '''
 
@@ -536,6 +542,7 @@ def get_live_world_history_status( ) -> Dict[ str, object ]:
         exception.method = 'get_live_world_history_status'
         Logger( ).write( exception )
         raise exception from exc
+
 def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         limit: int ) -> List[ Dict[ str, object ] ]:
     '''
@@ -567,12 +574,8 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
             raise ValueError( 'limit must be an integer between 1 and 25000.' )
         if not isinstance( entity_type, str ) or not isinstance( snapshot, str ):
             raise TypeError( 'entity_type and snapshot must be strings.' )
-        if hours < 0:
-            raise ValueError( 'Argument "hours" cannot be negative.' )
         if entity_type != 'All' and entity_type not in LIVE_WORLD_ENTITY_TYPES:
             raise ValueError( f'Unsupported entity type: {entity_type}' )
-        if limit < 1 or limit > 25000:
-            raise ValueError( 'Argument "limit" must be between 1 and 25000.' )
         entity_types = LIVE_WORLD_ENTITY_TYPES if entity_type == 'All' else [ entity_type ]
         df_history = load_live_world_history(
             hours=hours, entity_types=entity_types, snapshot=snapshot, limit=limit )
@@ -588,6 +591,7 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         exception.method = 'list_live_world_history'
         Logger( ).write( exception )
         raise exception from exc
+
 def get_live_world_tracking_status( ) -> Dict[ str, object ]:
     '''
 
@@ -619,6 +623,7 @@ def get_live_world_tracking_status( ) -> Dict[ str, object ]:
         exception.method = 'get_live_world_tracking_status'
         Logger( ).write( exception )
         raise exception from exc
+
 LIVE_WORLD_AGENT_TOOLS: Dict[ str, object ] = {
     'get_live_world_status': get_live_world_status,
     'list_live_world_entities': list_live_world_entities,
