@@ -945,10 +945,12 @@ class WebCrawler( WebFetcher ):
 			
 		'''
 		try:
+			throw_if( 'url', url )
+			self.url = url
 			with sync_playwright( ) as p:
 				browser = p.chromium.launch( )
 				page = browser.new_page( )
-				page.goto( url, timeout = timeout * 1000 )
+				page.goto( self.url, timeout = timeout * 1000 )
 				page.wait_for_load_state( 'networkidle', timeout = timeout * 1000 )
 				html = page.content( )
 				browser.close( )
@@ -2221,6 +2223,8 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
+			throw_if( 'path', path )
+			self.path = path
 			active_key = (self.api_key or '').strip( )
 			if not active_key:
 				raise ValueError( 'Google Weather API key is required.' )
@@ -2228,7 +2232,7 @@ class GoogleWeather( Fetcher ):
 			self.timeout = time
 			request_params = dict( params or { } )
 			request_params[ 'key' ] = active_key
-			request_url = f'{self.url}/{path}'
+			request_url = f'{self.url}/{self.path}'
 			self.response = requests.get( url=request_url, params=request_params,
 				headers=self.headers, timeout=self.timeout )
 			
@@ -2266,7 +2270,9 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
-			lat, lng = self.resolve_coordinates( address )
+			throw_if( 'address', address )
+			self.address = address
+			lat, lng = self.resolve_coordinates( self.address )
 			params = { 'location.latitude': lat, 'location.longitude': lng,
 			           'unitsSystem': units_system, 'languageCode': language_code, }
 			return self.request( path='currentConditions:lookup', params=params, time=time )
@@ -2301,7 +2307,9 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
-			lat, lng = self.resolve_coordinates( address )
+			throw_if( 'address', address )
+			self.address = address
+			lat, lng = self.resolve_coordinates( self.address )
 			params = { 'location.latitude': lat, 'location.longitude': lng,
 					'hours': max( 1, min( hours, 240 ) ), 'unitsSystem': units_system,
 					'languageCode': language_code, }
@@ -2338,7 +2346,9 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
-			lat, lng = self.resolve_coordinates( address )
+			throw_if( 'address', address )
+			self.address = address
+			lat, lng = self.resolve_coordinates( self.address )
 			params = { 'location.latitude': lat, 'location.longitude': lng,
 			           'days': max( 1, min( days, 10 ) ), 'unitsSystem': units_system,
 			           'languageCode': language_code, }
@@ -2368,7 +2378,9 @@ class GoogleWeather( Fetcher ):
 		
 		'''
 		try:
-			lat, lng = self.resolve_coordinates( address )
+			throw_if( 'address', address )
+			self.address = address
+			lat, lng = self.resolve_coordinates( self.address )
 			params = { 'location.latitude': lat, 'location.longitude': lng, 
 			           'languageCode': language_code, }
 			return self.request( path='publicAlerts:lookup', params=params, time=time ) 
@@ -2475,7 +2487,9 @@ class NavalObservatory( Fetcher ):
 			str
 		'''
 		try:
-			value = date_value.strip( )
+			throw_if( 'date_value', date_value )
+			self.date_value = date_value
+			value = self.date_value.strip( )
 			throw_if( 'date_value', value )
 			dt.datetime.strptime( value, '%Y-%m-%d' )
 			return value
@@ -2499,7 +2513,9 @@ class NavalObservatory( Fetcher ):
 			str
 		'''
 		try:
-			value = time_value.strip( )
+			throw_if( 'time_value', time_value )
+			self.time_value = time_value
+			value = self.time_value.strip( )
 			throw_if( 'time_value', value )
 			pattern = ( r'^(?:[01]\d|2[0-3]):[0-5]\d'
 					r'(?:'
@@ -2534,8 +2550,12 @@ class NavalObservatory( Fetcher ):
 			tuple[float, float]
 		'''
 		try:
-			lat = latitude
-			lon = longitude
+			throw_if( 'latitude', latitude )
+			self.latitude = latitude
+			throw_if( 'longitude', longitude )
+			self.longitude = longitude
+			lat = self.latitude
+			lon = self.longitude
 			if lat < -90.0 or lat > 90.0:
 				raise ValueError( 'Latitude must be between -90 and 90.' )
 			
@@ -2581,9 +2601,15 @@ class NavalObservatory( Fetcher ):
 			
 		'''
 		try:
-			self.date_value = self.validate_date( date_value )
-			self.time_value = self.validate_time( time_value )
-			self.latitude, self.longitude = self.validate_coordinates( latitude=latitude,
+			throw_if( 'date_value', date_value )
+			self.date_value = date_value
+			throw_if( 'time_value', time_value )
+			self.time_value = time_value
+			throw_if( 'latitude', latitude )
+			self.latitude = latitude
+			self.date_value = self.validate_date( self.date_value )
+			self.time_value = self.validate_time( self.time_value )
+			self.latitude, self.longitude = self.validate_coordinates( latitude=self.latitude,
 				longitude=longitude )
 			self.location_label = str( location_label or '' ).strip( )
 			self.url = f'{self.base_url}/celnav'
@@ -4396,15 +4422,17 @@ class OpenScience( Fetcher ):
 			Dict[str, Any] | str
 		'''
 		try:
-			content_type = str( response.headers.get( 'Content-Type', '' ) ).lower( )
+			throw_if( 'response', response )
+			self.response = response
+			content_type = str( self.response.headers.get( 'Content-Type', '' ) ).lower( )
 			
 			if 'application/json' in content_type:
-				return response.json( )
+				return self.response.json( )
 			
 			try:
-				return response.json( )
+				return self.response.json( )
 			except Exception:
-				return response.text
+				return self.response.text
 		
 		except Exception as e:
 			exception = Error( e )
@@ -5355,8 +5383,10 @@ class AstroCatalog( Fetcher ):
 			Any
 		"""
 		try:
+			throw_if( 'route', route )
+			self.route = route
 			self.timeout = time
-			self.url = f'{self.base_url}/{route.lstrip( "/" )}'
+			self.url = f'{self.base_url}/{self.route.lstrip( "/" )}'
 			self.params = params or { }
 			
 			self.response = requests.get(
@@ -6638,7 +6668,9 @@ class GovData( Fetcher ):
 			int
 		'''
 		try:
-			value = page_size
+			throw_if( 'page_size', page_size )
+			self.page_size = page_size
+			value = self.page_size
 			if value < 1 or value > 1000:
 				raise ValueError( 'page_size must be between 1 and 1000.' )
 			
@@ -7346,10 +7378,12 @@ class StarChart( Fetcher ):
 			--------
 			int
 		'''
+		throw_if( 'value', value )
+		self.value = value
 		if invert:
-			return 0 if value else 1
+			return 0 if self.value else 1
 		
-		return 1 if value else 0
+		return 1 if self.value else 0
 	
 	def search_object( self, name: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
@@ -7552,9 +7586,13 @@ class StarChart( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			self.mode = 'coordinate_chart'
+			throw_if( 'ra', ra )
 			self.ra = ra
+			throw_if( 'dec', dec )
 			self.dec = dec
+			self.mode = 'coordinate_chart'
+			self.ra = self.ra
+			self.dec = self.dec
 			self.zoom = zoom
 			self.box_color = str( box_color or 'yellow' ).strip( )
 			self.show_box = show_box
@@ -7649,9 +7687,13 @@ class StarChart( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			self.mode = 'static_chart'
+			throw_if( 'ra', ra )
 			self.ra = ra
+			throw_if( 'dec', dec )
 			self.dec = dec
+			self.mode = 'static_chart'
+			self.ra = self.ra
+			self.dec = self.dec
 			self.zoom = zoom
 			self.image_source = str( image_source or 'DSS2' ).strip( )
 			self.show_grid = show_grid
@@ -8084,7 +8126,9 @@ class Congress( Fetcher ):
 			int
 		'''
 		try:
-			value = limit
+			throw_if( 'limit', limit )
+			self.limit = limit
+			value = self.limit
 			if value < 1 or value > 250:
 				raise ValueError( 'limit must be between 1 and 250.' )
 			
@@ -8113,7 +8157,9 @@ class Congress( Fetcher ):
 			int
 		'''
 		try:
-			value = offset
+			throw_if( 'offset', offset )
+			self.offset = offset
+			value = self.offset
 			if value < 0:
 				raise ValueError( 'offset must be greater than or equal to 0.' )
 			
@@ -8142,7 +8188,9 @@ class Congress( Fetcher ):
 			str
 		'''
 		try:
-			value = str( bill_type or '' ).strip( ).lower( )
+			throw_if( 'bill_type', bill_type )
+			self.bill_type = bill_type
+			value = str( self.bill_type or '' ).strip( ).lower( )
 			throw_if( 'bill_type', value )
 			
 			allowed = {
@@ -8181,7 +8229,9 @@ class Congress( Fetcher ):
 			str
 		'''
 		try:
-			value = str( law_type or '' ).strip( ).lower( )
+			throw_if( 'law_type', law_type )
+			self.law_type = law_type
+			value = str( self.law_type or '' ).strip( ).lower( )
 			throw_if( 'law_type', value )
 			
 			allowed = { 'pub', 'priv' }
@@ -8214,7 +8264,9 @@ class Congress( Fetcher ):
 			str
 		'''
 		try:
-			value = str( report_type or '' ).strip( ).lower( )
+			throw_if( 'report_type', report_type )
+			self.report_type = report_type
+			value = str( self.report_type or '' ).strip( ).lower( )
 			throw_if( 'report_type', value )
 			
 			allowed = { 'hrpt', 'srpt', 'erpt' }
@@ -9163,7 +9215,9 @@ class InternetArchive( Fetcher ):
 			int
 		'''
 		try:
-			value = page
+			throw_if( 'page', page )
+			self.page = page
+			value = self.page
 			if value < 1:
 				raise ValueError( 'page must be greater than or equal to 1.' )
 			
@@ -10786,7 +10840,9 @@ class Grokipedia( Fetcher ):
 			int
 		'''
 		try:
-			value = limit
+			throw_if( 'limit', limit )
+			self.limit = limit
+			value = self.limit
 			if value < 1 or value > 100:
 				raise ValueError( 'limit must be between 1 and 100.' )
 			
@@ -10815,7 +10871,9 @@ class Grokipedia( Fetcher ):
 			int
 		'''
 		try:
-			value = offset
+			throw_if( 'offset', offset )
+			self.offset = offset
+			value = self.offset
 			if value < 0:
 				raise ValueError( 'offset must be greater than or equal to 0.' )
 			
@@ -11402,9 +11460,13 @@ class GoogleGeocoding( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			self.mode = 'reverse'
+			throw_if( 'latitude', latitude )
 			self.latitude = latitude
+			throw_if( 'longitude', longitude )
 			self.longitude = longitude
+			self.mode = 'reverse'
+			self.latitude = self.latitude
+			self.longitude = self.longitude
 			self.language = str( language or 'en' ).strip( )
 			self.result_type = str( result_type or '' ).strip( )
 			self.location_type = str( location_type or '' ).strip( )
@@ -12446,9 +12508,13 @@ class Socrata( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'domain', domain )
+			self.domain = domain
+			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			self.mode = 'metadata'
-			self.domain = self._normalize_domain( domain )
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
+			self.domain = self._normalize_domain( self.domain )
+			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
 			self.url = f'https://{self.domain}/api/views/{self.dataset_id}.json'
 			self.params = { }
 			
@@ -12523,9 +12589,11 @@ class Socrata( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			self.mode = 'rows'
 			self.domain = self._normalize_domain( domain )
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
+			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
 			self.select_clause = str( select or '' ).strip( )
 			self.where_clause = str( where or '' ).strip( )
 			self.order_clause = str( order or '' ).strip( )
@@ -12956,9 +13024,13 @@ class HealthData( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'domain', domain )
+			self.domain = domain
+			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			self.mode = 'metadata'
-			self.domain = self._normalize_domain( domain )
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
+			self.domain = self._normalize_domain( self.domain )
+			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
 			self.url = f'https://{self.domain}/api/views/{self.dataset_id}.json'
 			self.params = { }
 			
@@ -13033,9 +13105,11 @@ class HealthData( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'dataset_id', dataset_id )
+			self.dataset_id = dataset_id
 			self.mode = 'rows'
 			self.domain = self._normalize_domain( domain )
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
+			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
 			self.select_clause = str( select or '' ).strip( )
 			self.where_clause = str( where or '' ).strip( )
 			self.order_clause = str( order or '' ).strip( )
@@ -13463,8 +13537,10 @@ class GlobalHealthData( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'query_path', query_path )
+			self.query_path = query_path
 			self.mode = 'athena'
-			self.query_path = self._normalize_query_path( query_path )
+			self.query_path = self._normalize_query_path( self.query_path )
 			self.url = f'{self.athena_base_url}/{self.query_path}'
 			self.params = { }
 			
@@ -13799,8 +13875,10 @@ class UnitedNations( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'query_path', query_path )
+			self.query_path = query_path
 			self.mode = 'sdmx_query'
-			self.query_path = self._normalize_query_path( query_path )
+			self.query_path = self._normalize_query_path( self.query_path )
 			self.url = f'{self.base_url}/{self.query_path}'
 			self.params = { }
 			
@@ -14228,8 +14306,10 @@ class WorldPopulation( Fetcher ):
 
 		'''
 		try:
+			throw_if( 'asset_path', asset_path )
+			self.asset_path = asset_path
 			self.mode = 'raster_metadata'
-			self.asset_path = self._normalize_asset_path( asset_path )
+			self.asset_path = self._normalize_asset_path( self.asset_path )
 			self.url = f'{self.base_url}/{self.asset_path}'
 			self.params = { }
 			
@@ -18001,12 +18081,16 @@ class AirNow( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
+			throw_if( 'latitude', latitude )
+			self.latitude = latitude
+			throw_if( 'longitude', longitude )
+			self.longitude = longitude
 			self.mode = 'current-latlon'
 			base = self.request(
 				endpoint='observation/latLong/current/',
 				params={
-						'latitude': latitude,
-						'longitude': longitude,
+						'latitude': self.latitude,
+						'longitude': self.longitude,
 						'distance': max( 0, distance )
 				},
 				time=time
@@ -18127,6 +18211,10 @@ class AirNow( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
+			throw_if( 'latitude', latitude )
+			self.latitude = latitude
+			throw_if( 'longitude', longitude )
+			self.longitude = longitude
 			throw_if( 'date', date )
 			self.date = date
 			
@@ -18134,8 +18222,8 @@ class AirNow( Fetcher ):
 			base = self.request(
 				endpoint='forecast/latLong/',
 				params={
-						'latitude': latitude,
-						'longitude': longitude,
+						'latitude': self.latitude,
+						'longitude': self.longitude,
 						'date': self.date.strip( ),
 						'distance': max( 0, distance )
 				},
@@ -21688,16 +21776,24 @@ class PurpleAir( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
+			throw_if( 'nwlng', nwlng )
+			self.nwlng = nwlng
+			throw_if( 'nwlat', nwlat )
+			self.nwlat = nwlat
+			throw_if( 'selng', selng )
+			self.selng = selng
+			throw_if( 'selat', selat )
+			self.selat = selat
 			self.mode = 'sensors'
 			base = self.request(
 				endpoint='sensors',
 				params={
 						'fields': 'name,pm2.5,temperature,humidity,latitude,longitude,last_seen,location_type',
 						'location_type': location_type,
-						'nwlng': nwlng,
-						'nwlat': nwlat,
-						'selng': selng,
-						'selat': selat,
+						'nwlng': self.nwlng,
+						'nwlat': self.nwlat,
+						'selng': self.selng,
+						'selat': self.selat,
 						'max_age': max_age,
 						'modified_since': modified_since
 				},
@@ -21747,9 +21843,11 @@ class PurpleAir( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
+			throw_if( 'sensor_index', sensor_index )
+			self.sensor_index = sensor_index
 			self.mode = 'sensor'
 			base = self.request(
-				endpoint=f'sensors/{sensor_index}',
+				endpoint=f'sensors/{self.sensor_index}',
 				params={
 						'fields': (
 								'name,model,hardware,pm2.5_cf_1_a,pm2.5_cf_1_b,temperature,'
@@ -21767,7 +21865,7 @@ class PurpleAir( Fetcher ):
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': {
-							'sensor_index': sensor_index,
+							'sensor_index': self.sensor_index,
 							'fields': base.get( 'params', { } ).get( 'fields', '' )
 					},
 					'summary': self._summarize_rows( rows ),
@@ -22396,9 +22494,11 @@ class OpenAQ( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
+			throw_if( 'location_id', location_id )
+			self.location_id = location_id
 			self.mode = 'latest'
 			base = self.request(
-				endpoint=f'locations/{location_id}/latest',
+				endpoint=f'locations/{self.location_id}/latest',
 				params={ },
 				time=time
 			) or { }
@@ -22409,7 +22509,7 @@ class OpenAQ( Fetcher ):
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
-					'params': { 'location_id': location_id },
+					'params': { 'location_id': self.location_id },
 					'summary': self._summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
