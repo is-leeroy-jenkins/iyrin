@@ -2621,7 +2621,7 @@ class NavalObservatory( Fetcher ):
 			self.time_value = self.validate_time( self.time_value )
 			self.latitude, self.longitude = self.validate_coordinates( latitude=self.latitude,
 				longitude=self.longitude )
-			self.location_label = str( location_label or '' ).strip( )
+			self.location_label = (location_label or '').strip( )
 			self.url = f'{self.base_url}/celnav'
 			self.params = { 'date': self.date_value, 'time': self.time_value,
 					'coords': f'{self.latitude},{self.longitude}' }
@@ -2675,7 +2675,7 @@ class NavalObservatory( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'celnav' ).strip( ).lower( )
+			active_mode = (mode or 'celnav').strip( ).lower( )
 			if active_mode == 'celnav':
 				return self.fetch_celnav( date_value=date_value, time_value=time_value,
 					latitude=latitude, longitude=longitude, location_label=location_label,
@@ -3152,13 +3152,13 @@ class EarthObservatory( Fetcher ):
 		'''
 		try:
 			self.mode = 'events'
-			self.status = str( status or 'open' ).strip( ).lower( )
-			self.category = str( category or '' ).strip( )
-			self.source = str( source or '' ).strip( )
+			self.status = (status or 'open').strip( ).lower( )
+			self.category = (category or '').strip( )
+			self.source = (source or '').strip( )
 			self.limit = limit
 			self.days = days
-			self.start_date = str( start_date or '' ).strip( )
-			self.end_date = str( end_date or '' ).strip( )
+			self.start_date = (start_date or '').strip( )
+			self.end_date = (end_date or '').strip( )
 			self.url = f'{self.base_url}/events'
 			self.params = { }
 			
@@ -3288,7 +3288,7 @@ class EarthObservatory( Fetcher ):
 		'''
 		try:
 			self.mode = 'layers'
-			self.category = str( category or '' ).strip( )
+			self.category = (category or '').strip( )
 			if self.category:
 				self.url = f'{self.base_url}/layers/{self.category}'
 			else:
@@ -3828,9 +3828,9 @@ class NearbyObjects( Fetcher ):
 			self.mode = 'close_approaches'
 			self.start_date = self.start_date.strip( )
 			self.end_date = self.end_date.strip( )
-			self.dist_max = str( dist_max or '10LD' ).strip( )
-			self.body = str( body or 'Earth' ).strip( )
-			self.sort = str( sort or 'date' ).strip( )
+			self.dist_max = (dist_max or '10LD').strip( )
+			self.body = (body or 'Earth').strip( )
+			self.sort = (sort or 'date').strip( )
 			self.limit = limit
 			self.url = f'{self.base_url}/cad.api'
 			self.params = {
@@ -3921,7 +3921,7 @@ class NearbyObjects( Fetcher ):
 					'discovery': '1' if include_discovery else '0'
 			}
 			
-			if include_close_approaches and str( ca_body or '' ).strip( ):
+			if include_close_approaches and (ca_body or '').strip( ):
 				self.params[ 'ca-body' ] = ca_body.strip( )
 			
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
@@ -4090,7 +4090,7 @@ class NearbyObjects( Fetcher ):
 			self.url = f'{self.base_url}/fireball.api'
 			self.params = { 'limit': limit }
 			
-			if str( date_min or '' ).strip( ):
+			if (date_min or '').strip( ):
 				self.params[ 'date-min' ] = date_min.strip( )
 			
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
@@ -4197,7 +4197,7 @@ class NearbyObjects( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'close_approaches' ).strip( ).lower( )
+			active_mode = (mode or 'close_approaches').strip( ).lower( )
 			
 			if active_mode == 'close_approaches':
 				return self.fetch_close_approaches( start_date=start_date, end_date=end_date,
@@ -4707,7 +4707,7 @@ class OpenScience( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'dataset' ).strip( ).lower( )
+			active_mode = (mode or 'dataset').strip( ).lower( )
 			
 			if active_mode == 'dataset':
 				return self.fetch_dataset(
@@ -5185,7 +5185,7 @@ class SpaceWeather( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'cme' ).strip( ).lower( )
+			active_mode = (mode or 'cme').strip( ).lower( )
 			self.mode = active_mode
 			
 			endpoint_map = {
@@ -5213,14 +5213,14 @@ class SpaceWeather( Fetcher ):
 				start_date=start_date.strip( ),
 				end_date=end_date.strip( ),
 				time=time,
-				location=str( location or 'ALL' ).strip( ),
-				catalog=str( catalog or 'ALL' ).strip( ),
-				notification_type=str( notification_type or 'all' ).strip( ),
+				location=(location or 'ALL').strip( ),
+				catalog=(catalog or 'ALL').strip( ),
+				notification_type=(notification_type or 'all').strip( ),
 				most_accurate_only=most_accurate_only,
 				complete_entry_only=complete_entry_only,
 				speed=speed,
 				half_angle=half_angle,
-				keyword=str( keyword or '' ).strip( ),
+				keyword=(keyword or '').strip( ),
 				api_key=api_key
 			)
 		
@@ -6826,7 +6826,7 @@ class GovData( Fetcher ):
 			
 			self.query = self.query.strip( )
 			self.page_size = self._validate_page_size( page_size )
-			self.offset_mark = str( offset_mark or '*' ).strip( )
+			self.offset_mark = (offset_mark or '*').strip( )
 			self.sort_field = self._validate_sort_field( sort_field )
 			self.sort_order = self._validate_sort_order( sort_order )
 			
@@ -6957,7 +6957,7 @@ class GovData( Fetcher ):
 			self.collection = self.collection.strip( )
 			self.start_date = self.start_date.strip( )
 			self.page_size = self._validate_page_size( page_size )
-			self.offset_mark = str( offset_mark or '*' ).strip( )
+			self.offset_mark = (offset_mark or '*').strip( )
 			
 			self.url = f'{self.base_url}/collections/{self.collection}/{self.start_date}'
 			self.params = {
@@ -7043,7 +7043,7 @@ class GovData( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'search' ).strip( ).lower( )
+			active_mode = (mode or 'search').strip( ).lower( )
 			
 			if active_mode == 'search':
 				return self.fetch_search(
@@ -7542,9 +7542,9 @@ class StarChart( Fetcher ):
 			self.mode = 'object_chart'
 			self.query = self.name.strip( )
 			self.zoom = zoom
-			self.box_color = str( box_color or 'yellow' ).strip( )
+			self.box_color = (box_color or 'yellow').strip( )
 			self.show_box = show_box
-			self.image_source = str( image_source or '' ).strip( )
+			self.image_source = (image_source or '').strip( )
 			
 			self.url = self.link_url
 			self.params = {
@@ -7631,12 +7631,12 @@ class StarChart( Fetcher ):
 			self.ra = self.ra
 			self.dec = self.dec
 			self.zoom = zoom
-			self.box_color = str( box_color or 'yellow' ).strip( )
+			self.box_color = (box_color or 'yellow').strip( )
 			self.show_box = show_box
 			self.show_grid = show_grid
 			self.show_lines = show_lines
 			self.show_boundaries = show_boundaries
-			self.image_source = str( image_source or '' ).strip( )
+			self.image_source = (image_source or '').strip( )
 			
 			self.url = self.link_url
 			self.params = {
@@ -7732,7 +7732,7 @@ class StarChart( Fetcher ):
 			self.ra = self.ra
 			self.dec = self.dec
 			self.zoom = zoom
-			self.image_source = str( image_source or 'DSS2' ).strip( )
+			self.image_source = (image_source or 'DSS2').strip( )
 			self.show_grid = show_grid
 			self.show_lines = show_lines
 			self.show_boundaries = show_boundaries
@@ -8351,7 +8351,7 @@ class Congress( Fetcher ):
 					'format': 'json',
 					'limit': self._validate_limit( limit ),
 					'offset': self._validate_offset( offset ),
-					'sort': str( sort or 'updateDate+desc' ).strip( )
+					'sort': (sort or 'updateDate+desc').strip( )
 			}
 		
 		except Exception as e:
@@ -8462,7 +8462,7 @@ class Congress( Fetcher ):
 			throw_if( 'congress', congress )
 			
 			self.congress_number = congress
-			self.bill_type = str( bill_type or '' ).strip( ).lower( )
+			self.bill_type = (bill_type or '').strip( ).lower( )
 			
 			if self.bill_type:
 				self.bill_type = self._normalize_bill_type( self.bill_type )
@@ -8611,7 +8611,7 @@ class Congress( Fetcher ):
 			throw_if( 'congress', congress )
 			
 			self.congress_number = congress
-			self.law_type = str( law_type or '' ).strip( ).lower( )
+			self.law_type = (law_type or '').strip( ).lower( )
 			
 			if self.law_type:
 				self.law_type = self._normalize_law_type( self.law_type )
@@ -8757,7 +8757,7 @@ class Congress( Fetcher ):
 			throw_if( 'congress', congress )
 			
 			self.congress_number = congress
-			self.report_type = str( report_type or '' ).strip( ).lower( )
+			self.report_type = (report_type or '').strip( ).lower( )
 			self.conference = conference
 			
 			if self.report_type:
@@ -8942,7 +8942,7 @@ class Congress( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'congresses' ).strip( ).lower( )
+			active_mode = (mode or 'congresses').strip( ).lower( )
 			
 			if active_mode == 'congresses':
 				return self.fetch_congresses(
@@ -9365,9 +9365,9 @@ class InternetArchive( Fetcher ):
 			self.timeout = time
 			self.rows = self._validate_rows( rows )
 			self.page = self._validate_page( page )
-			self.sort = str( sort or 'downloads desc' ).strip( )
-			self.media_type = str( media_type or '' ).strip( )
-			self.collection = str( collection or '' ).strip( )
+			self.sort = (sort or 'downloads desc').strip( )
+			self.media_type = (media_type or '').strip( )
+			self.collection = (collection or '').strip( )
 			
 			active_fields = fields if fields else self.fields
 			if not isinstance( active_fields, list ) or not active_fields:
@@ -9851,7 +9851,7 @@ class OpenWeather( Fetcher ):
 			self.mode = 'current'
 			self.latitude = lat
 			self.longitude = long
-			self.timezone = str( zone or 'auto' ).strip( )
+			self.timezone = (zone or 'auto').strip( )
 			
 			self.params = {
 					'latitude': self.latitude,
@@ -9935,7 +9935,7 @@ class OpenWeather( Fetcher ):
 			self.mode = 'hourly'
 			self.latitude = lat
 			self.longitude = long
-			self.timezone = str( zone or 'auto' ).strip( )
+			self.timezone = (zone or 'auto').strip( )
 			
 			self.params = {
 					'latitude': self.latitude,
@@ -10020,7 +10020,7 @@ class OpenWeather( Fetcher ):
 			self.mode = 'daily'
 			self.latitude = lat
 			self.longitude = long
-			self.timezone = str( zone or 'auto' ).strip( )
+			self.timezone = (zone or 'auto').strip( )
 			
 			self.params = {
 					'latitude': self.latitude,
@@ -10137,7 +10137,7 @@ class OpenWeather( Fetcher ):
 				result = self.fetch_current(
 					lat=float( lat ),
 					long=float( long ),
-					zone=str( zone or 'auto' ).strip( ),
+					zone=(zone or 'auto').strip( ),
 					past_days=past_days
 				) or { }
 			
@@ -10145,7 +10145,7 @@ class OpenWeather( Fetcher ):
 				result = self.fetch_hourly(
 					lat=float( lat ),
 					long=float( long ),
-					zone=str( zone or 'auto' ).strip( ),
+					zone=(zone or 'auto').strip( ),
 					forecast_days=forecast_days,
 					past_days=past_days
 				) or { }
@@ -10154,7 +10154,7 @@ class OpenWeather( Fetcher ):
 				result = self.fetch_daily(
 					lat=float( lat ),
 					long=float( long ),
-					zone=str( zone or 'auto' ).strip( ),
+					zone=(zone or 'auto').strip( ),
 					forecast_days=forecast_days,
 					past_days=past_days
 				) or { }
@@ -10689,7 +10689,7 @@ class HistoricalWeather( Fetcher ):
 				lat=float( lat ),
 				long=float( long ),
 				date=self.date,
-				zone=str( zone or 'auto' ).strip( )
+				zone=(zone or 'auto').strip( )
 			) or { }
 			
 			result[ 'geocoding' ] = selected
@@ -11106,7 +11106,7 @@ class Grokipedia( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'search' ).strip( ).lower( )
+			active_mode = (mode or 'search').strip( ).lower( )
 			
 			if active_mode == 'search':
 				return self.fetch_search(
@@ -11445,8 +11445,8 @@ class GoogleGeocoding( Fetcher ):
 			
 			self.mode = 'forward'
 			self.query = self.query.strip( )
-			self.language = str( language or 'en' ).strip( )
-			self.region = str( region or '' ).strip( )
+			self.language = (language or 'en').strip( )
+			self.region = (region or '').strip( )
 			
 			params = {
 					'address': self.query,
@@ -11517,9 +11517,9 @@ class GoogleGeocoding( Fetcher ):
 			self.mode = 'reverse'
 			self.latitude = self.latitude
 			self.longitude = self.longitude
-			self.language = str( language or 'en' ).strip( )
-			self.result_type = str( result_type or '' ).strip( )
-			self.location_type = str( location_type or '' ).strip( )
+			self.language = (language or 'en').strip( )
+			self.result_type = (result_type or '').strip( )
+			self.location_type = (location_type or '').strip( )
 			
 			params = {
 					'latlng': f'{self.latitude},{self.longitude}',
@@ -11584,8 +11584,8 @@ class GoogleGeocoding( Fetcher ):
 			
 			self.mode = 'place'
 			self.place_id = self.place_id.strip( )
-			self.language = str( language or 'en' ).strip( )
-			self.region = str( region or '' ).strip( )
+			self.language = (language or 'en').strip( )
+			self.region = (region or '').strip( )
 			
 			params = {
 					'place_id': self.place_id,
@@ -11664,7 +11664,7 @@ class GoogleGeocoding( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'forward' ).strip( ).lower( )
+			active_mode = (mode or 'forward').strip( ).lower( )
 			
 			if active_mode == 'forward':
 				return self.fetch_forward(
@@ -12150,8 +12150,8 @@ class CensusData( Fetcher ):
 			self.mode = 'data'
 			self.year = self.year.strip( )
 			self.dataset = self.dataset.strip( ).strip( '/' )
-			self.geography_for = str( geography_for or '' ).strip( )
-			self.geography_in = str( geography_in or '' ).strip( )
+			self.geography_for = (geography_for or '').strip( )
+			self.geography_in = (geography_in or '').strip( )
 			self.predicates = self._parse_predicates( predicates )
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}'
 			self.params = {
@@ -12239,7 +12239,7 @@ class CensusData( Fetcher ):
 
 		'''
 		try:
-			self.mode = str( mode or 'variables' ).strip( ).lower( )
+			self.mode = (mode or 'variables').strip( ).lower( )
 			
 			if self.mode == 'variables':
 				return self.fetch_variables(
@@ -12650,10 +12650,10 @@ class Socrata( Fetcher ):
 			self.mode = 'rows'
 			self.domain = self._normalize_domain( self.domain )
 			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
-			self.select_clause = str( select or '' ).strip( )
-			self.where_clause = str( where or '' ).strip( )
-			self.order_clause = str( order or '' ).strip( )
-			self.group_clause = str( group or '' ).strip( )
+			self.select_clause = (select or '').strip( )
+			self.where_clause = (where or '').strip( )
+			self.order_clause = (order or '').strip( )
+			self.group_clause = (group or '').strip( )
 			self.limit_value = limit
 			self.offset_value = offset
 			
@@ -12756,7 +12756,7 @@ class Socrata( Fetcher ):
 
 		'''
 		try:
-			active_mode = str( mode or 'rows' ).strip( ).lower( )
+			active_mode = (mode or 'rows').strip( ).lower( )
 			
 			if active_mode == 'metadata':
 				return self.fetch_metadata(
@@ -13169,10 +13169,10 @@ class HealthData( Fetcher ):
 			self.mode = 'rows'
 			self.domain = self._normalize_domain( self.domain )
 			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
-			self.select_clause = str( select or '' ).strip( )
-			self.where_clause = str( where or '' ).strip( )
-			self.order_clause = str( order or '' ).strip( )
-			self.group_clause = str( group or '' ).strip( )
+			self.select_clause = (select or '').strip( )
+			self.where_clause = (where or '').strip( )
+			self.order_clause = (order or '').strip( )
+			self.group_clause = (group or '').strip( )
 			self.limit_value = limit
 			self.offset_value = offset
 			
@@ -13275,7 +13275,7 @@ class HealthData( Fetcher ):
 
 		'''
 		try:
-			active_mode = str( mode or 'rows' ).strip( ).lower( )
+			active_mode = (mode or 'rows').strip( ).lower( )
 			
 			if active_mode == 'metadata':
 				return self.fetch_metadata(
@@ -13604,7 +13604,7 @@ class GlobalHealthData( Fetcher ):
 			self.url = f'{self.athena_base_url}/{self.query_path}'
 			self.params = { }
 			
-			if str( fmt or '' ).strip( ):
+			if (fmt or '').strip( ):
 				self.params[ '$format' ] = fmt.strip( )
 			
 			api_key = self._resolve_api_key( )
@@ -13670,7 +13670,7 @@ class GlobalHealthData( Fetcher ):
 
 		'''
 		try:
-			active_mode = str( mode or 'indicator_registry' ).strip( ).lower( )
+			active_mode = (mode or 'indicator_registry').strip( ).lower( )
 			
 			if active_mode == 'indicator_registry':
 				return self.fetch_indicator_registry(
@@ -13999,7 +13999,7 @@ class UnitedNations( Fetcher ):
 
 		'''
 		try:
-			active_mode = str( mode or 'datasets' ).strip( ).lower( )
+			active_mode = (mode or 'datasets').strip( ).lower( )
 			
 			if active_mode == 'datasets':
 				return self.fetch_datasets(
@@ -14305,7 +14305,7 @@ class WorldPopulation( Fetcher ):
 		'''
 		try:
 			self.mode = 'search'
-			self.query_text = str( query or '' ).strip( )
+			self.query_text = (query or '').strip( )
 			self.url = f'{self.base_url}/search'
 			self.params = {
 					'page': page,
@@ -14441,7 +14441,7 @@ class WorldPopulation( Fetcher ):
 
 		'''
 		try:
-			active_mode = str( mode or 'catalog' ).strip( ).lower( )
+			active_mode = (mode or 'catalog').strip( ).lower( )
 			
 			if active_mode == 'catalog':
 				return self.fetch_catalog(
@@ -14860,7 +14860,7 @@ class Wonder( Fetcher ):
 
 		'''
 		try:
-			active_mode = str( mode or 'metadata_template' ).strip( ).lower( )
+			active_mode = (mode or 'metadata_template').strip( ).lower( )
 			
 			if active_mode == 'metadata_template':
 				return self.fetch_template(
@@ -15360,8 +15360,8 @@ class USGSEarthquakes( Fetcher ):
 			self.min_magnitude = min_magnitude
 			self.max_magnitude = max_magnitude
 			self.limit = max( 1, limit )
-			self.order_by = str( order_by or 'time' ).strip( )
-			self.event_type = str( event_type or 'earthquake' ).strip( )
+			self.order_by = (order_by or 'time').strip( )
+			self.event_type = (event_type or 'earthquake').strip( )
 			self.latitude = None if latitude is None else latitude
 			self.longitude = None if longitude is None else longitude
 			self.max_radius_km = None if max_radius_km is None else max_radius_km
@@ -15483,7 +15483,7 @@ class USGSEarthquakes( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'feed' ).strip( ).lower( )
+			active_mode = (mode or 'feed').strip( ).lower( )
 			
 			if active_mode == 'feed':
 				return self.fetch_feed(
@@ -16413,7 +16413,7 @@ class USGSWaterData( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'monitoring-locations' ).strip( ).lower( )
+			active_mode = (mode or 'monitoring-locations').strip( ).lower( )
 			
 			if active_mode == 'monitoring-locations':
 				return self.fetch_monitoring_locations(
@@ -17057,7 +17057,7 @@ class USGSTheNationalMap( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'products' ).strip( ).lower( )
+			active_mode = (mode or 'products').strip( ).lower( )
 			
 			if active_mode == 'datasets':
 				return self.fetch_datasets(
@@ -17688,7 +17688,7 @@ class USGSScienceBase( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'items' ).strip( ).lower( )
+			active_mode = (mode or 'items').strip( ).lower( )
 			
 			if active_mode == 'items':
 				return self.fetch_items(
@@ -18378,7 +18378,7 @@ class AirNow( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'current-zip' ).strip( ).lower( )
+			active_mode = (mode or 'current-zip').strip( ).lower( )
 			
 			if active_mode == 'current-zip':
 				return self.fetch_current_zip(
@@ -18991,7 +18991,7 @@ class ClimateData( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'datasets' ).strip( ).lower( )
+			active_mode = (mode or 'datasets').strip( ).lower( )
 			
 			if active_mode == 'datasets':
 				return self.fetch_datasets(
@@ -19594,7 +19594,7 @@ class EoNet( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'events' ).strip( ).lower( )
+			active_mode = (mode or 'events').strip( ).lower( )
 			
 			if active_mode == 'events':
 				return self.fetch_events(
@@ -20773,7 +20773,7 @@ class TidesAndCurrents( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'water-level' ).strip( ).lower( )
+			active_mode = (mode or 'water-level').strip( ).lower( )
 			
 			if active_mode == 'station':
 				return self.fetch_station(
@@ -21381,7 +21381,7 @@ class UvIndex( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'daily-zip' ).strip( ).lower( )
+			active_mode = (mode or 'daily-zip').strip( ).lower( )
 			
 			if active_mode == 'daily-zip':
 				return self.fetch_daily_zip(
@@ -22045,7 +22045,7 @@ class PurpleAir( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'sensors' ).strip( ).lower( )
+			active_mode = (mode or 'sensors').strip( ).lower( )
 			
 			if active_mode == 'sensors':
 				return self.fetch_sensors(
@@ -22691,7 +22691,7 @@ class OpenAQ( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'locations' ).strip( ).lower( )
+			active_mode = (mode or 'locations').strip( ).lower( )
 			
 			if active_mode == 'locations':
 				return self.fetch_locations(
@@ -23238,7 +23238,7 @@ class Firms( Fetcher ):
 			Dict[str, Any] | None
 		'''
 		try:
-			active_mode = str( mode or 'area' ).strip( ).lower( )
+			active_mode = (mode or 'area').strip( ).lower( )
 			
 			if active_mode == 'area':
 				return self.fetch_area(
