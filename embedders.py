@@ -52,26 +52,39 @@ class LocalEmbeddings( Embeddings ):
 
 	def __init__( self, model_path: str ) -> None:
 		"""Initialize the local GGUF embedding implementation."""
+		throw_if( 'model_path', model_path )
+		if not isinstance( model_path, str ):
+			raise TypeError( 'model_path must be a string.' )
 		self.model_path = model_path
 		self.client = None
 		self.response = None
 
 	def load( self ) -> None:
 		"""Load the configured local GGUF model once."""
-		if self.client is not None:
-			return
+		try:
+			if self.client is not None:
+				return
 
-		path = Path( self.model_path )
-		if not path.is_file( ):
-			raise FileNotFoundError( f'Local GGUF model not found: {self.model_path}' )
+			path = Path( self.model_path )
+			if not path.is_file( ):
+				raise FileNotFoundError( f'Local GGUF model not found: {self.model_path}' )
 
-		from llama_cpp import Llama
-		self.client = Llama( model_path=self.model_path, embedding=True, verbose=False )
+			from llama_cpp import Llama
+			self.client = Llama( model_path=self.model_path, embedding=True, verbose=False )
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'LocalEmbeddings'
+			exception.method = 'load( self ) -> None'
+			Logger( ).write( exception )
+			raise exception from e
 
 	def embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]:
 		"""Create embeddings for document text."""
 		try:
 			throw_if( 'texts', texts )
+			if not isinstance( texts, list ):
+				raise TypeError( 'texts must be a list of strings.' )
 			values: List[ str ] = [ ]
 			for text in texts:
 				throw_if( 'text', text )
@@ -96,7 +109,7 @@ class LocalEmbeddings( Embeddings ):
 			exception.cause = 'LocalEmbeddings'
 			exception.method = 'embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]'
 			Logger( ).write( exception )
-			raise exception
+			raise exception from e
 
 	def embed_query( self, text: str ) -> List[ float ]:
 		"""Create an embedding for query text."""
@@ -111,7 +124,7 @@ class LocalEmbeddings( Embeddings ):
 			exception.cause = 'LocalEmbeddings'
 			exception.method = 'embed_query( self, text: str ) -> List[ float ]'
 			Logger( ).write( exception )
-			raise exception
+			raise exception from e
 
 class EmbeddingFactory( ):
 	"""Factory for Iyr's supported LangChain embedding implementations."""
@@ -130,26 +143,26 @@ class EmbeddingFactory( ):
 		try:
 			throw_if( 'provider', provider )
 			throw_if( 'model', model )
+			if not isinstance( provider, str ) or not isinstance( model, str ):
+				raise TypeError( 'provider and model must be strings.' )
+			if not isinstance( model_path, str ):
+				raise TypeError( 'model_path must be a string.' )
 			self.provider = provider
 			self.model = model
 			self.model_path = model_path
 			if self.provider == 'OpenAI':
-				throw_if( 'model', self.model )
 				from langchain_openai import OpenAIEmbeddings
 				return OpenAIEmbeddings( model=self.model )
 	
 			if self.provider == 'Google Generative AI':
-				throw_if( 'model', self.model )
 				from langchain_google_genai import GoogleGenerativeAIEmbeddings
 				return GoogleGenerativeAIEmbeddings( model=self.model )
 	
 			if self.provider == 'Mistral AI':
-				throw_if( 'model', self.model )
 				from langchain_mistralai import MistralAIEmbeddings
 				return MistralAIEmbeddings( model=self.model )
 	
 			if self.provider == 'Hugging Face':
-				throw_if( 'model', self.model )
 				from langchain_huggingface import HuggingFaceEmbeddings
 				return HuggingFaceEmbeddings( model_name=self.model )
 	
@@ -162,7 +175,7 @@ class EmbeddingFactory( ):
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'EmbeddingFactory'
-			exception.method = 'create( self, **args ) -> Embeddings'
+			exception.method = "create( self, provider: str, model: str, model_path: str='' ) -> Embeddings"
 			Logger( ).write( exception )
-			raise exception
+			raise exception from e
 		
