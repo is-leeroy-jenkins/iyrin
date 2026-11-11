@@ -122,7 +122,6 @@ def initialize_live_world_history( ) -> None:
 	    Logger( ).write( exception )
 	    raise exception
 
-
 def create_live_world_history_fingerprint( row: pd.Series ) -> str:
     '''
 
@@ -169,7 +168,6 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 	    exception.method = 'create_live_world_fingerprint( self, **args ) -> None'
 	    Logger( ).write( exception )
 	    raise exception
-
 
 def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
         observed_at: str, max_rows_per_source: int=5000 ) -> int:
@@ -275,7 +273,6 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    Logger( ).write( exception )
 	    raise exception
 
-
 def purge_live_world_history( retention_days: int ) -> int:
     '''
 
@@ -309,9 +306,7 @@ def purge_live_world_history( retention_days: int ) -> int:
 	                SELECT 1
 	                FROM {HISTORY_TABLE}
 	                WHERE {HISTORY_TABLE}.EntityType = {HISTORY_STATE_TABLE}.EntityType
-	                    AND {HISTORY_TABLE}.EntityId = {HISTORY_STATE_TABLE}.EntityId
-	            )
-	        ''' )
+	                    AND {HISTORY_TABLE}.EntityId = {HISTORY_STATE_TABLE}.EntityId ) ''' )
 	        return deleted
     except Exception as e:
 	    exception = Error( e )
@@ -320,7 +315,6 @@ def purge_live_world_history( retention_days: int ) -> int:
 	    exception.method = 'purge_live_world_history( self, **args ) -> None'
 	    Logger( ).write( exception )
 	    raise exception
-
 
 def clear_live_world_history( ) -> int:
     '''
@@ -348,7 +342,6 @@ def clear_live_world_history( ) -> int:
 	    exception.method = 'clear_live_world_history( self, **args ) -> None'
 	    Logger( ).write( exception )
 	    raise exception
-
 
 def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
     '''
@@ -387,7 +380,6 @@ def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
 	    exception.method = 'get_live_world_history_snapshots( self, **args ) -> None'
 	    Logger( ).write( exception )
 	    raise exception
-
 
 def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: str,
         limit: int=5000 ) -> pd.DataFrame:
@@ -457,7 +449,6 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 	    exception.method = 'load_live_world_history( self, **args ) -> None'
 	    Logger( ).write( exception )
 	    raise exception
-
 
 def get_live_world_history_summary( ) -> Dict[ str, object ]:
     '''

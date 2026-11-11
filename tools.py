@@ -1,19 +1,19 @@
 '''
-******************************************************************************************
- Assembly:                iyr
- Filename:                tools.py
- Author:                  Terry D. Eppler / Assistant
- Created:                 09-12-2026
-
- Last Modified By:        Terry D. Eppler / Assistant
- Last Modified On:        09-12-2026
-******************************************************************************************
-
-Purpose:
-    Provider-neutral callable tools for querying Iyr Live World Data. The functions operate
-    on the normalized Live World session state and return JSON-serializable dictionaries
-    and lists suitable for agent/tool-calling integrations.
-******************************************************************************************
+	******************************************************************************************
+	 Assembly:                iyrin
+	 Filename:                tools.py
+	 Author:                  Terry D. Eppler / Assistant
+	 Created:                 09-12-2026
+	
+	 Last Modified By:        Terry D. Eppler / Assistant
+	 Last Modified On:        09-12-2026
+	******************************************************************************************
+	
+	Purpose:
+	    Provider-neutral callable tools for querying Iyr Live World Data. The functions operate
+	    on the normalized Live World session state and return JSON-serializable dictionaries
+	    and lists suitable for agent/tool-calling integrations.
+	******************************************************************************************
 '''
 
 from __future__ import annotations

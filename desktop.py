@@ -26,7 +26,6 @@ def application_root( ) -> Path:
     """
     return Path( getattr( sys, '_MEIPASS', Path( __file__ ).resolve( ).parent ) )
 
-
 def user_data_root( ) -> Path:
     """Resolve the writable per-user Iyrin directory.
 
@@ -39,7 +38,6 @@ def user_data_root( ) -> Path:
     location = Path( base ) / 'Iyrin'
     location.mkdir( parents=True, exist_ok=True )
     return location
-
 
 def prepare_user_data( ) -> Path:
     """Provision writable resources and storage without overwriting user data.
@@ -61,7 +59,6 @@ def prepare_user_data( ) -> Path:
     os.environ[ 'LOG_DIR' ] = str( destination / 'logging' )
     return destination
 
-
 def copy_if_missing( source: str, destination: str ) -> str:
     """Copy bundled defaults only when the destination does not already exist.
 
@@ -76,7 +73,6 @@ def copy_if_missing( source: str, destination: str ) -> str:
         shutil.copy2( source, destination )
     return destination
 
-
 def free_port( ) -> int:
     """Find a currently unused TCP port on loopback.
 
@@ -86,7 +82,6 @@ def free_port( ) -> int:
     with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as sock:
         sock.bind( ('127.0.0.1', 0) )
         return int( sock.getsockname( )[ 1 ] )
-
 
 def serve( port: int, directory: Path ) -> None:
     """Run Iyrin's Streamlit app inside the child process.
@@ -110,7 +105,6 @@ def serve( port: int, directory: Path ) -> None:
         'server.enableCORS': True,
         'server.enableXsrfProtection': True,
     } )
-
 
 def wait_for_server( process: subprocess.Popen, port: int ) -> None:
     """Wait for the child server health endpoint or fail on early exit.
@@ -136,7 +130,6 @@ def wait_for_server( process: subprocess.Popen, port: int ) -> None:
         except (OSError, URLError):
             time.sleep( 0.5 )
     raise RuntimeError( 'Iyrin Streamlit server did not become ready within 120 seconds.' )
-
 
 def main( ) -> None:
     """Launch the dedicated webview, terminating its server on window close.

@@ -9,7 +9,6 @@ def chunk_identifier( document, position: int ) -> str:
     payload = f'{source}\x00{position}\x00{document.page_content}'
     return f'chunk-{sha256( payload.encode( "utf-8" ) ).hexdigest( )}'
 
-
 def vector_document_ids( documents: list ) -> list[ str ]:
     """Preserve explicit IDs and derive stable IDs when none are provided."""
     ids = [ ]

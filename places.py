@@ -221,10 +221,8 @@ class Place( ):
 						'administrative_area_level_1' ),
 					'admin_level_2': self.component_value( components,
 						'administrative_area_level_2' ),
-					'locality': (
-							self.component_value( components, 'locality' )
-							or self.component_value( components, 'postal_town' )
-					),
+					'locality': ( self.component_value( components, 'locality' )
+							or self.component_value( components, 'postal_town' ) ),
 					'postal_code': self.component_value( components, 'postal_code' ),
 					'name': details.get( 'name' ),
 					'business_status': details.get( 'business_status' ),
