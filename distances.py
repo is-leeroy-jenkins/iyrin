@@ -397,7 +397,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
-			exception.method = 'matrix( self, origins, destinations, mode: str='driving', departure_time: str='' )'
+			exception.method = "matrix( self, origins, destinations, mode: str='driving', departure_time: str='' )"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -453,7 +453,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'iyrin'
 			exception.cause = 'DistanceMatrix'
-			exception.method = 'summary( self, origin, destination, mode: str='driving' ) -> Dict'
+			exception.method = "summary( self, origin, destination, mode: str='driving' ) -> Dict"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -501,7 +501,8 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'DistanceMatrix'
-			exception.method = 'compare_modes( self, origin, destination, modes=None, departure_time: str='' )'
+			exception.method = "compare_modes( self, origin, destination, modes=None, departure_time: str='' )"
+			Logger( ).write( exception )
 			raise exception from e
 	
 	def to_dataframe( self, rows: List[ Dict[ str, Any ] ] | None=None ) -> pd.DataFrame:
