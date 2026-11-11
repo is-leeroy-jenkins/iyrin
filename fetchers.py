@@ -1159,7 +1159,7 @@ class GoogleDrive( Fetcher ):
 		return [ 'documents', 'snippets' ]
 	
 	def fetch( self, question: str, folder_id: str='root', results: int=10, template: str='gdrive-query',
-			mime_type: str=None, mode: str='documents' ) -> List[ Document ] | None:
+			mime_type: Optional[ str ]=None, mode: str='documents' ) -> List[ Document ] | None:
 		'''Query Google Drive through LangChain's GoogleDriveRetriever and return LangChain Document objects.
 		
 			Parameters:
@@ -1189,16 +1189,28 @@ class GoogleDrive( Fetcher ):
 		
 		'''
 		try:
-			self.question = question
-			throw_if( 'template', template )
+			if not isinstance( question, str ):
+				raise TypeError( 'question must be a string.' )
 			throw_if( 'folder_id', folder_id )
-			
-			self.query = (self.question or '').strip( )
-			self.folder_id = folder_id.strip( ) if folder_id else 'root'
-			self.num_results = max( 1, min( results, 100 ) )
-			self.template = template.strip( )
-			self.mime_type = mime_type.strip( ) if isinstance( mime_type, str ) and mime_type.strip( ) else None
-			self.mode = mode.strip( ) if mode else 'documents'
+			throw_if( 'template', template )
+			throw_if( 'mode', mode )
+			if not isinstance( question, str ) or not isinstance( folder_id, str ):
+				raise TypeError( 'question and folder_id must be strings.' )
+			if not isinstance( template, str ) or template not in self.template_options:
+				raise ValueError( 'Unsupported Google Drive template.' )
+			if not isinstance( mode, str ) or mode not in self.mode_options:
+				raise ValueError( 'Unsupported Google Drive retrieval mode.' )
+			if type( results ) is not int or not 1 <= results <= 100:
+				raise ValueError( 'results must be an integer between 1 and 100.' )
+			if mime_type is not None and not isinstance( mime_type, str ):
+				raise TypeError( 'mime_type must be a string or None.' )
+			self.question = question
+			self.query = self.question.strip( )
+			self.folder_id = folder_id
+			self.num_results = results
+			self.template = template
+			self.mime_type = mime_type if mime_type else None
+			self.mode = mode
 			
 			retriever_kwargs: Dict[ str, Any ] = {
 					'folder_id': self.folder_id,
@@ -1271,12 +1283,19 @@ class Wikipedia( Fetcher ):
 		self.fetcher = None
 		self.documents = None
 		self.query = None
-		self.language = (language or 'en').strip( ) or 'en'
-		self.max_documents = max( 1, min( max_documents, 300 ) )
+		throw_if( 'language', language )
+		if not isinstance( language, str ):
+			raise TypeError( 'language must be a string.' )
+		if type( max_documents ) is not int or not 1 <= max_documents <= 300:
+			raise ValueError( 'max_documents must be between 1 and 300.' )
+		if type( include_metadata ) is not bool:
+			raise TypeError( 'include_metadata must be a boolean.' )
+		self.language = language
+		self.max_documents = max_documents
 		self.include_metadata = include_metadata
 	
-	def fetch( self, question: str, language: str=None, max_documents: int=None,
-			include_metadata: bool=None ) -> List[ Document ] | None:
+	def fetch( self, question: str, language: Optional[ str ]=None, max_documents: Optional[ int ]=None,
+			include_metadata: Optional[ bool ]=None ) -> List[ Document ] | None:
 		'''
 			Query Wikipedia through LangChain's WikipediaRetriever and return
 			LangChain Document objects.
@@ -1307,17 +1326,22 @@ class Wikipedia( Fetcher ):
 			self.question = question
 			self.query = self.question.strip( )
 			
-			lang = self.language if language is None else \
-				(language.strip( ) if language else 'en')
-			
-			max_docs = self.max_documents if max_documents is None else \
-				max( 1, min( max_documents, 300 ) )
-			
-			load_meta = self.include_metadata if include_metadata is None else \
-				include_metadata
-			
-			self.fetcher = WikipediaRetriever( lang=lang, load_max_docs=max_docs,
-				load_all_available_meta=load_meta )
+			if language is not None:
+				throw_if( 'language', language )
+				if not isinstance( language, str ):
+					raise TypeError( 'language must be a string.' )
+			if max_documents is not None and (type( max_documents ) is not int or
+				not 1 <= max_documents <= 300):
+				raise ValueError( 'max_documents must be between 1 and 300.' )
+			if include_metadata is not None and type( include_metadata ) is not bool:
+				raise TypeError( 'include_metadata must be a boolean.' )
+			self.language = self.language if language is None else language
+			self.max_documents = self.max_documents if max_documents is None else max_documents
+			self.include_metadata = (
+				self.include_metadata if include_metadata is None else include_metadata )
+			self.fetcher = WikipediaRetriever( lang=self.language,
+				load_max_docs=self.max_documents,
+				load_all_available_meta=self.include_metadata )
 			
 			self.documents = self.fetcher.invoke( input=self.query )
 			return self.documents
@@ -1831,7 +1855,7 @@ class GoogleMaps( Fetcher ):
 	
 	def __init__( self ) -> None:
 		super( ).__init__( )
-		self.api_key = cfg.GOOGLE_API_KEY
+		self.api_key = cfg.GOOGLEMAPS_API_KEY
 		self.headers = { }
 		self.params = { }
 		self.longitude = None
@@ -1906,15 +1930,31 @@ class GoogleMaps( Fetcher ):
 		'''
 		try:
 			throw_if( 'lat', lat )
-			self.latitude = lat
 			throw_if( 'long', long )
+			throw_if( 'api_key', self.api_key )
+			if type( lat ) not in (int, float) or not -90 <= lat <= 90:
+				raise ValueError( 'lat must be a finite latitude between -90 and 90.' )
+			if type( long ) not in (int, float) or not -180 <= long <= 180:
+				raise ValueError( 'long must be a finite longitude between -180 and 180.' )
+			self.latitude = lat
 			self.longitude = long
 			self.coordinates = (self.latitude, self.longitude)
-			self.url = r'https://maps.googleapis.com/maps/api/geocode/json?latlng='
-			self.url += f'{self.latitude},' + f'{self.longitude}' + f'&key={self.api_key}'
-			_response = requests.get( self.url ).json( )
-			_address = _response[ 'results' ][0][ 'formatted_address' ]
-			return _address
+			self.url = 'https://maps.googleapis.com/maps/api/geocode/json'
+			self.params = { 'latlng': f'{self.latitude},{self.longitude}',
+				'key': self.api_key }
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=10 )
+			self.response.raise_for_status( )
+			self.payload = self.response.json( )
+			self.status = self.payload.get( 'status', '' )
+			self.results = self.payload.get( 'results', [ ] )
+			if self.status != 'OK' or not self.results:
+				self.message = self.payload.get( 'error_message', '' )
+				raise RuntimeError(
+					f'Google reverse geocoding failed: {self.status or "EMPTY_RESPONSE"}. '
+					f'{self.message}' )
+			self.address = self.results[ 0 ][ 'formatted_address' ]
+			return self.address
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -1953,11 +1993,12 @@ class GoogleMaps( Fetcher ):
 				'key': self.api_key
 			}
 			
-			response = requests.post( url, params=self.params, json=payload )
-			if response.status_code != 200:
-				msg = f'Request failed: {response.status_code} – {response.text}'
-				raise RuntimeError( msg )
-			return response.json( )
+			self.url = url
+			self.payload = payload
+			self.response = requests.post( url=self.url, params=self.params,
+				json=self.payload, headers=self.headers, timeout=10 )
+			self.response.raise_for_status( )
+			return self.response.json( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -1990,6 +2031,10 @@ class GoogleMaps( Fetcher ):
 			self.origin = origin
 			throw_if( 'destination', destination )
 			self.destination = destination
+			throw_if( 'mode', mode )
+			throw_if( 'api_key', self.api_key )
+			if mode not in ('driving', 'walking', 'bicycling', 'transit'):
+				raise ValueError( 'Unsupported Google Maps travel mode.' )
 			self.mode = mode
 			self.url = "https://maps.googleapis.com/maps/api/directions/json"
 			self.params = \
@@ -2000,11 +2045,19 @@ class GoogleMaps( Fetcher ):
 				'key': self.api_key
 			}
 			
-			self.response = requests.get( url=self.url, params=self.params )
+			self.response = requests.get( url=self.url, params=self.params,
+				headers=self.headers, timeout=10 )
 			self.response.raise_for_status( )
-			_results = self.response.json( )
-			_route = _results.get( 'routes', [ { } ] )[ 0 ]
-			return _route
+			self.payload = self.response.json( )
+			self.status = self.payload.get( 'status', '' )
+			self.routes = self.payload.get( 'routes', [ ] )
+			if self.status != 'OK' or not self.routes:
+				self.message = self.payload.get( 'error_message', '' )
+				raise RuntimeError(
+					f'Google Directions failed: {self.status or "EMPTY_RESPONSE"}. '
+					f'{self.message}' )
+			self.directions = self.routes[ 0 ]
+			return self.directions
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -11839,7 +11892,7 @@ class CensusData( Fetcher ):
 
 		'''
 		super( ).__init__( )
-		self.api_key = getattr( cfg, 'CENSUS_API_KEY', '' )
+		self.api_key = cfg.CENSUS_API_KEY
 		self.base_url = 'https://api.census.gov/data'
 		self.year = None
 		self.dataset = None
@@ -12403,7 +12456,7 @@ class Socrata( Fetcher ):
 
 		'''
 		super( ).__init__( )
-		self.api_key = getattr( cfg, 'SOCRATA_API_KEY', '' )
+		self.api_key = cfg.SOCRATA_API_KEY
 		self.base_url = 'https://{domain}/resource/{dataset}.json'
 		self.domain = 'data.cdc.gov'
 		self.dataset_id = ''
@@ -12920,7 +12973,7 @@ class HealthData( Fetcher ):
 
 		'''
 		super( ).__init__( )
-		self.api_key = getattr( cfg, 'HEALTHDATA_API_KEY', '' )
+		self.api_key = cfg.HEALTHDATA_API_KEY
 		self.base_url = 'https://{domain}/resource/{dataset}.json'
 		self.domain = 'healthdata.gov'
 		self.dataset_id = ''
@@ -13433,7 +13486,7 @@ class GlobalHealthData( Fetcher ):
 
 		'''
 		super( ).__init__( )
-		self.api_key = getattr( cfg, 'WHO_API_KEY', '' )
+		self.api_key = os.getenv( 'WHO_API_KEY' )
 		self.base_url = 'https://www.who.int/data/gho'
 		self.athena_base_url = 'https://ghoapi.azureedge.net/api'
 		self.mode = 'indicator_registry'
@@ -22937,7 +22990,7 @@ class Firms( Fetcher ):
 			throw_if( 'url', url )
 			self.url = url
 			
-			if self.map_key is None or not str( self.map_key ).strip( ):
+			if self.map_key is None or not self.map_key.strip( ):
 				raise ValueError(
 					'FIRMS MAP_KEY not found. Set FIRMS_MAP_KEY or '
 					'NASA_FIRMS_MAP_KEY.'
@@ -23103,9 +23156,22 @@ class Firms( Fetcher ):
 			self.source = source
 			
 			self.mode = 'area'
+			throw_if( 'area_coordinates', area_coordinates )
+			if not isinstance( self.source, str ) or not isinstance( area_coordinates, str ):
+				raise TypeError( 'source and area_coordinates must be strings.' )
+			if type( day_range ) is not int or not 1 <= day_range <= 5:
+				raise ValueError( 'day_range must be an integer between 1 and 5.' )
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
+			if not isinstance( date, str ):
+				raise TypeError( 'date must be a string.' )
+			self.area_coordinates = area_coordinates
+			self.day_range = day_range
+			self.date = date
+			self.timeout = time
 			source_value = self.source.strip( ).upper( )
-			area_value = area_coordinates.strip( )
-			range_value = max( 1, min( 5, day_range ) )
+			area_value = self.area_coordinates.strip( )
+			range_value = self.day_range
 			
 			url = (
 					f'{self.base_url}/area/csv/{self.map_key}/{source_value}/'
@@ -23421,8 +23487,8 @@ class OpenSky( Fetcher ):
 			self.client_id = client_id
 			throw_if( 'client_secret', client_secret )
 			self.client_secret = client_secret
-			self.client_id = self.client_id.strip( )
-			self.client_secret = self.client_secret.strip( )
+			if not isinstance( self.client_id, str ) or not isinstance( self.client_secret, str ):
+				raise TypeError( 'OAuth credentials must be strings.' )
 			response = requests.post(
 				self.token_url,
 				headers={ 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -23479,19 +23545,32 @@ class OpenSky( Fetcher ):
 	
 		'''
 		try:
-			self.params = params
 			throw_if( 'endpoint', endpoint )
+			if not isinstance( endpoint, str ) or not endpoint.startswith( '/' ):
+				raise ValueError( 'endpoint must be a path beginning with /.' )
+			if not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary.' )
+			if (client_id is None) != (client_secret is None):
+				raise ValueError( 'OAuth credentials must be supplied together.' )
+			if client_id is not None:
+				throw_if( 'client_id', client_id )
+				throw_if( 'client_secret', client_secret )
+				if not isinstance( client_id, str ) or not isinstance( client_secret, str ):
+					raise TypeError( 'OAuth credentials must be strings.' )
+			if type( self.timeout ) is not int or self.timeout <= 0:
+				raise ValueError( 'timeout must be a positive integer.' )
 			self.endpoint = endpoint
+			self.params = params
+			self.client_id = client_id
+			self.client_secret = client_secret
 			self.url = f'{self.base_url}{self.endpoint}'
-			
 			request_headers = dict( self.headers or { } )
-			if client_id and client_secret:
-				token = self.get_token( client_id, client_secret )
-				request_headers[ 'Authorization' ] = f'Bearer {token}'
-			
+			if self.client_id is not None:
+				self.access_token = self.get_token( self.client_id, self.client_secret )
+				request_headers[ 'Authorization' ] = f'Bearer {self.access_token}'
 			clean_params = {
-					k: v for k, v in (self.params or { }).items( )
-					if v is not None and v != ''
+				key: value for key, value in self.params.items( )
+				if value is not None and value != ''
 			}
 			
 			self.response = requests.get(
@@ -23686,8 +23765,14 @@ class OpenSky( Fetcher ):
 			lomax: float | None = None, extended: bool=False, client_id: str=None,
 			client_secret: str=None, time: int=20 ) -> Dict[ str, Any ] | None:
 		try:
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
+			throw_if( 'mode', mode )
+			if not isinstance( mode, str ):
+				raise TypeError( 'mode must be a string.' )
 			self.timeout = time
-			active_mode = (mode or 'states_bbox').strip( ).lower( )
+			self.mode = mode
+			active_mode = self.mode.strip( ).lower( )
 			
 			if active_mode == 'states_bbox':
 				params: Dict[ str, Any ] = { }
