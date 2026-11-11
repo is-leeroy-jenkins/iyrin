@@ -49,7 +49,6 @@ from chunk_ids import chunk_identifier
 
 import json
 import math
-import os
 from typing import Dict, List
 import pandas as pd
 import streamlit as st
@@ -88,8 +87,8 @@ def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ s
 			step=100, key=f'{key_prefix}_chunk_size' )
 	with overlap_col:
 		chunk_overlap = st.slider( 'Chunk Overlap', min_value=0,
-			max_value=min( 1000, int( chunk_size ) - 1 ),
-			value=min( 200, int( chunk_size ) - 1 ), step=50,
+			max_value=min( 1000, chunk_size - 1 ),
+			value=min( 200, chunk_size - 1 ), step=50,
 			key=f'{key_prefix}_chunk_overlap' )
 
 	provider_col, model_col = st.columns( 2 )
@@ -128,7 +127,7 @@ def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ s
 		namespace = st.text_input( 'Namespace', value='',
 			key=f'{key_prefix}_pinecone_namespace' )
 	
-	return { 'chunk_size': int( chunk_size ), 'chunk_overlap': int( chunk_overlap ),
+	return { 'chunk_size': chunk_size, 'chunk_overlap': chunk_overlap,
 			'provider': provider, 'model': model, 'model_path': model_path,
 			'vector_backend': vector_backend, 'vector_target': vector_target,
 			'persist_directory': persist_directory, 'namespace': namespace, }
@@ -137,11 +136,15 @@ def chunk_documents( documents: List[ Document ], chunk_size: int,
 	chunk_overlap: int ) -> List[ Document ]:
 	"""Split LangChain documents into retrieval chunks."""
 	throw_if( 'documents', documents )
-	if chunk_overlap >= chunk_size:
-		raise ValueError( 'Chunk Overlap must be smaller than Chunk Size.' )
+	throw_if( 'chunk_size', chunk_size )
+	throw_if( 'chunk_overlap', chunk_overlap )
+	if type( chunk_size ) is not int or chunk_size <= 0:
+		raise ValueError( 'chunk_size must be a positive integer.' )
+	if type( chunk_overlap ) is not int or not 0 <= chunk_overlap < chunk_size:
+		raise ValueError( 'chunk_overlap must be an integer from 0 to chunk_size - 1.' )
 
 	splitter = RecursiveCharacterTextSplitter(
-		chunk_size=int( chunk_size ), chunk_overlap=int( chunk_overlap ) )
+		chunk_size=chunk_size, chunk_overlap=chunk_overlap )
 	chunks = splitter.split_documents( documents )
 	for index, document in enumerate( chunks, start=1 ):
 		document.metadata = dict( document.metadata or { } )
@@ -152,6 +155,12 @@ def create_embeddings( chunks: List[ Document ], provider: str, model: str,
 	model_path: str ) -> tuple[ object, List[ List[ float ] ] ]:
 	"""Create and validate embeddings for document chunks."""
 	throw_if( 'chunks', chunks )
+	throw_if( 'provider', provider )
+	throw_if( 'model', model )
+	if not isinstance( provider, str ) or not isinstance( model, str ):
+		raise TypeError( 'provider and model must be strings.' )
+	if not isinstance( model_path, str ):
+		raise TypeError( 'model_path must be a string.' )
 	factory = EmbeddingFactory( )
 	embedder = factory.create( provider, model, model_path )
 	vectors = embedder.embed_documents( [ document.page_content for document in chunks ] )
@@ -171,11 +180,19 @@ def store_documents( chunks: List[ Document ], embedder: object, vector_backend:
 	throw_if( 'embedder', embedder )
 	throw_if( 'vector_backend', vector_backend )
 	throw_if( 'vector_target', vector_target )
+	if vector_backend not in ('Chroma', 'Pinecone'):
+		raise ValueError( 'vector_backend must be Chroma or Pinecone.' )
+	if not isinstance( vector_target, str ):
+		raise TypeError( 'vector_target must be a string.' )
+	if not isinstance( persist_directory, str ) or not isinstance( namespace, str ):
+		raise TypeError( 'persist_directory and namespace must be strings.' )
 	if vector_backend == 'Chroma':
+		throw_if( 'persist_directory', persist_directory )
 		store = ChromaStore( )
 		return store.create( chunks, embedder, vector_target, persist_directory )
 
-	api_key = getattr( cfg, 'PINECONE_API_KEY', '' ) or os.getenv( 'PINECONE_API_KEY', '' )
+	api_key = cfg.PINECONE_API_KEY
+	throw_if( 'api_key', api_key )
 	store = PineconeStore( )
 	return store.create( chunks, embedder, vector_target, namespace, api_key )
 
@@ -209,9 +226,17 @@ def serialize_mode_result( result: object ) -> str:
 
 def sync_mode_document( prefix: str, result_key: str, source_key: str ) -> None:
 	"""Synchronize the latest API result into a LangChain Document."""
+	throw_if( 'prefix', prefix )
+	throw_if( 'result_key', result_key )
+	throw_if( 'source_key', source_key )
 	initialize_mode_document_state( prefix )
 	result = st.session_state.get( result_key )
-	if result is None or result == { } or result == [ ] or result == '':
+	if result is None:
+		return
+	if isinstance( result, pd.DataFrame ):
+		if result.empty:
+			return
+	elif isinstance( result, (dict, list, str) ) and not result:
 		return
 
 	text = serialize_mode_result( result )
@@ -314,6 +339,7 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 
 def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) -> None:
 	"""Render Loaded, Chunks, and Embeddings tabs for one API mode."""
+	throw_if( 'prefix', prefix )
 	initialize_mode_document_state( prefix )
 	loaded_tab, chunks_tab, embeddings_tab = st.tabs(
 		[ loaded_label, '✂️ Chunks', '🔢 Embeddings' ] )
@@ -396,7 +422,7 @@ def rebuild_raw_text_from_documents( ) -> str:
 	initialize_loading_state( )
 	return '\n\n'.join(
 		document.page_content for document in st.session_state[ 'documents' ]
-		if isinstance( getattr( document, 'page_content', None ), str )
+		if isinstance( document.page_content, str )
 		and document.page_content.strip( ) )
 
 def reset_document_processing_controls( key_prefix: str ) -> None:
@@ -442,13 +468,13 @@ def clear_if_active( loader_name: str ) -> None:
 	documents = st.session_state.get( 'documents', [ ] ) or [ ]
 	remaining = [
 		document for document in documents
-		if ( getattr( document, 'metadata', { } ) or { } ).get( 'loader' ) != loader_name ]
+		if ( document.metadata or { } ).get( 'loader' ) != loader_name ]
 	st.session_state[ 'documents' ] = remaining
 	st.session_state[ 'raw_documents' ] = list( remaining )
 	st.session_state[ 'raw_text' ] = rebuild_raw_text_from_documents( )
 	if st.session_state.get( 'active_loader' ) == loader_name:
 		st.session_state[ 'active_loader' ] = (
-			( getattr( remaining[ -1 ], 'metadata', { } ) or { } ).get( 'loader' )
+			( remaining[ -1 ].metadata or { } ).get( 'loader' )
 			if remaining else None )
 	st.session_state[ 'processed_text' ] = None
 	st.session_state[ 'lines' ] = None
@@ -487,7 +513,7 @@ def get_loader_documents( loader_name: str ) -> List[ Document ]:
 	documents = st.session_state.get( 'documents', [ ] ) or [ ]
 	matched = [
 		document for document in documents
-		if ( getattr( document, 'metadata', { } ) or { } ).get( 'loader' ) == loader_name ]
+		if ( document.metadata or { } ).get( 'loader' ) == loader_name ]
 	return matched
 
 def render_document_processing_actions( loader_name: str, key_prefix: str ) -> None:
@@ -585,6 +611,8 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 
 def render_document_processing_controls( loader_name: str, key_prefix: str ) -> None:
 	"""Render document-processing inputs and actions for one loader."""
+	throw_if( 'loader_name', loader_name )
+	throw_if( 'key_prefix', key_prefix )
 	render_document_processing_inputs( loader_name, key_prefix )
 	render_document_processing_actions( loader_name, key_prefix )
 
@@ -676,7 +704,7 @@ def render_web_document_processing( ) -> None:
 				try:
 					throw_if( 'target_url', target_url )
 					fetcher = WebFetcher( )
-					documents = fetcher.fetch( target_url.strip( ), time=int( request_timeout ) )
+					documents = fetcher.fetch( target_url.strip( ), time=request_timeout )
 					throw_if( 'documents', documents )
 					st.session_state[ 'web_documents' ] = documents
 					st.session_state[ 'web_document_url' ] = target_url.strip( )
