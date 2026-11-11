@@ -357,10 +357,11 @@ class WebFetcher( Fetcher ):
 		'''
 		try:
 			throw_if( 'html', html )
-			html = re.sub( r'<script[\s\S]*?</script>', ' ', html, flags=re.IGNORECASE )
-			html = re.sub( r'<style[\s\S]*?</style>', ' ', html, flags=re.IGNORECASE )
-			html = re.sub( r'</?(p|div|br|li|h[1-6])[^>]*>', '\n', html, flags=re.IGNORECASE )
-			text = re.sub( self.re_tag, ' ', html )
+			self.html = html
+			html = re.sub( r'<script[\s\S]*?</script>', ' ', self.html, flags=re.IGNORECASE )
+			html = re.sub( r'<style[\s\S]*?</style>', ' ', self.html, flags=re.IGNORECASE )
+			html = re.sub( r'</?(p|div|br|li|h[1-6])[^>]*>', '\n', self.html, flags=re.IGNORECASE )
+			text = re.sub( self.re_tag, ' ', self.html )
 			text = re.sub( self.re_ws, ' ', text ).strip( )
 			return text
 		except Exception as exc:
@@ -1032,7 +1033,8 @@ class ArXiv( Fetcher ):
 		'''
 		try:
 			throw_if( 'question', question )
-			self.query = question.strip( )
+			self.question = question
+			self.query = self.question.strip( )
 			max_docs = self.max_documents if max_documents is None else \
 				max( 1, min( max_documents, 300 ) )
 			
@@ -1300,7 +1302,8 @@ class Wikipedia( Fetcher ):
 		'''
 		try:
 			throw_if( 'question', question )
-			self.query = question.strip( )
+			self.question = question
+			self.query = self.question.strip( )
 			
 			lang = self.language if language is None else \
 				(language.strip( ) if language else 'en')
@@ -1703,6 +1706,7 @@ class GoogleSearch( Fetcher ):
 		'''
 		try:
 			throw_if( 'keywords', keywords )
+			self.keywords = keywords
 			active_key = (api_key or self.api_key or '').strip( )
 			active_cse = (cse_id or self.cse_id or '').strip( )
 			if not active_key:
@@ -1712,7 +1716,7 @@ class GoogleSearch( Fetcher ):
 				raise ValueError( 'Google CSE ID is required.' )
 			
 			self.timeout = time
-			self.keywords = keywords.strip( )
+			self.keywords = self.keywords.strip( )
 			self.results = max( 1, min( results, 10 ) )
 			self.start = max( 1, min( start, 91 ) )
 			self.params = {
@@ -2857,11 +2861,14 @@ class SatelliteCenter( Fetcher ):
 		"""
 		try:
 			throw_if( 'observatories', observatories )
+			self.observatories = observatories
 			throw_if( 'start_time', start_time )
+			self.start_time = start_time
 			throw_if( 'end_time', end_time )
+			self.end_time = end_time
 			self.timeout = time
-			obs = observatories.strip( )
-			time_range = f'{start_time.strip( )},{end_time.strip( )}'
+			obs = self.observatories.strip( )
+			time_range = f'{self.start_time.strip( )},{self.end_time.strip( )}'
 			coords = (coordinate_systems or 'gse').strip( )
 			request_url = ( f'{self.url}/locations/'
 					f'{obs}/'
@@ -5675,7 +5682,8 @@ class AstroQuery( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
+			self.name = name
+			self.name = self.name.strip( )
 			self.row_limit = max( 1, row_limit )
 			
 			simbad = Simbad( )
@@ -5718,7 +5726,8 @@ class AstroQuery( Fetcher ):
 		"""
 		try:
 			throw_if( 'name', name )
-			self.name = name.strip( )
+			self.name = name
+			self.name = self.name.strip( )
 			self.row_limit = max( 1, row_limit )
 			
 			simbad = Simbad( )
@@ -5779,10 +5788,12 @@ class AstroQuery( Fetcher ):
 		"""
 		try:
 			throw_if( 'ra', ra )
+			self.ra = ra
 			throw_if( 'dec', dec )
+			self.dec = dec
 			
-			self.right_ascension = ra.strip( )
-			self.declination = dec.strip( )
+			self.right_ascension = self.ra.strip( )
+			self.declination = self.dec.strip( )
 			self.radius = radius
 			self.row_limit = max( 1, row_limit )
 			
@@ -6111,8 +6122,9 @@ class StarMap( Fetcher ):
 		'''
 		try:
 			throw_if( 'name', name )
+			self.name = name
 			
-			self.object = name.strip( )
+			self.object = self.name.strip( )
 			self.zoom = max( 1, min( zoom, 18 ) )
 			self.box_color = box_color or 'yellow'
 			self.show_box = show_box
@@ -10615,6 +10627,7 @@ class HistoricalWeather( Fetcher ):
 			throw_if( 'location', location )
 			self.location = location
 			throw_if( 'date', date )
+			self.date = date
 			throw_if( 'zone', zone )
 			
 			selected = self.geocode_location( location=self.location, count=count )
@@ -10622,7 +10635,7 @@ class HistoricalWeather( Fetcher ):
 			if not selected:
 				return {
 						'location': self.location,
-						'date': date.isoformat( ),
+						'date': self.date.isoformat( ),
 						'message': 'No geocoding results found.',
 						'data': { }
 				}
@@ -10633,7 +10646,7 @@ class HistoricalWeather( Fetcher ):
 			if lat is None or long is None:
 				return {
 						'location': self.location,
-						'date': date.isoformat( ),
+						'date': self.date.isoformat( ),
 						'message': 'Geocoding returned no usable coordinates.',
 						'geocoding': selected,
 						'data': { }
@@ -10642,7 +10655,7 @@ class HistoricalWeather( Fetcher ):
 			result = self.fetch_historical(
 				lat=float( lat ),
 				long=float( long ),
-				date=date,
+				date=self.date,
 				zone=str( zone or 'auto' ).strip( )
 			) or { }
 			
@@ -10934,8 +10947,9 @@ class Grokipedia( Fetcher ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			
-			self.query = query.strip( )
+			self.query = self.query.strip( )
 			self.limit = self._validate_limit( limit )
 			self.offset = self._validate_offset( offset )
 			self.client = self._get_client( )
@@ -18529,8 +18543,9 @@ class ClimateData( Fetcher ):
 		'''
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -19776,8 +19791,9 @@ class EnviroFacts( Fetcher ):
 		'''
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.params = { }
 			
 			self.response = requests.get(
@@ -19927,8 +19943,9 @@ class EnviroFacts( Fetcher ):
 		'''
 		try:
 			throw_if( 'table_name', table_name )
+			self.table_name = table_name
 			
-			table_value = table_name.strip( ).upper( )
+			table_value = self.table_name.strip( ).upper( )
 			supported_tables: List[ str ] = [
 					'TRI_FACILITY',
 					'TRI_RELEASE',
@@ -20215,8 +20232,9 @@ class TidesAndCurrents( Fetcher ):
 		'''
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.params = { }
 			
 			for key, value in (params or { }).items( ):
@@ -20885,8 +20903,9 @@ class UvIndex( Fetcher ):
 		'''
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.params = { }
 			
 			self.response = requests.get(
@@ -22818,6 +22837,7 @@ class Firms( Fetcher ):
 		'''
 		try:
 			throw_if( 'url', url )
+			self.url = url
 			
 			if self.map_key is None or not str( self.map_key ).strip( ):
 				raise ValueError(
@@ -22825,7 +22845,7 @@ class Firms( Fetcher ):
 					'NASA_FIRMS_MAP_KEY.'
 				)
 			
-			self.url = url.strip( )
+			self.url = self.url.strip( )
 			self.params = { }
 			
 			self.response = requests.get(
