@@ -340,7 +340,6 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) -> None:
 	"""Render Loaded, Chunks, and Embeddings tabs for one API mode."""
 	throw_if( 'prefix', prefix )
-	throw_if( 'loaded_label', loaded_label )
 	initialize_mode_document_state( prefix )
 	loaded_tab, chunks_tab, embeddings_tab = st.tabs(
 		[ loaded_label, '✂️ Chunks', '🔢 Embeddings' ] )
@@ -423,7 +422,7 @@ def rebuild_raw_text_from_documents( ) -> str:
 	initialize_loading_state( )
 	return '\n\n'.join(
 		document.page_content for document in st.session_state[ 'documents' ]
-		if isinstance( getattr( document, 'page_content', None ), str )
+		if isinstance( document.page_content, str )
 		and document.page_content.strip( ) )
 
 def reset_document_processing_controls( key_prefix: str ) -> None:
@@ -469,13 +468,13 @@ def clear_if_active( loader_name: str ) -> None:
 	documents = st.session_state.get( 'documents', [ ] ) or [ ]
 	remaining = [
 		document for document in documents
-		if ( getattr( document, 'metadata', { } ) or { } ).get( 'loader' ) != loader_name ]
+		if ( document.metadata or { } ).get( 'loader' ) != loader_name ]
 	st.session_state[ 'documents' ] = remaining
 	st.session_state[ 'raw_documents' ] = list( remaining )
 	st.session_state[ 'raw_text' ] = rebuild_raw_text_from_documents( )
 	if st.session_state.get( 'active_loader' ) == loader_name:
 		st.session_state[ 'active_loader' ] = (
-			( getattr( remaining[ -1 ], 'metadata', { } ) or { } ).get( 'loader' )
+			( remaining[ -1 ].metadata or { } ).get( 'loader' )
 			if remaining else None )
 	st.session_state[ 'processed_text' ] = None
 	st.session_state[ 'lines' ] = None
@@ -514,7 +513,7 @@ def get_loader_documents( loader_name: str ) -> List[ Document ]:
 	documents = st.session_state.get( 'documents', [ ] ) or [ ]
 	matched = [
 		document for document in documents
-		if ( getattr( document, 'metadata', { } ) or { } ).get( 'loader' ) == loader_name ]
+		if ( document.metadata or { } ).get( 'loader' ) == loader_name ]
 	return matched
 
 def render_document_processing_actions( loader_name: str, key_prefix: str ) -> None:
