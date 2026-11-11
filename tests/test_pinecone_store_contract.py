@@ -29,7 +29,8 @@ class PineconeStoreContractTests( unittest.TestCase ):
             and node.name == 'throw_if' )
         isolated = ast.Module( body=[ throw_if, store_class ], type_ignores=[ ] )
         environment = { 'Any': object, 'List': list, 'Document': object,
-            'Embeddings': object, 'vector_document_ids': vector_document_ids }
+            'Embeddings': object, 'vector_document_ids': vector_document_ids,
+            'Error': lambda error: error, 'Logger': MagicMock( ) }
         exec( compile( ast.fix_missing_locations( isolated ), '<vector>', 'exec' ),
             environment )
         store = environment[ 'PineconeStore' ]( )
