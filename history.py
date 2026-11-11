@@ -210,6 +210,9 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    initialize_live_world_history( )
 	    if df_entities.empty:
 	        return 0
+	    required_columns = { 'EntityType', 'EntityId', 'Name', 'Latitude', 'Longitude', 'Source' }
+	    if not required_columns.issubset( df_entities.columns ):
+	        raise ValueError( 'df_entities is missing required history columns.' )
 	
 	    source_counts: Dict[ str, int ] = { }
 	    inserted = 0
@@ -217,6 +220,14 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	        for _, row in df_entities.iterrows( ):
 	            entity_type = str( row.get( 'EntityType', '' ) )
 	            entity_id = str( row.get( 'EntityId', '' ) )
+	            latitude = row[ 'Latitude' ]
+	            longitude = row[ 'Longitude' ]
+	            if (not isinstance( latitude, (int, float) ) or
+	                    not isinstance( longitude, (int, float) ) or
+	                    isinstance( latitude, bool ) or isinstance( longitude, bool ) or
+	                    not math.isfinite( latitude ) or not math.isfinite( longitude ) or
+	                    not -90 <= latitude <= 90 or not -180 <= longitude <= 180):
+	                raise ValueError( 'History coordinates must be finite and within valid ranges.' )
 	            source_counts[ entity_type ] = source_counts.get( entity_type, 0 )
 	            if source_counts[ entity_type ] >= max_rows_per_source:
 	                continue
@@ -247,8 +258,8 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	                entity_id,
 	                entity_type,
 	                str( row.get( 'Name', '' ) ),
-	                float( row.get( 'Latitude', 0.0 ) ),
-	                float( row.get( 'Longitude', 0.0 ) ),
+	                float( latitude ),
+	                float( longitude ),
 	                float( row.get( 'Altitude', 0.0 ) )
 	                    if pd.notna( row.get( 'Altitude', 0.0 ) ) else None,
 	                float( row.get( 'Heading', 0.0 ) )
