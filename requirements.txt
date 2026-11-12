@@ -58,7 +58,6 @@ spacy
 textblob
 tiktoken
 lxml
-webview
 mkdocs
 mkdocs-material
 mkdocstrings[python]
