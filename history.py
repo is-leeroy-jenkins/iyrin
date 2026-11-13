@@ -214,21 +214,15 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    throw_if( 'refresh_id', refresh_id )
 	    throw_if( 'observed_at', observed_at )
 	    throw_if( 'max_rows_per_source', max_rows_per_source )
-	    if not isinstance( df_entities, pd.DataFrame ):
-	        raise TypeError( 'df_entities must be a pandas DataFrame.' )
-	    if not isinstance( refresh_id, str ) or not isinstance( observed_at, str ):
-	        raise TypeError( 'refresh_id and observed_at must be strings.' )
-	    if type( max_rows_per_source ) is not int or max_rows_per_source < 1:
-	        raise ValueError( 'max_rows_per_source must be a positive integer.' )
 	    timestamp = dt.datetime.fromisoformat( observed_at.replace( 'Z', '+00:00' ) )
 	    if timestamp.tzinfo is None or timestamp.utcoffset( ) != dt.timedelta( 0 ):
-	        raise ValueError( 'observed_at must be an ISO 8601 UTC timestamp.' )
+		    raise ValueError( 'observed_at must be an ISO 8601 UTC timestamp.' )
 	    initialize_live_world_history( )
 	    if df_entities.empty:
-	        return 0
+		    return 0
 	    required_columns = { 'EntityType', 'EntityId', 'Name', 'Latitude', 'Longitude', 'Source' }
 	    if not required_columns.issubset( df_entities.columns ):
-	        raise ValueError( 'df_entities is missing required history columns.' )
+		    raise ValueError( 'df_entities is missing required history columns.' )
 	
 	    source_counts: Dict[ str, int ] = { }
 	    inserted = 0
