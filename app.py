@@ -2227,8 +2227,7 @@ def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ s
 	         'vector_target': vector_target, 'persist_directory': persist_directory,
 	         'namespace': namespace, }
 
-def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap: int ) -> List[
-	Document ]:
+def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap: int ) -> List[ Document ]:
 	"""Split LangChain documents into retrieval chunks."""
 	throw_if( 'documents', documents )
 	throw_if( 'chunk_size', chunk_size )
