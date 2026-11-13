@@ -4404,21 +4404,9 @@ class OpenScience( Fetcher ):
 			--------
 			List[str]
 		'''
-		return [
-				'base_url',
-				'url',
-				'params',
-				'query_text',
-				'format_value',
-				'size',
-				'endpoint',
-				'fetch_dataset',
-				'fetch_metadata',
-				'fetch_assays',
-				'fetch_data',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'url', 'params', 'query_text', 'format_value', 'size', 'endpoint',
+				'fetch_dataset', 'fetch_metadata', 'fetch_assays', 'fetch_data', 'fetch',
+				'create_schema' ]
 	
 	def _validate_format( self, format_value: str ) -> str:
 		'''
