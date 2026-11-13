@@ -109,21 +109,8 @@ class Maps( ):
 	
 	BASE = 'https://maps.googleapis.com/maps/api'
 	
-	def __init__( self, qps: Optional[ float ]=5.0, retries: int=5,
-			min: float=1.0, max: float=30.0, timeout: float=15.0,
-			api_key: Optional[ str ]=None ) -> None:
-		if qps is not None and (
-				type( qps ) not in (int, float) or not math.isfinite( qps )):
-			raise ValueError( 'qps must be a finite number or None.' )
-		if type( retries ) is not int or retries < 0:
-			raise ValueError( 'retries must be a nonnegative integer.' )
-		if (type( min ) not in (int, float) or not math.isfinite( min ) or min < 0 or
-				type( max ) not in (int, float) or not math.isfinite( max ) or max < min):
-			raise ValueError( 'Backoff bounds must be finite and satisfy 0 <= min <= max.' )
-		if type( timeout ) not in (int, float) or not math.isfinite( timeout ) or timeout <= 0:
-			raise ValueError( 'timeout must be a positive finite number.' )
-		if api_key is not None and not isinstance( api_key, str ):
-			raise TypeError( 'api_key must be a string or None.' )
+	def __init__( self, qps: float=5.0, retries: int=5, min: float=1.0,
+	              max: float=30.0, timeout: float=15.0, api_key: str=None ) -> None:
 		self.api_key = api_key if api_key is not None else cfg.GOOGLEMAPS_API_KEY
 		self.limiter = RateLimiter( qps )
 		self.retries = retries
@@ -166,12 +153,6 @@ class Maps( ):
 			throw_if( 'endpoint', endpoint )
 			throw_if( 'params', params )
 			throw_if( 'api_key', self.api_key )
-			if not isinstance( endpoint, str ):
-				raise TypeError( 'endpoint must be a string.' )
-			if not isinstance( params, dict ):
-				raise TypeError( 'params must be a dictionary.' )
-			if not isinstance( self.api_key, str ):
-				raise TypeError( 'api_key must be a string.' )
 			self.endpoint = endpoint
 			self.params = params
 			self.url = f'{self.base_url}/{self.endpoint}'
@@ -185,7 +166,7 @@ class Maps( ):
 					self.query = dict( self.params )
 					self.query[ 'key' ]=self.api_key
 					self.last_query = { key: value for key, value in self.query.items( )
-						if key != 'key' }
+					                    if key != 'key' }
 					start = time.perf_counter( )
 					self.response = self.session.get( self.url, params=self.query,
 						timeout=self.timeout )
@@ -198,7 +179,7 @@ class Maps( ):
 							raise GatewayError( f'Transient HTTP {self.last_status}: '
 								f'{self.response.text[ :200 ]}' )
 						
-						raise GatewayError( f'HTTP {self.last_status}: {self.response.text[ :200 ]}' )
+						raise GatewayError( f'HTTP {self.last_status}: {self.response.text[ :200 ]}')
 					
 					payload = self.response.json( )
 					self.last_payload_status = None
@@ -208,15 +189,9 @@ class Maps( ):
 						payload_error = str( payload.get( 'error_message', '' ) or '' ).strip( )
 						self.last_payload_status = payload_status
 						self.last_payload_error = payload_error
-						hard_failures = {
-								'REQUEST_DENIED',
-								'OVER_DAILY_LIMIT',
-								'OVER_QUERY_LIMIT',
-								'INVALID_REQUEST',
-								'MAX_ELEMENTS_EXCEEDED',
-								'MAX_DIMENSIONS_EXCEEDED',
-								'UNKNOWN_ERROR'
-						}
+						hard_failures = { 'REQUEST_DENIED', 'OVER_DAILY_LIMIT', 'OVER_QUERY_LIMIT',
+						                  'INVALID_REQUEST', 'MAX_ELEMENTS_EXCEEDED',
+								          'MAX_DIMENSIONS_EXCEEDED', 'UNKNOWN_ERROR' }
 						if payload_status in hard_failures:
 							message = payload_error or f'Google API status: {payload_status}'
 							if payload_status in ('OVER_QUERY_LIMIT', 'UNKNOWN_ERROR'):

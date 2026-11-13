@@ -40,7 +40,7 @@
     rates.py
   </summary>
   ******************************************************************************************
-  '''
+'''
 import time
 from typing import Optional
 from boogr import Error, Logger
@@ -68,7 +68,7 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, str ) and not value.strip( ):
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
-class RateLimiter:
+class RateLimiter( ):
 	"""
 
 		Purpose:
@@ -95,8 +95,10 @@ class RateLimiter:
 	
 	def __init__( self, max: Optional[ float ] ) -> None:
 		self.query_per_second = float( max ) if max is not None else None
-		self.interval = ( 1.0 / self.query_per_second
-		                  if self.query_per_second and self.query_per_second > 0 else 0.0 )
+		if self.query_per_second and self.query_per_second > 0:
+			self.interval = 1.0 / self.query_per_second
+		else:
+			self.interval = 0.0
 		self.last = 0.0
 		self.now = 0.0
 		self.delta = 0.0
@@ -129,7 +131,8 @@ class RateLimiter:
 				self.last_sleep = self.interval - self.delta
 				time.sleep( self.last_sleep )
 				self.total_sleep += self.last_sleep
-			self.last = time.time( )
+			else:
+				self.last = time.time( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'

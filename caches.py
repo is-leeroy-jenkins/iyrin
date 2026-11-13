@@ -181,8 +181,7 @@ class InMemoryCache( BaseCache ):
 				None.
 
 			Returns:
-				float:
-					Current Unix timestamp.
+				float: Current Unix timestamp.
 
 		"""
 		try:
@@ -219,7 +218,6 @@ class InMemoryCache( BaseCache ):
 		try:
 			throw_if( 'key', key )
 			throw_if( 'value', value )
-			
 			now_value = self.now( )
 			ttl_value = int( ttl ) if ttl is not None and int( ttl ) > 0 else None
 			expires_value = now_value + ttl_value if ttl_value else None
@@ -248,12 +246,10 @@ class InMemoryCache( BaseCache ):
 				Determine whether an in-memory cache record has expired.
 
 			Parameters:
-				record (Dict[str, Any]):
-					Cache metadata record.
+				record (Dict[str, Any]): Cache metadata record.
 
 			Returns:
-				bool:
-					True if expired; otherwise False.
+				bool: True if expired; otherwise False.
 
 		"""
 		try:
@@ -278,12 +274,10 @@ class InMemoryCache( BaseCache ):
 				Return a cached value by key when present and not expired.
 
 			Parameters:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
 			Returns:
-				Optional[Dict[str, Any]]:
-					Cached value or None.
+				Optional[Dict[str, Any]]: Cached value or None.
 
 		"""
 		try:
@@ -473,14 +467,14 @@ class SQLiteCache( BaseCache ):
 
 	"""
 	path: Optional[ str ]
-	_conn: sqlite3.Connection
+	connection: sqlite3.Connection
 	
 	def __init__( self, path: str = 'mappy_cache.sqlite' ) -> None:
 		self.path = path
 		d = os.path.dirname( self.path )
 		if d:
 			os.makedirs( d, exist_ok=True )
-		self._conn = sqlite3.connect( self.path )
+		self.connection = sqlite3.connect( self.path )
 		self.initialize( )
 	
 	def initialize( self ) -> None:
@@ -497,33 +491,17 @@ class SQLiteCache( BaseCache ):
 
 		"""
 		try:
-			self._conn.execute(  '''
+			self.connection.execute( '''
                 CREATE TABLE IF NOT EXISTS kv
-                (
-                    k
-                    TEXT
-                    PRIMARY
-                    KEY,
-                    v
-                    TEXT
-                    NOT
-                    NULL,
-                    created_at
-                    REAL,
-                    updated_at
-                    REAL,
-                    expires_at
-                    REAL,
-                    hit_count
-                    INTEGER
-                    DEFAULT
-                    0,
-                    last_accessed
-                    REAL
-                )
-				''' )
+                ( k TEXT PRIMARY KEY,
+                  v TEXT  NOT  NULL,
+                  created_at REAL,
+                  updated_at REAL,
+                  expires_at  REAL,
+                  hit_count INTEGER DEFAULT 0,
+                  last_accessed REAL ) ''' )
 			self.migrate( )
-			self._conn.commit( )
+			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -545,19 +523,17 @@ class SQLiteCache( BaseCache ):
 
 		"""
 		try:
-			cursor = self._conn.execute( 'PRAGMA table_info(kv)' )
+			cursor = self.connection.execute( 'PRAGMA table_info(kv)' )
 			columns = { row[ 1 ] for row in cursor.fetchall( ) }
-			additions = {
-					'created_at': 'ALTER TABLE kv ADD COLUMN created_at REAL',
+			additions = { 'created_at': 'ALTER TABLE kv ADD COLUMN created_at REAL',
 					'updated_at': 'ALTER TABLE kv ADD COLUMN updated_at REAL',
 					'expires_at': 'ALTER TABLE kv ADD COLUMN expires_at REAL',
 					'hit_count': 'ALTER TABLE kv ADD COLUMN hit_count INTEGER DEFAULT 0',
-					'last_accessed': 'ALTER TABLE kv ADD COLUMN last_accessed REAL'
-			}
+					'last_accessed': 'ALTER TABLE kv ADD COLUMN last_accessed REAL' }
 			
 			for column, sql in additions.items( ):
 				if column not in columns:
-					self._conn.execute( sql )
+					self.connection.execute( sql )
 		
 		except Exception as e:
 			exception = Error( e )
@@ -576,8 +552,7 @@ class SQLiteCache( BaseCache ):
 				None.
 
 			Returns:
-				float:
-					Current Unix timestamp.
+				float: Current Unix timestamp.
 
 		"""
 		try:
@@ -596,18 +571,13 @@ class SQLiteCache( BaseCache ):
 				Return a cached value by key when present and not expired.
 
 			Parameters:
-				key (str):
-					Cache key.
-
-			Returns:
-				Optional[Dict[str, Any]]:
-					Cached value or None.
+				key (str): Cached value or None.
 
 		"""
 		try:
 			throw_if( 'key', key )
-			cursor = self._conn.execute( 'SELECT v, expires_at, hit_count FROM kv WHERE k = ?',
-				(key,) )
+			statement = 'SELECT v, expires_at, hit_count FROM kv WHERE k = ?'
+			cursor = self.connection.execute( statement, (key,) )
 			row = cursor.fetchone( )
 			if not row:
 				return None
@@ -619,10 +589,9 @@ class SQLiteCache( BaseCache ):
 				self.delete( key )
 				return None
 			
-			self._conn.execute(
-				'UPDATE kv SET hit_count = ?, last_accessed = ? WHERE k = ?',
+			self.connection.execute( 'UPDATE kv SET hit_count = ?, last_accessed = ? WHERE k = ?',
 				(hit_count + 1, self.now( ), key) )
-			self._conn.commit( )
+			self.connection.commit( )
 			return json.loads( payload )
 		except Exception as e:
 			exception = Error( e )
@@ -638,14 +607,9 @@ class SQLiteCache( BaseCache ):
 				Set a cache value by key.
 
 			Parameters:
-				key (str):
-					Cache key.
-
-				value (Dict[str, Any]):
-					JSON-serializable cache value.
-
-				ttl (Optional[int]):
-					Optional time-to-live in seconds.
+				key (str): Cache key.
+				value (Dict[str, Any]): JSON-serializable cache value.
+				ttl (Optional[int]): Optional time-to-live in seconds.
 
 			Returns:
 				None.
@@ -658,28 +622,20 @@ class SQLiteCache( BaseCache ):
 			ttl_value = int( ttl ) if ttl is not None and int( ttl ) > 0 else None
 			expires_value = now_value + ttl_value if ttl_value else None
 			payload = json.dumps( value, ensure_ascii=False )
-			self._conn.execute( '''
-                INSERT INTO kv
-                (k,
-                 v,
-                 created_at,
-                 updated_at,
-                 expires_at,
-                 hit_count,
-                 last_accessed)
+			self.connection.execute( ''' INSERT INTO kv
+                (k, v, created_at, updated_at, expires_at, hit_count, last_accessed)
                 VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(k) DO
                 UPDATE SET
                     v = excluded.v,
                     updated_at = excluded.updated_at,
                     expires_at = excluded.expires_at
-				''', (key, payload, now_value,
-			          now_value, expires_value, 0, None) )
-			self._conn.commit( )
+				''', (key, payload, now_value, now_value, expires_value, 0, None) )
+			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None )'
+			exception.method = 'set( self, **args )'
 			raise exception
 	
 	def delete( self, key: str ) -> None:
@@ -689,8 +645,7 @@ class SQLiteCache( BaseCache ):
 				Delete a cache entry by key.
 
 			Parameters:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
 			Returns:
 				None.
@@ -698,8 +653,8 @@ class SQLiteCache( BaseCache ):
 		"""
 		try:
 			throw_if( 'key', key )
-			self._conn.execute( 'DELETE FROM kv WHERE k = ?', (key,) )
-			self._conn.commit( )
+			self.connection.execute( 'DELETE FROM kv WHERE k = ?', (key,) )
+			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -707,15 +662,14 @@ class SQLiteCache( BaseCache ):
 			exception.method = 'delete( self, key: str )'
 			raise exception
 	
-	def clear( self, namespace: Optional[ str ] = None ) -> None:
+	def clear( self, namespace: Optional[ str ]=None ) -> None:
 		"""
 
 			Purpose:
 				Clear all cache entries or only entries under a namespace prefix.
 
 			Parameters:
-				namespace (Optional[str]):
-					Optional namespace prefix.
+				namespace (Optional[str]): Optional namespace prefix.
 
 			Returns:
 				None.
@@ -724,11 +678,11 @@ class SQLiteCache( BaseCache ):
 		try:
 			if namespace:
 				prefix = f'{namespace}::%'
-				self._conn.execute( 'DELETE FROM kv WHERE k LIKE ?', (prefix,) )
+				self.connection.execute( 'DELETE FROM kv WHERE k LIKE ?', (prefix,) )
 			else:
-				self._conn.execute( 'DELETE FROM kv' )
+				self.connection.execute( 'DELETE FROM kv' )
 			
-			self._conn.commit( )
+			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -743,12 +697,10 @@ class SQLiteCache( BaseCache ):
 				Determine whether a cache key exists and is not expired.
 
 			Parameters:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
 			Returns:
-				bool:
-					True if the key exists and is not expired.
+				bool: True if the key exists and is not expired.
 
 		"""
 		try:
@@ -776,14 +728,14 @@ class SQLiteCache( BaseCache ):
 
 		"""
 		try:
-			cursor = self._conn.execute(
+			cursor = self.connection.execute(
 				'SELECT COUNT(*) FROM kv WHERE expires_at IS NOT NULL AND expires_at <= ?',
 				(self.now( ),) )
 			count = int( cursor.fetchone( )[ 0 ] or 0 )
-			self._conn.execute(
+			self.connection.execute(
 				'DELETE FROM kv WHERE expires_at IS NOT NULL AND expires_at <= ?',
 				(self.now( ),) )
-			self._conn.commit( )
+			self.connection.commit( )
 			return count
 		except Exception as e:
 			exception = Error( e )
@@ -802,24 +754,18 @@ class SQLiteCache( BaseCache ):
 				None.
 
 			Returns:
-				Dict[str, Any]:
-					Cache diagnostics.
+				Dict[str, Any]: Cache diagnostics.
 
 		"""
 		try:
-			total = self._conn.execute( 'SELECT COUNT(*) FROM kv' ).fetchone( )[ 0 ]
-			expired = self._conn.execute(
+			total = self.connection.execute( 'SELECT COUNT(*) FROM kv' ).fetchone( )[ 0 ]
+			expired = self.connection.execute(
 				'SELECT COUNT(*) FROM kv WHERE expires_at IS NOT NULL AND expires_at <= ?',
 				(self.now( ),) ).fetchone( )[ 0 ]
-			hits = self._conn.execute(
+			hits = self.connection.execute(
 				'SELECT COALESCE(SUM(hit_count), 0) FROM kv' ).fetchone( )[ 0 ]
-			return {
-					'backend': 'sqlite',
-					'path': self.path,
-					'entries': int( total or 0 ),
-					'expired_entries': int( expired or 0 ),
-					'hits': int( hits or 0 )
-			}
+			return { 'backend': 'sqlite', 'path': self.path, 'entries': int( total or 0 ),
+					'expired_entries': int( expired or 0 ), 'hits': int( hits or 0 ) }
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -841,7 +787,7 @@ class SQLiteCache( BaseCache ):
 
 		"""
 		try:
-			self._conn.close( )
+			self.connection.close( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'

@@ -320,11 +320,7 @@ class StaticMap( ):
 			marker_values = [ ]			
 			for lat_value, lng_value in self.points:
 				marker_values.append( f'color:{self.color}|{lat_value},{lng_value}' )			
-			self.params = {
-					'size': self.size,
-					'maptype': self.maptype,
-					'markers': marker_values
-			}			
+			self.params = { 'size': self.size, 'maptype': self.maptype, 'markers': marker_values }
 			if self.zoom > 0:
 				center_lat = sum( p[ 0 ] for p in self.points ) / len( self.points )
 				center_lng = sum( p[ 1 ] for p in self.points ) / len( self.points )
@@ -391,16 +387,10 @@ class StaticMap( ):
 			path_points = [ f'{lat},{lng}' for lat, lng in self.points ]
 			path_parts = [ f'color:{self.color}', f'weight:{self.weight}' ] + path_points
 			path_value = '|'.join( path_parts )
-			self.params = {
-					'size': self.size,
-					'maptype': self.maptype,
-					'path': path_value,
-					'markers': [
-							f'color:green|{self.points[ 0 ][ 0 ]},{self.points[ 0 ][ 1 ]}',
-							f'color:red|{self.points[ -1 ][ 0 ]},{self.points[ -1 ][ 1 ]}'
-					],
-					'visible': path_points
-			}
+			self.params = { 'size': self.size, 'maptype': self.maptype, 'path': path_value,
+					'markers': [ f'color:green|{self.points[ 0 ][ 0 ]},{self.points[ 0 ][ 1 ]}',
+							f'color:red|{self.points[ -1 ][ 0 ]},{self.points[ -1 ][ 1 ]}' ],
+					'visible': path_points }
 			
 			return self.build_url( self.params )
 		except Exception as e:

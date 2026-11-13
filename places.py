@@ -1,6 +1,6 @@
 '''
   ******************************************************************************************
-      Assembly:                Iyrin
+      Assembly:                iyrin
       Filename:                places.py
       Author:                  Terry D. Eppler
       Created:                 05-31-2022
@@ -10,10 +10,7 @@
   ******************************************************************************************
   <copyright file='places.py' company='Terry D. Eppler'>
 
-	     Iyrin is a python framework encapsulating the Google Maps functionality.
-	     Copyright ©  2022  Terry Eppler
-
-	 
+	     Copyright ©  2025  Terry Eppler
 
      Permission is hereby granted, free of charge, to any person obtaining a copy
      of this software and associated documentation files (the “Software”),
@@ -76,18 +73,15 @@ class Place( ):
 	"""
 
 		Purpose:
-		Use Places Text Search and Place Details to recover locations that
-		Geocoding may miss. Results are returned in the same canonical shape
-		used by Geocoder so both services can be used interchangeably.
+			Use Places Text Search and Place Details to recover locations that
+			Geocoding may miss. Results are returned in the same canonical shape
+			used by Geocoder so both services can be used interchangeably.
 
 		Parameters:
-		maps (Maps):
-			Maps gateway instance.
-		cache (Optional[BaseCache]):
-			Optional cache for query results.
+			maps (Maps): Maps gateway instance.
+			cache (Optional[BaseCache]): Optional cache for query results.
 
-		Returns:
-		Places instance with text search and place-details helpers.
+		Returns: Places instance with text search and place-details helpers.
 
 	"""
 	map: Optional[ Maps ]
@@ -105,6 +99,19 @@ class Place( ):
 	output: Optional[ Dict ]
 	
 	def __init__( self, maps: Maps, cache: Optional[ BaseCache ]=None ) -> None:
+		"""
+	
+			Purpose:
+				Initializes Place objects given a map and optional cache
+	
+			Parameters:
+				maps (Maps): Maps gateway instance.
+				cache (Optional[BaseCache]): Optional cache for query results.
+	
+			Returns:
+				Places instance with text search and place-details helpers.
+	
+		"""
 		self.maps = maps
 		self.cache = cache
 		self.country = None
@@ -171,6 +178,8 @@ class Place( ):
 
 		"""
 		try:
+			throw_if( 'components', components )
+			throw_if( 'kind', kind )
 			for component in components or [ ]:
 				if kind in (component.get( 'types' ) or [ ]):
 					if want_long:
@@ -208,8 +217,7 @@ class Place( ):
 			throw_if( 'details', details )
 			geometry = (details.get( 'geometry' ) or { }).get( 'location' ) or { }
 			components = details.get( 'address_components', [ ] ) or [ ]
-			return {
-					'formatted_address': details.get( 'formatted_address' ),
+			return { 'formatted_address': details.get( 'formatted_address' ),
 					'lat': geometry.get( 'lat' ),
 					'lng': geometry.get( 'lng' ),
 					'place_id': details.get( 'place_id' ),
@@ -266,10 +274,8 @@ class Place( ):
 			fields = ( 'formatted_address,geometry,address_component,place_id,type,'
 					'name,business_status,rating,user_ratings_total,website,'
 					'formatted_phone_number' )
-			self.details = self.maps.request( 'place/details/json', {
-						'place_id': place_id,
-						'fields': fields
-				} ).get( 'result', { } )
+			pyld = { 'place_id': place_id, 'fields': fields }
+			self.details = self.maps.request( 'place/details/json', pyld  ).get( 'result', { } )
 			if not self.details:
 				raise NotFound( f'No place details found for "{place_id}" ' )
 			self.output = self.flatten_place_details( self.details, query=place_id )
@@ -328,10 +334,8 @@ class Place( ):
 			fields = ( 'formatted_address,geometry,address_component,place_id,type,'
 					'name,business_status,rating,user_ratings_total,website,'
 					'formatted_phone_number' )
-			self.details = self.maps.request( 'place/details/json', {
-						'place_id': place_id,
-						'fields': fields
-				} ).get( 'result', { } )
+			_payload = { 'place_id': place_id, 'fields': fields }
+			self.details = self.maps.request( 'place/details/json', _payload  ).get( 'result', { } )
 			if not self.details:
 				raise NotFound( f'No place details found for "{self.query}" ' )
 			self.output = self.flatten_place_details( self.details, query=self.query )

@@ -63,7 +63,6 @@ def throw_if( name: str, value: object ) -> None:
     if isinstance( value, str ) and not value.strip( ):
         raise ValueError( f'Argument "{name}" cannot be empty.' )
 
-
 def initialize_live_world_history( ) -> None:
     '''
 
@@ -81,8 +80,7 @@ def initialize_live_world_history( ) -> None:
 	    database_path.parent.mkdir( parents=True, exist_ok=True )
 	    with sqlite3.connect( database_path ) as conn:
 		    conn.execute( f'''
-	            CREATE TABLE IF NOT EXISTS {HISTORY_TABLE} (
-	                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+	            CREATE TABLE IF NOT EXISTS {HISTORY_TABLE} ( Id INTEGER PRIMARY KEY AUTOINCREMENT,
 	                RefreshId TEXT NOT NULL,
 	                ObservedAt TEXT NOT NULL,
 	                EntityId TEXT NOT NULL,
@@ -96,26 +94,20 @@ def initialize_live_world_history( ) -> None:
 	                Timestamp TEXT,
 	                Source TEXT NOT NULL,
 	                Metadata TEXT,
-	                UNIQUE (RefreshId, EntityType, EntityId)
-	            )
-	        ''' )
+	                UNIQUE (RefreshId, EntityType, EntityId) ) ''' )
 		    conn.execute( f'''
 	            CREATE INDEX IF NOT EXISTS IX_{HISTORY_TABLE}_ObservedAt
-	            ON {HISTORY_TABLE} (ObservedAt)
-	        ''' )
+	            ON {HISTORY_TABLE} (ObservedAt) ''' )
 		    conn.execute( f'''
 	            CREATE INDEX IF NOT EXISTS IX_{HISTORY_TABLE}_Entity
-	            ON {HISTORY_TABLE} (EntityType, EntityId, ObservedAt)
-	        ''' )
+	            ON {HISTORY_TABLE} (EntityType, EntityId, ObservedAt) ''' )
 		    conn.execute( f'''
 	            CREATE TABLE IF NOT EXISTS {HISTORY_STATE_TABLE} (
 	                EntityType TEXT NOT NULL,
 	                EntityId TEXT NOT NULL,
 	                Fingerprint TEXT NOT NULL,
 	                UpdatedAt TEXT NOT NULL,
-	                PRIMARY KEY (EntityType, EntityId)
-	            )
-	        ''' )
+	                PRIMARY KEY (EntityType, EntityId) ) ''' )
     except Exception as e:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
@@ -147,8 +139,7 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 	        raise TypeError( 'row must be a pandas Series.' )
 	    metadata = row.get( 'Metadata', { } )
 	    metadata_value = metadata if isinstance( metadata, dict ) else { }
-	    state = {
-	        'EntityType': str( row.get( 'EntityType', '' ) ),
+	    state = { 'EntityType': str( row.get( 'EntityType', '' ) ),
 	        'EntityId': str( row.get( 'EntityId', '' ) ),
 	        'Name': str( row.get( 'Name', '' ) ),
 	        'Latitude': float( row.get( 'Latitude', 0.0 ) ),
@@ -160,8 +151,7 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 	        'Speed': float( row.get( 'Speed', 0.0 ) )
 	            if pd.notna( row.get( 'Speed', 0.0 ) ) else None,
 	        'Source': str( row.get( 'Source', '' ) ),
-	        'Metadata': metadata_value,
-	    }
+	        'Metadata': metadata_value, }
 	    payload = json.dumps( state, sort_keys=True, ensure_ascii=False,
 	        separators=( ',', ':' ), default=str )
 	    return hashlib.sha256( payload.encode( 'utf-8' ) ).hexdigest( )
@@ -248,16 +238,11 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	            metadata_text = json.dumps(
 	                metadata if isinstance( metadata, dict ) else { },
 	                ensure_ascii=False, default=str )
-	            cursor = conn.execute( f'''
-	                INSERT OR IGNORE INTO {HISTORY_TABLE} (
+	            cursor = conn.execute( f''' INSERT OR IGNORE INTO {HISTORY_TABLE} (
 	                    RefreshId, ObservedAt, EntityId, EntityType, Name, Latitude, Longitude,
 	                    Altitude, Heading, Speed, Timestamp, Source, Metadata )
 	                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	            ''', (
-	                refresh_id,
-	                observed_at,
-	                entity_id,
-	                entity_type,
+	            ''', (refresh_id, observed_at, entity_id, entity_type,
 	                str( row.get( 'Name', '' ) ),
 	                float( latitude ),
 	                float( longitude ),
@@ -269,29 +254,26 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	                    if pd.notna( row.get( 'Speed', 0.0 ) ) else None,
 	                str( row.get( 'Timestamp', '' ) ),
 	                str( row.get( 'Source', '' ) ),
-	                metadata_text,
-	            ) )
+	                metadata_text,  ) )
 	            if cursor.rowcount != 1:
 	                continue
 	            inserted += 1
 	            source_counts[ entity_type ] += 1
-	
 	            if fingerprint:
-	                conn.execute( f'''
-	                    INSERT INTO {HISTORY_STATE_TABLE} (
+	                conn.execute( f''' INSERT INTO {HISTORY_STATE_TABLE} (
 	                        EntityType, EntityId, Fingerprint, UpdatedAt )
 	                    VALUES (?, ?, ?, ?)
 	                    ON CONFLICT (EntityType, EntityId) DO UPDATE SET
 	                        Fingerprint = excluded.Fingerprint,
-	                        UpdatedAt = excluded.UpdatedAt
-	                ''', (entity_type, entity_id, fingerprint, observed_at) )
+	                        UpdatedAt = excluded.UpdatedAt ''',
+		                (entity_type, entity_id,  fingerprint, observed_at) )
 	
 	    return inserted
     except Exception as e:
 	    exception = Error( e )
 	    exception.module = 'Iyrin'
 	    exception.cause = 'history'
-	    exception.method = 'persist_live_world_history( df_entities, refresh_id, observed_at, max_rows_per_source=5000 ) -> int'
+	    exception.method = 'persist_live_world_history( **args ) -> int'
 	    Logger( ).write( exception )
 	    raise exception from e
 

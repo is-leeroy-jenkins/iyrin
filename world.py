@@ -1,45 +1,67 @@
 '''
-******************************************************************************************
- Assembly:                iyr
- Filename:                world.py
- Author:                  Terry D. Eppler / Assistant
- Created:                 09-12-2026
+  ******************************************************************************************
+      Assembly:                Iyrin
+      Filename:                world.py
+      Author:                  Terry D. Eppler
+      Created:                 05-31-2025
 
- Last Modified By:        Terry D. Eppler / Assistant
- Last Modified On:        09-12-2026
-******************************************************************************************
+      Last Modified By:        Terry D. Eppler
+      Last Modified On:        05-01-2025
+  ******************************************************************************************
+  <copyright file='world.py' company='Terry D. Eppler'>
 
-Purpose:
-    Live World Data functionality inspired by God's Eye View while preserving Iyr's
-    existing GIS modes and execution paths. The module provides isolated sidebar state,
-    live aircraft, military aircraft, satellite, vessel, earthquake, active-fire, infrastructure, and public-camera retrieval,
-    normalized geospatial entities, operational PyDeck rendering, entity tracking and trails,
-    refresh controls,
-    filtering, and source-data inspection.
-******************************************************************************************
+	     Copyright ©  2025  Terry Eppler
+
+     Permission is hereby granted, free of charge, to any person obtaining a copy
+     of this software and associated documentation files (the “Software”),
+     to deal in the Software without restriction,
+     including without limitation the rights to use,
+     copy, modify, merge, publish, distribute, sublicense,
+     and/or sell copies of the Software,
+     and to permit persons to whom the Software is furnished to do so,
+     subject to the following conditions:
+
+     The above copyright notice and this permission notice shall be included in all
+     copies or substantial portions of the Software.
+
+     THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+     INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+     ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+     DEALINGS IN THE SOFTWARE.
+
+     You can contact me at:  terryeppler@gmail.com or eppler.terry@epa.gov
+
+  </copyright>
+  <summary>
+        Live World Data functionality inspired by God's Eye View while preserving Iyr's
+	    existing GIS modes and execution paths. The module provides isolated sidebar state,
+	    live aircraft, military aircraft, satellite, vessel, earthquake, active-fire, infrastructure,
+	    and public-camera retrieval, normalized geospatial entities, operational PyDeck rendering,
+	    entity tracking and trails, refresh controls,
+	    filtering, and source-data inspection.
+  </summary>
+  ******************************************************************************************
 '''
-
 from __future__ import annotations
-
 import datetime as dt
 import json
 import math
 import os
 from dataclasses import asdict, dataclass
 from typing import Any, Callable, Dict, List
-
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
-
 import config as cfg
 from fetchers import Firms, USGSEarthquakes
-from history import (
-	clear_live_world_history, get_live_world_history_snapshots, get_live_world_history_summary,
-	load_live_world_history, persist_live_world_history, purge_live_world_history )
-from sources import (
-	AdsbLolMilitary, AisStreamLive, CelesTrakLive, OpenSkyLive, OverpassCameras, OverpassInfrastructure,
-	OverpassMapLayers )
+from history import (clear_live_world_history, get_live_world_history_snapshots,
+                     get_live_world_history_summary,load_live_world_history,
+                     persist_live_world_history, purge_live_world_history )
+from sources import ( AdsbLolMilitary, AisStreamLive, CelesTrakLive, OpenSkyLive,
+                      OverpassCameras, OverpassInfrastructure, OverpassMapLayers )
 from tools import LIVE_WORLD_AGENT_TOOLS
 
 LIVE_WORLD_LAYERS: Dict[ str, str ] = { 'aircraft': '✈️ Aircraft (Live)',
@@ -312,7 +334,6 @@ def initialize_live_world_state( ) -> None:
 		if key not in st.session_state:
 			st.session_state[ key ] = value
 
-
 def get_live_world_layers( ) -> Dict[ str, bool ]:
 	'''
 
@@ -326,11 +347,8 @@ def get_live_world_layers( ) -> Dict[ str, bool ]:
 
 	'''
 	initialize_live_world_state( )
-	return {
-		key: bool( st.session_state.get( f'live_world_{key}', False ) )
-		for key in LIVE_WORLD_LAYERS
-	}
-
+	return { key: bool( st.session_state.get( f'live_world_{key}', False ) )
+		for key in LIVE_WORLD_LAYERS }
 
 def render_live_world_sidebar( ) -> None:
 	'''
@@ -346,12 +364,10 @@ def render_live_world_sidebar( ) -> None:
 
 	'''
 	initialize_live_world_state( )
-
 	with st.expander( '🌐 Mapping', expanded=False ):
 		st.checkbox( 'Enable Live Map', key='live_world_enabled' )
 		st.divider( )
 		st.caption( 'Live Layers' )
-
 		st.checkbox( LIVE_WORLD_LAYERS[ 'aircraft' ], key='live_world_aircraft' )
 		if st.session_state[ 'live_world_aircraft' ]:
 			st.slider( 'Aircraft Radius (Degrees)', min_value=0.25, max_value=10.0,

@@ -37,16 +37,12 @@
 
   </copyright>
   <summary>
-    pipelines.py — application processing pipelines and orchestration helpers.
-
-    Purpose:
-        Provides Iyrin's document processing pipelines and orchestration functionality
+    Provides Iyrin's document processing pipelines and orchestration functionality
   </summary>
   ******************************************************************************************
 '''
 from __future__ import annotations
 from chunk_ids import chunk_identifier
-
 import json
 import math
 from typing import Dict, List
@@ -55,7 +51,6 @@ import streamlit as st
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from processors import PdfParser
-
 import config as cfg
 from embedders import EmbeddingFactory
 from fetchers import WebFetcher
@@ -843,7 +838,6 @@ def clear_loader_documents( loader_name: str ) -> int:
 	throw_if( 'loader_name', loader_name )
 	clear_if_active( loader_name )
 	return len( st.session_state.get( 'documents', [ ] ) or [ ] )
-
 
 def promote_loader_documents( documents: List[ Document ], loader_name: str ) -> int:
 	"""
