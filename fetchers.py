@@ -4085,25 +4085,14 @@ class NearbyObjects( Fetcher ):
 			self.mode = 'nhats_object'
 			self.query = self.designation.strip( )
 			self.url = f'{self.base_url}/nhats.api'
-			self.params = {
-					'des': self.query,
-					'dv': dv,
-					'dur': dur,
-					'stay': stay,
-					'launch': launch.strip( )
-			}
+			self.params = { 'des': self.query, 'dv': dv, 'dur': dur, 'stay': stay,
+					'launch': launch.strip( ) }
 			
 			self.response = requests.get( url=self.url, params=self.params,
 				headers=self.headers, timeout=time )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
-			
-			return {
-					'mode': self.mode,
-					'url': self.url,
-					'params': self.params,
-					'data': payload
-			}
+			return { 'mode': self.mode, 'url': self.url, 'params': self.params, 'data': payload }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -4143,16 +4132,10 @@ class NearbyObjects( Fetcher ):
 				timeout=time )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
-			
-			return {
-					'mode': self.mode,
-					'url': self.url,
-					'params': self.params,
-					'count': payload.get( 'count', 0 ),
-					'fields': payload.get( 'fields', [ ] ),
+			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
+					'count': payload.get( 'count', 0 ), 'fields': payload.get( 'fields', [ ] ),
 					'data': payload.get( 'data', [ ] ),
-					'signature': payload.get( 'signature', { } )
-			}
+					'signature': payload.get( 'signature', { } ) }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -4276,8 +4259,7 @@ class NearbyObjects( Fetcher ):
 			exception.method = 'fetch( self, **kwargs) -> Dict[ str, Any ]'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
@@ -4306,14 +4288,15 @@ class NearbyObjects( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
-			self.required = required
 			throw_if( 'function', function )
-			self.function = function
 			throw_if( 'tool', tool )
-			self.tool = tool
-			throw_if( 'description', description )
-			self.description = description
+			throw_if( 'required', required )
 			throw_if( 'parameters', parameters )
+			throw_if( 'description', description )
+			self.required = required
+			self.function = function
+			self.tool = tool
+			self.description = description
 			self.parameters = parameters
 			if not isinstance( self.parameters, dict ):
 				raise TypeError( 'parameters must be a dictionary.' )
@@ -4325,25 +4308,17 @@ class NearbyObjects( Fetcher ):
 			
 			if self.required is None:
 				self.required = list( self.parameters.keys( ) )
-			
-			return {
-					'name': self.function.strip( ),
-					'description': f'{self.description.strip( )} This function uses the {self.tool.strip( )} service.',
-					'parameters': {
-							'type': 'object',
-							'properties': self.parameters,
-							'required': self.required
-					}
-			}
+			return { 'name': self.function.strip( ),
+					'description': f'{self.description.strip( )} This function uses the '
+					               f'{self.tool.strip( )} service.',
+					'parameters': { 'type': 'object', 'properties': self.parameters,
+							'required': self.required } }
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
+			exception.method = 'create_schema( self, **args) -> Dict[ str, str ]'
 			raise exception
 
 class OpenScience( Fetcher ):
