@@ -18,6 +18,6 @@ Data Management provides local tabular and persistence workflows.
 |---|---|
 | `stores/sqlite/` | SQLite persistence. |
 | `stores/csv/` | CSV-backed storage. |
-| `caches.py` | Memory and SQLite cache implementations. |
+| `../../storage.py` | Memory and SQLite cache implementations. |
 | `excel.py` | Spreadsheet integration. |
 | `stores/vector.py` | Chroma and Pinecone vector storage. |

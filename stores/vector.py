@@ -32,7 +32,6 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
-
 class ChromaStore( ):
 	"""Persistent local Chroma vector-store wrapper."""
 

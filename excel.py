@@ -44,7 +44,7 @@
 
 from typing import Optional, Dict, List
 import pandas as pd
-from caches import BaseCache
+from storage import BaseCache
 from geocode import Geocoder
 from maps import Maps
 from places import Place

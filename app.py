@@ -55,7 +55,7 @@ from distances import DistanceMatrix
 from timezones import Timezone
 from staticmaps import StaticMap
 from excel import Excel
-from caches import InMemoryCache, SQLiteCache
+from storage import InMemoryCache, SQLiteCache
 from langchain_core.documents import Document
 from lxml import etree
 from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promote_loader_documents,
@@ -65,7 +65,7 @@ from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promo
                         render_loading_tabs, render_mode_document_tabs, initialize_mode_document_state,
                         render_source_processing_controls, reset_document_processing_controls,
                         render_web_document_processing)
-from world import render_live_world_map, render_live_world_sidebar
+from realtime import render_live_world_map, render_live_world_sidebar
 from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoader,
 	ExcelLoader, MarkdownLoader,
 	HtmlLoader, JsonLoader, WikiLoader, GithubLoader, WebLoader, ArXivLoader,
@@ -82,9 +82,7 @@ from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData
                       USGSScienceBase, CensusData, Socrata, HealthData, GlobalHealthData,
                       UnitedNations, WorldPopulation, Wonder)
 
-# ---------------------------------------------------------------------
-# SESSION STATE INITIALIZATION
-# ---------------------------------------------------------------------
+# ------- Session State Initialization
 
 if 'source' not in st.session_state:
 	st.session_state[ 'source' ] = ''
@@ -2184,7 +2182,7 @@ def append_geocoding_map_result( query: str, source: str, result: object ) -> No
 		
 # ------------ DATABASE UTILITIES
 
-def initialize_database( ) -> None:
+def initialize_sqlite( ) -> None:
 	"""
 		Purpose:
 		--------
@@ -2275,7 +2273,7 @@ def initialize_database( ) -> None:
 		conn.commit( )
 
 # Initialize the writable database before the application reads its tables.
-initialize_database( )
+initialize_sqlite( )
 
 def create_connection( ) -> sqlite3.Connection:
 	return sqlite3.connect( cfg.DB_PATH )
@@ -3348,7 +3346,9 @@ style_subheaders( )
 st.logo( cfg.LOGO, size='Large' )
 
 with st.sidebar:
-	# ------- Map Mode
+	# ------------------------------------------------------------------------------
+	# Expander - Map Mode
+	# ------------------------------------------------------------------------------
 	blue_divider( )
 	st.markdown( '#### 🛰️ Map Data' )
 	with st.expander( label='Pipelines', expanded=True ):
@@ -3362,8 +3362,10 @@ with st.sidebar:
 		if previous_mode != mode:
 			st.session_state[ 'previous_mode' ] = mode
 			st.rerun( )
-		
-	# ------- Data
+			
+	# ------------------------------------------------------------------------------
+	# Expander - Static Data
+	# ------------------------------------------------------------------------------
 	blue_divider( )
 	st.markdown( '#### 🏛️ Static Data' )
 	with st.expander( label='Source', expanded=False ):
@@ -3442,7 +3444,9 @@ with st.sidebar:
 	blue_divider( )
 	st.markdown( '#### 🎚️ Configuration' )
 	
-	# ------- User Location
+	# ------------------------------------------------------------------------------
+	# Expander - Location
+	# ------------------------------------------------------------------------------
 	with st.expander( label='Location',  expanded=False ):
 		st.checkbox( 'Use browser location on load',
 			value=st.session_state.get( 'browser_geolocation_enabled', True ),
@@ -3471,11 +3475,15 @@ with st.sidebar:
 			st.session_state[ 'browser_geolocation_permission_denied' ] = False
 			st.rerun( )
 	
-	# ------- Query
+	# ------------------------------------------------------------------------------
+	# Expander - Query
+	# ------------------------------------------------------------------------------
 	with st.expander( label='Frequency', expanded=False ):
 		qps = st.slider( 'Queries Per Second', min_value=1, max_value=50, value=10, )
 	
-	# ------- Cache
+	# ------------------------------------------------------------------------------
+	# Expander - Cache
+	# ------------------------------------------------------------------------------
 	with st.expander( label='Persistence',  expanded=False ):
 		cache_backend = st.selectbox( 'Select', options=[ 'none', 'memory', 'sqlite' ],
 			key='cache_backend' )
@@ -3486,7 +3494,9 @@ with st.sidebar:
 			cache_path = st.text_input( 'SQLite Cache Path', value='mappy_cache.db', )
 			cache = SQLiteCache( cache_path )
 	
-	# ------- Security
+	# ------------------------------------------------------------------------------
+	# Expander - Security
+	# ------------------------------------------------------------------------------
 	blue_divider( )
 	st.markdown( '#### 🔒 Credentials' )
 	with st.expander( label='API', expanded=False ):
@@ -3641,6 +3651,7 @@ with st.sidebar:
 			st.session_state.purpleair_api_key = purpleair_key
 			os.environ[ 'PURPLEAIR_API_KEY' ] = purpleair_key
 	
+	# ------- Map Functionality
 	maps = Maps( qps=qps, )
 	distances = DistanceMatrix( maps )
 	timezone = Timezone( maps )
@@ -3648,9 +3659,7 @@ with st.sidebar:
 	places = Place( maps, cache=cache )
 	static_maps = StaticMap( )
 	
-# ------------------------------------------------------------------------------
-# BROWSER GEOLOCATION BOOTSTRAP
-# ------------------------------------------------------------------------------
+# ----- Browser Geolocation
 bootstrap_browser_geolocation( geocoder )
 ensure_active_location_state( )
 

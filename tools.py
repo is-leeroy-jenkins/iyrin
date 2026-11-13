@@ -624,15 +624,13 @@ def get_live_world_tracking_status( ) -> Dict[ str, object ]:
         Logger( ).write( exception )
         raise exception from exc
 
-LIVE_WORLD_AGENT_TOOLS: Dict[ str, object ] = {
-    'get_live_world_status': get_live_world_status,
-    'list_live_world_entities': list_live_world_entities,
-    'search_live_world_entities': search_live_world_entities,
-    'find_live_world_nearest': find_live_world_nearest,
-    'get_live_world_source_status': get_live_world_source_status,
-    'get_live_world_analysis_status': get_live_world_analysis_status,
-    'get_live_world_geofence_status': get_live_world_geofence_status,
-    'get_live_world_tracking_status': get_live_world_tracking_status,
-    'get_live_world_history_status': get_live_world_history_status,
-    'list_live_world_history': list_live_world_history,
-}
+LIVE_WORLD_AGENT_TOOLS: Dict[ str, object ] = { 'get_live_world_status': get_live_world_status,
+		'list_live_world_entities': list_live_world_entities,
+		'search_live_world_entities': search_live_world_entities,
+		'find_live_world_nearest': find_live_world_nearest,
+		'get_live_world_source_status': get_live_world_source_status,
+		'get_live_world_analysis_status': get_live_world_analysis_status,
+		'get_live_world_geofence_status': get_live_world_geofence_status,
+		'get_live_world_tracking_status': get_live_world_tracking_status,
+		'get_live_world_history_status': get_live_world_history_status,
+		'list_live_world_history': list_live_world_history, }

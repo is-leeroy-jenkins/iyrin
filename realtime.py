@@ -1,14 +1,14 @@
 '''
   ******************************************************************************************
       Assembly:                Iyrin
-      Filename:                world.py
+      Filename:                realtime.py
       Author:                  Terry D. Eppler
       Created:                 05-31-2025
 
       Last Modified By:        Terry D. Eppler
       Last Modified On:        05-01-2025
   ******************************************************************************************
-  <copyright file='world.py' company='Terry D. Eppler'>
+  <copyright file='realtime.py' company='Terry D. Eppler'>
 
 	     Copyright ©  2025  Terry Eppler
 
@@ -184,7 +184,6 @@ def throw_if( name: str, value: object ) -> None:
 
 	if isinstance( value, str ) and not value.strip( ):
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
-
 
 def initialize_live_world_state( ) -> None:
 	'''
@@ -657,7 +656,6 @@ def render_live_world_sidebar( ) -> None:
 						st.session_state[ 'live_world_history_last_error' ] = ''
 			st.checkbox( AI_ADVANCED_TOOLS[ 'agent_tools' ], key='live_world_agent_tools' )
 
-
 def clear_live_world_data( ) -> None:
 	'''
 
@@ -715,7 +713,6 @@ def clear_live_world_data( ) -> None:
 		key: False for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_refresh_requested' ] = False
 
-
 def create_live_world_bounding_box( latitude: float, longitude: float,
 		delta: float=2.0 ) -> str:
 	'''
@@ -742,7 +739,6 @@ def create_live_world_bounding_box( latitude: float, longitude: float,
 	east = min( 180.0, float( longitude ) + float( delta ) )
 	north = min( 90.0, float( latitude ) + float( delta ) )
 	return f'{west:.6f},{south:.6f},{east:.6f},{north:.6f}'
-
 
 def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -846,8 +842,6 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	st.session_state[ 'live_world_aircraft_result' ] = result
 	return entities_to_dataframe( entities )
 
-
-
 def calculate_live_world_distance_nm( latitude_a: float, longitude_a: float,
 		latitude_b: float, longitude_b: float ) -> float:
 	'''
@@ -880,7 +874,6 @@ def calculate_live_world_distance_nm( latitude_a: float, longitude_a: float,
 		+ math.cos( lat_a ) * math.cos( lat_b ) * math.sin( delta_lon / 2.0 ) ** 2)
 	central_angle = 2.0 * math.atan2( math.sqrt( value ), math.sqrt( 1.0 - value ) )
 	return 3440.065 * central_angle
-
 
 def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -977,7 +970,6 @@ def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.Data
 
 	st.session_state[ 'live_world_military_aircraft_result' ] = result
 	return entities_to_dataframe( entities )
-
 
 def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -1126,7 +1118,6 @@ def fetch_live_satellites( ) -> pd.DataFrame:
 			f'CelesTrak returned {len( records )} records but every propagation failed.' )
 	return entities_to_dataframe( entities )
 
-
 def fetch_live_earthquakes( ) -> pd.DataFrame:
 	'''
 
@@ -1197,7 +1188,6 @@ def fetch_live_earthquakes( ) -> pd.DataFrame:
 
 	st.session_state[ 'live_world_earthquake_result' ] = result
 	return entities_to_dataframe( entities )
-
 
 def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -1287,8 +1277,6 @@ def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	st.session_state[ 'live_world_firms_result' ] = result
 	return entities_to_dataframe( entities )
 
-
-
 def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
 
@@ -1365,7 +1353,6 @@ def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFra
 
 	st.session_state[ 'live_world_infrastructure_result' ] = result
 	return entities_to_dataframe( entities )
-
 
 def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -1448,7 +1435,6 @@ def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 	st.session_state[ 'live_world_camera_result' ] = result
 	return entities_to_dataframe( entities )
 
-
 def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
 
@@ -1528,7 +1514,6 @@ def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 	st.session_state[ 'live_world_map_layer_result' ] = result
 	return entities_to_dataframe( entities )
 
-
 def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
 	'''
 
@@ -1552,7 +1537,6 @@ def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
 		if key in row:
 			return row[ key ]
 	return None
-
 
 def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 	'''
@@ -1593,8 +1577,6 @@ def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 		} )
 	return pd.DataFrame( rows, columns=columns )
 
-
-
 def get_live_world_tracking_options( ) -> Dict[ str, str ]:
 	'''
 
@@ -1627,9 +1609,6 @@ def get_live_world_tracking_options( ) -> Dict[ str, str ]:
 		options[ tracking_key ] = f'{entity_type} | {name} | {entity_id}'
 	return options
 
-
-
-
 def get_live_world_measurement_options( ) -> Dict[ str, str ]:
 	'''
 
@@ -1657,7 +1636,6 @@ def get_live_world_measurement_options( ) -> Dict[ str, str ]:
 		key = f'Entity::{entity_type}::{entity_id}'
 		options[ key ] = f'{entity_type} | {name} | {entity_id}'
 	return options
-
 
 def resolve_live_world_measurement_point( key: str, latitude: float,
 		longitude: float, endpoint: str ) -> Dict[ str, object ]:
@@ -1714,7 +1692,6 @@ def resolve_live_world_measurement_point( key: str, latitude: float,
 		'Longitude': float( row[ 'Longitude' ] ),
 	}
 
-
 def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dict[ str, object ]:
 	'''
 
@@ -1755,7 +1732,6 @@ def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dic
 		'Bearing': bearing,
 	}
 
-
 def add_live_world_annotation( ) -> None:
 	'''
 
@@ -1783,7 +1759,6 @@ def add_live_world_annotation( ) -> None:
 	} )
 	st.session_state[ 'live_world_annotations' ] = annotations
 
-
 def clear_live_world_annotations( ) -> None:
 	'''
 
@@ -1798,7 +1773,6 @@ def clear_live_world_annotations( ) -> None:
 	'''
 	initialize_live_world_state( )
 	st.session_state[ 'live_world_annotations' ] = [ ]
-
 
 def get_live_world_annotation_frame( ) -> pd.DataFrame:
 	'''
@@ -1816,7 +1790,6 @@ def get_live_world_annotation_frame( ) -> pd.DataFrame:
 	columns = [ 'AnnotationId', 'Label', 'Latitude', 'Longitude', 'CreatedAt' ]
 	return pd.DataFrame( st.session_state.get( 'live_world_annotations', [ ] ) or [ ],
 		columns=columns )
-
 
 def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
 	'''
@@ -1845,7 +1818,6 @@ def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
 		key = f'Entity::{entity_type}::{entity_id}'
 		options[ key ] = f'{entity_type} | {name} | {entity_id}'
 	return options
-
 
 def resolve_live_world_analysis_origin( key: str, latitude: float,
 		longitude: float ) -> Dict[ str, object ]:
@@ -1897,7 +1869,6 @@ def resolve_live_world_analysis_origin( key: str, latitude: float,
 		'EntityType': entity_type,
 		'EntityId': entity_id,
 	}
-
 
 def calculate_live_world_cross_layer_analysis( latitude: float,
 		longitude: float ) -> pd.DataFrame:
@@ -1968,7 +1939,6 @@ def calculate_live_world_cross_layer_analysis( latitude: float,
 	limit = int( st.session_state[ 'live_world_analysis_limit' ] )
 	return df_result.head( limit ).reset_index( drop=True )
 
-
 def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
 	'''
 
@@ -1996,7 +1966,6 @@ def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
 		key = f'Entity::{entity_type}::{entity_id}'
 		options[ key ] = f'{entity_type} | {name} | {entity_id}'
 	return options
-
 
 def resolve_live_world_geofence_origin( key: str, latitude: float,
 		longitude: float ) -> Dict[ str, object ]:
@@ -2048,7 +2017,6 @@ def resolve_live_world_geofence_origin( key: str, latitude: float,
 		'EntityType': entity_type,
 		'EntityId': entity_id,
 	}
-
 
 def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -2114,7 +2082,6 @@ def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.Dat
 	return pd.DataFrame( rows ).sort_values(
 		by='DistanceNM', ascending=True, kind='stable' ).reset_index( drop=True )
 
-
 def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 	'''
 
@@ -2176,7 +2143,6 @@ def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 	st.session_state[ 'live_world_geofence_events' ] = events[ -limit: ]
 	st.session_state[ 'live_world_geofence_snapshot' ] = current_snapshot
 
-
 def clear_live_world_geofence_events( ) -> None:
 	'''
 
@@ -2195,7 +2161,6 @@ def clear_live_world_geofence_events( ) -> None:
 	st.session_state[ 'live_world_geofence_initialized' ] = False
 	st.session_state[ 'live_world_geofence_last_refresh_processed' ] = ''
 
-
 def get_live_world_geofence_event_frame( ) -> pd.DataFrame:
 	'''
 
@@ -2213,7 +2178,6 @@ def get_live_world_geofence_event_frame( ) -> pd.DataFrame:
 		'DistanceNM', 'Source', 'ObservedAt' ]
 	return pd.DataFrame( st.session_state.get( 'live_world_geofence_events', [ ] ) or [ ],
 		columns=columns )
-
 
 def get_live_world_history_window_hours( window: str ) -> int:
 	'''
@@ -2244,7 +2208,6 @@ def get_live_world_history_window_hours( window: str ) -> int:
 		raise ValueError( f'Unsupported Historical Replay window: {window}' )
 	return windows[ window ]
 
-
 def load_live_world_replay_frame( ) -> pd.DataFrame:
 	'''
 
@@ -2269,7 +2232,6 @@ def load_live_world_replay_frame( ) -> pd.DataFrame:
 	return load_live_world_history( hours, entity_types, snapshot,
 		int( st.session_state[ 'live_world_history_limit' ] ) )
 
-
 def clear_live_world_tracking( ) -> None:
 	'''
 
@@ -2285,7 +2247,6 @@ def clear_live_world_tracking( ) -> None:
 	initialize_live_world_state( )
 	st.session_state[ 'live_world_tracking_history' ] = [ ]
 	st.session_state[ 'live_world_tracking_active_entity' ] = ''
-
 
 def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 	'''
@@ -2350,7 +2311,6 @@ def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 	history.append( point )
 	max_points = int( st.session_state[ 'live_world_tracking_max_points' ] )
 	st.session_state[ 'live_world_tracking_history' ] = history[ -max_points: ]
-
 
 def get_live_world_tracking_frame( ) -> pd.DataFrame:
 	'''
@@ -2417,7 +2377,6 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 	st.session_state[ 'live_world_source_last_success' ] = last_success
 	st.session_state[ 'live_world_source_stale' ] = stale_state
 
-
 def refresh_live_world_source( source_key: str,
 		fetcher: Callable[ [ ], pd.DataFrame ] ) -> pd.DataFrame:
 	'''
@@ -2472,7 +2431,6 @@ def refresh_live_world_source( source_key: str,
 			source_key, 'Failed', error=str( ex ), stale=has_stale_data,
 			attempted_at=attempted_at )
 		return previous_frame
-
 
 def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -2561,7 +2519,6 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 
 	finally:
 		st.session_state[ 'live_world_refresh_requested' ] = False
-
 
 def render_live_world_map( latitude: float, longitude: float ) -> None:
 	'''
@@ -3230,7 +3187,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 				'Provider-neutral tools operate on normalized Live World state and return '
 				'JSON-serializable results for external agent frameworks.' )
 
-
 def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> float:
 	'''
 
@@ -3256,7 +3212,6 @@ def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> flo
 		return float( metadata.get( key, default ) )
 	except ( TypeError, ValueError ):
 		return float( default )
-
 
 def make_live_world_display_frame( df_frame: pd.DataFrame ) -> pd.DataFrame:
 	'''

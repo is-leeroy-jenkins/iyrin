@@ -56,14 +56,13 @@ from boogr import Error, Logger
 import pandas as pd
 import config as cfg
 
-
 HISTORY_TABLE = 'LiveWorldHistory'
 HISTORY_STATE_TABLE = 'LiveWorldHistoryState'
-HISTORY_DEDUP_ENTITY_TYPES: List[ str ] = [
-    'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ]
-HISTORY_COLUMNS: List[ str ] = [
-    'RefreshId', 'ObservedAt', 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude',
-    'Altitude', 'Heading', 'Speed', 'Timestamp', 'Source', 'Metadata' ]
+HISTORY_DEDUP_ENTITY_TYPES: List[ str ] = [ 'Earthquake', 'Fire', 'Infrastructure',
+                                            'Camera', 'Map Feature' ]
+HISTORY_COLUMNS: List[ str ] = [ 'RefreshId', 'ObservedAt', 'EntityId', 'EntityType', 'Name',
+                                 'Latitude', 'Longitude', 'Altitude', 'Heading', 'Speed',
+                                 'Timestamp', 'Source', 'Metadata' ]
 
 
 def throw_if( name: str, value: object ) -> None:

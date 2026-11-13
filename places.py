@@ -41,7 +41,7 @@
   ******************************************************************************************
 '''
 from typing import Any, Dict, Optional, List
-from caches import BaseCache
+from storage import BaseCache
 from exceptions import NotFound
 from maps import Maps
 from boogr import Error
