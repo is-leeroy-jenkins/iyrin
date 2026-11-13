@@ -3519,10 +3519,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
+			exception.method = 'create_schema( self, **args ) -> Dict[ str, str ]'
 			raise exception
 			
 class GlobalImagery( Fetcher ):
@@ -3626,7 +3623,6 @@ class GlobalImagery( Fetcher ):
 			exception.method = 'fetch_sidereal( self, date: str ) -> float'
 			raise exception
 			
-	
 	def fetch_mercator_map( self , ccrs=None ):
 		'''Fetch a NASA GIBS Mercator map image and render it through the provided
 			Cartopy coordinate reference system module.
@@ -3852,26 +3848,10 @@ class NearbyObjects( Fetcher ):
 			--------
 			List[str]
 		'''
-		return [
-				'base_url',
-				'url',
-				'params',
-				'mode',
-				'start_date',
-				'end_date',
-				'query',
-				'dist_max',
-				'body',
-				'sort',
-				'limit',
-				'fetch_close_approaches',
-				'fetch_object_lookup',
-				'fetch_nhats_summary',
-				'fetch_nhats_object',
-				'fetch_fireballs',
-				'fetch',
-				'create_schema'
-		]
+		return [ 'base_url', 'url', 'params', 'mode', 'start_date', 'end_date', 'query',
+		         'dist_max', 'body', 'sort', 'limit', 'fetch_close_approaches',
+		         'fetch_object_lookup', 'fetch_nhats_summary', 'fetch_nhats_object',
+		         'fetch_fireballs', 'fetch', 'create_schema' ]
 	
 	def fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD',
 			body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3879,33 +3859,23 @@ class NearbyObjects( Fetcher ):
 
 			Parameters:
 			-----------
-			start_date (str):
-				Inclusive lower date bound in YYYY-MM-DD format.
-
-			end_date (str):
-				Inclusive upper date bound in YYYY-MM-DD format.
-
-			dist_max (str):
-				Maximum close-approach distance. Examples:
-				- 10LD
-				- 0.05AU
-
-			body (str):
-				Close-approach body selector. Example values include Earth, Moon,
-				Mars, Juptr.
-
-			sort (str):
-				Sort key for the returned records. Example values include date and dist.
-
-			limit (int):
-				Maximum number of rows to return.
-
-			time (int):
-				Request timeout in seconds.
+				start_date (str): Inclusive lower date bound in YYYY-MM-DD format.
+	
+				end_date (str): Inclusive upper date bound in YYYY-MM-DD format.
+	
+				dist_max (str):
+					Maximum close-approach distance. Examples:
+					- 10LD
+					- 0.05AU
+	
+				body (str): Close-approach body selector. Example values include Earth, Moon, Mars, Juptr.
+				sort (str): Sort key for the returned records. Example values include date and dist.
+				limit (int): Maximum number of rows to return.
+				time (int): Request timeout in seconds.
 
 			Returns:
 			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 		'''
 		try:
 			throw_if( 'start_date', start_date )
@@ -3920,28 +3890,17 @@ class NearbyObjects( Fetcher ):
 			self.sort = (sort or 'date').strip( )
 			self.limit = limit
 			self.url = f'{self.base_url}/cad.api'
-			self.params = {
-					'date-min': self.start_date,
-					'date-max': self.end_date,
-					'dist-max': self.dist_max,
-					'body': self.body,
-					'sort': self.sort,
-					'limit': self.limit
-			}
+			self.params = { 'date-min': self.start_date, 'date-max': self.end_date,
+					'dist-max': self.dist_max, 'body': self.body, 'sort': self.sort,
+					'limit': self.limit }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=time )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
 			
-			return {
-					'mode': self.mode,
-					'url': self.url,
-					'params': self.params,
-					'count': payload.get( 'count', 0 ),
-					'fields': payload.get( 'fields', [ ] ),
-					'data': payload.get( 'data', [ ] ),
-					'signature': payload.get( 'signature', { } )
-			}
+			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
+					'count': payload.get( 'count', 0 ), 'fields': payload.get( 'fields', [ ] ),
+					'data': payload.get( 'data', [] ), 'signature': payload.get( 'signature', {})}
 		
 		except Exception as e:
 			exception = Error( e )
