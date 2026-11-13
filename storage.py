@@ -50,9 +50,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import re
-from chunk_ids import vector_document_ids
+from embedders import vector_document_ids
 from pathlib import Path
-from typing import Any, List, Dict, Optional
+from typing import Any, List, Dict, Optional, Tuple
 from boogr import Error, Logger
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
@@ -250,16 +250,8 @@ class InMemoryCache( BaseCache ):
 			now_value = self.now( )
 			ttl_value = int( ttl ) if ttl is not None and int( ttl ) > 0 else None
 			expires_value = now_value + ttl_value if ttl_value else None
-			
-			return {
-					'key': key,
-					'value': value,
-					'created_at': now_value,
-					'updated_at': now_value,
-					'expires_at': expires_value,
-					'hit_count': 0,
-					'last_accessed': None
-			}
+			return { 'key': key, 'value': value, 'created_at': now_value, 'updated_at': now_value,
+					'expires_at': expires_value, 'hit_count': 0, 'last_accessed': None }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -464,15 +456,9 @@ class InMemoryCache( BaseCache ):
 			for record in self.store.values( ):
 				if self.is_expired( record ):
 					expired += 1
-			return {
-					'backend': 'memory',
-					'entries': len( self.store ),
-					'expired_entries': expired,
-					'hits': self.hits,
-					'misses': self.misses,
-					'sets': self.sets,
-					'deletes': self.deletes
-			}
+			return { 'backend': 'memory', 'entries': len( self.store ), 'expired_entries': expired,
+					'hits': self.hits, 'misses': self.misses, 'sets': self.sets,
+					'deletes': self.deletes }
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -1366,7 +1352,7 @@ class SQLiteDatabase( ):
 			rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
 			return rows
 	
-	def add_column( table: str, column: str, col_type: str ):
+	def add_column( self, table: str, column: str, col_type: str ):
 		column = self.create_identifier( column )
 		col_type = col_type.upper( )
 		with self.create_connection( ) as conn:

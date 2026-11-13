@@ -53,9 +53,8 @@ from langchain_core.documents import Document
 from lxml import etree
 from realtime import render_live_world_map, render_live_world_sidebar
 from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoader,
-	ExcelLoader, MarkdownLoader,
-	HtmlLoader, JsonLoader, WikiLoader, GithubLoader, WebLoader, ArXivLoader,
-	XmlLoader, PubMedSearchLoader, OpenCityLoader,
+	ExcelLoader, MarkdownLoader, HtmlLoader, JsonLoader, WikiLoader, GithubLoader, WebLoader,
+	ArXivLoader, XmlLoader, PubMedSearchLoader, OpenCityLoader,
 	AwsFileLoader, OneDriveDocLoader, GoogleCloudFileLoader, GoogleSpeechToTextLoader,
 	GoogleBucketLoader, AwsBucketLoader, EmailLoader, SpfxLoader, WebCrawler as LoaderWebCrawler)
 from generators import Chat, Claude, Gemini, Grok, Mistral
@@ -2245,16 +2244,12 @@ def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap
 		document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )
 	return chunks
 
-def create_embeddings( chunks: List[ Document ], provider: str, model: str, model_path: str ) -> \
-tuple[ object, List[ List[ float ] ] ]:
+def create_embeddings( chunks: List[ Document ],
+           provider: str, model: str, model_path: str ) -> tuple[ object, List[ List[ float ] ] ]:
 	"""Create and validate embeddings for document chunks."""
 	throw_if( 'chunks', chunks )
 	throw_if( 'provider', provider )
 	throw_if( 'model', model )
-	if not isinstance( provider, str ) or not isinstance( model, str ):
-		raise TypeError( 'provider and model must be strings.' )
-	if not isinstance( model_path, str ):
-		raise TypeError( 'model_path must be a string.' )
 	factory = EmbeddingFactory( )
 	embedder = factory.create( provider, model, model_path )
 	vectors = embedder.embed_documents( [ document.page_content for document in chunks ] )
