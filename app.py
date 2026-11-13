@@ -25,13 +25,13 @@ from __future__ import annotations
 
 from bs4 import BeautifulSoup
 from collections import deque, Counter
+import datetime as dt
 from exceptions import NotFound
 import html as html_lib
 import inspect
 import json
 import os
 import tempfile
-from typing import Optional
 import matplotlib
 import pandas as pd
 import plotly.graph_objects as go
@@ -41,19 +41,12 @@ import streamlit.components.v1 as components
 from streamlit_js_eval import get_geolocation
 import sqlite3
 import re
-import datetime as dt
-from typing import Optional
 import time
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
 import config as cfg
-from mapping import Map
+from mapping import Map, Geocoder, Place, DistanceMatrix, Timezone, StaticMap
 from typing import Any, Optional, Dict, List, Tuple
-from geocode import Geocoder
-from places import Place
-from distances import DistanceMatrix
-from timezones import Timezone
-from staticmaps import StaticMap
 from excel import Excel
 from storage import InMemoryCache, SQLiteCache
 from langchain_core.documents import Document
@@ -68,7 +61,6 @@ from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoa
 from generators import Chat, Claude, Gemini, Grok, Mistral
 from upload_documents import load_uploaded_document
 from embedders import EmbeddingFactory
-from fetchers import WebFetcher
 from storage import ChromaStore, PineconeStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from processors import PdfParser
@@ -79,7 +71,7 @@ from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData
                       NavalObservatory, SatelliteCenter, SpaceWeather, AstroCatalog, AstroQuery,
                       StarMap, StarChart, WebFetcher, EarthObservatory, NearbyObjects, OpenScience,
                       USGSScienceBase, CensusData, Socrata, HealthData, GlobalHealthData,
-                      UnitedNations, WorldPopulation, Wonder)
+                      UnitedNations, WorldPopulation, Wonder, WebFetcher)
 
 # ------- Session State Initialization
 
