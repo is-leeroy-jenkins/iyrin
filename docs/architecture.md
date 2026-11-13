@@ -5,7 +5,7 @@
 | Layer | Modules | Responsibility |
 |---|---|---|
 | Streamlit UI | `app.py`, `../realtime.py` | Modes, controls, session state, visualization, and interaction. |
-| Geospatial gateway | `maps.py`, `geocode.py`, `places.py`, `distances.py`, `timezones.py`, `staticmaps.py` | Geocoding, places, distance, time zones, and map operations. |
+| Geospatial gateway | `../mapping.py`, `geocode.py`, `places.py`, `distances.py`, `timezones.py`, `staticmaps.py` | Geocoding, places, distance, time zones, and map operations. |
 | Data acquisition | `fetchers.py`, `sources.py`, `loaders.py` | Scientific APIs, Live World providers, web retrieval, documents, and cloud sources. |
 | Processing | `processors.py`, `pipelines.py`, `embedders.py` | Parsing, NLP, chunking, embeddings, and orchestration. |
 | Persistence | `../storage.py`, `history.py`, `stores/` | Cache state, Live World history, SQLite, Chroma, and Pinecone. |

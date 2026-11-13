@@ -45,7 +45,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Union
 import math
 import pandas as pd
-from maps import Maps
+from mapping import Map
 from boogr import Error, Logger
 
 
@@ -113,12 +113,12 @@ class DistanceMatrix( ):
 		The instance exposes summary, matrix, compare_modes, and DataFrame helpers.
 			
 	"""
-	_maps: Maps
+	_maps: Map
 	modes: List[ str ]
 	data: Dict[ str, Any ] | None
 	rows: List[ Dict[ str, Any ] ] | None
 	
-	def __init__( self, maps: Maps ) -> None:
+	def __init__( self, maps: Map ) -> None:
 		self._maps = maps
 		self.modes = [ 'driving', 'walking', 'bicycling', 'transit' ]
 		self.data = None

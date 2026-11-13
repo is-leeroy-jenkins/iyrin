@@ -47,7 +47,7 @@ import time
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
 import config as cfg
-from maps import Maps
+from mapping import Map
 from typing import Any, Optional, Dict, List, Tuple
 from geocode import Geocoder
 from places import Place
@@ -58,13 +58,6 @@ from excel import Excel
 from storage import InMemoryCache, SQLiteCache
 from langchain_core.documents import Document
 from lxml import etree
-from pipelines import (PdfParser, clear_if_active, clear_loader_documents, promote_loader_documents,
-                       initialize_loading_state, sync_mode_document,
-                        rebuild_raw_text_from_documents, render_document_processing_actions,
-                        render_document_processing_controls, render_document_processing_inputs,
-                        render_loading_tabs, render_mode_document_tabs, initialize_mode_document_state,
-                        render_source_processing_controls, reset_document_processing_controls,
-                        render_web_document_processing)
 from realtime import render_live_world_map, render_live_world_sidebar
 from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoader,
 	ExcelLoader, MarkdownLoader,
@@ -74,6 +67,12 @@ from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoa
 	GoogleBucketLoader, AwsBucketLoader, EmailLoader, SpfxLoader, WebCrawler as LoaderWebCrawler)
 from generators import Chat, Claude, Gemini, Grok, Mistral
 from upload_documents import load_uploaded_document
+from embedders import EmbeddingFactory
+from fetchers import WebFetcher
+from storage import ChromaStore, PineconeStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from processors import PdfParser
+from chunk_ids import chunk_identifier
 from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData, TidesAndCurrents,
                       AirNow, UvIndex, OpenAQ, PurpleAir, EnviroFacts, Firms, EoNet,
                       USGSEarthquakes, USGSWaterData, USGSTheNationalMap, GlobalImagery,
@@ -2180,1041 +2179,762 @@ def append_geocoding_map_result( query: str, source: str, result: object ) -> No
 	except Exception as e:
 		st.error( f'Unable to append geocoding result to map: {e}' )
 		
-# ------------ DATABASE UTILITIES
+# ------------ PIPELINE UTILITIES
 
-def initialize_sqlite( ) -> None:
-	"""
-		Purpose:
-		--------
-		Ensure required SQLite tables exist and that the Prompts table contains the
-		columns required by the prompt utilities and Prompt Engineering mode.
+EMBEDDING_MODELS: Dict[ str, List[ str ] ] = {
+		'OpenAI': [ 'text-embedding-3-small', 'text-embedding-3-large' ],
+		'Google Generative AI': [ 'gemini-embedding-2-preview' ], 'Mistral AI': [
+				'mistral-embed' ],
+		'Hugging Face': [ 'sentence-transformers/all-MiniLM-L6-v2',
+				'sentence-transformers/all-mpnet-base-v2' ], 'Local GGUF': [ 'Local GGUF' ], }
 
-		Parameters:
-		-----------
-		None
-
-		Returns:
-		--------
-		None
-	"""
-	Path( 'stores/sqlite' ).mkdir( parents=True, exist_ok=True )
-	with sqlite3.connect( cfg.DB_PATH ) as conn:
-		conn.execute(
-			"""
-            CREATE TABLE IF NOT EXISTS chat_history
-            (
-                id
-                INTEGER
-                PRIMARY
-                KEY
-                AUTOINCREMENT,
-                role
-                TEXT,
-                content
-                TEXT
-            )
-			"""
-		)
-		
-		conn.execute(
-			"""
-            CREATE TABLE IF NOT EXISTS embeddings
-            (
-                id
-                INTEGER
-                PRIMARY
-                KEY
-                AUTOINCREMENT,
-                chunk
-                TEXT,
-                vector
-                BLOB
-            )
-			"""
-		)
-		
-		conn.execute(
-			"""
-            CREATE TABLE IF NOT EXISTS Prompts
-            (
-                PromptsId
-                INTEGER
-                NOT
-                NULL
-                PRIMARY
-                KEY
-                AUTOINCREMENT,
-                Caption
-                TEXT,
-                Name
-                TEXT
-            (
-                80
-            ),
-                Text TEXT,
-                Version TEXT
-            (
-                80
-            ),
-                ID TEXT
-            (
-                80
-            )
-                )
-			"""
-		)
-		
-		prompt_columns = [ row[ 1 ] for row in
-		                   conn.execute( 'PRAGMA table_info("Prompts");' ).fetchall( ) ]
-		
-		if 'Caption' not in prompt_columns:
-			conn.execute( 'ALTER TABLE "Prompts" ADD COLUMN "Caption" TEXT;' )
-		
-		conn.commit( )
-
-# Initialize the writable database before the application reads its tables.
-initialize_sqlite( )
-
-def create_connection( ) -> sqlite3.Connection:
-	return sqlite3.connect( cfg.DB_PATH )
-
-def list_tables( ) -> List[ str ]:
-	with create_connection( ) as conn:
-		_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
-		rows = conn.execute( _query ).fetchall( )
-		return [ r[ 0 ] for r in rows ]
-
-def create_schema( table: str ) -> List[ Tuple ]:
-	with create_connection( ) as conn:
-		return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
-
-def read_table( table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
-	"""
-	
-		Purpose:
-		--------
-		Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
-	
-		Parameters:
-		-----------
-		table : str
-			Table name.
-		limit : int = None
-			Optional row limit.
-		offset : int = 0
-			Optional row offset.
-	
-		Returns:
-		--------
-		pd.DataFrame
-			DataFrame of plain Python scalar values.
-	
-	"""
-	if not table:
-		return pd.DataFrame( )
-	
-	query = f'SELECT * FROM "{table}"'
-	if limit:
-		query += f' LIMIT {int( limit )} OFFSET {int( offset )}'
-	
-	with create_connection( ) as conn:
-		cur = conn.cursor( )
-		cur.execute( query )
-		
-		raw_columns = [ d[ 0 ] for d in (cur.description or [ ]) ]
-		rows = cur.fetchall( )
-	
-	seen: Dict[ str, int ] = { }
-	columns: List[ str ] = [ ]
-	
-	for col in raw_columns:
-		name = str( col )
-		if name not in seen:
-			seen[ name ] = 0
-			columns.append( name )
+def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ str, object ]:
+	"""Render Foo-style chunking, embedding, and vector-storage controls."""
+	throw_if( 'key_prefix', key_prefix )
+	throw_if( 'collection_name', collection_name )
+	chunk_col, overlap_col = st.columns( 2, border=True, gap='xxsmall' )
+	with chunk_col:
+		chunk_size = st.slider( 'Chunk Size', min_value=100, max_value=4000, value=1000, step=100,
+			key=f'{key_prefix}_chunk_size' )
+	with overlap_col:
+		chunk_overlap = st.slider( 'Chunk Overlap', min_value=0,
+			max_value=min( 1000, chunk_size - 1 ), value=min( 200, chunk_size - 1 ), step=50,
+			key=f'{key_prefix}_chunk_overlap' )
+	provider_col, model_col = st.columns( 2 )
+	with provider_col:
+		provider = st.selectbox( 'Embedding Provider', options=list( EMBEDDING_MODELS.keys( ) ),
+			index=list( EMBEDDING_MODELS.keys( ) ).index( 'Hugging Face' ),
+			key=f'{key_prefix}_embedding_provider' )
+	with model_col:
+		model = st.selectbox( 'Embedding Model', options=EMBEDDING_MODELS[ provider ],
+			key=f'{key_prefix}_embedding_model' )
+	model_path = ''
+	if provider == 'Local GGUF':
+		model_path = st.text_input( 'Local GGUF Model Path',
+			placeholder=r'C:\models\embedding-model.gguf',
+			key=f'{key_prefix}_embedding_model_path' )
+	store_col, target_col = st.columns( 2 )
+	with store_col:
+		vector_backend = st.selectbox( 'Vector Store', options=[ 'Chroma', 'Pinecone' ],
+			key=f'{key_prefix}_vector_backend' )
+	with target_col:
+		if vector_backend == 'Chroma':
+			vector_target = st.text_input( 'Collection Name', value=collection_name,
+				key=f'{key_prefix}_chroma_collection' )
 		else:
-			seen[ name ] += 1
-			columns.append( f'{name}_{seen[ name ]}' )
-	
-	def _scalarize( value: Any ) -> Any:
-		if value is None or isinstance( value, (str, int, float, bool) ):
-			return value
-		
-		if isinstance( value, bytes ):
-			try:
-				return value.decode( 'utf-8' )
-			except Exception:
-				return value.hex( )
-		
-		if isinstance( value, (list, tuple, set, dict) ):
-			try:
-				return str( normalize( value ) )
-			except Exception:
-				return str( value )
-		
-		if hasattr( value, 'model_dump' ):
-			try:
-				return str( value.model_dump( ) )
-			except Exception:
-				return str( value )
-		
-		return str( value )
-	
-	normalized_rows: List[ Dict[ str, Any ] ] = [ ]
-	for row in rows:
-		record: Dict[ str, Any ] = { }
-		for idx, col in enumerate( columns ):
-			record[ col ] = _scalarize( row[ idx ] )
-		normalized_rows.append( record )
-	
-	return pd.DataFrame( normalized_rows, columns=columns )
+			vector_target = st.text_input( 'Index Name', value='',
+				key=f'{key_prefix}_pinecone_index' )
+	if vector_backend == 'Chroma':
+		persist_directory = st.text_input( 'Persistence Directory', value='stores/chroma',
+			key=f'{key_prefix}_chroma_directory' )
+		namespace = ''
+	else:
+		persist_directory = ''
+		namespace = st.text_input( 'Namespace', value='', key=f'{key_prefix}_pinecone_namespace' )
+	return { 'chunk_size': chunk_size, 'chunk_overlap': chunk_overlap, 'provider': provider,
+	         'model': model, 'model_path': model_path, 'vector_backend': vector_backend,
+	         'vector_target': vector_target, 'persist_directory': persist_directory,
+	         'namespace': namespace, }
 
-def render_table( df: pd.DataFrame ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
-		first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
-	
-		Parameters:
-		-----------
-		df : pd.DataFrame
-			The DataFrame to render.
-	
-		Returns:
-		--------
-		None
-	
-	"""
-	if df is None:
-		st.info( 'No data available.' )
+def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap: int ) -> List[
+	Document ]:
+	"""Split LangChain documents into retrieval chunks."""
+	throw_if( 'documents', documents )
+	throw_if( 'chunk_size', chunk_size )
+	throw_if( 'chunk_overlap', chunk_overlap )
+	if type( chunk_size ) is not int or chunk_size <= 0:
+		raise ValueError( 'chunk_size must be a positive integer.' )
+	if type( chunk_overlap ) is not int or not 0 <= chunk_overlap < chunk_size:
+		raise ValueError( 'chunk_overlap must be an integer from 0 to chunk_size - 1.' )
+	splitter = RecursiveCharacterTextSplitter( chunk_size=chunk_size, chunk_overlap=chunk_overlap )
+	chunks = splitter.split_documents( documents )
+	for index, document in enumerate( chunks, start=1 ):
+		document.metadata = dict( document.metadata or { } )
+		document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )
+	return chunks
+
+def create_embeddings( chunks: List[ Document ], provider: str, model: str, model_path: str ) -> \
+tuple[ object, List[ List[ float ] ] ]:
+	"""Create and validate embeddings for document chunks."""
+	throw_if( 'chunks', chunks )
+	throw_if( 'provider', provider )
+	throw_if( 'model', model )
+	if not isinstance( provider, str ) or not isinstance( model, str ):
+		raise TypeError( 'provider and model must be strings.' )
+	if not isinstance( model_path, str ):
+		raise TypeError( 'model_path must be a string.' )
+	factory = EmbeddingFactory( )
+	embedder = factory.create( provider, model, model_path )
+	vectors = embedder.embed_documents( [ document.page_content for document in chunks ] )
+	if len( vectors ) != len( chunks ):
+		raise RuntimeError( 'Embedding count does not match the chunk count.' )
+	dimensions = { len( vector ) for vector in vectors }
+	if len( dimensions ) != 1:
+		raise RuntimeError( 'Embedding vectors do not have a consistent dimension.' )
+	if not all( math.isfinite( float( value ) ) for vector in vectors for value in vector ):
+		raise RuntimeError( 'Embedding vectors contain non-finite values.' )
+	return embedder, vectors
+
+def store_documents( chunks: List[ Document ], embedder: object, vector_backend: str,
+                     vector_target: str, persist_directory: str, namespace: str ) -> object:
+	"""Persist document chunks to Chroma or Pinecone."""
+	throw_if( 'chunks', chunks )
+	throw_if( 'embedder', embedder )
+	throw_if( 'vector_backend', vector_backend )
+	throw_if( 'vector_target', vector_target )
+	if vector_backend not in ('Chroma', 'Pinecone'):
+		raise ValueError( 'vector_backend must be Chroma or Pinecone.' )
+	if not isinstance( vector_target, str ):
+		raise TypeError( 'vector_target must be a string.' )
+	if not isinstance( persist_directory, str ) or not isinstance( namespace, str ):
+		raise TypeError( 'persist_directory and namespace must be strings.' )
+	if vector_backend == 'Chroma':
+		throw_if( 'persist_directory', persist_directory )
+		store = ChromaStore( )
+		return store.create( chunks, embedder, vector_target, persist_directory )
+	api_key = cfg.PINECONE_API_KEY
+	throw_if( 'api_key', api_key )
+	store = PineconeStore( )
+	return store.create( chunks, embedder, vector_target, namespace, api_key )
+
+def initialize_mode_document_state( prefix: str ) -> None:
+	"""Initialize isolated document state for one API mode."""
+	throw_if( 'prefix', prefix )
+	defaults = { f'{prefix}_documents': [ ], f'{prefix}_chunks': [ ], f'{prefix}_embeddings': [ ],
+			f'{prefix}_embedder': None, f'{prefix}_vector_store': None,
+			f'{prefix}_document_signature': '', f'{prefix}_chunk_size_used': 0,
+			f'{prefix}_chunk_overlap_used': 0, f'{prefix}_embedding_provider_used': '',
+			f'{prefix}_embedding_model_used': '', f'{prefix}_embedding_model_path_used': '', }
+	for key, value in defaults.items( ):
+		if key not in st.session_state:
+			st.session_state[ key ] = value
+
+def serialize_mode_result( result: object ) -> str:
+	"""Serialize a structured API result as LangChain document text."""
+	if isinstance( result, pd.DataFrame ):
+		return result.to_json( orient='records', indent=2, default_handler=str )
+	if isinstance( result, str ):
+		return result
+	return json.dumps( result, indent=2, sort_keys=True, default=str )
+
+def sync_mode_document( prefix: str, result_key: str, source_key: str ) -> None:
+	"""Synchronize the latest API result into a LangChain Document."""
+	throw_if( 'prefix', prefix )
+	throw_if( 'result_key', result_key )
+	throw_if( 'source_key', source_key )
+	initialize_mode_document_state( prefix )
+	result = st.session_state.get( result_key )
+	if result is None:
 		return
-	
-	try:
-		st.data_editor( df, use_container_width=True )
+	if isinstance( result, pd.DataFrame ):
+		if result.empty:
+			return
+	elif isinstance( result, (dict, list, str) ) and not result:
 		return
-	except Exception:
-		pass
-	
-	fallback_df = df.copy( )
-	fallback_df = fallback_df.where( pd.notnull( fallback_df ), '' )
-	
-	for col in fallback_df.columns:
-		fallback_df[ col ] = fallback_df[ col ].map(
-			lambda x: x if isinstance( x, (str, int, float, bool) ) or x == '' else str( x ) )
-	
-	st.markdown( fallback_df.to_html( index=False, escape=True ), unsafe_allow_html=True )
-
-def make_display_safe( df: pd.DataFrame ) -> pd.DataFrame:
-	display_df = df.copy( )
-	for col in display_df.columns:
-		display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
-	
-	return display_df
-
-def drop_table( table: str ) -> None:
-	"""
-		Purpose:
-		--------
-		Safely drop a table if it exists.
-	
-		Parameters:
-		-----------
-		table : str
-			Table name.
-	"""
-	if not table:
+	text = serialize_mode_result( result )
+	source = str( st.session_state.get( source_key, '' ) or prefix.title( ) )
+	signature = f'{source}\n{text}'
+	if signature == st.session_state[ f'{prefix}_document_signature' ]:
 		return
-	
-	with create_connection( ) as conn:
-		conn.execute( f'DROP TABLE IF EXISTS "{table}";' )
-		conn.commit( )
+	st.session_state[ f'{prefix}_documents' ] = [
+			Document( page_content=text, metadata={ 'source': source, 'mode': prefix } ) ]
+	st.session_state[ f'{prefix}_chunks' ] = [ ]
+	st.session_state[ f'{prefix}_embeddings' ] = [ ]
+	st.session_state[ f'{prefix}_embedder' ] = None
+	st.session_state[ f'{prefix}_vector_store' ] = None
+	st.session_state[ f'{prefix}_document_signature' ] = signature
 
-def create_index( table: str, column: str ) -> None:
-	"""
-		Purpose:
-		--------
-		Create a safe SQLite index on a specified table column.
-	
-		Handles:
-			- Spaces in column names
-			- Special characters
-			- Reserved words
-			- Duplicate index names
-			- Validation against actual table schema
-	
-		Parameters:
-		-----------
-		table : str
-			Table name.
-		column : str
-			Column name to index.
-	"""
-	if not table or not column:
-		return
-	
-	# ------------------------------------------------------------------
-	# Validate table exists
-	# ------------------------------------------------------------------
-	tables = list_tables( )
-	if table not in tables:
-		raise ValueError( 'Invalid table name.' )
-	
-	# ------------------------------------------------------------------
-	# Validate column exists
-	# ------------------------------------------------------------------
-	schema = create_schema( table )
-	valid_columns = [ col[ 1 ] for col in schema ]
-	
-	if column not in valid_columns:
-		raise ValueError( 'Invalid column name.' )
-	
-	# ------------------------------------------------------------------
-	# Sanitize index name (identifier only)
-	# ------------------------------------------------------------------
-	safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{table}_{column}" )
-	
-	# ------------------------------------------------------------------
-	# Create index safely (quote identifiers)
-	# ------------------------------------------------------------------
-	sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{table}"("{column}");'
-	
-	with create_connection( ) as conn:
-		conn.execute( sql )
-		conn.commit( )
-
-def apply_filters( df: pd.DataFrame ) -> pd.DataFrame:
-	st.subheader( 'Advanced Filters' )
-	conditions = [ ]
-	col1, col2, col3 = st.columns( 3 )
-	column = col1.selectbox( 'Column', df.columns )
-	operator = col2.selectbox( 'Operator', [ '=', '!=', '>', '<', '>=', '<=', 'contains' ] )
-	value = col3.text_input( 'Value' )
-	if value:
-		if operator == '=':
-			df = df[ df[ column ] == value ]
-		elif operator == '!=':
-			df = df[ df[ column ] != value ]
-		elif operator == '>':
-			df = df[ df[ column ].astype( float ) > float( value ) ]
-		elif operator == '<':
-			df = df[ df[ column ].astype( float ) < float( value ) ]
-		elif operator == '>=':
-			df = df[ df[ column ].astype( float ) >= float( value ) ]
-		elif operator == '<=':
-			df = df[ df[ column ].astype( float ) <= float( value ) ]
-		elif operator == 'contains':
-			df = df[ df[ column ].astype( str ).str.contains( value ) ]
-	
-	return df
-
-def create_aggregation( df: pd.DataFrame ):
-	st.subheader( 'Aggregation Engine' )
-	
-	numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
-	
-	if not numeric_cols:
-		st.info( 'No numeric columns available.' )
-		return
-	
-	col = st.selectbox( 'Column', numeric_cols )
-	agg = st.selectbox( 'Aggregation', [ 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'MEDIAN' ] )
-	
-	if agg == 'COUNT':
-		result = df[ col ].count( )
-	elif agg == 'SUM':
-		result = df[ col ].sum( )
-	elif agg == 'AVG':
-		result = df[ col ].mean( )
-	elif agg == 'MIN':
-		result = df[ col ].min( )
-	elif agg == 'MAX':
-		result = df[ col ].max( )
-	elif agg == 'MEDIAN':
-		result = df[ col ].median( )
-	
-	st.metric( 'Result', result )
-
-def create_visualization( df: pd.DataFrame ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Render data visualizations without passing pandas objects directly into
-		Plotly/Narwhals.
-		
-		Parameters:
-		-----------
-		df : pd.DataFrame
-			The input DataFrame.
-		
-		Returns:
-		--------
-		None
-		
-	"""
-	
-	blue_divider( )
-	st.markdown( '##### Visualization Engine' )
-	if df is None or df.empty:
-		st.info( 'No data available.' )
-		return
-	
-	df_plot = df.copy( )
-	for col in df_plot.columns:
-		if df_plot[ col ].dtype == object:
-			df_plot[ col ] = df_plot[ col ].map( lambda x: '' if x is None else str( x ) )
-	
-	numeric_cols: List[ str ] = [ ]
-	for col in df_plot.columns:
-		series_num = pd.to_numeric( df_plot[ col ], errors='coerce' )
-		if series_num.notna( ).any( ):
-			numeric_cols.append( col )
-	
-	categorical_cols: List[ str ] = [ col for col in df_plot.columns if col not in numeric_cols ]
-	chart = st.selectbox( 'Chart Type',
-		[ 'Histogram', 'Bar', 'Line', 'Scatter', 'Box', 'Pie', 'Correlation' ] )
-	
-	if chart == 'Histogram':
-		if not numeric_cols:
-			st.info( 'No numeric columns available.' )
-			return
-		
-		col = st.selectbox( 'Column', numeric_cols )
-		values = pd.to_numeric( df_plot[ col ], errors='coerce' ).dropna( ).tolist( )
-		fig = go.Figure( data=[ go.Histogram( x=values ) ] )
-		fig.update_layout( xaxis_title=col, yaxis_title='Count' )
-		st.plotly_chart( fig, use_container_width=True )
-	
-	elif chart == 'Bar':
-		if not numeric_cols:
-			st.info( 'No numeric columns available.' )
-			return
-		
-		x = st.selectbox( 'X', df_plot.columns )
-		y = st.selectbox( 'Y', numeric_cols )
-		x_values = df_plot[ x ].astype( str ).tolist( )
-		y_values = pd.to_numeric( df_plot[ y ], errors='coerce' ).fillna( 0 ).tolist( )
-		fig = go.Figure( data=[ go.Bar( x=x_values, y=y_values ) ] )
-		fig.update_layout( xaxis_title=x, yaxis_title=y )
-		st.plotly_chart( fig, use_container_width=True )
-	
-	elif chart == 'Line':
-		if not numeric_cols:
-			st.info( 'No numeric columns available.' )
-			return
-		
-		x = st.selectbox( 'X', df_plot.columns )
-		y = st.selectbox( 'Y', numeric_cols )
-		x_values = df_plot[ x ].astype( str ).tolist( )
-		y_values = pd.to_numeric( df_plot[ y ], errors='coerce' ).fillna( 0 ).tolist( )
-		fig = go.Figure( data=[ go.Scatter( x=x_values, y=y_values, mode='lines' ) ] )
-		fig.update_layout( xaxis_title=x, yaxis_title=y )
-		st.plotly_chart( fig, use_container_width=True )
-	
-	elif chart == 'Scatter':
-		if len( numeric_cols ) < 2:
-			st.info( 'At least two numeric columns are required.' )
-			return
-		
-		x = st.selectbox( 'X', numeric_cols, key='viz_scatter_x' )
-		y = st.selectbox( 'Y', numeric_cols, key='viz_scatter_y' )
-		x_series = pd.to_numeric( df_plot[ x ], errors='coerce' )
-		y_series = pd.to_numeric( df_plot[ y ], errors='coerce' )
-		mask = x_series.notna( ) & y_series.notna( )
-		x_values = x_series[ mask ].tolist( )
-		y_values = y_series[ mask ].tolist( )
-		fig = go.Figure( data=[ go.Scatter( x=x_values, y=y_values, mode='markers' ) ] )
-		fig.update_layout( xaxis_title=x, yaxis_title=y )
-		st.plotly_chart( fig, use_container_width=True )
-	
-	elif chart == 'Box':
-		if not numeric_cols:
-			st.info( 'No numeric columns available.' )
-			return
-		
-		col = st.selectbox( 'Column', numeric_cols, key='viz_box_col' )
-		values = pd.to_numeric( df_plot[ col ], errors='coerce' ).dropna( ).tolist( )
-		fig = go.Figure( data=[ go.Box( y=values, name=col ) ] )
-		fig.update_layout( yaxis_title=col )
-		st.plotly_chart( fig, use_container_width=True )
-	
-	elif chart == 'Pie':
-		if not categorical_cols:
-			st.info( 'No categorical columns available.' )
-			return
-		
-		col = st.selectbox( 'Category Column', categorical_cols )
-		counts = df_plot[ col ].astype( str ).value_counts( )
-		fig = go.Figure( data=[ go.Pie( labels=counts.index.tolist( ),
-			values=counts.values.tolist( ) ) ] )
-		st.plotly_chart( fig, use_container_width=True )
-	
-	elif chart == 'Correlation':
-		if len( numeric_cols ) < 2:
-			st.info( 'At least two numeric columns are required.' )
-			return
-		
-		corr_df = pd.DataFrame( )
-		for col in numeric_cols:
-			corr_df[ col ] = pd.to_numeric( df_plot[ col ], errors='coerce' )
-		
-		corr = corr_df.corr( )
-		fig = go.Figure( data=[ go.Heatmap( z=corr.values.tolist( ), x=corr.columns.tolist( ),
-				y=corr.index.tolist( ) ) ] )
-		st.plotly_chart( fig, use_container_width=True )
-
-def convert_dataframe( table_name: str, df: pd.DataFrame ):
-	columns = [ ]
-	for col in df.columns:
-		sql_type = get_sqlite_type( df[ col ].dtype )
-		safe_col = col.replace( ' ', '_' )
-		columns.append( f'{safe_col} {sql_type}' )
-	
-	create_stmt = f'CREATE TABLE IF NOT EXISTS {table_name} ({", ".join( columns )});'
-	with create_connection( ) as conn:
-		conn.execute( create_stmt )
-		conn.commit( )
-
-def insert_data( table_name: str, df: pd.DataFrame ):
-	df = df.copy( )
-	df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
-	placeholders = ', '.join( [ '?' ] * len( df.columns ) )
-	stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
-	with create_connection( ) as conn:
-		conn.executemany( stmt, df.values.tolist( ) )
-		conn.commit( )
-
-def get_sqlite_type( dtype ) -> str:
-	"""
-		Purpose:
-		--------
-		Map a pandas dtype to an appropriate SQLite column type.
-	
-		Parameters:
-		-----------
-		dtype : pandas dtype
-			The dtype of a pandas Series.
-	
-		Returns:
-		--------
-		str
-			SQLite column type.
-	"""
-	dtype_str = str( dtype ).lower( )
-	
-	# ------------------------------------------------------------------
-	# Integer Types (including nullable Int64)
-	# ------------------------------------------------------------------
-	if 'int' in dtype_str:
-		return 'INTEGER'
-	
-	# ------------------------------------------------------------------
-	# Float Types
-	# ------------------------------------------------------------------
-	if 'float' in dtype_str:
-		return 'REAL'
-	
-	# ------------------------------------------------------------------
-	# Boolean
-	# ------------------------------------------------------------------
-	if 'bool' in dtype_str:
-		return 'INTEGER'
-	
-	# ------------------------------------------------------------------
-	# Datetime
-	# ------------------------------------------------------------------
-	if 'datetime' in dtype_str:
-		return 'TEXT'
-	
-	# ------------------------------------------------------------------
-	# Categorical
-	# ------------------------------------------------------------------
-	if 'category' in dtype_str:
-		return 'TEXT'
-	
-	# ------------------------------------------------------------------
-	# Default fallback
-	# ------------------------------------------------------------------
-	return 'TEXT'
-
-def create_custom_table( table_name: str, columns: list ) -> None:
-	"""
-		Purpose:
-		--------
-		Create a custom SQLite table from column definitions.
-	
-		Parameters:
-		-----------
-		table_name : str
-			Name of table.
-	
-		columns : list of dict
-			[
-				{
-					"name": str,
-					"type": str,
-					"not_null": bool,
-					"primary_key": bool,
-					"auto_increment": bool
-				}
-			]
-	"""
-	if not table_name:
-		raise ValueError( 'Table name required.' )
-	
-	# Validate identifier
-	if not re.match( r"^[A-Za-z_][A-Za-z0-9_]*$", table_name ):
-		raise ValueError( 'Invalid table name.' )
-	
-	col_defs = [ ]
-	
-	for col in columns:
-		col_name = col[ 'name' ]
-		col_type = col[ 'type' ].upper( )
-		
-		if not re.match( r"^[A-Za-z_][A-Za-z0-9_]*$", col_name ):
-			raise ValueError( f"Invalid column name: {col_name}" )
-		
-		definition = f'"{col_name}" {col_type}'
-		
-		if col[ 'primary_key' ]:
-			definition += ' PRIMARY KEY'
-			if col[ 'auto_increment' ] and col_type == 'INTEGER':
-				definition += ' AUTOINCREMENT'
-		
-		if col[ "not_null" ]:
-			definition += " NOT NULL"
-		
-		col_defs.append( definition )
-	
-	sql = f'CREATE TABLE IF NOT EXISTS "{table_name}" ({", ".join( col_defs )});'
-	
-	with create_connection( ) as conn:
-		conn.execute( sql )
-		conn.commit( )
-
-def is_safe_query( query: str ) -> bool:
-	"""
-	
-		Purpose:
-		--------
-		Determine whether a SQL query is read-only and safe to execute.
-	
-		Allows:
-			SELECT
-			WITH (CTE returning SELECT)
-			EXPLAIN SELECT
-			PRAGMA (read-only)
-	
-		Blocks:
-			INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
-			DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
-			
-	"""
-	if not query or not isinstance( query, str ):
-		return False
-	
-	q = query.strip( ).lower( )
-	
-	# ------------------------------------------------------------------
-	# Block multiple statements
-	# ------------------------------------------------------------------
-	if ';' in q[ :-1 ]:
-		return False
-	
-	# ------------------------------------------------------------------
-	# Remove SQL comments
-	# ------------------------------------------------------------------
-	q = re.sub( r"--.*?$", "", q, flags=re.MULTILINE )
-	q = re.sub( r"/\*.*?\*/", "", q, flags=re.DOTALL )
-	q = q.strip( )
-	
-	# ------------------------------------------------------------------
-	# Allowed starting keywords
-	# ------------------------------------------------------------------
-	allowed_starts = ('select', 'with', 'explain', 'pragma')
-	if not q.startswith( allowed_starts ):
-		return False
-	
-	# ------------------------------------------------------------------
-	# Block dangerous keywords anywhere
-	# ------------------------------------------------------------------
-	blocked_keywords = ('insert ', 'update ', 'delete ', 'drop ', 'alter ',
-	                    'create ', 'attach ', 'detach ', 'vacuum ', 'replace ', 'trigger ')
-	
-	for keyword in blocked_keywords:
-		if keyword in q:
-			return False
-	
-	return True
-
-def create_identifier( name: str ) -> str:
-	"""
-	
-		Purpose:
-		--------
-		Sanitize a string into a safe SQLite identifier.
-	
-		- Replaces invalid characters with underscores
-		- Ensures it starts with a letter or underscore
-		- Prevents empty names
-		
-	"""
-	if not name or not isinstance( name, str ):
-		raise ValueError( 'Invalid Identifier.' )
-	
-	safe = re.sub( r'[^0-9a-zA-Z_]', '_', name.strip( ) )
-	if not re.match( r'^[A-Za-z_]', safe ):
-		safe = f'_{safe}'
-	
-	if not safe:
-		raise ValueError( 'Invalid identifier after sanitization.' )
-	
-	return safe
-
-def get_indexes( table: str ):
-	with create_connection( ) as conn:
-		rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
-		return rows
-
-def add_column( table: str, column: str, col_type: str ):
-	column = create_identifier( column )
-	col_type = col_type.upper( )
-	
-	with create_connection( ) as conn:
-		conn.execute(
-			f'ALTER TABLE "{table}" ADD COLUMN "{column}" {col_type};' )
-		conn.commit( )
-
-def rename_column( table_name: str, old_name: str, new_name: str ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
-		first; if it fails, falls back to a schema-safe rebuild preserving column order, data,
-		and indexes.
-
-		Parameters:
-		-----------
-		table_name : str
-			Table containing the column.
-
-		old_name : str
-			Existing column name.
-
-		new_name : str
-			New column name.
-
-		Returns:
-		--------
-		None
-		
-	"""
-	if not table_name or not old_name or not new_name:
-		return
-	
-	with create_connection( ) as conn:
-		try:
-			conn.execute(
-				f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}";'
-			)
-			conn.commit( )
-			return
-		except Exception:
-			pass
-		
-		row = conn.execute(
-			"""
-            SELECT sql
-            FROM sqlite_master
-            WHERE type ='table' AND name =?
-			""",
-			(table_name,)
-		).fetchone( )
-		
-		if not row or not row[ 0 ]:
-			raise ValueError( "Table definition not found." )
-		
-		create_sql = row[ 0 ]
-		
-		indexes = conn.execute(
-			"""
-            SELECT sql
-            FROM sqlite_master
-            WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
-			""",
-			(table_name,)
-		).fetchall( )
-		
-		schema = conn.execute( f'PRAGMA table_info("{table_name}");' ).fetchall( )
-		cols = [ r[ 1 ] for r in schema ]
-		if old_name not in cols:
-			raise ValueError( "Column not found." )
-		
-		mapped_cols = [ (new_name if c == old_name else c) for c in cols ]
-		
-		temp_table = f"{table_name}__rebuild_temp"
-		
-		col_defs: List[ str ] = [ ]
-		pk_cols = [ r for r in schema if int( r[ 5 ] or 0 ) > 0 ]
-		single_pk = len( pk_cols ) == 1
-		
-		for row in schema:
-			col_name = row[ 1 ]
-			col_type = row[ 2 ] or ''
-			not_null = int( row[ 3 ] or 0 )
-			default_value = row[ 4 ]
-			pk = int( row[ 5 ] or 0 )
-			
-			out_name = new_name if col_name == old_name else col_name
-			col_def = f'"{out_name}" {col_type}'.strip( )
-			
-			if not_null:
-				col_def += ' NOT NULL'
-			
-			if default_value is not None:
-				col_def += f' DEFAULT {default_value}'
-			
-			if single_pk and pk == 1:
-				col_def += ' PRIMARY KEY'
-			
-			col_defs.append( col_def )
-		
-		new_create_sql = f'CREATE TABLE "{temp_table}" ({", ".join( col_defs )});'
-		
-		old_select = ", ".join( [ f'"{c}"' for c in cols ] )
-		new_insert = ", ".join( [ f'"{c}"' for c in mapped_cols ] )
-		
-		conn.execute( "BEGIN" )
-		conn.execute( new_create_sql )
-		conn.execute(
-			f'INSERT INTO "{temp_table}" ({new_insert}) SELECT {old_select} FROM "{table_name}";'
-		)
-		
-		conn.execute( f'DROP TABLE "{table_name}";' )
-		conn.execute( f'ALTER TABLE "{temp_table}" RENAME TO "{table_name}";' )
-		
-		for idx in indexes:
-			idx_sql = idx[ 0 ]
-			if idx_sql:
-				idx_sql = idx_sql.replace( f'"{old_name}"', f'"{new_name}"' )
-				conn.execute( idx_sql )
-		
-		conn.commit( )
-
-def create_profile_table( table: str ):
-	df = read_table( table )
-	profile_rows = [ ]
-	total_rows = len( df )
-	for col in df.columns:
-		series = df[ col ]
-		null_count = series.isna( ).sum( )
-		distinct_count = series.nunique( dropna=True )
-		row = \
-			{
-					'column': col, 'dtype': str( series.dtype ),
-					'null_%': round( (null_count / total_rows) * 100, 2 ) if total_rows else 0,
-					'distinct_%': round( (
-							                     distinct_count / total_rows) * 100,
-						2 ) if total_rows else 0,
-			}
-		
-		if pd.api.types.is_numeric_dtype( series ):
-			row[ 'min' ] = series.min( )
-			row[ 'max' ] = series.max( )
-			row[ 'mean' ] = series.mean( )
+def render_source_processing_controls( prefix: str, result_key: str, source_key: str,
+                                       source_name: str, key_prefix: str ) -> None:
+	"""Render Foo-style processing controls inside one source/API expander."""
+	throw_if( 'prefix', prefix )
+	throw_if( 'result_key', result_key )
+	throw_if( 'source_key', source_key )
+	throw_if( 'source_name', source_name )
+	throw_if( 'key_prefix', key_prefix )
+	initialize_mode_document_state( prefix )
+	active_source = str( st.session_state.get( source_key, '' ) or '' )
+	if active_source == source_name:
+		sync_mode_document( prefix, result_key, source_key )
+	settings = render_processing_inputs( key_prefix, f'iyr-{prefix}-documents' )
+	chunk_col, embed_col, store_col = st.columns( 3 )
+	chunk_run = chunk_col.button( 'Chunk', icon='✂️', key=f'{key_prefix}_chunk_run',
+		use_container_width=True )
+	embed_run = embed_col.button( 'Embed', icon='🧬', key=f'{key_prefix}_embed_run',
+		use_container_width=True )
+	store_run = store_col.button( 'Store', icon='🗄️', key=f'{key_prefix}_store_run',
+		use_container_width=True )
+	if chunk_run:
+		if active_source != source_name:
+			st.warning( f'Run {source_name} before chunking.' )
 		else:
-			row[ 'min' ] = None
-			row[ 'max' ] = None
-			row[ 'mean' ] = None
-		
-		profile_rows.append( row )
-	
-	return pd.DataFrame( profile_rows )
+			try:
+				documents = st.session_state[ f'{prefix}_documents' ]
+				chunks = chunk_documents( documents, settings[ 'chunk_size' ],
+					settings[ 'chunk_overlap' ] )
+				st.session_state[ f'{prefix}_chunks' ] = chunks
+				st.session_state[ f'{prefix}_chunk_size_used' ] = settings[ 'chunk_size' ]
+				st.session_state[ f'{prefix}_chunk_overlap_used' ] = settings[ 'chunk_overlap' ]
+				st.session_state[ f'{prefix}_embeddings' ] = [ ]
+				st.session_state[ f'{prefix}_embedder' ] = None
+				st.session_state[ f'{prefix}_vector_store' ] = None
+				st.success( f'Created {len( chunks ):,} chunk(s).' )
+			except Exception as exc:
+				st.error( str( exc ) )
+	if embed_run:
+		chunks = st.session_state[ f'{prefix}_chunks' ]
+		if active_source != source_name:
+			st.warning( f'Run and chunk {source_name} before embedding.' )
+		elif not chunks:
+			st.warning( 'Chunk the loaded result before embedding.' )
+		elif settings[ 'chunk_size' ] != st.session_state[ f'{prefix}_chunk_size_used' ] or \
+				settings[ 'chunk_overlap' ] != st.session_state[ f'{prefix}_chunk_overlap_used' ]:
+			st.warning( 'Chunk settings changed. Run Chunk again before embedding.' )
+		else:
+			try:
+				embedder, vectors = create_embeddings( chunks, settings[ 'provider' ],
+					settings[ 'model' ], settings[ 'model_path' ] )
+				st.session_state[ f'{prefix}_embedder' ] = embedder
+				st.session_state[ f'{prefix}_embeddings' ] = vectors
+				st.session_state[ f'{prefix}_embedding_provider_used' ] = settings[ 'provider' ]
+				st.session_state[ f'{prefix}_embedding_model_used' ] = settings[ 'model' ]
+				st.session_state[ f'{prefix}_embedding_model_path_used' ] = settings[ 'model_path' ]
+				st.session_state[ f'{prefix}_vector_store' ] = None
+				st.success( f'Created {len( vectors ):,} embedding vector(s).' )
+			except Exception as exc:
+				st.error( str( exc ) )
+	if store_run:
+		chunks = st.session_state[ f'{prefix}_chunks' ]
+		embedder = st.session_state[ f'{prefix}_embedder' ]
+		if active_source != source_name:
+			st.warning( f'Run, chunk, and embed {source_name} before storing.' )
+		elif not chunks or embedder is None:
+			st.warning( 'Create embeddings before storing vectors.' )
+		elif settings[ 'provider' ] != st.session_state[ f'{prefix}_embedding_provider_used' ] or \
+				settings[ 'model' ] != st.session_state[ f'{prefix}_embedding_model_used' ] or \
+				settings[ 'model_path' ] != st.session_state[
+			f'{prefix}_embedding_model_path_used' ]:
+			st.warning( 'Embedding settings changed. Run Embed again before storing.' )
+		else:
+			try:
+				st.session_state[ f'{prefix}_vector_store' ] = store_documents( chunks, embedder,
+					settings[ 'vector_backend' ], settings[ 'vector_target' ],
+					settings[ 'persist_directory' ], settings[ 'namespace' ] )
+				st.success(
+					f"Stored {len( chunks ):,} chunk(s) in {settings[ 'vector_backend' ]}." )
+			except Exception as exc:
+				st.error( str( exc ) )
 
-def drop_column( table: str, column: str ):
-	if not table or not column:
-		raise ValueError( 'Table and column required.' )
-	
-	with create_connection( ) as conn:
-		# ------------------------------------------------------------
-		# Fetch original CREATE TABLE statement
-		# ------------------------------------------------------------
-		row = conn.execute(
-			"""
-            SELECT sql
-            FROM sqlite_master
-            WHERE type ='table' AND name =?
-			""",
-			(table,)
-		).fetchone( )
-		
-		if not row or not row[ 0 ]:
-			raise ValueError( 'Table definition not found.' )
-		
-		create_sql = row[ 0 ]
-		
-		# ------------------------------------------------------------
-		# Extract column definitions
-		# ------------------------------------------------------------
-		open_paren = create_sql.find( "(" )
-		close_paren = create_sql.rfind( ")" )
-		
-		if open_paren == -1 or close_paren == -1:
-			raise ValueError( "Malformed CREATE TABLE statement." )
-		
-		inner = create_sql[ open_paren + 1: close_paren ]
-		
-		column_defs = [ c.strip( ) for c in inner.split( "," ) ]
-		
-		# Remove target column
-		new_defs = [ ]
-		for col_def in column_defs:
-			col_name = col_def.split( )[ 0 ].strip( '"' )
-			if col_name != column:
-				new_defs.append( col_def )
-		
-		if len( new_defs ) == len( column_defs ):
-			raise ValueError( "Column not found." )
-		
-		# ------------------------------------------------------------
-		# Build new CREATE TABLE statement
-		# ------------------------------------------------------------
-		temp_table = f"{table}_rebuild_temp"
-		
-		new_create_sql = (
-				f'CREATE TABLE "{temp_table}" ('
-				+ ", ".join( new_defs )
-				+ ");"
-		)
-		
-		# ------------------------------------------------------------
-		# Begin transaction
-		# ------------------------------------------------------------
-		conn.execute( "BEGIN" )
-		
-		conn.execute( new_create_sql )
-		
-		remaining_cols = [
-				c.split( )[ 0 ].strip( '"' )
-				for c in new_defs
-		]
-		
-		col_list = ", ".join( [ f'"{c}"' for c in remaining_cols ] )
-		
-		conn.execute(
-			f'INSERT INTO "{temp_table}" ({col_list}) '
-			f'SELECT {col_list} FROM "{table}";'
-		)
-		
-		# Preserve indexes
-		indexes = conn.execute(
-			"""
-            SELECT sql
-            FROM sqlite_master
-            WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
-			""",
-			(table,)
-		).fetchall( )
-		
-		conn.execute( f'DROP TABLE "{table}";' )
-		conn.execute(
-			f'ALTER TABLE "{temp_table}" RENAME TO "{table}";'
-		)
-		
-		# Recreate indexes
-		for idx in indexes:
-			idx_sql = idx[ 0 ]
-			if column not in idx_sql:
-				conn.execute( idx_sql )
-		
-		conn.commit( )
+def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) -> None:
+	"""Render Loaded, Chunks, and Embeddings tabs for one API mode."""
+	throw_if( 'prefix', prefix )
+	initialize_mode_document_state( prefix )
+	loaded_tab, chunks_tab, embeddings_tab = st.tabs(
+		[ loaded_label, '✂️ Chunks', '🔢 Embeddings' ] )
+	with loaded_tab:
+		documents = st.session_state[ f'{prefix}_documents' ]
+		if not documents:
+			st.info( 'Run a source request to load a document.' )
+		else:
+			text = '\n\n'.join( document.page_content for document in documents )
+			st.text_area( 'Loaded Document Text', value=text, height=500, disabled=True )
+	with chunks_tab:
+		chunks = st.session_state[ f'{prefix}_chunks' ]
+		if not chunks:
+			st.info( 'Run Chunk to display document chunks.' )
+		else:
+			rows = [ { 'Chunk': index, 'Chunk ID': (document.metadata or { }).get( 'chunk_id', '' ),
+					'Source': (document.metadata or { }).get( 'source', '' ),
+					'Characters': len( document.page_content ), 'Text': document.page_content, } for
+					index, document in enumerate( chunks, start=1 ) ]
+			st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
+	with embeddings_tab:
+		vectors = st.session_state[ f'{prefix}_embeddings' ]
+		chunks = st.session_state[ f'{prefix}_chunks' ]
+		if not vectors:
+			st.info( 'Run Embed to display embedding vectors.' )
+		else:
+			rows = [ ]
+			for index, vector in enumerate( vectors ):
+				document = chunks[ index ]
+				rows.append( { 'Chunk': index + 1,
+						'Provider': st.session_state[ f'{prefix}_embedding_provider_used' ],
+						'Model': st.session_state[ f'{prefix}_embedding_model_path_used' ] or
+						         st.session_state[ f'{prefix}_embedding_model_used' ],
+						'Dimensions': len( vector ),
+						'Source': (document.metadata or { }).get( 'source', '' ),
+						'Text': document.page_content, 'Vector': vector, } )
+			st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
 
-def rename_table( old_name: str, new_name: str ) -> None:
+def initialize_loading_state( ) -> None:
 	"""
-	
 		Purpose:
 		--------
-		Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
-		falls back to a schema-safe rebuild using the original CREATE TABLE statement and
-		preserves indexes.
-
-		Parameters:
-		-----------
-		old_name : str
-			Existing table name.
-
-		new_name : str
-			New table name.
+		Initialize the shared document-loading state used by every Loading-mode execution path.
 
 		Returns:
 		--------
 		None
-		
 	"""
-	if not old_name or not new_name:
+	defaults = { 'documents': [ ], 'raw_documents': [ ], 'raw_text': '', 'processed_text': None,
+			'lines': None, 'tokens': [ ], 'chunked_documents': [ ], 'df_chunks': pd.DataFrame( ),
+			'embeddings': [ ], 'embedder': None, 'vector_store': None, 'active_loader': None,
+			'chunk_loader': None, 'pdf_pages': None, }
+	for key, value in defaults.items( ):
+		if key not in st.session_state:
+			st.session_state[ key ] = value
+
+def rebuild_raw_text_from_documents( ) -> str:
+	"""
+		Purpose:
+		--------
+		Rebuild the shared raw-text representation from the currently loaded documents.
+
+		Returns:
+		--------
+		str: Concatenated document text.
+	"""
+	initialize_loading_state( )
+	return '\n\n'.join( document.page_content for document in st.session_state[ 'documents' ] if
+	                    isinstance( document.page_content,
+		                    str ) and document.page_content.strip( ) )
+
+def reset_document_processing_controls( key_prefix: str ) -> None:
+	"""
+		Purpose:
+		--------
+		Clear derived chunk, embedding, and vector-store state for one loader workflow.
+
+		Parameters:
+		-----------
+		key_prefix (str): Stable loader-control key prefix.
+
+		Returns:
+		--------
+		None
+	"""
+	throw_if( 'key_prefix', key_prefix )
+	initialize_loading_state( )
+	st.session_state[ 'chunked_documents' ] = [ ]
+	st.session_state[ 'chunk_loader' ] = None
+	st.session_state[ 'df_chunks' ] = pd.DataFrame( )
+	st.session_state[ 'embeddings' ] = [ ]
+	st.session_state[ 'embedder' ] = None
+	st.session_state[ 'vector_store' ] = None
+	st.session_state.pop( f'{key_prefix}_processing_settings', None )
+
+def clear_if_active( loader_name: str ) -> None:
+	"""
+		Purpose:
+		--------
+		Remove documents owned by the selected loader while preserving documents from other loaders.
+
+		Parameters:
+		-----------
+		loader_name (str): Loader metadata name to clear.
+
+		Returns:
+		--------
+		None
+	"""
+	throw_if( 'loader_name', loader_name )
+	initialize_loading_state( )
+	documents = st.session_state.get( 'documents', [ ] ) or [ ]
+	remaining = [ document for document in documents if
+			(document.metadata or { }).get( 'loader' ) != loader_name ]
+	st.session_state[ 'documents' ] = remaining
+	st.session_state[ 'raw_documents' ] = list( remaining )
+	st.session_state[ 'raw_text' ] = rebuild_raw_text_from_documents( )
+	if st.session_state.get( 'active_loader' ) == loader_name:
+		st.session_state[ 'active_loader' ] = (
+				(remaining[ -1 ].metadata or { }).get( 'loader' ) if remaining else None)
+	st.session_state[ 'processed_text' ] = None
+	st.session_state[ 'lines' ] = None
+	st.session_state[ 'chunked_documents' ] = [ ]
+	st.session_state[ 'chunk_loader' ] = None
+	st.session_state[ 'df_chunks' ] = pd.DataFrame( )
+	st.session_state[ 'embeddings' ] = [ ]
+	st.session_state[ 'embedder' ] = None
+	st.session_state[ 'vector_store' ] = None
+
+def render_document_processing_inputs( loader_name: str, key_prefix: str ) -> None:
+	"""
+		Purpose:
+		--------
+		Render chunking, embedding, and vector-storage controls for a document loader.
+
+		Parameters:
+		-----------
+		loader_name (str): Loader metadata name.
+		key_prefix (str): Stable Streamlit widget key prefix.
+
+		Returns:
+		--------
+		None
+	"""
+	throw_if( 'loader_name', loader_name )
+	throw_if( 'key_prefix', key_prefix )
+	initialize_loading_state( )
+	st.session_state[ f'{key_prefix}_processing_settings' ] = render_processing_inputs( key_prefix,
+		f'iyr-{key_prefix}-documents' )
+
+def get_loader_documents( loader_name: str ) -> List[ Document ]:
+	"""Return documents owned by one loader from shared Loading-mode state."""
+	throw_if( 'loader_name', loader_name )
+	initialize_loading_state( )
+	documents = st.session_state.get( 'documents', [ ] ) or [ ]
+	matched = [ document for document in documents if
+			(document.metadata or { }).get( 'loader' ) == loader_name ]
+	return matched
+
+def render_document_processing_actions( loader_name: str, key_prefix: str ) -> None:
+	"""
+		Purpose:
+		--------
+		Execute chunking, embedding, and vector-storage actions for one document loader.
+
+		Parameters:
+		-----------
+		loader_name (str): Loader metadata name.
+		key_prefix (str): Stable Streamlit widget key prefix.
+
+		Returns:
+		--------
+		None
+	"""
+	throw_if( 'loader_name', loader_name )
+	throw_if( 'key_prefix', key_prefix )
+	initialize_loading_state( )
+	settings = st.session_state.get( f'{key_prefix}_processing_settings', None )
+	if not isinstance( settings, dict ):
+		st.warning( 'Processing controls are not initialized.' )
 		return
-	
-	with create_connection( ) as conn:
+	chunk_col, embed_col, store_col = st.columns( 3 )
+	chunk_run = chunk_col.button( 'Chunk', icon='✂️', key=f'{key_prefix}_loader_chunk',
+		use_container_width=True )
+	embed_run = embed_col.button( 'Embed', icon='🧬', key=f'{key_prefix}_loader_embed',
+		use_container_width=True )
+	store_run = store_col.button( 'Store', icon='🗄️', key=f'{key_prefix}_loader_store',
+		use_container_width=True )
+	if chunk_run:
+		st.session_state[ 'chunked_documents' ] = [ ]
+		st.session_state[ 'chunk_loader' ] = None
+		st.session_state[ 'df_chunks' ] = pd.DataFrame( )
+		st.session_state[ 'embeddings' ] = [ ]
+		st.session_state[ 'embedder' ] = None
+		st.session_state[ 'vector_store' ] = None
 		try:
-			conn.execute( f'ALTER TABLE "{old_name}" RENAME TO "{new_name}";' )
-			conn.commit( )
-			return
-		except Exception:
-			pass
-		
-		row = conn.execute(
-			"""
-            SELECT sql
-            FROM sqlite_master
-            WHERE type ='table' AND name =?
-			""",
-			(old_name,)
-		).fetchone( )
-		
-		if not row or not row[ 0 ]:
-			raise ValueError( "Table definition not found." )
-		
-		create_sql = row[ 0 ]
-		
-		indexes = conn.execute(
-			"""
-            SELECT sql
-            FROM sqlite_master
-            WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
-			""",
-			(old_name,)
-		).fetchall( )
-		
-		open_paren = create_sql.find( "(" )
-		if open_paren == -1:
-			raise ValueError( "Malformed CREATE TABLE statement." )
-		
-		temp_name = f"{new_name}__rebuild_temp"
-		
-		conn.execute( "BEGIN" )
-		conn.execute( f'CREATE TABLE "{temp_name}" {create_sql[ open_paren: ]}' )
-		
-		cols = [ r[ 1 ] for r in conn.execute( f'PRAGMA table_info("{old_name}");' ).fetchall( ) ]
-		col_list = ", ".join( [ f'"{c}"' for c in cols ] )
-		
-		conn.execute(
-			f'INSERT INTO "{temp_name}" ({col_list}) SELECT {col_list} FROM "{old_name}";'
-		)
-		
-		conn.execute( f'DROP TABLE "{old_name}";' )
-		conn.execute( f'ALTER TABLE "{temp_name}" RENAME TO "{new_name}";' )
-		
-		for idx in indexes:
-			idx_sql = idx[ 0 ]
-			if idx_sql:
-				idx_sql = idx_sql.replace( f'ON "{old_name}"', f'ON "{new_name}"' )
-				conn.execute( idx_sql )
-		
-		conn.commit( )
+			documents = get_loader_documents( loader_name )
+			throw_if( 'documents', documents )
+			chunks = chunk_documents( documents, settings[ 'chunk_size' ],
+				settings[ 'chunk_overlap' ] )
+			chunk_rows = pd.DataFrame( [
+					{ 'Chunk': index, 'Chunk ID': (document.metadata or { }).get( 'chunk_id', '' ),
+							'Source': (document.metadata or { }).get( 'source', '' ),
+							'Characters': len( document.page_content ),
+							'Text': document.page_content, } for index, document in
+					enumerate( chunks, start=1 ) ] )
+			st.session_state[ 'chunked_documents' ] = chunks
+			st.session_state[ 'chunk_loader' ] = loader_name
+			st.session_state[ 'df_chunks' ] = chunk_rows
+			st.session_state[ 'embeddings' ] = [ ]
+			st.session_state[ 'embedder' ] = None
+			st.session_state[ 'vector_store' ] = None
+			st.success( f'Created {len( chunks ):,} chunk(s).' )
+		except Exception as exc:
+			st.error( str( exc ) )
+	if embed_run:
+		st.session_state[ 'embeddings' ] = [ ]
+		st.session_state[ 'embedder' ] = None
+		st.session_state[ 'vector_store' ] = None
+		try:
+			if st.session_state.get( 'chunk_loader' ) != loader_name:
+				raise ValueError( f'Chunk documents from {loader_name} before embedding.' )
+			chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
+			throw_if( 'chunks', chunks )
+			embedder, vectors = create_embeddings( chunks, settings[ 'provider' ],
+				settings[ 'model' ], settings[ 'model_path' ] )
+			st.session_state[ 'embedder' ] = embedder
+			st.session_state[ 'embeddings' ] = vectors
+			st.session_state[ 'vector_store' ] = None
+			st.success( f'Created {len( vectors ):,} embedding vector(s).' )
+		except Exception as exc:
+			st.error( str( exc ) )
+	if store_run:
+		st.session_state[ 'vector_store' ] = None
+		try:
+			if st.session_state.get( 'chunk_loader' ) != loader_name:
+				raise ValueError( f'Chunk and embed documents from {loader_name} before storing.' )
+			chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
+			embedder = st.session_state.get( 'embedder', None )
+			throw_if( 'chunks', chunks )
+			throw_if( 'embedder', embedder )
+			st.session_state[ 'vector_store' ] = store_documents( chunks, embedder,
+				settings[ 'vector_backend' ], settings[ 'vector_target' ],
+				settings[ 'persist_directory' ], settings[ 'namespace' ] )
+			st.success( f"Stored {len( chunks ):,} chunk(s) in {settings[ 'vector_backend' ]}." )
+		except Exception as exc:
+			st.error( str( exc ) )
+
+def render_document_processing_controls( loader_name: str, key_prefix: str ) -> None:
+	"""Render document-processing inputs and actions for one loader."""
+	throw_if( 'loader_name', loader_name )
+	throw_if( 'key_prefix', key_prefix )
+	render_document_processing_inputs( loader_name, key_prefix )
+	render_document_processing_actions( loader_name, key_prefix )
+
+def render_loading_tabs( ) -> None:
+	"""Render shared Loaded, Chunks, and Embeddings tabs for Loading mode."""
+	initialize_loading_state( )
+	loaded_tab, chunks_tab, embeddings_tab = st.tabs( [ '📄 Loaded', '✂️ Chunks', '🔢 Embeddings' ] )
+	with loaded_tab:
+		documents = st.session_state.get( 'documents', [ ] ) or [ ]
+		if not documents:
+			st.info( 'Load a document to display its content.' )
+		else:
+			text = '\n\n'.join( document.page_content for document in documents )
+			st.text_area( 'Loaded Document Text', value=text, height=500, disabled=True )
+	with chunks_tab:
+		df_chunks = st.session_state.get( 'df_chunks', pd.DataFrame( ) )
+		if not isinstance( df_chunks, pd.DataFrame ) or df_chunks.empty:
+			st.info( 'Run Chunk to display document chunks.' )
+		else:
+			st.data_editor( df_chunks, use_container_width=True, hide_index=True, disabled=True )
+	with embeddings_tab:
+		vectors = st.session_state.get( 'embeddings', [ ] ) or [ ]
+		chunks = st.session_state.get( 'chunked_documents', [ ] ) or [ ]
+		if not vectors:
+			st.info( 'Run Embed to display embedding vectors.' )
+		else:
+			rows = [ { 'Chunk': index + 1, 'Dimensions': len( vector ),
+					'Source': (chunks[ index ].metadata or { }).get( 'source', '' ) if index < len(
+						chunks ) else '', 'Vector': vector, } for index, vector in
+					enumerate( vectors ) ]
+			st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True,
+				disabled=True )
+
+def initialize_web_state( ) -> None:
+	"""Initialize isolated web-document state."""
+	defaults = { 'web_documents': [ ], 'web_document_url': '', 'web_chunks': [ ],
+	             'web_embeddings': [ ], 'web_embedder': None, 'web_vector_store': None,
+	             'web_chunk_size_used': 0, 'web_chunk_overlap_used': 0,
+	             'web_embedding_provider_used': '', 'web_embedding_model_used': '',
+	             'web_embedding_model_path_used': '', }
+	for key, value in defaults.items( ):
+		if key not in st.session_state:
+			st.session_state[ key ] = value
+
+def clear_web_state( ) -> None:
+	"""Clear scraped documents and all derived web state."""
+	initialize_web_state( )
+	st.session_state[ 'web_documents' ] = [ ]
+	st.session_state[ 'web_document_url' ] = ''
+	st.session_state[ 'web_chunks' ] = [ ]
+	st.session_state[ 'web_embeddings' ] = [ ]
+	st.session_state[ 'web_embedder' ] = None
+	st.session_state[ 'web_vector_store' ] = None
+	st.session_state[ 'web_chunk_size_used' ] = 0
+	st.session_state[ 'web_chunk_overlap_used' ] = 0
+	st.session_state[ 'web_embedding_provider_used' ] = ''
+	st.session_state[ 'web_embedding_model_used' ] = ''
+	st.session_state[ 'web_embedding_model_path_used' ] = ''
+
+def render_web_document_processing( ) -> None:
+	"""Render Foo-style Site Crawler document processing."""
+	initialize_web_state( )
+	st.subheader( '🕷️ Site Crawler' )
+	st.divider( )
+	left, right = st.columns( [ 0.4, 0.6 ], gap='xxsmall', border=True )
+	with left:
+		with st.expander( label='Web Processing', icon='🌐', expanded=True ):
+			target_url = st.text_input( 'Target URL', placeholder='https://example.com',
+				key='web_document_url_input' )
+			request_timeout = st.slider( 'Request Timeout', min_value=1, max_value=120, value=10,
+				step=1, key='web_document_timeout' )
+			fetch_col, clear_col = st.columns( 2 )
+			fetch_run = fetch_col.button( 'Fetch', icon='🌐', key='web_document_fetch',
+				use_container_width=True )
+			clear_run = clear_col.button( 'Clear', icon='🧹', key='web_document_clear',
+				use_container_width=True )
+			if clear_run:
+				clear_web_state( )
+				st.rerun( )
+			if fetch_run:
+				try:
+					throw_if( 'target_url', target_url )
+					fetcher = WebFetcher( )
+					documents = fetcher.fetch( target_url.strip( ), time=request_timeout )
+					throw_if( 'documents', documents )
+					st.session_state[ 'web_documents' ] = documents
+					st.session_state[ 'web_document_url' ] = target_url.strip( )
+					st.session_state[ 'web_chunks' ] = [ ]
+					st.session_state[ 'web_embeddings' ] = [ ]
+					st.session_state[ 'web_embedder' ] = None
+					st.session_state[ 'web_vector_store' ] = None
+					st.success( f'Scraped {len( documents ):,} LangChain document(s).' )
+				except Exception as exc:
+					st.error( str( exc ) )
+			settings = render_processing_inputs( 'web', 'iyr-web-documents' )
+			chunk_col, embed_col, store_col = st.columns( 3 )
+			chunk_run = chunk_col.button( 'Chunk', icon='✂️', key='web_chunk_run',
+				use_container_width=True )
+			embed_run = embed_col.button( 'Embed', icon='🔢', key='web_embed_run',
+				use_container_width=True )
+			store_run = store_col.button( 'Store', icon='🗄️', key='web_store_run',
+				use_container_width=True )
+			if chunk_run:
+				if not st.session_state[ 'web_documents' ]:
+					st.warning( 'Fetch a URL before chunking.' )
+				else:
+					try:
+						chunks = chunk_documents( st.session_state[ 'web_documents' ],
+							settings[ 'chunk_size' ], settings[ 'chunk_overlap' ] )
+						st.session_state[ 'web_chunks' ] = chunks
+						st.session_state[ 'web_chunk_size_used' ] = settings[ 'chunk_size' ]
+						st.session_state[ 'web_chunk_overlap_used' ] = settings[ 'chunk_overlap' ]
+						st.session_state[ 'web_embeddings' ] = [ ]
+						st.session_state[ 'web_embedder' ] = None
+						st.session_state[ 'web_vector_store' ] = None
+						st.success( f'Created {len( chunks ):,} chunk(s).' )
+					except Exception as exc:
+						st.error( str( exc ) )
+			if embed_run:
+				chunks = st.session_state[ 'web_chunks' ]
+				if not chunks:
+					st.warning( 'Chunk the scraped document before embedding.' )
+				elif settings[ 'chunk_size' ] != st.session_state[ 'web_chunk_size_used' ] or \
+						settings[ 'chunk_overlap' ] != st.session_state[ 'web_chunk_overlap_used' ]:
+					st.warning( 'Chunk settings changed. Run Chunk again before embedding.' )
+				else:
+					try:
+						embedder, vectors = create_embeddings( chunks, settings[ 'provider' ],
+							settings[ 'model' ], settings[ 'model_path' ] )
+						st.session_state[ 'web_embedder' ] = embedder
+						st.session_state[ 'web_embeddings' ] = vectors
+						st.session_state[ 'web_embedding_provider_used' ] = settings[ 'provider' ]
+						st.session_state[ 'web_embedding_model_used' ] = settings[ 'model' ]
+						st.session_state[ 'web_embedding_model_path_used' ] = settings[
+							'model_path' ]
+						st.session_state[ 'web_vector_store' ] = None
+						st.success( f'Created {len( vectors ):,} embedding vector(s).' )
+					except Exception as exc:
+						st.error( str( exc ) )
+			if store_run:
+				embedder = st.session_state[ 'web_embedder' ]
+				chunks = st.session_state[ 'web_chunks' ]
+				if not chunks or embedder is None:
+					st.warning( 'Create embeddings before storing vectors.' )
+				elif settings[ 'provider' ] != st.session_state[ 'web_embedding_provider_used' ] or \
+						settings[ 'model' ] != st.session_state[ 'web_embedding_model_used' ] or \
+						settings[ 'model_path' ] != st.session_state[
+					'web_embedding_model_path_used' ]:
+					st.warning( 'Embedding settings changed. Run Embed again before storing.' )
+				else:
+					try:
+						st.session_state[ 'web_vector_store' ] = store_documents( chunks, embedder,
+							settings[ 'vector_backend' ], settings[ 'vector_target' ],
+							settings[ 'persist_directory' ], settings[ 'namespace' ] )
+						st.success(
+							f"Stored {len( chunks ):,} chunk(s) in {settings[ 'vector_backend' ]}." )
+					except Exception as exc:
+						st.error( str( exc ) )
+	with right:
+		loaded_tab, chunks_tab, embeddings_tab = st.tabs(
+			[ '🌐 Scraped', '✂️ Chunks', '🔢 Embeddings' ] )
+		with loaded_tab:
+			documents = st.session_state[ 'web_documents' ]
+			if not documents:
+				st.info( 'Fetch a URL to load a LangChain document.' )
+			else:
+				text = '\n\n'.join( document.page_content for document in documents )
+				st.text_area( 'Scraped Text', value=text, height=500, disabled=True,
+					key='web_scraped_text' )
+		with chunks_tab:
+			chunks = st.session_state[ 'web_chunks' ]
+			if not chunks:
+				st.info( 'Run Chunk to display scraped document chunks.' )
+			else:
+				rows = [ { 'Chunk': index,
+						'Chunk ID': (document.metadata or { }).get( 'chunk_id', '' ),
+						'Source': (document.metadata or { }).get( 'source', '' ),
+						'Characters': len( document.page_content ), 'Text': document.page_content, }
+						for index, document in enumerate( chunks, start=1 ) ]
+				st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
+		with embeddings_tab:
+			vectors = st.session_state[ 'web_embeddings' ]
+			chunks = st.session_state[ 'web_chunks' ]
+			if not vectors:
+				st.info( 'Run Embed to display embedding vectors.' )
+			else:
+				rows = [ ]
+				for index, vector in enumerate( vectors ):
+					document = chunks[ index ]
+					rows.append( { 'Chunk': index + 1,
+							'Provider': st.session_state[ 'web_embedding_provider_used' ],
+							'Model': st.session_state[ 'web_embedding_model_path_used' ] or
+							         st.session_state[ 'web_embedding_model_used' ],
+							'Dimensions': len( vector ),
+							'Source': (document.metadata or { }).get( 'source', '' ),
+							'Text': document.page_content, 'Vector': vector, } )
+				st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
+
+def clear_loader_documents( loader_name: str ) -> int:
+	"""
+		Purpose:
+		--------
+		Remove documents owned by one loader and return the remaining document count.
+
+		Parameters:
+		-----------
+		loader_name (str): Loader metadata name to clear.
+
+		Returns:
+		--------
+		int: Number of documents remaining in shared loading state.
+	"""
+	throw_if( 'loader_name', loader_name )
+	clear_if_active( loader_name )
+	return len( st.session_state.get( 'documents', [ ] ) or [ ] )
+
+def promote_loader_documents( documents: List[ Document ], loader_name: str ) -> int:
+	"""
+		Purpose:
+		--------
+		Promote loader output into shared document-processing state.
+
+		Parameters:
+		-----------
+		documents (List[Document]): Documents returned by the loader.
+		loader_name (str): Loader metadata name assigned to promoted documents.
+
+		Returns:
+		--------
+		int: Number of documents promoted.
+	"""
+	throw_if( 'documents', documents )
+	throw_if( 'loader_name', loader_name )
+	initialize_loading_state( )
+	clear_if_active( loader_name )
+	promoted: List[ Document ] = [ ]
+	for document in documents:
+		metadata = dict( document.metadata or { } )
+		metadata[ 'loader' ] = loader_name
+		document.metadata = metadata
+		promoted.append( document )
+	remaining = st.session_state.get( 'documents', [ ] ) or [ ]
+	st.session_state[ 'documents' ] = list( remaining ) + promoted
+	st.session_state[ 'raw_documents' ] = list( st.session_state[ 'documents' ] )
+	st.session_state[ 'raw_text' ] = rebuild_raw_text_from_documents( )
+	st.session_state[ 'active_loader' ] = loader_name
+	st.session_state[ 'processed_text' ] = None
+	st.session_state[ 'lines' ] = None
+	st.session_state[ 'chunked_documents' ] = [ ]
+	st.session_state[ 'chunk_loader' ] = None
+	st.session_state[ 'df_chunks' ] = pd.DataFrame( )
+	st.session_state[ 'embeddings' ] = [ ]
+	st.session_state[ 'embedder' ] = None
+	st.session_state[ 'vector_store' ] = None
+	return len( promoted )
 
 # ------------- GEN AI
 
@@ -3652,7 +3372,7 @@ with st.sidebar:
 			os.environ[ 'PURPLEAIR_API_KEY' ] = purpleair_key
 	
 	# ------- Map Functionality
-	maps = Maps( qps=qps, )
+	maps = Map( qps=qps, )
 	distances = DistanceMatrix( maps )
 	timezone = Timezone( maps )
 	geocoder = Geocoder( maps, cache=cache )

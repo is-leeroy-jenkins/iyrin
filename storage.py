@@ -47,7 +47,9 @@ import sqlite3
 import time
 import config as cfg
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
+import re
 from chunk_ids import vector_document_ids
 from pathlib import Path
 from typing import Any, List, Dict, Optional
@@ -81,6 +83,23 @@ def throw_if( name: str, value: object ) -> None:
 	
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
+
+def normalize( obj ):
+	if obj is None or isinstance( obj, (str, int, float, bool) ):
+		return obj
+	if isinstance( obj, dict ):
+		return { k: normalize( v ) for k, v in obj.items( ) }
+	if isinstance( obj, (list, tuple, set) ):
+		return [ normalize( v ) for v in obj ]
+	if hasattr( obj, "model_dump" ):
+		try:
+			return obj.model_dump( )
+		except Exception:
+			return str( obj )
+	return str( obj )
+
+def blue_divider( ) -> None:
+	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 class BaseCache( ):
 	"""
@@ -946,7 +965,7 @@ class SQLiteDatabase( ):
 		"""
 		if not table:
 			return
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			conn.execute( f'DROP TABLE IF EXISTS "{table}";' )
 			conn.commit( )
 	
@@ -975,13 +994,13 @@ class SQLiteDatabase( ):
 		# ------------------------------------------------------------------
 		# Validate table exists
 		# ------------------------------------------------------------------
-		tables = list_tables( )
+		tables = self.list_tables( )
 		if table not in tables:
 			raise ValueError( 'Invalid table name.' )
 		# ------------------------------------------------------------------
 		# Validate column exists
 		# ------------------------------------------------------------------
-		schema = create_schema( table )
+		schema = self.create_schema( table )
 		valid_columns = [ col[ 1 ] for col in schema ]
 		if column not in valid_columns:
 			raise ValueError( 'Invalid column name.' )
@@ -993,7 +1012,7 @@ class SQLiteDatabase( ):
 		# Create index safely (quote identifiers)
 		# ------------------------------------------------------------------
 		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{table}"("{column}");'
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			conn.execute( sql )
 			conn.commit( )
 	
@@ -1163,11 +1182,11 @@ class SQLiteDatabase( ):
 	def convert_dataframe( self, table_name: str, df: pd.DataFrame ):
 		columns = [ ]
 		for col in df.columns:
-			sql_type = get_sqlite_type( df[ col ].dtype )
+			sql_type = self.get_sqlite_type( df[ col ].dtype )
 			safe_col = col.replace( ' ', '_' )
 			columns.append( f'{safe_col} {sql_type}' )
 		create_stmt = f'CREATE TABLE IF NOT EXISTS {table_name} ({", ".join( columns )});'
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			conn.execute( create_stmt )
 			conn.commit( )
 	
@@ -1176,7 +1195,7 @@ class SQLiteDatabase( ):
 		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
 		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
 		stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			conn.executemany( stmt, df.values.tolist( ) )
 			conn.commit( )
 	
@@ -1269,7 +1288,7 @@ class SQLiteDatabase( ):
 				definition += " NOT NULL"
 			col_defs.append( definition )
 		sql = f'CREATE TABLE IF NOT EXISTS "{table_name}" ({", ".join( col_defs )});'
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			conn.execute( sql )
 			conn.commit( )
 	
@@ -1343,14 +1362,14 @@ class SQLiteDatabase( ):
 		return safe
 	
 	def get_indexes( self, table: str ):
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
 			return rows
 	
 	def add_column( table: str, column: str, col_type: str ):
-		column = create_identifier( column )
+		column = self.create_identifier( column )
 		col_type = col_type.upper( )
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			conn.execute( f'ALTER TABLE "{table}" ADD COLUMN "{column}" {col_type};' )
 			conn.commit( )
 	
@@ -1381,7 +1400,7 @@ class SQLiteDatabase( ):
 		"""
 		if not table_name or not old_name or not new_name:
 			return
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			try:
 				conn.execute(
 					f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}";' )
@@ -1443,7 +1462,7 @@ class SQLiteDatabase( ):
 			conn.commit( )
 	
 	def create_profile_table( self, table: str ):
-		df = read_table( table )
+		df = self.read_table( table )
 		profile_rows = [ ]
 		total_rows = len( df )
 		for col in df.columns:
@@ -1468,7 +1487,7 @@ class SQLiteDatabase( ):
 	def drop_column( self, table: str, column: str ):
 		if not table or not column:
 			raise ValueError( 'Table and column required.' )
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			# ------------------------------------------------------------
 			# Fetch original CREATE TABLE statement
 			# ------------------------------------------------------------
@@ -1550,7 +1569,7 @@ class SQLiteDatabase( ):
 		"""
 		if not old_name or not new_name:
 			return
-		with create_connection( ) as conn:
+		with self.create_connection( ) as conn:
 			try:
 				conn.execute( f'ALTER TABLE "{old_name}" RENAME TO "{new_name}";' )
 				conn.commit( )

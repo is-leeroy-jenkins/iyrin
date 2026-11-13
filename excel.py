@@ -46,7 +46,7 @@ from typing import Optional, Dict, List
 import pandas as pd
 from storage import BaseCache
 from geocode import Geocoder
-from maps import Maps
+from mapping import Map
 from places import Place
 from boogr import Error
 
@@ -90,7 +90,7 @@ class Excel:
         
     """
 	api_key: str
-	maps: Optional[ Maps ]
+	maps: Optional[ Map ]
 	geocoder: Optional[ Geocoder ]
 	places: Optional[ Place ]
 	input_path: Optional[ str ]
@@ -110,7 +110,7 @@ class Excel:
 		throw_if( 'api', api )
 		self.api_key = api
 		self.cache = cache
-		self.maps = Maps( api_key=self.api_key )
+		self.maps = Map( api_key=self.api_key )
 		self.geocoder = Geocoder( self.maps, cache=self.cache )
 		self.places = Place( self.maps, cache=self.cache )
 		self.input_path = None

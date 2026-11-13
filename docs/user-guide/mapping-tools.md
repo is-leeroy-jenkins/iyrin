@@ -14,7 +14,7 @@ Mapping Tools centralizes direct geographic utility operations.
 
 | Module | Responsibility |
 |---|---|
-| `maps.py` | Shared mapping gateway. |
+| `../../mapping.py` | Shared mapping gateway. |
 | `geocode.py` | Address and coordinate geocoding. |
 | `places.py` | Place search and details. |
 | `distances.py` | Distance Matrix and travel metrics. |
