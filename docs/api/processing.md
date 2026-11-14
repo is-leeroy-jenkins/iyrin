@@ -11,7 +11,7 @@
 | `serialize_mode_result(...)` | Serialize structured results for document content. |
 | `sync_mode_document(...)` | Synchronize a mode result into LangChain document state. |
 
-The pipeline module imports the full parser stack, so this page documents its public orchestration surface without importing it during MkDocs generation.
+The document-processing orchestration functions now reside in `app.py`. This page documents their public contracts without importing the Streamlit entry point during MkDocs generation.
 
 ## Embedding Factory
 
@@ -19,8 +19,10 @@ The pipeline module imports the full parser stack, so this page documents its pu
 
 ## Local GGUF Embeddings
 
-::: embedders.LocalGGUFEmbeddings
+::: embedders.LocalEmbeddings
 
 ## Vector Stores
 
-::: stores.vector
+::: storage.ChromaStore
+
+::: storage.PineconeStore
