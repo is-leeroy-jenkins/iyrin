@@ -1491,7 +1491,8 @@ def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
 		object: Matching value or None.
 
 	'''
-	throw_if( 'row', row )
+	if not isinstance( row, dict ):
+		raise TypeError( 'row must be a dictionary.' )
 	throw_if( 'keys', keys )
 	for key in keys:
 		if key in row:

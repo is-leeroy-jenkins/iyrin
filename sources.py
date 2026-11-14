@@ -363,8 +363,13 @@ class AisStreamLive( ):
 			self.latitude = latitude
 			self.longitude = longitude
 			self.radius_degrees = radius_degrees
-			self.max_messages = int( max_messages )
-			self.duration_seconds = float( duration_seconds )
+			if type( max_messages ) is not int or max_messages < 1:
+				raise ValueError( 'max_messages must be a positive integer.' )
+			if (type( duration_seconds ) not in (int, float) or
+					not math.isfinite( duration_seconds ) or duration_seconds <= 0.0):
+				raise ValueError( 'duration_seconds must be a positive finite number.' )
+			self.max_messages = max_messages
+			self.duration_seconds = duration_seconds
 			self.north = min( 90.0, self.latitude + self.radius_degrees )
 			self.south = max( -90.0, self.latitude - self.radius_degrees )
 			self.west = max( -180.0, self.longitude - self.radius_degrees )
@@ -650,6 +655,7 @@ class OverpassClient( ):
 		'''
 		try:
 			throw_if( 'query', query )
+			self.query = query
 			transient_statuses = { 406, 429, 500, 502, 503, 504 }
 			errors: List[ str ] = [ ]
 			for endpoint in self.endpoints:
@@ -657,7 +663,7 @@ class OverpassClient( ):
 					try:
 						self.url = endpoint
 						self.response = None
-						self.response = requests.post( self.url, data={ 'data': query }, headers=self.headers,
+						self.response = requests.post( self.url, data={ 'data': self.query }, headers=self.headers,
 							timeout=self.timeout )
 						status_code = int( self.response.status_code )
 						if status_code in transient_statuses and attempt < self.retries:
