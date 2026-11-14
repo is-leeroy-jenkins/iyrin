@@ -719,10 +719,16 @@ def create_live_world_bounding_box( latitude: float, longitude: float,
 	'''
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
-	west = max( -180.0, float( longitude ) - float( delta ) )
-	south = max( -90.0, float( latitude ) - float( delta ) )
-	east = min( 180.0, float( longitude ) + float( delta ) )
-	north = min( 90.0, float( latitude ) + float( delta ) )
+	if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
+		raise ValueError( 'latitude must be between -90 and 90 degrees.' )
+	if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
+		raise ValueError( 'longitude must be between -180 and 180 degrees.' )
+	if type( delta ) not in (int, float) or not 0 < delta <= 180:
+		raise ValueError( 'delta must be positive and no greater than 180.' )
+	west = max( -180.0, longitude - delta )
+	south = max( -90.0, latitude - delta )
+	east = min( 180.0, longitude + delta )
+	north = min( 90.0, latitude + delta )
 	return f'{west:.6f},{south:.6f},{east:.6f},{north:.6f}'
 
 def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
@@ -3092,11 +3098,11 @@ def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> flo
 	'''
 	throw_if( 'key', key )
 	if not isinstance( metadata, dict ):
-		return float( default )
+		return default
 	try:
 		return float( metadata.get( key, default ) )
 	except ( TypeError, ValueError ):
-		return float( default )
+		return default
 
 def make_live_world_display_frame( df_frame: pd.DataFrame ) -> pd.DataFrame:
 	'''
