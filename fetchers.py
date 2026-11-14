@@ -5233,7 +5233,7 @@ class AstroCatalog( Fetcher ):
 	radius: Optional[ int ]
 	params: Optional[ Dict[ str, Any ] ]
 	
-	def __init__( self ):
+	def __init__( self ) -> None:
 		"""Initialize AstroCatalog provider state.
 
 		Purpose:
