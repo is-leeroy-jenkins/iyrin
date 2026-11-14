@@ -207,13 +207,6 @@ class WebFetcher( Fetcher ):
 		Attributes:
 			soup (Optional[ BeautifulSoup ]): Parsed Beautiful Soup HTML document.
 			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
-			designation (str): Selected near-Earth object designation.
-			dv (float | int): Maximum mission delta-V constraint.
-			dur (int): Maximum mission duration.
-			stay (int): Minimum mission stay.
-			launch (str): Mission launch year range.
-			date_min (str): Optional earliest fireball observation date.
-			timeout (int): HTTP request timeout for the active API operation.
 			url (Optional[ str ]): Current resource or endpoint URL.
 			html (Optional[ str ]): HTML response body returned by the current request.
 			re_tag (Optional[ Pattern ]): Regular expression used to match HTML tags.
@@ -3720,6 +3713,13 @@ class NearbyObjects( Fetcher ):
 			sort (Optional[ str ]): Sorting expression applied to returned records.
 			limit (Optional[ int ]): Maximum records requested.
 			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+			designation (str): Selected near-Earth object designation.
+			dv (float | int): Maximum mission delta-V constraint.
+			dur (int): Maximum mission duration.
+			stay (int): Minimum mission stay.
+			launch (str): Mission launch year range.
+			date_min (str): Optional earliest fireball observation date.
+			timeout (int): HTTP request timeout for the active API operation.
 	
 			designation (Any): Catalog designation of the selected object.
 			required (Any): Names of mandatory inputs in the generated function schema.
