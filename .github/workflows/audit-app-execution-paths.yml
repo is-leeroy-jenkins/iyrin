@@ -41,7 +41,7 @@ jobs:
           import ast
           from pathlib import Path
           errors = []
-          for filename in ('fetchers.py', 'generators.py', 'loaders.py'):
+          for filename in ('fetchers.py', 'generators.py', 'loaders.py', 'processors.py'):
               tree = ast.parse(Path(filename).read_text(encoding='utf-8'))
               for cls in (node for node in tree.body if isinstance(node, ast.ClassDef)):
                   if not ast.get_docstring(cls):
