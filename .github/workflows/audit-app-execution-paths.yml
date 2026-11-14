@@ -55,7 +55,9 @@ jobs:
                           continue
                       if any(isinstance(node, ast.Raise) and isinstance(node.exc, ast.Call)
                              and isinstance(node.exc.func, ast.Name)
-                             and node.exc.func.id == 'NotImplementedError' for node in ast.walk(fn)):
+                             and node.exc.func.id == 'NotImplementedError' for node in ast.walk(fn)) or any(
+                             isinstance(node, ast.Raise) and isinstance(node.exc, ast.Name)
+                             and node.exc.id == 'NotImplementedError' for node in ast.walk(fn)):
                           continue
                       args = fn.args.posonlyargs + fn.args.args
                       required = args[:len(args) - len(fn.args.defaults)]
