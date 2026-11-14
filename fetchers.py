@@ -4322,7 +4322,7 @@ class OpenScience( Fetcher ):
 				'fetch_dataset', 'fetch_metadata', 'fetch_assays', 'fetch_data', 'fetch',
 				'create_schema' ]
 	
-	def _validate_format( self, format_value: str ) -> str:
+	def validate_format( self, format_value: str ) -> str:
 		"""
 
 		Purpose:
@@ -4350,11 +4350,11 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = '_validate_format( self, format_value: str ) -> str'
+			exception.method = 'validate_format( self, format_value: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str:
+	def coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str:
 		"""Convert an HTTP response into JSON when possible, otherwise text.
 
 		Purpose:
@@ -4385,7 +4385,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'OpenScience._coerce_response'
+			exception.method = 'OpenScience.coerce_response'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4417,7 +4417,7 @@ class OpenScience( Fetcher ):
 				timeout=time )
 			self.response.raise_for_status( )
 			return { 'mode': 'dataset', 'url': self.url, 'params': self.params,
-					'data': self._coerce_response( self.response ) }
+					'data': self.coerce_response( self.response ) }
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -4450,7 +4450,7 @@ class OpenScience( Fetcher ):
 			throw_if( 'query', query )
 			self.query = query
 			self.query_text = self.query.strip( )
-			self.format_value = self._validate_format( format_value )
+			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/metadata/'
 			self.url = f'{self.base_url}{self.endpoint}'
 			self.params = { 'query': self.query_text, 'format': self.format_value }
@@ -4458,7 +4458,7 @@ class OpenScience( Fetcher ):
 				timeout=time )
 			self.response.raise_for_status( )
 			return { 'mode': 'metadata', 'url': self.url, 'params': self.params,
-					'data': self._coerce_response( self.response ) }
+					'data': self.coerce_response( self.response ) }
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -4491,7 +4491,7 @@ class OpenScience( Fetcher ):
 			throw_if( 'query', query )
 			self.query = query
 			self.query_text = self.query.strip( )
-			self.format_value = self._validate_format( format_value )
+			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/assays/'
 			self.url = f'{self.base_url}{self.endpoint}'
 			self.params = { 'query': self.query_text, 'format': self.format_value }
@@ -4499,7 +4499,7 @@ class OpenScience( Fetcher ):
 				timeout=time )
 			self.response.raise_for_status( )
 			return { 'mode': 'assays', 'url': self.url, 'params': self.params,
-					'data': self._coerce_response( self.response ) }
+					'data': self.coerce_response( self.response ) }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -4534,7 +4534,7 @@ class OpenScience( Fetcher ):
 			self.query = query
 			
 			self.query_text = self.query.strip( )
-			self.format_value = self._validate_format( format_value )
+			self.format_value = self.validate_format( format_value )
 			self.endpoint = '/v2/query/data/'
 			self.url = f'{self.base_url}{self.endpoint}'
 			self.params = {
@@ -4554,7 +4554,7 @@ class OpenScience( Fetcher ):
 					'mode': 'data',
 					'url': self.url,
 					'params': self.params,
-					'data': self._coerce_response( self.response )
+					'data': self.coerce_response( self.response )
 			}
 		
 		except Exception as e:
@@ -5166,7 +5166,7 @@ class AstroCatalog( Fetcher ):
 				'fetch',
 		]
 	
-	def _normalize_attribute_path( self, quantity: str='', attributes: str='' ) -> str:
+	def normalize_attribute_path( self, quantity: str='', attributes: str='' ) -> str:
 		"""
 
 		Purpose:
@@ -5189,7 +5189,7 @@ class AstroCatalog( Fetcher ):
 		
 		return '/'.join( parts )
 	
-	def _parse_argument_string( self, argument_string: str ) -> Dict[ str, Any ]:
+	def parse_argument_string( self, argument_string: str ) -> Dict[ str, Any ]:
 		"""
 			Purpose:
 				Parse a comma-separated or newline-separated list of OAC query
@@ -5300,12 +5300,12 @@ class AstroCatalog( Fetcher ):
 			self.format = (data_format or 'json').strip( ).lower( )
 			
 			route_parts = [ urllib.parse.quote( self.name ) ]
-			attr_path = self._normalize_attribute_path( quantity, attributes )
+			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
 				route_parts.append( attr_path )
 			
 			route = '/'.join( route_parts )
-			params = self._parse_argument_string( arguments )
+			params = self.parse_argument_string( arguments )
 			
 			if self.format:
 				params[ 'format' ] = self.format
@@ -5358,11 +5358,11 @@ class AstroCatalog( Fetcher ):
 			self.format = (data_format or 'json').strip( ).lower( )
 			
 			route = 'catalog'
-			attr_path = self._normalize_attribute_path( quantity, attributes )
+			attr_path = self.normalize_attribute_path( quantity, attributes )
 			if attr_path:
 				route = f'{route}/{attr_path}'
 			
-			params = self._parse_argument_string( arguments )
+			params = self.parse_argument_string( arguments )
 			params[ 'ra' ] = self.right_ascension
 			params[ 'dec' ] = self.declination
 			params[ 'radius' ] = str( self.radius )
@@ -5516,7 +5516,7 @@ class AstroQuery( Fetcher ):
 				'fetch',
 		]
 	
-	def _table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]:
+	def table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -5560,7 +5560,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = '_table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]'
+			exception.method = 'table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -5598,7 +5598,7 @@ class AstroQuery( Fetcher ):
 					'query': self.name,
 					'row_limit': self.row_limit,
 					'columns': list( result_table.colnames ) if result_table is not None else [ ],
-					'rows': self._table_to_records( result_table ),
+					'rows': self.table_to_records( result_table ),
 			}
 		
 		except Exception as exc:
@@ -5642,7 +5642,7 @@ class AstroQuery( Fetcher ):
 					'query': self.name,
 					'row_limit': self.row_limit,
 					'columns': list( result_table.colnames ) if result_table is not None else [ ],
-					'rows': self._table_to_records( result_table ),
+					'rows': self.table_to_records( result_table ),
 			}
 		
 		except Exception as exc:
@@ -5727,7 +5727,7 @@ class AstroQuery( Fetcher ):
 					'radius_unit': (radius_unit or 'deg').strip( ).lower( ),
 					'row_limit': self.row_limit,
 					'columns': list( result_table.colnames ) if result_table is not None else [ ],
-					'rows': self._table_to_records( result_table ),
+					'rows': self.table_to_records( result_table ),
 			}
 		
 		except Exception as exc:
@@ -5925,7 +5925,7 @@ class StarMap( Fetcher ):
 				'fetch',
 		]
 	
-	def _normalize_bool( self, value: bool ) -> str:
+	def normalize_bool( self, value: bool ) -> str:
 		"""
 
 		Purpose:
@@ -5942,7 +5942,7 @@ class StarMap( Fetcher ):
 		self.value = value
 		return '1' if self.value else '0'
 	
-	def _extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]:
+	def extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]:
 		"""
 
 		Purpose:
@@ -5983,7 +5983,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = '_extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]'
+			exception.method = 'extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6031,7 +6031,7 @@ class StarMap( Fetcher ):
 			
 			self.params = {
 					'object': self.object,
-					'show_box': self._normalize_bool( self.show_box ),
+					'show_box': self.normalize_bool( self.show_box ),
 					'zoom': str( self.zoom ),
 					'box_color': self.box_color,
 					'box_width': '50',
@@ -6135,12 +6135,12 @@ class StarMap( Fetcher ):
 			self.params = {
 					'ra': f'{self.right_ascension}',
 					'de': f'{self.declination}',
-					'show_box': self._normalize_bool( self.show_box ),
+					'show_box': self.normalize_bool( self.show_box ),
 					'zoom': str( self.zoom ),
 					'box_color': self.box_color,
-					'show_grid': self._normalize_bool( self.show_grid ),
-					'show_constellation_lines': self._normalize_bool( self.show_lines ),
-					'show_constellation_boundaries': self._normalize_bool( self.show_boundaries ),
+					'show_grid': self.normalize_bool( self.show_grid ),
+					'show_constellation_lines': self.normalize_bool( self.show_lines ),
+					'show_constellation_boundaries': self.normalize_bool( self.show_boundaries ),
 			}
 			
 			interactive_url = f'{self.base_url}?{urllib.parse.urlencode( self.params )}'
@@ -6245,10 +6245,10 @@ class StarMap( Fetcher ):
 					'de': f'{self.declination}',
 					'zoom': str( self.zoom ),
 					'img_source': self.image_source,
-					'show_grid': self._normalize_bool( self.show_grid ),
-					'show_constellation_lines': self._normalize_bool( self.show_lines ),
-					'show_constellation_boundaries': self._normalize_bool( self.show_boundaries ),
-					'show_const_names': self._normalize_bool( self.show_const_names ),
+					'show_grid': self.normalize_bool( self.show_grid ),
+					'show_constellation_lines': self.normalize_bool( self.show_lines ),
+					'show_constellation_boundaries': self.normalize_bool( self.show_boundaries ),
+					'show_const_names': self.normalize_bool( self.show_const_names ),
 			}
 			
 			page_url = f'{self.snapshot_url}?{urllib.parse.urlencode( self.params )}'
@@ -6260,7 +6260,7 @@ class StarMap( Fetcher ):
 				timeout=self.timeout )
 			self.response.raise_for_status( )
 			
-			image_links = self._extract_snapshot_links(
+			image_links = self.extract_snapshot_links(
 				html=self.response.text,
 				base_url=self.snapshot_url )
 			
@@ -6516,7 +6516,7 @@ class GovData( Fetcher ):
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self ) -> str:
+	def resolve_api_key( self ) -> str:
 		"""
 
 		Purpose:
@@ -6536,11 +6536,11 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = '_resolve_api_key( self ) -> str'
+			exception.method = 'resolve_api_key( self ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_page_size( self, page_size: int ) -> int:
+	def validate_page_size( self, page_size: int ) -> int:
 		"""
 
 		Purpose:
@@ -6568,11 +6568,11 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = '_validate_page_size( self, page_size: int ) -> int'
+			exception.method = 'validate_page_size( self, page_size: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_sort_field( self, sort_field: str ) -> str:
+	def validate_sort_field( self, sort_field: str ) -> str:
 		"""
 
 		Purpose:
@@ -6603,11 +6603,11 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = '_validate_sort_field( self, sort_field: str ) -> str'
+			exception.method = 'validate_sort_field( self, sort_field: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_sort_order( self, sort_order: str ) -> str:
+	def validate_sort_order( self, sort_order: str ) -> str:
 		"""
 
 		Purpose:
@@ -6636,7 +6636,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = '_validate_sort_order( self, sort_order: str ) -> str'
+			exception.method = 'validate_sort_order( self, sort_order: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6676,14 +6676,14 @@ class GovData( Fetcher ):
 			self.query = query
 			
 			self.query = self.query.strip( )
-			self.page_size = self._validate_page_size( page_size )
+			self.page_size = self.validate_page_size( page_size )
 			self.offset_mark = (offset_mark or '*').strip( )
-			self.sort_field = self._validate_sort_field( sort_field )
-			self.sort_order = self._validate_sort_order( sort_order )
+			self.sort_field = self.validate_sort_field( sort_field )
+			self.sort_order = self.validate_sort_order( sort_order )
 			
 			self.url = f'{self.base_url}/search'
 			self.params = {
-					'api_key': self._resolve_api_key( )
+					'api_key': self.resolve_api_key( )
 			}
 			self.payload = {
 					'query': self.query,
@@ -6749,7 +6749,7 @@ class GovData( Fetcher ):
 			self.package_id = package_id
 			self.package_id = self.package_id.strip( )
 			self.url = f'{self.base_url}/packages/{self.package_id}/summary'
-			self.params = { 'api_key': self._resolve_api_key( ) }
+			self.params = { 'api_key': self.resolve_api_key( ) }
 			self.payload = { }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=time )
@@ -6804,14 +6804,14 @@ class GovData( Fetcher ):
 			
 			self.collection = self.collection.strip( )
 			self.start_date = self.start_date.strip( )
-			self.page_size = self._validate_page_size( page_size )
+			self.page_size = self.validate_page_size( page_size )
 			self.offset_mark = (offset_mark or '*').strip( )
 			
 			self.url = f'{self.base_url}/collections/{self.collection}/{self.start_date}'
 			self.params = {
 					'pageSize': self.page_size,
 					'offsetMark': self.offset_mark,
-					'api_key': self._resolve_api_key( )
+					'api_key': self.resolve_api_key( )
 			}
 			self.payload = { }
 			
@@ -7170,7 +7170,7 @@ class StarChart( Fetcher ):
 				'create_schema'
 		]
 	
-	def _flag( self, value: bool, invert: bool=False ) -> int:
+	def flag( self, value: bool, invert: bool=False ) -> int:
 		"""
 
 		Purpose:
@@ -7314,7 +7314,7 @@ class StarChart( Fetcher ):
 			self.params = {
 					'object': self.query,
 					'zoom': self.zoom,
-					'show_box': self._flag( self.show_box ),
+					'show_box': self.flag( self.show_box ),
 					'box_color': self.box_color
 			}
 			
@@ -7400,11 +7400,11 @@ class StarChart( Fetcher ):
 					'ra': self.ra,
 					'de': self.dec,
 					'zoom': self.zoom,
-					'show_box': self._flag( self.show_box ),
+					'show_box': self.flag( self.show_box ),
 					'box_color': self.box_color,
-					'show_grid': self._flag( self.show_grid, invert=True ),
-					'show_constellation_lines': self._flag( self.show_lines, invert=True ),
-					'show_constellation_boundaries': self._flag( self.show_boundaries, invert=True )
+					'show_grid': self.flag( self.show_grid, invert=True ),
+					'show_constellation_lines': self.flag( self.show_lines, invert=True ),
+					'show_constellation_boundaries': self.flag( self.show_boundaries, invert=True )
 			}
 			
 			if self.image_source:
@@ -7498,12 +7498,12 @@ class StarChart( Fetcher ):
 					'de': self.dec,
 					'zoom': self.zoom,
 					'mag': self.magnitude,
-					'show_grid': self._flag( self.show_grid ),
+					'show_grid': self.flag( self.show_grid ),
 					'grid_color': '404040',
 					'grid_color_zero': '808080',
-					'show_constellation_lines': self._flag( self.show_lines ),
-					'show_constellation_boundaries': self._flag( self.show_boundaries ),
-					'show_const_names': self._flag( self.show_const_names ),
+					'show_constellation_lines': self.flag( self.show_lines ),
+					'show_constellation_boundaries': self.flag( self.show_boundaries ),
+					'show_const_names': self.flag( self.show_const_names ),
 					'img_source': self.image_source
 			}
 			
@@ -7833,7 +7833,7 @@ class Congress( Fetcher ):
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self ) -> str:
+	def resolve_api_key( self ) -> str:
 		"""
 
 		Purpose:
@@ -7854,11 +7854,11 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = '_resolve_api_key( self ) -> str'
+			exception.method = 'resolve_api_key( self ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_limit( self, limit: int ) -> int:
+	def validate_limit( self, limit: int ) -> int:
 		"""
 
 		Purpose:
@@ -7886,11 +7886,11 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = '_validate_limit( self, limit: int ) -> int'
+			exception.method = 'validate_limit( self, limit: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_offset( self, offset: int ) -> int:
+	def validate_offset( self, offset: int ) -> int:
 		"""
 
 		Purpose:
@@ -7918,11 +7918,11 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = '_validate_offset( self, offset: int ) -> int'
+			exception.method = 'validate_offset( self, offset: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _normalize_bill_type( self, bill_type: str ) -> str:
+	def normalize_bill_type( self, bill_type: str ) -> str:
 		"""
 
 		Purpose:
@@ -7960,11 +7960,11 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = '_normalize_bill_type( self, bill_type: str ) -> str'
+			exception.method = 'normalize_bill_type( self, bill_type: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _normalize_law_type( self, law_type: str ) -> str:
+	def normalize_law_type( self, law_type: str ) -> str:
 		"""
 
 		Purpose:
@@ -7996,11 +7996,11 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = '_normalize_law_type( self, law_type: str ) -> str'
+			exception.method = 'normalize_law_type( self, law_type: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _normalize_report_type( self, report_type: str ) -> str:
+	def normalize_report_type( self, report_type: str ) -> str:
 		"""
 
 		Purpose:
@@ -8034,11 +8034,11 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = '_normalize_report_type( self, report_type: str ) -> str'
+			exception.method = 'normalize_report_type( self, report_type: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _base_params( self, limit: int=20, offset: int=0,
+	def base_params( self, limit: int=20, offset: int=0,
 			sort: str='updateDate+desc' ) -> Dict[ str, Any ]:
 		"""
 
@@ -8060,10 +8060,10 @@ class Congress( Fetcher ):
 		"""
 		try:
 			return {
-					'api_key': self._resolve_api_key( ),
+					'api_key': self.resolve_api_key( ),
 					'format': 'json',
-					'limit': self._validate_limit( limit ),
-					'offset': self._validate_offset( offset ),
+					'limit': self.validate_limit( limit ),
+					'offset': self.validate_offset( offset ),
 					'sort': (sort or 'updateDate+desc').strip( )
 			}
 		
@@ -8072,7 +8072,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = (
-					'_base_params( self, limit: int=20, offset: int=0, '
+					'base_params( self, limit: int=20, offset: int=0, '
 					'sort: str=updateDate+desc ) -> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -8100,7 +8100,7 @@ class Congress( Fetcher ):
 		"""
 		try:
 			self.url = f'{self.base_url}/congress'
-			self.params = self._base_params(
+			self.params = self.base_params(
 				limit=limit,
 				offset=offset,
 				sort='updateDate+desc'
@@ -8171,12 +8171,12 @@ class Congress( Fetcher ):
 			self.bill_type = (bill_type or '').strip( ).lower( )
 			
 			if self.bill_type:
-				self.bill_type = self._normalize_bill_type( self.bill_type )
+				self.bill_type = self.normalize_bill_type( self.bill_type )
 				self.url = f'{self.base_url}/bill/{self.congress_number}/{self.bill_type}'
 			else:
 				self.url = f'{self.base_url}/bill/{self.congress_number}'
 			
-			self.params = self._base_params(
+			self.params = self.base_params(
 				limit=limit,
 				offset=offset,
 				sort=sort
@@ -8245,7 +8245,7 @@ class Congress( Fetcher ):
 			throw_if( 'bill_number', bill_number )
 			
 			self.congress_number = congress
-			self.bill_type = self._normalize_bill_type( self.bill_type )
+			self.bill_type = self.normalize_bill_type( self.bill_type )
 			self.bill_number = bill_number
 			
 			self.url = (
@@ -8253,7 +8253,7 @@ class Congress( Fetcher ):
 					f'{self.bill_type}/{self.bill_number}'
 			)
 			self.params = {
-					'api_key': self._resolve_api_key( ),
+					'api_key': self.resolve_api_key( ),
 					'format': 'json'
 			}
 			
@@ -8315,12 +8315,12 @@ class Congress( Fetcher ):
 			self.law_type = (law_type or '').strip( ).lower( )
 			
 			if self.law_type:
-				self.law_type = self._normalize_law_type( self.law_type )
+				self.law_type = self.normalize_law_type( self.law_type )
 				self.url = f'{self.base_url}/law/{self.congress_number}/{self.law_type}'
 			else:
 				self.url = f'{self.base_url}/law/{self.congress_number}'
 			
-			self.params = self._base_params(
+			self.params = self.base_params(
 				limit=limit,
 				offset=offset,
 				sort='updateDate+desc'
@@ -8382,7 +8382,7 @@ class Congress( Fetcher ):
 			throw_if( 'law_number', law_number )
 			
 			self.congress_number = congress
-			self.law_type = self._normalize_law_type( self.law_type )
+			self.law_type = self.normalize_law_type( self.law_type )
 			self.law_number = law_number
 			
 			self.url = (
@@ -8390,7 +8390,7 @@ class Congress( Fetcher ):
 					f'{self.law_type}/{self.law_number}'
 			)
 			self.params = {
-					'api_key': self._resolve_api_key( ),
+					'api_key': self.resolve_api_key( ),
 					'format': 'json'
 			}
 			
@@ -8455,7 +8455,7 @@ class Congress( Fetcher ):
 			self.conference = conference
 			
 			if self.report_type:
-				self.report_type = self._normalize_report_type( self.report_type )
+				self.report_type = self.normalize_report_type( self.report_type )
 				self.url = (
 						f'{self.base_url}/committee-report/'
 						f'{self.congress_number}/{self.report_type}'
@@ -8463,7 +8463,7 @@ class Congress( Fetcher ):
 			else:
 				self.url = f'{self.base_url}/committee-report/{self.congress_number}'
 			
-			self.params = self._base_params(
+			self.params = self.base_params(
 				limit=limit,
 				offset=offset,
 				sort='updateDate+desc'
@@ -8526,7 +8526,7 @@ class Congress( Fetcher ):
 			throw_if( 'report_number', report_number )
 			
 			self.congress_number = congress
-			self.report_type = self._normalize_report_type( self.report_type )
+			self.report_type = self.normalize_report_type( self.report_type )
 			self.report_number = report_number
 			
 			self.url = (
@@ -8534,7 +8534,7 @@ class Congress( Fetcher ):
 					f'{self.report_type}/{self.report_number}'
 			)
 			self.params = {
-					'api_key': self._resolve_api_key( ),
+					'api_key': self.resolve_api_key( ),
 					'format': 'json'
 			}
 			
@@ -8875,7 +8875,7 @@ class InternetArchive( Fetcher ):
 				'create_schema'
 		]
 	
-	def _validate_rows( self, rows: int ) -> int:
+	def validate_rows( self, rows: int ) -> int:
 		"""
 
 		Purpose:
@@ -8903,11 +8903,11 @@ class InternetArchive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
-			exception.method = '_validate_rows( self, rows: int ) -> int'
+			exception.method = 'validate_rows( self, rows: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_page( self, page: int ) -> int:
+	def validate_page( self, page: int ) -> int:
 		"""
 
 		Purpose:
@@ -8935,11 +8935,11 @@ class InternetArchive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
-			exception.method = '_validate_page( self, page: int ) -> int'
+			exception.method = 'validate_page( self, page: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _build_query( self, keywords: str, media_type: str='',
+	def build_query( self, keywords: str, media_type: str='',
 			collection: str='' ) -> str:
 		"""
 
@@ -8978,7 +8978,7 @@ class InternetArchive( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
 			exception.method = (
-					'_build_query( self, keywords: str, media_type: str=, '
+					'build_query( self, keywords: str, media_type: str=, '
 					'collection: str= ) -> str'
 			)
 			Logger( ).write( exception )
@@ -9023,8 +9023,8 @@ class InternetArchive( Fetcher ):
 			throw_if( 'keywords', self.keywords )
 			
 			self.timeout = time
-			self.rows = self._validate_rows( rows )
-			self.page = self._validate_page( page )
+			self.rows = self.validate_rows( rows )
+			self.page = self.validate_page( page )
 			self.sort = (sort or 'downloads desc').strip( )
 			self.media_type = (media_type or '').strip( )
 			self.collection = (collection or '').strip( )
@@ -9033,7 +9033,7 @@ class InternetArchive( Fetcher ):
 			if not isinstance( active_fields, list ) or not active_fields:
 				raise ValueError( 'fields must be a non-empty list of field names.' )
 			
-			query_text = self._build_query(
+			query_text = self.build_query(
 				keywords=self.keywords,
 				media_type=self.media_type,
 				collection=self.collection
@@ -10402,7 +10402,7 @@ class Grokipedia( Fetcher ):
 				'create_schema'
 		]
 	
-	def _validate_limit( self, limit: int ) -> int:
+	def validate_limit( self, limit: int ) -> int:
 		"""
 
 		Purpose:
@@ -10430,11 +10430,11 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = '_validate_limit( self, limit: int ) -> int'
+			exception.method = 'validate_limit( self, limit: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _validate_offset( self, offset: int ) -> int:
+	def validate_offset( self, offset: int ) -> int:
 		"""
 
 		Purpose:
@@ -10462,11 +10462,11 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = '_validate_offset( self, offset: int ) -> int'
+			exception.method = 'validate_offset( self, offset: int ) -> int'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _get_client( self ) -> GrokipediaClient:
+	def get_client( self ) -> GrokipediaClient:
 		"""
 
 		Purpose:
@@ -10485,7 +10485,7 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = '_get_client( self ) -> GrokipediaClient'
+			exception.method = 'get_client( self ) -> GrokipediaClient'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -10514,9 +10514,9 @@ class Grokipedia( Fetcher ):
 			self.query = query
 			
 			self.query = self.query.strip( )
-			self.limit = self._validate_limit( limit )
-			self.offset = self._validate_offset( offset )
-			self.client = self._get_client( )
+			self.limit = self.validate_limit( limit )
+			self.offset = self.validate_offset( offset )
+			self.client = self.get_client( )
 			self.params = {
 					'query': self.query,
 					'limit': self.limit,
@@ -10572,7 +10572,7 @@ class Grokipedia( Fetcher ):
 			
 			self.page = self.page.strip( )
 			self.include_content = include_content
-			self.client = self._get_client( )
+			self.client = self.get_client( )
 			self.params = {
 					'page': self.page,
 					'include_content': self.include_content
@@ -10839,7 +10839,7 @@ class GoogleGeocoding( Fetcher ):
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self, api_key: Optional[ str ] = None ) -> str:
+	def resolve_api_key( self, api_key: Optional[ str ] = None ) -> str:
 		"""
 
 		Purpose:
@@ -10863,7 +10863,7 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = '_resolve_api_key( self, api_key: Optional[ str ]=None ) -> str'
+			exception.method = 'resolve_api_key( self, api_key: Optional[ str ]=None ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -10896,7 +10896,7 @@ class GoogleGeocoding( Fetcher ):
 			self.params = params
 			self.timeout = time
 			request_params = dict( self.params )
-			request_params[ 'key' ] = self._resolve_api_key( api_key=api_key )
+			request_params[ 'key' ] = self.resolve_api_key( api_key=api_key )
 			
 			self.params = request_params
 			self.response = requests.get(
@@ -11366,17 +11366,17 @@ class CensusData( Fetcher ):
 				'predicates',
 				'params',
 				'payload',
-				'_resolve_api_key',
-				'_normalize_fields',
-				'_parse_predicates',
-				'_shape_table',
+				'resolve_api_key',
+				'normalize_fields',
+				'parse_predicates',
+				'shape_table',
 				'fetch_variables',
 				'fetch_data',
 				'fetch',
 				'create_schema',
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -11388,7 +11388,7 @@ class CensusData( Fetcher ):
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
 	
-	def _normalize_fields( self, fields: str ) -> str:
+	def normalize_fields( self, fields: str ) -> str:
 		"""
 
 		Purpose:
@@ -11415,11 +11415,11 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = '_normalize_fields( self, fields: str ) -> str'
+			exception.method = 'normalize_fields( self, fields: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _parse_predicates( self, predicates: str ) -> Dict[ str, Any ]:
+	def parse_predicates( self, predicates: str ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -11466,12 +11466,12 @@ class CensusData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
 			exception.method = (
-					'_parse_predicates( self, predicates: str ) -> Dict[ str, Any ]'
+					'parse_predicates( self, predicates: str ) -> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]:
+	def shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -11517,7 +11517,7 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = '_shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]'
+			exception.method = 'shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -11551,7 +11551,7 @@ class CensusData( Fetcher ):
 			self.dataset = self.dataset.strip( ).strip( '/' )
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}/variables.json'
 			self.params = { }
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.params[ 'key' ] = api_key
 			
@@ -11621,10 +11621,10 @@ class CensusData( Fetcher ):
 			self.dataset = self.dataset.strip( ).strip( '/' )
 			self.geography_for = (geography_for or '').strip( )
 			self.geography_in = (geography_in or '').strip( )
-			self.predicates = self._parse_predicates( predicates )
+			self.predicates = self.parse_predicates( predicates )
 			self.url = f'{self.base_url}/{self.year}/{self.dataset}'
 			self.params = {
-					'get': self._normalize_fields( self.fields ),
+					'get': self.normalize_fields( self.fields ),
 			}
 			
 			if self.geography_for:
@@ -11636,7 +11636,7 @@ class CensusData( Fetcher ):
 			if self.predicates:
 				self.params.update( self.predicates )
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.params[ 'key' ] = api_key
 			
@@ -11653,7 +11653,7 @@ class CensusData( Fetcher ):
 					'mode': self.mode,
 					'url': self.response.url,
 					'params': self.params,
-					'data': self._shape_table( self.payload ),
+					'data': self.shape_table( self.payload ),
 					'raw': self.payload,
 			}
 		except Exception as e:
@@ -11901,16 +11901,16 @@ class Socrata( Fetcher ):
 				'offset_value',
 				'params',
 				'payload',
-				'_resolve_api_key',
-				'_normalize_domain',
-				'_normalize_dataset_id',
+				'resolve_api_key',
+				'normalize_domain',
+				'normalize_dataset_id',
 				'fetch_metadata',
 				'fetch_rows',
 				'fetch',
 				'create_schema',
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -11922,7 +11922,7 @@ class Socrata( Fetcher ):
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
 	
-	def _normalize_domain( self, domain: str ) -> str:
+	def normalize_domain( self, domain: str ) -> str:
 		"""
 
 		Purpose:
@@ -11949,11 +11949,11 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = '_normalize_domain( self, domain: str ) -> str'
+			exception.method = 'normalize_domain( self, domain: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _normalize_dataset_id( self, dataset_id: str ) -> str:
+	def normalize_dataset_id( self, dataset_id: str ) -> str:
 		"""
 
 		Purpose:
@@ -11980,7 +11980,7 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = '_normalize_dataset_id( self, dataset_id: str ) -> str'
+			exception.method = 'normalize_dataset_id( self, dataset_id: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12010,12 +12010,12 @@ class Socrata( Fetcher ):
 			throw_if( 'dataset_id', dataset_id )
 			self.dataset_id = dataset_id
 			self.mode = 'metadata'
-			self.domain = self._normalize_domain( self.domain )
-			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.url = f'https://{self.domain}/api/views/{self.dataset_id}.json'
 			self.params = { }
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.headers[ 'X-App-Token' ] = api_key
 			
@@ -12083,8 +12083,8 @@ class Socrata( Fetcher ):
 			throw_if( 'dataset_id', dataset_id )
 			self.dataset_id = dataset_id
 			self.mode = 'rows'
-			self.domain = self._normalize_domain( self.domain )
-			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.select_clause = (select or '').strip( )
 			self.where_clause = (where or '').strip( )
 			self.order_clause = (order or '').strip( )
@@ -12113,7 +12113,7 @@ class Socrata( Fetcher ):
 			if self.group_clause:
 				self.params[ '$group' ] = self.group_clause
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.headers[ 'X-App-Token' ] = api_key
 			
@@ -12382,16 +12382,16 @@ class HealthData( Fetcher ):
 				'offset_value',
 				'params',
 				'payload',
-				'_resolve_api_key',
-				'_normalize_domain',
-				'_normalize_dataset_id',
+				'resolve_api_key',
+				'normalize_domain',
+				'normalize_dataset_id',
 				'fetch_metadata',
 				'fetch_rows',
 				'fetch',
 				'create_schema',
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -12403,7 +12403,7 @@ class HealthData( Fetcher ):
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
 	
-	def _normalize_domain( self, domain: str ) -> str:
+	def normalize_domain( self, domain: str ) -> str:
 		"""
 
 		Purpose:
@@ -12430,11 +12430,11 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = '_normalize_domain( self, domain: str ) -> str'
+			exception.method = 'normalize_domain( self, domain: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _normalize_dataset_id( self, dataset_id: str ) -> str:
+	def normalize_dataset_id( self, dataset_id: str ) -> str:
 		"""
 
 		Purpose:
@@ -12461,7 +12461,7 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = '_normalize_dataset_id( self, dataset_id: str ) -> str'
+			exception.method = 'normalize_dataset_id( self, dataset_id: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12491,12 +12491,12 @@ class HealthData( Fetcher ):
 			throw_if( 'dataset_id', dataset_id )
 			self.dataset_id = dataset_id
 			self.mode = 'metadata'
-			self.domain = self._normalize_domain( self.domain )
-			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.url = f'https://{self.domain}/api/views/{self.dataset_id}.json'
 			self.params = { }
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.headers[ 'X-App-Token' ] = api_key
 			
@@ -12564,8 +12564,8 @@ class HealthData( Fetcher ):
 			throw_if( 'dataset_id', dataset_id )
 			self.dataset_id = dataset_id
 			self.mode = 'rows'
-			self.domain = self._normalize_domain( self.domain )
-			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
+			self.domain = self.normalize_domain( self.domain )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.select_clause = (select or '').strip( )
 			self.where_clause = (where or '').strip( )
 			self.order_clause = (order or '').strip( )
@@ -12594,7 +12594,7 @@ class HealthData( Fetcher ):
 			if self.group_clause:
 				self.params[ '$group' ] = self.group_clause
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.headers[ 'X-App-Token' ] = api_key
 			
@@ -12843,15 +12843,15 @@ class GlobalHealthData( Fetcher ):
 				'query_path',
 				'params',
 				'payload',
-				'_resolve_api_key',
-				'_normalize_query_path',
+				'resolve_api_key',
+				'normalize_query_path',
 				'fetch_indicator_registry',
 				'fetch_athena',
 				'fetch',
 				'create_schema',
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		'''
 
 			Purpose:
@@ -12868,7 +12868,7 @@ class GlobalHealthData( Fetcher ):
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
 	
-	def _normalize_query_path( self, query_path: str ) -> str:
+	def normalize_query_path( self, query_path: str ) -> str:
 		'''
 		
 			Purpose:
@@ -12896,7 +12896,7 @@ class GlobalHealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
-			exception.method = '_normalize_query_path( self, query_path: str ) -> str'
+			exception.method = 'normalize_query_path( self, query_path: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12920,7 +12920,7 @@ class GlobalHealthData( Fetcher ):
 			self.url = f'{self.base_url}/indicator-metadata-registry'
 			self.params = { }
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.headers[ 'X-API-Key' ] = api_key
 			
@@ -12981,14 +12981,14 @@ class GlobalHealthData( Fetcher ):
 			throw_if( 'query_path', query_path )
 			self.query_path = query_path
 			self.mode = 'athena'
-			self.query_path = self._normalize_query_path( self.query_path )
+			self.query_path = self.normalize_query_path( self.query_path )
 			self.url = f'{self.athena_base_url}/{self.query_path}'
 			self.params = { }
 			
 			if (fmt or '').strip( ):
 				self.params[ '$format' ] = fmt.strip( )
 			
-			api_key = self._resolve_api_key( )
+			api_key = self.resolve_api_key( )
 			if api_key:
 				self.headers[ 'X-API-Key' ] = api_key
 			
@@ -13211,14 +13211,14 @@ class UnitedNations( Fetcher ):
 				'query_path',
 				'params',
 				'payload',
-				'_normalize_query_path',
+				'normalize_query_path',
 				'fetch_datasets',
 				'fetch_sdmx_query',
 				'fetch',
 				'create_schema',
 		]
 	
-	def _normalize_query_path( self, query_path: str ) -> str:
+	def normalize_query_path( self, query_path: str ) -> str:
 		"""
 
 		Purpose:
@@ -13245,7 +13245,7 @@ class UnitedNations( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
-			exception.method = '_normalize_query_path( self, query_path: str ) -> str'
+			exception.method = 'normalize_query_path( self, query_path: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -13323,7 +13323,7 @@ class UnitedNations( Fetcher ):
 			throw_if( 'query_path', query_path )
 			self.query_path = query_path
 			self.mode = 'sdmx_query'
-			self.query_path = self._normalize_query_path( self.query_path )
+			self.query_path = self.normalize_query_path( self.query_path )
 			self.url = f'{self.base_url}/{self.query_path}'
 			self.params = { }
 			
@@ -13552,7 +13552,7 @@ class WorldPopulation( Fetcher ):
 				'asset_path',
 				'params',
 				'payload',
-				'_normalize_asset_path',
+				'normalize_asset_path',
 				'fetch_catalog',
 				'search_catalog',
 				'fetch_raster_metadata',
@@ -13560,7 +13560,7 @@ class WorldPopulation( Fetcher ):
 				'create_schema',
 		]
 	
-	def _normalize_asset_path( self, asset_path: str ) -> str:
+	def normalize_asset_path( self, asset_path: str ) -> str:
 		"""
 
 		Purpose:
@@ -13587,7 +13587,7 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = '_normalize_asset_path( self, asset_path: str ) -> str'
+			exception.method = 'normalize_asset_path( self, asset_path: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -13732,7 +13732,7 @@ class WorldPopulation( Fetcher ):
 			throw_if( 'asset_path', asset_path )
 			self.asset_path = asset_path
 			self.mode = 'raster_metadata'
-			self.asset_path = self._normalize_asset_path( self.asset_path )
+			self.asset_path = self.normalize_asset_path( self.asset_path )
 			self.url = f'{self.base_url}/{self.asset_path}'
 			self.params = { }
 			
@@ -13974,7 +13974,7 @@ class Wonder( Fetcher ):
 				'request_xml',
 				'params',
 				'payload',
-				'_normalize_dataset_id',
+				'normalize_dataset_id',
 				'build_template',
 				'fetch_template',
 				'submit_query',
@@ -13982,7 +13982,7 @@ class Wonder( Fetcher ):
 				'create_schema',
 		]
 	
-	def _normalize_dataset_id( self, dataset_id: str ) -> str:
+	def normalize_dataset_id( self, dataset_id: str ) -> str:
 		"""
 
 		Purpose:
@@ -14008,7 +14008,7 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = '_normalize_dataset_id( self, dataset_id: str ) -> str'
+			exception.method = 'normalize_dataset_id( self, dataset_id: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -14028,7 +14028,7 @@ class Wonder( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
+			self.dataset_id = self.normalize_dataset_id( dataset_id )
 			
 			return (
 					f'<request>\n'
@@ -14077,7 +14077,7 @@ class Wonder( Fetcher ):
 		"""
 		try:
 			self.mode = 'metadata_template'
-			self.dataset_id = self._normalize_dataset_id( dataset_id )
+			self.dataset_id = self.normalize_dataset_id( dataset_id )
 			self.payload = {
 					'dataset_id': self.dataset_id,
 					'request_xml': self.build_template( dataset_id=self.dataset_id ),
@@ -14132,7 +14132,7 @@ class Wonder( Fetcher ):
 			self.request_xml = request_xml
 			
 			self.mode = 'query_xml'
-			self.dataset_id = self._normalize_dataset_id( self.dataset_id )
+			self.dataset_id = self.normalize_dataset_id( self.dataset_id )
 			self.request_xml = self.request_xml.strip( )
 			self.url = f'{self.base_url}/{self.dataset_id}'
 			
@@ -14440,15 +14440,15 @@ class USGSEarthquakes( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_shape_feature_rows',
-				'_summarize_features',
+				'shape_feature_rows',
+				'summarize_features',
 				'fetch_feed',
 				'fetch_search',
 				'fetch',
 				'create_schema'
 		]
 	
-	def _shape_feature_rows( self, features: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_feature_rows( self, features: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -14524,13 +14524,13 @@ class USGSEarthquakes( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
 			exception.method = (
-					'_shape_feature_rows( self, features: List[ Dict[ str, Any ] ] ) '
+					'shape_feature_rows( self, features: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_features( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_features( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -14578,7 +14578,7 @@ class USGSEarthquakes( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSEarthquakes'
 			exception.method = (
-					'_summarize_features( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_features( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -14624,7 +14624,7 @@ class USGSEarthquakes( Fetcher ):
 			
 			self.payload = self.response.json( ) or { }
 			features = self.payload.get( 'features', [ ] ) or [ ]
-			rows = self._shape_feature_rows( features )
+			rows = self.shape_feature_rows( features )
 			
 			return {
 					'mode': self.mode,
@@ -14635,7 +14635,7 @@ class USGSEarthquakes( Fetcher ):
 					'generated': self.payload.get( 'metadata', { } ).get( 'generated', None ),
 					'count': self.payload.get( 'metadata', { } ).get( 'count', len( rows ) ),
 					'bbox': self.payload.get( 'bbox', [ ] ),
-					'summary': self._summarize_features( rows ),
+					'summary': self.summarize_features( rows ),
 					'rows': rows,
 					'raw': self.payload
 			}
@@ -14742,7 +14742,7 @@ class USGSEarthquakes( Fetcher ):
 			
 			self.payload = self.response.json( ) or { }
 			features = self.payload.get( 'features', [ ] ) or [ ]
-			rows = self._shape_feature_rows( features )
+			rows = self.shape_feature_rows( features )
 			
 			return {
 					'mode': self.mode,
@@ -14752,7 +14752,7 @@ class USGSEarthquakes( Fetcher ):
 					'generated': self.payload.get( 'metadata', { } ).get( 'generated', None ),
 					'count': self.payload.get( 'metadata', { } ).get( 'count', len( rows ) ),
 					'bbox': self.payload.get( 'bbox', [ ] ),
-					'summary': self._summarize_features( rows ),
+					'summary': self.summarize_features( rows ),
 					'rows': rows,
 					'raw': self.payload
 			}
@@ -14987,7 +14987,7 @@ class USGSWaterData( Fetcher ):
 		super( ).__init__( )
 		self.base_url = 'https://api.waterdata.usgs.gov/ogcapi/v0'
 		self.mode = 'monitoring-locations'
-		self.api_key = self._resolve_api_key( )
+		self.api_key = self.resolve_api_key( )
 		self.params = { }
 		self.payload = { }
 		self.timeout = 20
@@ -15016,13 +15016,13 @@ class USGSWaterData( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_resolve_api_key',
-				'_coalesce',
+				'resolve_api_key',
+				'coalesce',
 				'request',
-				'_shape_monitoring_locations',
-				'_shape_time_series_metadata',
-				'_shape_latest_values',
-				'_summarize_rows',
+				'shape_monitoring_locations',
+				'shape_time_series_metadata',
+				'shape_latest_values',
+				'summarize_rows',
 				'fetch_monitoring_locations',
 				'fetch_time_series_metadata',
 				'fetch_latest_continuous',
@@ -15031,7 +15031,7 @@ class USGSWaterData( Fetcher ):
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -15060,11 +15060,11 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
+	def coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -15098,7 +15098,7 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = '_coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			exception.method = 'coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -15165,7 +15165,7 @@ class USGSWaterData( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_monitoring_locations( self,
+	def shape_monitoring_locations( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
@@ -15253,13 +15253,13 @@ class USGSWaterData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
 			exception.method = (
-					'_shape_monitoring_locations( self, records: '
+					'shape_monitoring_locations( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_time_series_metadata( self,
+	def shape_time_series_metadata( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
@@ -15327,13 +15327,13 @@ class USGSWaterData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
 			exception.method = (
-					'_shape_time_series_metadata( self, records: '
+					'shape_time_series_metadata( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_latest_values( self,
+	def shape_latest_values( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
@@ -15408,13 +15408,13 @@ class USGSWaterData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
 			exception.method = (
-					'_shape_latest_values( self, records: '
+					'shape_latest_values( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -15456,7 +15456,7 @@ class USGSWaterData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -15503,14 +15503,14 @@ class USGSWaterData( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_monitoring_locations( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_monitoring_locations( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -15562,14 +15562,14 @@ class USGSWaterData( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_time_series_metadata( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_time_series_metadata( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -15621,14 +15621,14 @@ class USGSWaterData( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_latest_values( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_latest_values( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -15680,14 +15680,14 @@ class USGSWaterData( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_latest_values( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_latest_values( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -15950,10 +15950,10 @@ class USGSTheNationalMap( Fetcher ):
 				'payload',
 				'timeout',
 				'request',
-				'_coalesce',
-				'_shape_dataset_rows',
-				'_shape_product_rows',
-				'_summarize_rows',
+				'coalesce',
+				'shape_dataset_rows',
+				'shape_product_rows',
+				'summarize_rows',
 				'fetch_datasets',
 				'fetch_products',
 				'fetch',
@@ -16023,7 +16023,7 @@ class USGSTheNationalMap( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
+	def coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -16057,11 +16057,11 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = '_coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			exception.method = 'coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_dataset_rows( self,
+	def shape_dataset_rows( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
@@ -16110,13 +16110,13 @@ class USGSTheNationalMap( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
 			exception.method = (
-					'_shape_dataset_rows( self, records: '
+					'shape_dataset_rows( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_product_rows( self,
+	def shape_product_rows( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
@@ -16191,13 +16191,13 @@ class USGSTheNationalMap( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
 			exception.method = (
-					'_shape_product_rows( self, records: '
+					'shape_product_rows( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -16236,7 +16236,7 @@ class USGSTheNationalMap( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -16265,14 +16265,14 @@ class USGSTheNationalMap( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_dataset_rows( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_dataset_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -16329,14 +16329,14 @@ class USGSTheNationalMap( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_product_rows( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_product_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -16574,10 +16574,10 @@ class USGSScienceBase( Fetcher ):
 				'payload',
 				'timeout',
 				'request',
-				'_coalesce',
-				'_shape_item_rows',
-				'_shape_single_item',
-				'_summarize_rows',
+				'coalesce',
+				'shape_item_rows',
+				'shape_single_item',
+				'summarize_rows',
 				'fetch_items',
 				'fetch_item',
 				'fetch',
@@ -16647,7 +16647,7 @@ class USGSScienceBase( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
+	def coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -16684,11 +16684,11 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = '_coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			exception.method = 'coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_item_rows( self,
+	def shape_item_rows( self,
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
@@ -16765,13 +16765,13 @@ class USGSScienceBase( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
 			exception.method = (
-					'_shape_item_rows( self, records: '
+					'shape_item_rows( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_single_item( self, item: Dict[ str, Any ] ) -> Dict[ str, Any ]:
+	def shape_single_item( self, item: Dict[ str, Any ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -16821,13 +16821,13 @@ class USGSScienceBase( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
 			exception.method = (
-					'_shape_single_item( self, item: Dict[ str, Any ] ) '
+					'shape_single_item( self, item: Dict[ str, Any ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -16869,7 +16869,7 @@ class USGSScienceBase( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -16913,14 +16913,14 @@ class USGSScienceBase( Fetcher ):
 				time=time
 			) or { }
 			
-			records = self._coalesce( base.get( 'raw', { } ) )
-			rows = self._shape_item_rows( records )
+			records = self.coalesce( base.get( 'raw', { } ) )
+			rows = self.shape_item_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', { } )
 			}
@@ -16966,7 +16966,7 @@ class USGSScienceBase( Fetcher ):
 			) or { }
 			
 			item = base.get( 'raw', { } ) or { }
-			detail = self._shape_single_item( item )
+			detail = self.shape_single_item( item )
 			
 			return {
 					'mode': self.mode,
@@ -17184,7 +17184,7 @@ class AirNow( Fetcher ):
 		"""
 		super( ).__init__( )
 		self.base_url = 'https://www.airnowapi.org/aq'
-		self.api_key = self._resolve_api_key( )
+		self.api_key = self.resolve_api_key( )
 		self.mode = 'current-zip'
 		self.params = { }
 		self.payload = [ ]
@@ -17211,10 +17211,10 @@ class AirNow( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_resolve_api_key',
+				'resolve_api_key',
 				'request',
-				'_shape_rows',
-				'_summarize_rows',
+				'shape_rows',
+				'summarize_rows',
 				'fetch_current_zip',
 				'fetch_current_latlon',
 				'fetch_forecast_zip',
@@ -17223,7 +17223,7 @@ class AirNow( Fetcher ):
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -17251,7 +17251,7 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -17324,7 +17324,7 @@ class AirNow( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -17372,13 +17372,13 @@ class AirNow( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
 			exception.method = (
-					'_shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -17428,7 +17428,7 @@ class AirNow( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -17469,13 +17469,13 @@ class AirNow( Fetcher ):
 			) or { }
 			
 			records = base.get( 'raw', [ ] ) or [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', [ ] )
 			}
@@ -17530,13 +17530,13 @@ class AirNow( Fetcher ):
 			) or { }
 			
 			records = base.get( 'raw', [ ] ) or [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', [ ] )
 			}
@@ -17592,13 +17592,13 @@ class AirNow( Fetcher ):
 			) or { }
 			
 			records = base.get( 'raw', [ ] ) or [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', [ ] )
 			}
@@ -17659,13 +17659,13 @@ class AirNow( Fetcher ):
 			) or { }
 			
 			records = base.get( 'raw', [ ] ) or [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', [ ] )
 			}
@@ -17933,9 +17933,9 @@ class ClimateData( Fetcher ):
 				'payload',
 				'timeout',
 				'request',
-				'_shape_dataset_rows',
-				'_shape_data_rows',
-				'_summarize_rows',
+				'shape_dataset_rows',
+				'shape_data_rows',
+				'summarize_rows',
 				'fetch_datasets',
 				'fetch_data',
 				'fetch',
@@ -18003,7 +18003,7 @@ class ClimateData( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -18050,13 +18050,13 @@ class ClimateData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
 			exception.method = (
-					'_shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -18091,13 +18091,13 @@ class ClimateData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
 			exception.method = (
-					'_shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -18140,7 +18140,7 @@ class ClimateData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'ClimateData'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -18189,13 +18189,13 @@ class ClimateData( Fetcher ):
 			
 			payload = base.get( 'raw', { } ) or { }
 			records = payload.get( 'results', [ ] ) if isinstance( payload, dict ) else [ ]
-			rows = self._shape_dataset_rows( records )
+			rows = self.shape_dataset_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -18264,13 +18264,13 @@ class ClimateData( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', [ ] ) or [ ]
-			rows = self._shape_data_rows( payload if isinstance( payload, list ) else [ ] )
+			rows = self.shape_data_rows( payload if isinstance( payload, list ) else [ ] )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -18520,9 +18520,9 @@ class EoNet( Fetcher ):
 				'payload',
 				'timeout',
 				'request',
-				'_shape_event_rows',
-				'_shape_category_rows',
-				'_summarize_rows',
+				'shape_event_rows',
+				'shape_category_rows',
+				'summarize_rows',
 				'fetch_events',
 				'fetch_categories',
 				'fetch',
@@ -18592,7 +18592,7 @@ class EoNet( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -18667,13 +18667,13 @@ class EoNet( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
 			exception.method = (
-					'_shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -18709,13 +18709,13 @@ class EoNet( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
 			exception.method = (
-					'_shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -18757,7 +18757,7 @@ class EoNet( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -18820,13 +18820,13 @@ class EoNet( Fetcher ):
 			
 			payload = base.get( 'raw', { } ) or { }
 			records = payload.get( 'events', [ ] ) if isinstance( payload, dict ) else [ ]
-			rows = self._shape_event_rows( records )
+			rows = self.shape_event_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -18868,13 +18868,13 @@ class EoNet( Fetcher ):
 			
 			payload = base.get( 'raw', { } ) or { }
 			records = payload.get( 'categories', [ ] ) if isinstance( payload, dict ) else [ ]
-			rows = self._shape_category_rows( records )
+			rows = self.shape_category_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -19114,16 +19114,16 @@ class EnviroFacts( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_resolve_table_path',
+				'resolve_table_path',
 				'request',
-				'_shape_rows',
-				'_summarize_rows',
+				'shape_rows',
+				'summarize_rows',
 				'fetch_table',
 				'fetch',
 				'create_schema'
 		]
 	
-	def _resolve_table_path( self, table_name: str,
+	def resolve_table_path( self, table_name: str,
 			state_code: str='', facility_name: str='',
 			limit: int=25 ) -> str:
 		"""
@@ -19185,7 +19185,7 @@ class EnviroFacts( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
 			exception.method = (
-					'_resolve_table_path( self, table_name: str, state_code: str=, '
+					'resolve_table_path( self, table_name: str, state_code: str=, '
 					'facility_name: str=, limit: int=25 ) -> str'
 			)
 			Logger( ).write( exception )
@@ -19241,7 +19241,7 @@ class EnviroFacts( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -19276,13 +19276,13 @@ class EnviroFacts( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
 			exception.method = (
-					'_shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -19326,7 +19326,7 @@ class EnviroFacts( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EnviroFacts'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -19378,7 +19378,7 @@ class EnviroFacts( Fetcher ):
 				)
 			
 			self.mode = 'table'
-			path = self._resolve_table_path(
+			path = self.resolve_table_path(
 				table_name=table_value,
 				state_code=state_code,
 				facility_name=facility_name,
@@ -19392,7 +19392,7 @@ class EnviroFacts( Fetcher ):
 			
 			payload = base.get( 'raw', [ ] ) or [ ]
 			records = payload if isinstance( payload, list ) else [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
@@ -19404,7 +19404,7 @@ class EnviroFacts( Fetcher ):
 							'facility_name': facility_name.strip( ),
 							'limit': max( 1, limit )
 					},
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -19627,9 +19627,9 @@ class TidesAndCurrents( Fetcher ):
 				'payload',
 				'timeout',
 				'request',
-				'_shape_station_rows',
-				'_shape_data_rows',
-				'_summarize_rows',
+				'shape_station_rows',
+				'shape_data_rows',
+				'summarize_rows',
 				'fetch_station',
 				'fetch_water_level',
 				'fetch_tide_predictions',
@@ -19698,7 +19698,7 @@ class TidesAndCurrents( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_station_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_station_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -19742,13 +19742,13 @@ class TidesAndCurrents( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
 			exception.method = (
-					'_shape_station_rows( self, payload: Dict[ str, Any ] ) '
+					'shape_station_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_data_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_data_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -19787,13 +19787,13 @@ class TidesAndCurrents( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
 			exception.method = (
-					'_shape_data_rows( self, payload: Dict[ str, Any ] ) '
+					'shape_data_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -19842,7 +19842,7 @@ class TidesAndCurrents( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'TidesAndCurrents'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -19878,14 +19878,14 @@ class TidesAndCurrents( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_station_rows( payload )
+			rows = self.shape_station_rows( payload )
 			
 			return {
 					'mode': self.mode,
 					'station_id': self.station_id.strip( ),
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -19956,14 +19956,14 @@ class TidesAndCurrents( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_data_rows( payload )
+			rows = self.shape_data_rows( payload )
 			
 			return {
 					'mode': self.mode,
 					'station_id': self.station_id.strip( ),
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -20039,14 +20039,14 @@ class TidesAndCurrents( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_data_rows( payload )
+			rows = self.shape_data_rows( payload )
 			
 			return {
 					'mode': self.mode,
 					'station_id': self.station_id.strip( ),
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -20301,8 +20301,8 @@ class UvIndex( Fetcher ):
 				'payload',
 				'timeout',
 				'request',
-				'_shape_rows',
-				'_summarize_rows',
+				'shape_rows',
+				'summarize_rows',
 				'fetch_daily_zip',
 				'fetch_daily_city_state',
 				'fetch_hourly_zip',
@@ -20361,7 +20361,7 @@ class UvIndex( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -20396,13 +20396,13 @@ class UvIndex( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
 			exception.method = (
-					'_shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
+					'shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -20454,7 +20454,7 @@ class UvIndex( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'UvIndex'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -20490,13 +20490,13 @@ class UvIndex( Fetcher ):
 			
 			payload = base.get( 'raw', [ ] ) or [ ]
 			records = payload if isinstance( payload, list ) else [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': { 'zip_code': self.zip_code.strip( ) },
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -20549,7 +20549,7 @@ class UvIndex( Fetcher ):
 			
 			payload = base.get( 'raw', [ ] ) or [ ]
 			records = payload if isinstance( payload, list ) else [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
@@ -20558,7 +20558,7 @@ class UvIndex( Fetcher ):
 							'city': self.city.strip( ),
 							'state': self.state.strip( ).upper( )
 					},
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -20604,13 +20604,13 @@ class UvIndex( Fetcher ):
 			
 			payload = base.get( 'raw', [ ] ) or [ ]
 			records = payload if isinstance( payload, list ) else [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': { 'zip_code': self.zip_code.strip( ) },
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -20663,7 +20663,7 @@ class UvIndex( Fetcher ):
 			
 			payload = base.get( 'raw', [ ] ) or [ ]
 			records = payload if isinstance( payload, list ) else [ ]
-			rows = self._shape_rows( records )
+			rows = self.shape_rows( records )
 			
 			return {
 					'mode': self.mode,
@@ -20672,7 +20672,7 @@ class UvIndex( Fetcher ):
 							'city': self.city.strip( ),
 							'state': self.state.strip( ).upper( )
 					},
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -20900,7 +20900,7 @@ class PurpleAir( Fetcher ):
 		"""
 		super( ).__init__( )
 		self.base_url = 'https://api.purpleair.com/v1'
-		self.api_key = self._resolve_api_key( )
+		self.api_key = self.resolve_api_key( )
 		self.mode = 'sensors'
 		self.params = { }
 		self.payload = { }
@@ -20930,18 +20930,18 @@ class PurpleAir( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_resolve_api_key',
+				'resolve_api_key',
 				'request',
-				'_shape_sensor_list_rows',
-				'_shape_sensor_detail_rows',
-				'_summarize_rows',
+				'shape_sensor_list_rows',
+				'shape_sensor_detail_rows',
+				'summarize_rows',
 				'fetch_sensors',
 				'fetch_sensor',
 				'fetch',
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -20969,7 +20969,7 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -21042,7 +21042,7 @@ class PurpleAir( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -21094,13 +21094,13 @@ class PurpleAir( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
 			exception.method = (
-					'_shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) '
+					'shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -21143,13 +21143,13 @@ class PurpleAir( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
 			exception.method = (
-					'_shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) '
+					'shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -21196,7 +21196,7 @@ class PurpleAir( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -21259,13 +21259,13 @@ class PurpleAir( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_sensor_list_rows( payload )
+			rows = self.shape_sensor_list_rows( payload )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -21317,7 +21317,7 @@ class PurpleAir( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_sensor_detail_rows( payload )
+			rows = self.shape_sensor_detail_rows( payload )
 			
 			return {
 					'mode': self.mode,
@@ -21326,7 +21326,7 @@ class PurpleAir( Fetcher ):
 							'sensor_index': self.sensor_index,
 							'fields': base.get( 'params', { } ).get( 'fields', '' )
 					},
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -21551,7 +21551,7 @@ class OpenAQ( Fetcher ):
 		"""
 		super( ).__init__( )
 		self.base_url = 'https://api.openaq.org/v3'
-		self.api_key = self._resolve_api_key( )
+		self.api_key = self.resolve_api_key( )
 		self.mode = 'locations'
 		self.params = { }
 		self.payload = { }
@@ -21581,18 +21581,18 @@ class OpenAQ( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_resolve_api_key',
+				'resolve_api_key',
 				'request',
-				'_shape_location_rows',
-				'_shape_latest_rows',
-				'_summarize_rows',
+				'shape_location_rows',
+				'shape_latest_rows',
+				'summarize_rows',
 				'fetch_locations',
 				'fetch_latest',
 				'fetch',
 				'create_schema'
 		]
 	
-	def _resolve_api_key( self ) -> Optional[ str ]:
+	def resolve_api_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -21620,7 +21620,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -21692,7 +21692,7 @@ class OpenAQ( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_location_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_location_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -21742,13 +21742,13 @@ class OpenAQ( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
 			exception.method = (
-					'_shape_location_rows( self, payload: Dict[ str, Any ] ) '
+					'shape_location_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _shape_latest_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
+	def shape_latest_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -21803,13 +21803,13 @@ class OpenAQ( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
 			exception.method = (
-					'_shape_latest_rows( self, payload: Dict[ str, Any ] ) '
+					'shape_latest_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -21854,7 +21854,7 @@ class OpenAQ( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -21910,13 +21910,13 @@ class OpenAQ( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_location_rows( payload )
+			rows = self.shape_location_rows( payload )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': base.get( 'params', { } ),
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -21962,13 +21962,13 @@ class OpenAQ( Fetcher ):
 			) or { }
 			
 			payload = base.get( 'raw', { } ) or { }
-			rows = self._shape_latest_rows( payload )
+			rows = self.shape_latest_rows( payload )
 			
 			return {
 					'mode': self.mode,
 					'url': base.get( 'url', '' ),
 					'params': { 'location_id': self.location_id },
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': payload
 			}
@@ -22192,7 +22192,7 @@ class Firms( Fetcher ):
 		"""
 		super( ).__init__( )
 		self.base_url = 'https://firms.modaps.eosdis.nasa.gov/api'
-		self.map_key = self._resolve_map_key( )
+		self.map_key = self.resolve_map_key( )
 		self.mode = 'area'
 		self.params = { }
 		self.payload = ''
@@ -22219,17 +22219,17 @@ class Firms( Fetcher ):
 				'params',
 				'payload',
 				'timeout',
-				'_resolve_map_key',
+				'resolve_map_key',
 				'request_csv',
-				'_csv_to_rows',
-				'_summarize_rows',
+				'csv_to_rows',
+				'summarize_rows',
 				'fetch_area',
 				'fetch_data_availability',
 				'fetch',
 				'create_schema'
 		]
 	
-	def _resolve_map_key( self ) -> Optional[ str ]:
+	def resolve_map_key( self ) -> Optional[ str ]:
 		"""
 
 		Purpose:
@@ -22257,7 +22257,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = '_resolve_map_key( self ) -> Optional[ str ]'
+			exception.method = 'resolve_map_key( self ) -> Optional[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -22317,7 +22317,7 @@ class Firms( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def _csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]:
+	def csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -22356,12 +22356,12 @@ class Firms( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
 			exception.method = (
-					'_csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]'
+					'csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]'
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
+	def summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -22403,7 +22403,7 @@ class Firms( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
 			exception.method = (
-					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
+					'summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
 			Logger( ).write( exception )
@@ -22477,7 +22477,7 @@ class Firms( Fetcher ):
 				time=time
 			) or { }
 			
-			rows = self._csv_to_rows( str( base.get( 'raw', '' ) or '' ) )
+			rows = self.csv_to_rows( str( base.get( 'raw', '' ) or '' ) )
 			
 			return {
 					'mode': self.mode,
@@ -22488,7 +22488,7 @@ class Firms( Fetcher ):
 							'day_range': range_value,
 							'date': date.strip( )
 					},
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', '' )
 			}
@@ -22534,7 +22534,7 @@ class Firms( Fetcher ):
 				time=time
 			) or { }
 			
-			rows = self._csv_to_rows( str( base.get( 'raw', '' ) or '' ) )
+			rows = self.csv_to_rows( str( base.get( 'raw', '' ) or '' ) )
 			
 			return {
 					'mode': self.mode,
@@ -22542,7 +22542,7 @@ class Firms( Fetcher ):
 					'params': {
 							'sensor': sensor_value
 					},
-					'summary': self._summarize_rows( rows ),
+					'summary': self.summarize_rows( rows ),
 					'rows': rows,
 					'raw': base.get( 'raw', '' )
 			}
