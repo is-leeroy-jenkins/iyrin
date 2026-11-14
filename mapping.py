@@ -337,6 +337,8 @@ class Geocoder( ):
 	Attributes:
 		maps (Optional[ Map ]): Google Maps gateway used for requests.
 		cache (Optional[ BaseCache ]): Optional cache for resolved locations.
+		_maps (Map): Google Maps gateway used by geocoding methods.
+		_cache (Optional[BaseCache]): Optional cache used internally.
 		prefix (Optional[ str ]): Namespace prefix for generated cache keys.
 		data (Optional[ Dict ]): Most recently retrieved API payload.
 		output (Optional[ Dict ]): Most recently normalized location record.
@@ -353,6 +355,8 @@ class Geocoder( ):
 	"""
 	maps: Optional[ Map ]
 	cache: Optional[ BaseCache ]
+	_maps: Map
+	_cache: Optional[ BaseCache ]
 	prefix: Optional[ str ]
 	data: Optional[ Dict ]
 	output: Optional[ Dict ]
@@ -422,7 +426,7 @@ class Geocoder( ):
 			self.prefix = prefix
 			self.parts = parts
 			joined = ' '.join( str( p ).strip( ) for p in parts if p and str( p ).strip( ) )
-			return f'{prefix}::{joined}'
+			return f'{self.prefix}::{joined}'
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -664,11 +668,21 @@ class DistanceMatrix( ):
 		modes (List[ str ]): Supported Google travel modes.
 		data (Dict[ str, Any ] | None): Most recent raw matrix response.
 		rows (List[ Dict[ str, Any ] ] | None): Most recent flattened matrix results.
+		origins (List[AddressOrCoord] | None): Normalized origins for the last request.
+		destinations (List[AddressOrCoord] | None): Normalized destinations for the last request.
+		mode (str | None): Travel mode for the last matrix request.
+		departure_time (str | None): Last requested departure-time value.
+		params (Dict[str, str] | None): Query sent to the Google Distance Matrix API.
 	"""
 	_maps: Map
 	modes: List[ str ]
 	data: Dict[ str, Any ] | None
 	rows: List[ Dict[ str, Any ] ] | None
+	origins: List[ AddressOrCoord ] | None
+	destinations: List[ AddressOrCoord ] | None
+	mode: str | None
+	departure_time: str | None
+	params: Dict[ str, str ] | None
 	
 	def __init__( self, maps: Map ) -> None:
 		"""Initialize supported travel modes and response state.
@@ -686,6 +700,11 @@ class DistanceMatrix( ):
 		self.modes = [ 'driving', 'walking', 'bicycling', 'transit' ]
 		self.data = None
 		self.rows = None
+		self.origins = None
+		self.destinations = None
+		self.mode = None
+		self.departure_time = None
+		self.params = None
 	
 	def normalize_mode( self, mode: str ) -> str:
 		"""
@@ -890,13 +909,18 @@ class DistanceMatrix( ):
 			travel_mode = self.normalize_mode( mode )
 			origin_values = self.normalize_inputs( origins )
 			destination_values = self.normalize_inputs( destinations )
+			self.origins = origin_values
+			self.destinations = destination_values
+			self.mode = travel_mode
+			self.departure_time = departure_time
 			origin_query = '|'.join( fmt( value ) for value in origin_values )
 			destination_query = '|'.join( fmt( value ) for value in destination_values )
 			params = { 'origins': origin_query, 'destinations': destination_query,
 			           'mode': travel_mode }
 			if departure_time:
 				params[ 'departure_time' ] = departure_time
-			self.data = self._maps.request( 'distancematrix/json', params )
+			self.params = params
+			self.data = self._maps.request( 'distancematrix/json', self.params )
 			if not isinstance( self.data, dict ):
 				raise ValueError( 'Distance Matrix response was not a dictionary.' )
 			status = self.data.get( 'status' )
@@ -1078,6 +1102,9 @@ class Place( ):
 		geometry (Optional[ Dict ]): Location geometry from a place response.
 		key (Optional[ str ]): Cache key for the current lookup.
 		output (Optional[ Dict ]): Most recent normalized location result.
+		prefix (Optional[str]): Current cache-key namespace.
+		parts (Optional[Tuple]): Components used to construct the current cache key.
+		place_id (Optional[str]): Current Google Places identifier.
 	"""
 	maps: Optional[ Map ]
 	cache: Optional[ BaseCache ]
@@ -1092,6 +1119,9 @@ class Place( ):
 	geometry: Optional[ Dict ]
 	key: Optional[ str ]
 	output: Optional[ Dict ]
+	prefix: Optional[ str ]
+	parts: Optional[ Tuple ]
+	place_id: Optional[ str ]
 	
 	def __init__( self, maps: Map, cache: Optional[ BaseCache ] = None ) -> None:
 		"""
@@ -1120,6 +1150,9 @@ class Place( ):
 		self.geometry = None
 		self.key = None
 		self.output = None
+		self.prefix = None
+		self.parts = None
+		self.place_id = None
 	
 	def key_for( self, prefix: str, *parts: str ) -> str | None:
 		"""
@@ -1142,8 +1175,10 @@ class Place( ):
 		try:
 			throw_if( 'prefix', prefix )
 			throw_if( 'parts', parts )
+			self.prefix = prefix
+			self.parts = parts
 			joined = ' '.join( str( p ).strip( ) for p in parts if p and str( p ).strip( ) )
-			return f'{prefix}::{joined}'
+			return f'{self.prefix}::{joined}'
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -1257,7 +1292,8 @@ class Place( ):
 		"""
 		try:
 			throw_if( 'place_id', place_id )
-			self.key = self.key_for( 'place_details', place_id )
+			self.place_id = place_id
+			self.key = self.key_for( 'place_details', self.place_id )
 			if self.cache:
 				self.hit = self.cache.get( self.key )
 				if self.hit:
@@ -1265,7 +1301,7 @@ class Place( ):
 			fields = ('formatted_address,geometry,address_component,place_id,type,'
 			          'name,business_status,rating,user_ratings_total,website,'
 			          'formatted_phone_number')
-			self.request = { 'place_id': place_id, 'fields': fields }
+			self.request = { 'place_id': self.place_id, 'fields': fields }
 			self.details = self.maps.request( 'place/details/json', self.request ).get( 'result', { } )
 			if not self.details:
 				raise NotFound( f'No place details found for "{place_id}" ' )
