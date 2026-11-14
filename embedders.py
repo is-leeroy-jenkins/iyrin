@@ -18,7 +18,6 @@ from typing import Any, List
 from boogr import Error, Logger
 from hashlib import sha256
 from langchain_core.embeddings import Embeddings
-from langchain_core.documents import Document
 
 def throw_if( name: str, value: object ) -> None:
 	"""Validate a required runtime value.
@@ -43,14 +42,14 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
-def chunk_identifier( document: Document, position: int ) -> str:
+def chunk_identifier( document: object, position: int ) -> str:
     """Generate a deterministic identifier for a document chunk.
 
     Purpose:
         Combines the source, ordinal position, and content of a chunk into a stable SHA-256 ID.
 
     Args:
-        document (Document): Document containing the source metadata and chunk text.
+        document (object): Document-like value containing the source metadata and chunk text.
         position (int): One-based position of the chunk within the source sequence.
 
     Returns:
@@ -61,7 +60,7 @@ def chunk_identifier( document: Document, position: int ) -> str:
     payload = f'{source}\x00{position}\x00{document.page_content}'
     return f'chunk-{sha256( payload.encode( "utf-8" ) ).hexdigest( )}'
 
-def vector_document_ids( documents: list[ Document ] ) -> list[ str ]:
+def vector_document_ids( documents: list[ object ] ) -> list[ str ]:
     """Resolve unique identifiers for a collection of document chunks.
 
     Purpose:
@@ -69,7 +68,7 @@ def vector_document_ids( documents: list[ Document ] ) -> list[ str ]:
         Duplicate identifiers are rejected before a vector store receives the documents.
 
     Args:
-        documents (list[Document]): Documents to identify for vector storage.
+        documents (list[object]): Documents to identify for vector storage.
 
     Returns:
         list[str]: Identifiers in the same order as the supplied documents.
