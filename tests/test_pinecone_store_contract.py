@@ -24,7 +24,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
 
         identifier_tree = ast.parse( (ROOT / 'embedders.py').read_text(
             encoding='utf-8' ) )
-        identifier_names = { 'chunk_identifier', 'vector_document_ids' }
+        identifier_names = { 'throw_if', 'chunk_identifier', 'vector_document_ids' }
         identifier_functions = [ node for node in identifier_tree.body
             if isinstance( node, ast.FunctionDef ) and node.name in identifier_names ]
         if { node.name for node in identifier_functions } != identifier_names:
