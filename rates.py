@@ -118,7 +118,7 @@ class RateLimiter( ):
 			self.interval = 1.0 / self.query_per_second
 		else:
 			self.interval = 0.0
-		self.last = 0.0
+		self.last = None
 		self.now = 0.0
 		self.delta = 0.0
 		self.calls = 0
@@ -130,7 +130,8 @@ class RateLimiter( ):
 
 			Purpose:
 				Sleep just enough so successive calls remain under the configured
-				query-per-second ceiling.
+				query-per-second ceiling. Uses a monotonic clock so system time
+				adjustments do not affect request spacing.
 
 			Args:
 				None.
@@ -144,13 +145,14 @@ class RateLimiter( ):
 			self.last_sleep = 0.0
 			if self.interval is None or self.interval <= 0:
 				return
-			self.now = time.time( )
-			self.delta = self.now - self.last
-			if self.last > 0.0 and self.delta < self.interval:
-				self.last_sleep = self.interval - self.delta
-				time.sleep( self.last_sleep )
-				self.total_sleep += self.last_sleep
-			self.last = time.time( )
+			self.now = time.monotonic( )
+			if self.last is not None:
+				self.delta = self.now - self.last
+				if self.delta < self.interval:
+					self.last_sleep = self.interval - self.delta
+					time.sleep( self.last_sleep )
+					self.total_sleep += self.last_sleep
+			self.last = time.monotonic( )
 		except Exception as e:
 			from boogr import Error, Logger
 			exception = Error( e )

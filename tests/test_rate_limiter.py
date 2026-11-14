@@ -17,7 +17,7 @@ class RateLimiterTests( unittest.TestCase ):
     def test_consecutive_waits_update_request_timestamp( self ) -> None:
         """Verify each interval is measured from the previous request."""
         limiter = RateLimiter( 1.0 )
-        with patch( 'rates.time.time', side_effect=[ 10.0, 10.0, 10.25, 11.0, 11.1, 12.0 ] ):
+        with patch( 'rates.time.monotonic', side_effect=[ 10.0, 10.0, 10.25, 11.0, 11.1, 12.0 ] ):
             with patch( 'rates.time.sleep' ) as sleep:
                 limiter.wait( )
                 limiter.wait( )
@@ -29,6 +29,27 @@ class RateLimiterTests( unittest.TestCase ):
         self.assertAlmostEqual( 0.9, sleep.call_args_list[ 1 ].args[ 0 ] )
         self.assertAlmostEqual( 1.65, limiter.total_sleep )
         self.assertEqual( 12.0, limiter.last )
+
+    def test_zero_monotonic_timestamp_is_not_treated_as_uninitialized( self ) -> None:
+        """Verify the second request is throttled even when the first starts at zero."""
+        limiter = RateLimiter( 1.0 )
+        with patch( 'rates.time.monotonic', side_effect=[ 0.0, 0.0, 0.25, 1.0 ] ):
+            with patch( 'rates.time.sleep' ) as sleep:
+                limiter.wait( )
+                limiter.wait( )
+        sleep.assert_called_once_with( 0.75 )
+        self.assertEqual( 1.0, limiter.last )
+
+    def test_wall_clock_changes_do_not_affect_throttling( self ) -> None:
+        """Verify elapsed time comes from a monotonic rather than wall clock."""
+        limiter = RateLimiter( 2.0 )
+        with patch( 'rates.time.monotonic', side_effect=[ 20.0, 20.0, 20.1, 20.5 ] ):
+            with patch( 'rates.time.time', side_effect=AssertionError( 'Wall clock used' ) ):
+                with patch( 'rates.time.sleep' ) as sleep:
+                    limiter.wait( )
+                    limiter.wait( )
+        self.assertEqual( 1, sleep.call_count )
+        self.assertAlmostEqual( 0.4, sleep.call_args.args[ 0 ] )
 
     def test_disabled_limiter_does_not_sleep( self ) -> None:
         """Verify None and nonpositive rate ceilings preserve no-throttle behavior."""
