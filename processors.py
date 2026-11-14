@@ -363,7 +363,7 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			filepath: Filepath value used by the processing operation. Expected type: ``str``.
+			filepath (str): Filepath value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			str | None: Result produced by the processing operation.
@@ -395,7 +395,7 @@ class TextParser( Processor ):
 			while preserving capitalization, punctuation, numbers, symbols, and content order.
 		
 		Args:
-			text: Source text containing whitespace to collapse.
+			text (str): Source text containing whitespace to collapse.
 		
 		Returns:
 			str | None: Text containing one ordinary space between adjacent content.
@@ -526,7 +526,7 @@ class TextParser( Processor ):
 			line boundaries, tabs, and document order.
 		
 		Args:
-			text: Source text containing extraction or encoding artifacts.
+			text (str): Source text containing extraction or encoding artifacts.
 		
 		Returns:
 			str: Text with recognized extraction artifacts removed or repaired.
@@ -574,7 +574,7 @@ class TextParser( Processor ):
 			and document order.
 		
 		Args:
-			text: Source text containing possible extraction fragments.
+			text (str): Source text containing possible extraction fragments.
 		
 		Returns:
 			str: Text with isolated malformed extraction fragments removed.
@@ -676,7 +676,7 @@ class TextParser( Processor ):
 			legal citations, and document order.
 		
 		Args:
-			text: Source text containing HTML markup or entities.
+			text (str): Source text containing HTML markup or entities.
 		
 		Returns:
 			str: Visible text extracted from the supplied HTML content.
@@ -731,7 +731,7 @@ class TextParser( Processor ):
 			capitalization, punctuation, numbers, URLs, legal citations, and document order.
 		
 		Args:
-			text: Source text containing XML markup.
+			text (str): Source text containing XML markup.
 		
 		Returns:
 			str: Visible text extracted from the supplied XML content.
@@ -837,7 +837,7 @@ class TextParser( Processor ):
 			line boundaries, paragraph boundaries, capitalization, citations, and document order.
 		
 		Args:
-			text: Source text containing English stopwords.
+			text (str): Source text containing English stopwords.
 		
 		Returns:
 			str: Text with standalone English stopwords removed.
@@ -893,7 +893,7 @@ class TextParser( Processor ):
 			capitalization, punctuation, numbers, tabs, line boundaries, URLs, and document order.
 		
 		Args:
-			text: Source text containing encoded entities or Unicode artifacts.
+			text (str): Source text containing encoded entities or Unicode artifacts.
 		
 		Returns:
 			str: Text containing normalized Unicode characters without unsafe encoding artifacts.
@@ -950,10 +950,10 @@ class TextParser( Processor ):
 			single-page documents.
 		
 		Args:
-			filepath: Path to the UTF-8 text file to process.
-			lines: Maximum number of lines assigned to each logical page.
-			headers: Number of leading lines evaluated as a repeated header.
-			footers: Number of trailing lines evaluated as a repeated footer.
+			filepath (str): Path to the UTF-8 text file to process.
+			lines (int): Maximum number of lines assigned to each logical page.
+			headers (int): Number of leading lines evaluated as a repeated header.
+			footers (int): Number of trailing lines evaluated as a repeated footer.
 		
 		Returns:
 			str: Text with qualifying repeated headers and footers removed.
@@ -1079,7 +1079,7 @@ class TextParser( Processor ):
 			whitespace, citations, and document order.
 		
 		Args:
-			text: Source text containing Roman numerals to remove.
+			text (str): Source text containing Roman numerals to remove.
 		
 		Returns:
 			str: Text with qualifying standalone Roman numerals removed.
@@ -1155,8 +1155,8 @@ class TextParser( Processor ):
 			punctuation, numbers, whitespace, symbols, or content order.
 		
 		Args:
-			text: Source text to tokenize.
-			encoding: TikToken encoding name used to generate token identifiers.
+			text (str): Source text to tokenize.
+			encoding (str): TikToken encoding name used to generate token identifiers.
 		
 		Returns:
 			DataFrame: Token identifiers in source order.
@@ -1187,7 +1187,7 @@ class TextParser( Processor ):
 			symbols, whitespace within sentences, legal citations, or content order.
 		
 		Args:
-			text: Source text to segment into sentences.
+			text (str): Source text to segment into sentences.
 		
 		Returns:
 			List[ str ]: Sentences in source order.
@@ -1217,8 +1217,8 @@ class TextParser( Processor ):
 			or fixed-length line groups otherwise, while resetting parser state for each call.
 		
 		Args:
-			filepath: Path to the UTF-8 text file to split.
-			num: Maximum number of lines assigned to each fallback logical page.
+			filepath (str): Path to the UTF-8 text file to split.
+			num (int): Maximum number of lines assigned to each fallback logical page.
 		
 		Returns:
 			List[ str ]: Nonempty logical pages in source order.
@@ -1268,7 +1268,7 @@ class TextParser( Processor ):
 			sentence spacing, punctuation, capitalization, numbers, symbols, and paragraph order.
 		
 		Args:
-			filepath: Path to the text file to split into paragraphs.
+			filepath (str): Path to the text file to split into paragraphs.
 		
 		Returns:
 			DataFrame: Nonempty paragraphs in source order.
@@ -1315,7 +1315,7 @@ class TextParser( Processor ):
 			steps.
 		
 		Args:
-			tokens: Tokens value used by the processing operation. Expected type: ``List[ str ]``.
+			tokens (List[ str ]): Tokens value used by the processing operation. Expected type: ``List[ str ]``.
 		
 		Returns:
 			DataFrame | None: Result produced by the processing operation.
@@ -1349,7 +1349,7 @@ class TextParser( Processor ):
 			downstream loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			tokens: Tokens value used by the processing operation. Expected type: ``List[ str ]``.
+			tokens (List[ str ]): Tokens value used by the processing operation. Expected type: ``List[ str ]``.
 		
 		Returns:
 			Series | None: Result produced by the processing operation.
@@ -1382,7 +1382,7 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			tokens: Tokens value used by the processing operation. Expected type: ``List[ str ]``.
+			tokens (List[ str ]): Tokens value used by the processing operation. Expected type: ``List[ str ]``.
 		
 		Returns:
 			DataFrame | None: Result produced by the processing operation.
@@ -1413,7 +1413,7 @@ class TextParser( Processor ):
 			capitalization, punctuation, symbols, duplicates, and source order.
 		
 		Args:
-			tokens: Tokens used to construct the TF-IDF feature matrix.
+			tokens (List[ str ]): Tokens used to construct the TF-IDF feature matrix.
 		
 		Returns:
 			DataFrame: TF-IDF vectors indexed by the source tokens.
@@ -1457,7 +1457,7 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			filepath: Filepath value used by the processing operation. Expected type: ``str``.
+			filepath (str): Filepath value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			str | None: Result produced by the processing operation.
@@ -1499,8 +1499,8 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			source: Source value used by the processing operation. Expected type: ``str``.
-			destination: Destination value used by the processing operation. Expected type:
+			source (str): Source value used by the processing operation. Expected type: ``str``.
+			destination (str): Destination value used by the processing operation. Expected type:
 				``str``.
 		
 		Returns:
@@ -1556,8 +1556,8 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			source: Source value used by the processing operation. Expected type: ``str``.
-			destination: Destination value used by the processing operation. Expected type:
+			source (str): Source value used by the processing operation. Expected type: ``str``.
+			destination (str): Destination value used by the processing operation. Expected type:
 				``str``.
 		
 		Returns:
@@ -1612,8 +1612,8 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			filepath: Filepath value used by the processing operation. Expected type: ``str``.
-			size: Size value used by the processing operation. Expected type: ``int``. Defaults to
+			filepath (str): Filepath value used by the processing operation. Expected type: ``str``.
+			size (int): Size value used by the processing operation. Expected type: ``int``. Defaults to
 				``10``.
 		
 		Returns:
@@ -1661,9 +1661,9 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			source: Source value used by the processing operation. Expected type: ``str``.
-			destination: Destination value used by the processing operation. Expected type: ``str``.
-			size: Size value used by the processing operation. Defaults to `10`.
+			source (str): Source value used by the processing operation. Expected type: ``str``.
+			destination (str): Destination value used by the processing operation. Expected type: ``str``.
+			size (int): Size value used by the processing operation. Defaults to `10`.
 		
 		Returns:
 			DataFrame: Result produced by the processing operation.
@@ -1729,10 +1729,10 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			source: Source value used by the processing operation. Expected type: ``str``.
-			destination: Destination value used by the processing operation. Expected type:
+			source (str): Source value used by the processing operation. Expected type: ``str``.
+			destination (str): Destination value used by the processing operation. Expected type:
 				``str``.
-			size: Size value used by the processing operation. Expected type: ``int``. Defaults to
+			size (int): Size value used by the processing operation. Expected type: ``int``. Defaults to
 				``10``.
 		
 		Returns:
@@ -1789,8 +1789,8 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			tokens: Tokens value used by the processing operation. Expected type: ``List[ str ]``.
-			model: Model value used by the processing operation. Expected type: ``str``. Defaults
+			tokens (List[ str ]): Tokens value used by the processing operation. Expected type: ``List[ str ]``.
+			model (str): Model value used by the processing operation. Expected type: ``str``. Defaults
 				to ``'all-MiniLM-L6-v2'``.
 		
 		Returns:
@@ -1825,13 +1825,13 @@ class TextParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			query: Query value used by the processing operation. Expected type: ``str``.
-			tokens: Tokens value used by the processing operation. Expected type: ``List[ str ]``.
-			embeddings: Embeddings value used by the processing operation. Expected type:
+			query (str): Query value used by the processing operation. Expected type: ``str``.
+			tokens (List[ str ]): Tokens value used by the processing operation. Expected type: ``List[ str ]``.
+			embeddings (np.ndarray): Embeddings value used by the processing operation. Expected type:
 				``np.ndarray``.
-			model: Model value used by the processing operation. Expected type:
+			model (SentenceTransformer): Model value used by the processing operation. Expected type:
 				``SentenceTransformer``.
-			top: Top value used by the processing operation. Expected type: ``int``. Defaults to
+			top (int): Top value used by the processing operation. Expected type: ``int``. Defaults to
 				``5``.
 		
 		Returns:
@@ -1960,7 +1960,7 @@ class NltkParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			List[ str ] | None: Result produced by the processing operation.
@@ -1991,7 +1991,7 @@ class NltkParser( Processor ):
 			downstream loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			List[ str ] | None: Result produced by the processing operation.
@@ -2021,7 +2021,7 @@ class NltkParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			List[ str ] | None: Result produced by the processing operation.
@@ -2054,7 +2054,7 @@ class NltkParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			List[ str ] | None: Result produced by the processing operation.
@@ -2087,7 +2087,7 @@ class NltkParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			List[ Tuple[ str, str ] ] | None: Result produced by the processing operation.
@@ -2118,7 +2118,7 @@ class NltkParser( Processor ):
 			downstream loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			List[ Tuple[ str, str ] ] | None: Result produced by the processing operation.
@@ -2160,8 +2160,8 @@ class NltkParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
-			size: Size value used by the processing operation. Expected type: ``int``. Defaults to
+			text (str): Text value used by the processing operation. Expected type: ``str``.
+			size (int): Size value used by the processing operation. Expected type: ``int``. Defaults to
 				``5``.
 		
 		Returns:
@@ -2199,8 +2199,8 @@ class NltkParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
-			size: Size value used by the processing operation. Expected type: ``int``. Defaults to
+			text (str): Text value used by the processing operation. Expected type: ``str``.
+			size (int): Size value used by the processing operation. Expected type: ``int``. Defaults to
 				``15``.
 		
 		Returns:
@@ -2263,7 +2263,7 @@ class WordParser( Processor ):
 			processing methods.
 		
 		Args:
-			filepath: Filepath value used by the processing operation. Expected type: ``str``.
+			filepath (str): Filepath value used by the processing operation. Expected type: ``str``.
 
 		Returns:
 			None: Initializes the class processing state.
@@ -2300,7 +2300,7 @@ class WordParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			num: Num value used by the processing operation. Defaults to ``1``.
+			num (int): Num value used by the processing operation. Defaults to ``1``.
 		
 		Returns:
 			str | None: Result produced by the processing operation.
@@ -2492,11 +2492,11 @@ class PdfParser( Processor ):
 			processing methods.
 		
 		Args:
-			headers: Headers value used by the processing operation. Expected type: ``bool``.
+			headers (bool): Headers value used by the processing operation. Expected type: ``bool``.
 				Defaults to ``False``.
-			size: Size value used by the processing operation. Expected type: ``int``. Defaults to
+			size (int): Size value used by the processing operation. Expected type: ``int``. Defaults to
 				``10``.
-			tables: Tables value used by the processing operation. Expected type: ``bool``.
+			tables (bool): Tables value used by the processing operation. Expected type: ``bool``.
 				Defaults to ``True``.
 
 		Returns:
@@ -2545,11 +2545,11 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			path: Path value used by the processing operation. Expected type: ``str``.
-			count: Count value used by the processing operation. Defaults to ``None``.
-			header_ratio: Header ratio value used by the processing operation.  Defaults to ``0.08``.
-			footer_ratio: Footer ratio value used by the processing operation. Defaults to ``0.08``.
-			preserve_page_breaks: Preserve page breaks value used by the processing operation.
+			path (str): Path value used by the processing operation. Expected type: ``str``.
+			count (Optional[ int ]): Count value used by the processing operation. Defaults to ``None``.
+			header_ratio (float): Header ratio value used by the processing operation.  Defaults to ``0.08``.
+			footer_ratio (float): Footer ratio value used by the processing operation. Defaults to ``0.08``.
+			preserve_page_breaks (bool): Preserve page breaks value used by the processing operation.
 		
 		Returns:
 			str | None: Result produced by the processing operation.
@@ -2581,12 +2581,12 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			path: Path value used by the processing operation. Expected type: ``str``.
-			count: Count value used by the processing operation. Expected type: ``Optional[ int
+			path (str): Path value used by the processing operation. Expected type: ``str``.
+			count (Optional[ int ]): Count value used by the processing operation. Expected type: ``Optional[ int
 				]``. Defaults to ``None``.
-			header_ratio: Header ratio value used by the processing operation. Expected type:
+			header_ratio (float): Header ratio value used by the processing operation. Expected type:
 				``float``. Defaults to ``0.08``.
-			footer_ratio: Footer ratio value used by the processing operation. Expected type:
+			footer_ratio (float): Footer ratio value used by the processing operation. Expected type:
 				``float``. Defaults to ``0.08``.
 		
 		Returns:
@@ -2665,8 +2665,8 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			pages: Pages value used by the processing operation. Expected type: ``List[ dict ]``.
-			minimum_repeats: Minimum repeats value used by the processing operation. Expected
+			pages (List[ Dict ]): Pages value used by the processing operation. Expected type: ``List[ dict ]``.
+			minimum_repeats (int): Minimum repeats value used by the processing operation. Expected
 				type: ``int``. Defaults to ``3``.
 		
 		Returns:
@@ -2786,7 +2786,7 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
+			text (str): Text value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			str: Result produced by the processing operation.
@@ -2844,7 +2844,7 @@ class PdfParser( Processor ):
 			order.
 		
 		Args:
-			text: Source text containing spacing artifacts produced during PDF extraction.
+			text (str): Source text containing spacing artifacts produced during PDF extraction.
 		
 		Returns:
 			str: Text with supported spacing artifacts repaired.
@@ -2927,8 +2927,8 @@ class PdfParser( Processor ):
 			downstream loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			text: Text value used by the processing operation. Expected type: ``str``.
-			repair_embedded: Repair embedded value used by the processing operation. Expected
+			text (str): Text value used by the processing operation. Expected type: ``str``.
+			repair_embedded (bool): Repair embedded value used by the processing operation. Expected
 				type: ``bool``. Defaults to ``True``.
 		
 		Returns:
@@ -3068,8 +3068,8 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			pages: Pages value used by the processing operation. Expected type: ``List[ dict ]``.
-			preserve_page_breaks: Preserve page breaks value used by the processing operation.
+			pages (List[ dict ]): Pages value used by the processing operation. Expected type: ``List[ dict ]``.
+			preserve_page_breaks (bool): Preserve page breaks value used by the processing operation.
 				Expected type: ``bool``. Defaults to ``False``.
 		
 		Returns:
@@ -3134,8 +3134,8 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			path: Path value used by the processing operation. Expected type: ``str``.
-			count: Count value used by the processing operation. Expected type: ``Optional[ int
+			path (str): Path value used by the processing operation. Expected type: ``str``.
+			count (Optional[ int ]): Count value used by the processing operation. Expected type: ``Optional[ int
 				]``. Defaults to ``None``.
 		
 		Returns:
@@ -3167,8 +3167,8 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			path: Path value used by the processing operation. Expected type: ``str``.
-			count: Count value used by the processing operation. Expected type: ``Optional[ int
+			path (str): Path value used by the processing operation. Expected type: ``str``.
+			count (Optional[ int ]): Count value used by the processing operation. Expected type: ``Optional[ int
 				]``. Defaults to ``None``.
 		
 		Returns:
@@ -3197,8 +3197,8 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			path: Path value used by the processing operation. Expected type: ``str``.
-			count: Count value used by the processing operation. Expected type: ``Optional[ int
+			path (str): Path value used by the processing operation. Expected type: ``str``.
+			count (Optional[ int ]): Count value used by the processing operation. Expected type: ``Optional[ int
 				]``. Defaults to ``None``.
 		
 		Returns:
@@ -3238,9 +3238,9 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			tables: Tables value used by the processing operation. Expected type: ``List[
+			tables (List[ pd.DataFrame ]): Tables value used by the processing operation. Expected type: ``List[
 				pd.DataFrame ]``.
-			filename: Filename value used by the processing operation. Expected type: ``str``.
+			filename (str): Filename value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			None: Result produced by the processing operation.
@@ -3272,8 +3272,8 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			lines: Lines value used by the processing operation. Expected type: ``List[ str ]``.
-			path: Path value used by the processing operation. Expected type: ``str``.
+			lines (List[ str ]): Lines value used by the processing operation. Expected type: ``List[ str ]``.
+			path (str): Path value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			None: Result produced by the processing operation.
@@ -3307,9 +3307,9 @@ class PdfParser( Processor ):
 			loading, processing, analysis, tokenization, or embedding steps.
 		
 		Args:
-			tables: Tables value used by the processing operation. Expected type: ``List[
+			tables (List[ pd.DataFrame ]): Tables value used by the processing operation. Expected type: ``List[
 				pd.DataFrame ]``.
-			path: Path value used by the processing operation. Expected type: ``str``.
+			path (str): Path value used by the processing operation. Expected type: ``str``.
 		
 		Returns:
 			None: Result produced by the processing operation.
