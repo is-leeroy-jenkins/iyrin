@@ -494,6 +494,7 @@ class InMemoryCache( BaseCache ):
 			bool: True if the key exists and is not expired.
 		"""
 		try:
+			throw_if( 'key', key )
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
@@ -1041,7 +1042,7 @@ class SQLiteDatabase( ):
 			exception.method = 'read_table( self, **args )'
 			Logger( ).write( exception )
 			raise exception from e
-	def render_table( self, df: pd.DataFrame ) -> None:
+	def render_table( self, df: pd.DataFrame | None ) -> None:
 		"""
 
 		Purpose:
@@ -1081,6 +1082,9 @@ class SQLiteDatabase( ):
 		Returns:
 			pd.DataFrame: Result of the make display safe operation.
 		"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		display_df = df.copy( )
 		for col in display_df.columns:
 			display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
@@ -1185,6 +1189,9 @@ class SQLiteDatabase( ):
 		Returns:
 			pd.DataFrame: Result of the apply filters operation.
 		"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		st.subheader( 'Advanced Filters' )
 		conditions = [ ]
 		col1, col2, col3 = st.columns( 3 )
@@ -1220,6 +1227,9 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Displays the selected aggregation result in Streamlit, or an informational message when no numeric column exists.
 		"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
 		if not numeric_cols:
@@ -1254,6 +1264,9 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Renders a visualization in the Streamlit interface.
 			"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		blue_divider( )
 		st.markdown( '##### Visualization Engine' )
 		if df is None or df.empty:
