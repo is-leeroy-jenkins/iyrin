@@ -135,7 +135,7 @@ def initialize_live_world_history( ) -> None:
 	                PRIMARY KEY (EntityType, EntityId) ) ''' )
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
 	    exception.method = 'initialize_live_world_history( ) -> None'
 	    Logger( ).write( exception )
@@ -179,7 +179,7 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 	    return hashlib.sha256( payload.encode( 'utf-8' ) ).hexdigest( )
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
 	    exception.method = 'create_live_world_history_fingerprint( row: pd.Series ) -> str'
 	    Logger( ).write( exception )
@@ -290,9 +290,9 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    return inserted
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
-	    exception.method = 'persist_live_world_history( **args ) -> int'
+	    exception.method = 'persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str, observed_at: str, max_rows_per_source: int=5000 ) -> int'
 	    Logger( ).write( exception )
 	    raise exception from e
 
@@ -330,7 +330,7 @@ def purge_live_world_history( retention_days: int ) -> int:
 	        return deleted
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
 	    exception.method = 'purge_live_world_history( retention_days: int ) -> int'
 	    Logger( ).write( exception )
@@ -355,7 +355,7 @@ def clear_live_world_history( ) -> int:
 	        return deleted
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
 	    exception.method = 'clear_live_world_history( ) -> int'
 	    Logger( ).write( exception )
@@ -390,7 +390,7 @@ def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
 	        return [ str( row[ 0 ] ) for row in conn.execute( query, parameters ).fetchall( ) ]
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
 	    exception.method = 'get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]'
 	    Logger( ).write( exception )
@@ -463,9 +463,9 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 	    return df_history
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
-	    exception.method = 'load_live_world_history( hours, entity_types, snapshot, limit: int=5000 ) -> pd.DataFrame'
+	    exception.method = 'load_live_world_history( hours: int, entity_types: List[ str ], snapshot: str, limit: int=5000 ) -> pd.DataFrame'
 	    Logger( ).write( exception )
 	    raise exception from e
 
@@ -494,7 +494,7 @@ def get_live_world_history_summary( ) -> Dict[ str, object ]:
 	    }
     except Exception as e:
 	    exception = Error( e )
-	    exception.module = 'Iyrin'
+	    exception.module = 'history'
 	    exception.cause = 'history'
 	    exception.method = 'get_live_world_history_summary( ) -> Dict[ str, object ]'
 	    Logger( ).write( exception )
