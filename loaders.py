@@ -1189,17 +1189,30 @@ class PdfLoader( Loader ):
 
 		Returns:
 		    str: Normalized text produced by the operation.
+		Raises:
+		    Error: Raised when mode is missing, invalid, or unsupported.
 		"""
-		value = mode.strip( ).lower( ) if isinstance( mode, str ) else 'single'
-		
-		if value == 'elements':
-			return 'page'
-		
-		if value not in self.mode_options:
-			return 'single'
-		
-		return value
-	
+		try:
+			throw_if( 'mode', mode )
+			if not isinstance( mode, str ):
+				raise TypeError( 'mode must be a string.' )
+			value = mode.strip( ).lower( )
+			
+			if value == 'elements':
+				return 'page'
+			
+			if value not in self.mode_options:
+				raise ValueError( 'Unsupported mode value.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'loaders'
+			exception.cause = 'PdfLoader'
+			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			Logger( ).write( exception )
+			raise exception
+
 	def normalize_extraction( self, extract: str ) -> str:
 		"""Normalize extraction.
 
@@ -1211,17 +1224,30 @@ class PdfLoader( Loader ):
 
 		Returns:
 		    str: Normalized text produced by the operation.
+		Raises:
+		    Error: Raised when extract is missing, invalid, or unsupported.
 		"""
-		value = extract.strip( ).lower( ) if isinstance( extract, str ) else 'plain'
-		
-		if value == 'ocr':
-			return 'layout'
-		
-		if value not in self.extraction_options:
-			return 'plain'
-		
-		return value
-	
+		try:
+			throw_if( 'extract', extract )
+			if not isinstance( extract, str ):
+				raise TypeError( 'extract must be a string.' )
+			value = extract.strip( ).lower( )
+			
+			if value == 'ocr':
+				return 'layout'
+			
+			if value not in self.extraction_options:
+				raise ValueError( 'Unsupported extract value.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'loaders'
+			exception.cause = 'PdfLoader'
+			exception.method = 'normalize_extraction( self, extract: str ) -> str'
+			Logger( ).write( exception )
+			raise exception
+
 	def normalize_image_format( self, format: str ) -> str:
 		"""Normalize image format.
 
@@ -1233,16 +1259,29 @@ class PdfLoader( Loader ):
 
 		Returns:
 		    str: Normalized text produced by the operation.
+		Raises:
+		    Error: Raised when format is missing, invalid, or unsupported.
 		"""
-		value = format.strip( ).lower( ) if isinstance( format, str ) else 'markdown-img'
-		if value == 'text':
-			return 'markdown-img'
-		
-		if value not in self.image_options:
-			return 'markdown-img'
-		
-		return value
-	
+		try:
+			throw_if( 'format', format )
+			if not isinstance( format, str ):
+				raise TypeError( 'format must be a string.' )
+			value = format.strip( ).lower( )
+			if value == 'text':
+				raise ValueError( 'Unsupported format value.' )
+			
+			if value not in self.image_options:
+				return 'markdown-img'
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'loaders'
+			exception.cause = 'PdfLoader'
+			exception.method = 'normalize_image_format( self, format: str ) -> str'
+			Logger( ).write( exception )
+			raise exception
+
 	def load( self, filepath: str, mode: str='single', extract: str='plain',
 		include: bool=False, format: str='markdown-img' ) -> List[ Document ]:
 		"""Load.
@@ -1400,16 +1439,29 @@ class ExcelLoader( Loader ):
 
 		Returns:
 		    str: Normalized text produced by the operation.
+		Raises:
+		    Error: Raised when mode is missing, invalid, or unsupported.
 		"""
-		value = mode.strip( ).lower( ) if isinstance( mode, str ) else 'single'
-		if value in [ 'page', 'paged' ]:
-			return 'elements'
-		
-		if value not in self.mode_options:
-			return 'single'
-		
-		return value
-	
+		try:
+			throw_if( 'mode', mode )
+			if not isinstance( mode, str ):
+				raise TypeError( 'mode must be a string.' )
+			value = mode.strip( ).lower( )
+			if value in [ 'page', 'paged' ]:
+				return 'elements'
+			
+			if value not in self.mode_options:
+				raise ValueError( 'Unsupported mode value.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'loaders'
+			exception.cause = 'ExcelLoader'
+			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			Logger( ).write( exception )
+			raise exception
+
 	def load( self, path: str, mode: str='single', has_headers: bool=True ) -> List[ Document ]:
 		"""Load.
 
@@ -1662,17 +1714,30 @@ class MarkdownLoader( Loader ):
 
 		Returns:
 		    str: Normalized text produced by the operation.
+		Raises:
+		    Error: Raised when mode is missing, invalid, or unsupported.
 		"""
-		value = mode.strip( ).lower( ) if isinstance( mode, str ) else 'single'
-		
-		if value in [ 'page', 'paged' ]:
-			return 'elements'
-		
-		if value not in self.mode_options:
-			return 'single'
-		
-		return value
-	
+		try:
+			throw_if( 'mode', mode )
+			if not isinstance( mode, str ):
+				raise TypeError( 'mode must be a string.' )
+			value = mode.strip( ).lower( )
+			
+			if value in [ 'page', 'paged' ]:
+				return 'elements'
+			
+			if value not in self.mode_options:
+				raise ValueError( 'Unsupported mode value.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'loaders'
+			exception.cause = 'MarkdownLoader'
+			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			Logger( ).write( exception )
+			raise exception
+
 	def load( self, path: str, mode: str='single' ) -> List[ Document ] | None:
 		"""Load.
 
@@ -2481,17 +2546,30 @@ class PowerPointLoader( Loader ):
 
 		Returns:
 		    str: Normalized text produced by the operation.
+		Raises:
+		    Error: Raised when mode is missing, invalid, or unsupported.
 		"""
-		value = mode.strip( ).lower( ) if isinstance( mode, str ) else 'single'
-		
-		if value == 'multiple':
-			return 'elements'
-		
-		if value not in [ 'single', 'elements' ]:
-			return 'single'
-		
-		return value
-	
+		try:
+			throw_if( 'mode', mode )
+			if not isinstance( mode, str ):
+				raise TypeError( 'mode must be a string.' )
+			value = mode.strip( ).lower( )
+			
+			if value == 'multiple':
+				return 'elements'
+			
+			if value not in [ 'single', 'elements' ]:
+				raise ValueError( 'Unsupported mode value.' )
+			
+			return value
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'loaders'
+			exception.cause = 'PowerPointLoader'
+			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			Logger( ).write( exception )
+			raise exception
+
 	def load( self, path: str, mode: str='single' ) -> List[ Document ] | None:
 		"""Load.
 
