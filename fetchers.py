@@ -4411,7 +4411,30 @@ class NearbyObjects( Fetcher ):
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8,
-			launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:
+			launch: st	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
+		'''Fetch atmospheric fireball records from the JPL Fireball API.
+
+			Args:
+				date_min (str):
+				Optional lower date bound in YYYY-MM-DD or
+				YYYY-MM-DDThh:mm:ss format.
+
+				limit (int):
+				Maximum number of rows to return.
+
+				time (int):
+				Request timeout in seconds.
+
+			Returns:
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch atmospheric fireball records from the JPL Fireball API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
+		'''r='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch NHATS details for a single object designation.
 
 			Args:
@@ -4467,30 +4490,7 @@ class NearbyObjects( Fetcher ):
 			exception.method = 'NearbyObjects.fetch_nhats_object'
 			raise exception
 	
-	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
-		'''Fetch atmospheric fireball records from the JPL Fireball API.
-
-			Args:
-				date_min (str):
-				Optional lower date bound in YYYY-MM-DD or
-				YYYY-MM-DDThh:mm:ss format.
-
-				limit (int):
-				Maximum number of rows to return.
-
-				time (int):
-				Request timeout in seconds.
-
-			Returns:
-				Dict[str, Any] | None
-		
-
-		Purpose:
-			Fetch atmospheric fireball records from the JPL Fireball API. Args:
-
-		Raises:
-			Error: Wraps and propagates the underlying provider or request exception.
-		'''
+	
 		try:
 			self.mode = 'fireballs'
 			self.url = f'{self.base_url}/fireball.api'
@@ -5041,8 +5041,7 @@ class OpenScience( Fetcher ):
 			)
 			raise exception
 	
-	def fetch( self, mode: str='dataset', query: str='',
-			accession: str='', format_value: str='json',
+	def fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json',
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
@@ -5094,8 +5093,7 @@ class OpenScience( Fetcher ):
 			exception.method = 'OpenScience.fetch'
 			raise exception
 	
-	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict,
+	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
