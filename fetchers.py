@@ -110,26 +110,26 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 def encode_image( path: str ) -> str:
-	'''
-		
-		Purpose:
-		-----------
-		Simple guard which raises ValueError when `path` is falsy (None, empty).
-		
-		Parameters:
-		-----------
-		path (str): the path to an image file.
-		
-		Returns:
-		-----------
-		str: string representing the bytes of the image
-		
-	'''
-	if path is None:
-		raise ValueError( f"Argument '{path}' cannot be empty!" )
-	else:
-		data = Path( path ).read_bytes( )
-		return base64.b64encode( data ).decode( "utf-8" )
+	"""Encode a local image file as base64 text.
+
+	Purpose:
+		Reads image bytes and encodes them for providers that accept base64 image content.
+
+	Args:
+		path (str): Required path to an existing image file.
+
+	Returns:
+		str: Base64-encoded image content.
+
+	Raises:
+		ValueError: Raised when the path is missing or blank.
+		TypeError: Raised when the path is not a string.
+	"""
+	throw_if( 'path', path )
+	if not isinstance( path, str ):
+		raise TypeError( 'path must be a string.' )
+	data = Path( path ).read_bytes( )
+	return base64.b64encode( data ).decode( 'utf-8' )
 
 class Fetcher:
 	'''
@@ -980,8 +980,8 @@ class ArXiv( Fetcher ):
 		self.full_documents = full_documents
 		self.include_metadata = include_metadata
 	
-	def fetch( self, question: str, max_documents: int=None,
-			full_documents: bool=None, include_metadata: bool=None ) -> List[ Document ] | None:
+	def fetch( self, question: str, max_documents: Optional[ int ]=None,
+			full_documents: Optional[ bool ]=None, include_metadata: Optional[ bool ]=None ) -> List[ Document ] | None:
 		'''
 
 			Purpose:
@@ -1346,7 +1346,7 @@ class Wikipedia( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'Wikipedia'
-			exception.method = 'fetch( self, question: str, **kwargs ) -> List[ Document ]'
+			exception.method = 'Wikipedia.fetch'
 			raise exception
 
 class TheNews( Fetcher ):
@@ -1422,7 +1422,7 @@ class TheNews( Fetcher ):
 			source_ids: str='', exclude_source_ids: str='', published_after: str='',
 			published_before: str='', published_on: str='', sort: str='published_at',
 			limit: int=10, page: int=1, include_similar: bool=True, headlines_per_category: int=6,
-			time: int=10, api_key: str=None ) -> Dict[ str, Any ] | None:
+			time: int=10, api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''Send a request to The News API using one of the documented endpoints and return the parsed JSON response.
 
 			Args:
@@ -1600,7 +1600,7 @@ class TheNews( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'TheNews'
-			exception.method =  'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method =  'TheNews.fetch'
 			raise exception
 
 class GoogleSearch( Fetcher ):
@@ -1698,8 +1698,8 @@ class GoogleSearch( Fetcher ):
 			file_type: str='', date_restrict: str='', gl: str='', lr: str='',
 			safe: str='off', search_type: str='', site_search: str='', site_search_filter: str='',
 			sort: str='', img_size: str='', img_type: str='', img_color_type: str='',
-			img_dominant_color: str='', time: int=10, api_key: str=None,
-			cse_id: str=None ) -> Dict[ str, Any ] | None:
+			img_dominant_color: str='', time: int=10, api_key: Optional[ str ]=None,
+			cse_id: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''
 
 			Purpose:
@@ -2832,7 +2832,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NavalObservatory.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -3417,7 +3417,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_events( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'EarthObservatory.fetch_events'
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3537,7 +3537,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_layers( self, c**kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'EarthObservatory.fetch_layers'
 			raise exception
 	
 	def fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20,
@@ -3599,7 +3599,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'EarthObservatory.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -3663,7 +3663,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'create_schema( self, **args ) -> Dict[ str, str ]'
+			exception.method = 'EarthObservatory.create_schema'
 			raise exception
 			
 class GlobalImagery( Fetcher ):
@@ -4107,7 +4107,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_close_approaches( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_close_approaches'
 			raise exception
 	
 	def fetch_object_lookup( self, query: str, query_type: str='sstr',
@@ -4187,7 +4187,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_object_lookup( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_object_lookup'
 			raise exception
 	
 	def fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045',
@@ -4251,7 +4251,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_summary( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_nhats_summary'
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8,
@@ -4305,7 +4305,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_object( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_nhats_object'
 			raise exception
 	
 	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -4350,7 +4350,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_fireballs( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_fireballs'
 			raise exception
 	
 	def fetch( self, mode: str='close_approaches', start_date: str='',
@@ -4467,7 +4467,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch( self, **kwargs) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -4526,7 +4526,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'create_schema( self, **args) -> Dict[ str, str ]'
+			exception.method = 'NearbyObjects.create_schema'
 			raise exception
 
 class OpenScience( Fetcher ):
@@ -4682,7 +4682,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = '_coerce_response( self, **args ) -> Dict[ str, Any ] | str'
+			exception.method = 'OpenScience._coerce_response'
 			raise exception
 	
 	def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -4716,7 +4716,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_dataset( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch_dataset'
 			raise exception
 	
 	def fetch_metadata( self, query: str, format_value: str='json',
@@ -4755,7 +4755,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_metadata( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch_metadata'
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
@@ -4795,7 +4795,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_assays( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch_assays'
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
@@ -4902,7 +4902,7 @@ class OpenScience( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch( self, **args) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -4959,7 +4959,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'create_schema( self, **args ) -> Dict[ str, str ]'
+			exception.method = 'OpenScience.create_schema'
 			raise exception
 
 class SpaceWeather( Fetcher ):
@@ -5153,7 +5153,7 @@ class SpaceWeather( Fetcher ):
 			notification_type: str='', most_accurate_only: bool=True,
 			complete_entry_only: bool=True, speed: int=0,
 			half_angle: int=0, keyword: str='',
-			api_key: str=None ) -> Dict[ str, Any ] | None:
+			api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
 				Send a request to a specific DONKI endpoint and return normalized JSON.
@@ -5277,7 +5277,7 @@ class SpaceWeather( Fetcher ):
 			notification_type: str='all', most_accurate_only: bool=True,
 			complete_entry_only: bool=True, speed: int=0,
 			half_angle: int=0, keyword: str='',
-			api_key: str=None ) -> Dict[ str, Any ] | None:
+			api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
 				Unified dispatcher for NASA DONKI endpoints.
@@ -22063,7 +22063,7 @@ class PurpleAir( Fetcher ):
 			)
 			raise exception
 	
-	def fetch( self, mode: str='sensors', sensor_index: int=None,
+	def fetch( self, mode: str='sensors', sensor_index: Optional[ int ]=None,
 			nwlng: float | None = None, nwlat: float | None = None,
 			selng: float | None = None, selat: float | None = None,
 			location_type: int=0, max_age: int=0, modified_since: int=0,
@@ -22575,7 +22575,7 @@ class OpenAQ( Fetcher ):
 			)
 			raise exception
 	
-	def fetch_locations( self, country_id: int=None,
+	def fetch_locations( self, country_id: Optional[ int ]=None,
 			coordinates: str='', radius: int=25000,
 			providers_id: str='', parameters_id: str='',
 			limit: int=25, page: int=1,
@@ -22699,8 +22699,8 @@ class OpenAQ( Fetcher ):
 			)
 			raise exception
 	
-	def fetch( self, mode: str='locations', location_id: int=None,
-			country_id: int=None, coordinates: str='',
+	def fetch( self, mode: str='locations', location_id: Optional[ int ]=None,
+			country_id: Optional[ int ]=None, coordinates: str='',
 			radius: int=25000, providers_id: str='',
 			parameters_id: str='', limit: int=25, page: int=1,
 			time: int=20 ) -> Dict[ str, Any ] | None:
@@ -23548,8 +23548,8 @@ class OpenSky( Fetcher ):
 			exception.method = 'get_token( self, client_id: str, client_secret: str ) -> str'
 			raise exception
 	
-	def request( self, endpoint: str, params: Dict[ str, Any ], client_id: str=None,
-			client_secret: str=None ) -> Any:
+	def request( self, endpoint: str, params: Dict[ str, Any ], client_id: Optional[ str ]=None,
+			client_secret: Optional[ str ]=None ) -> Any:
 		'''
 	
 			Purpose:
@@ -23807,10 +23807,10 @@ class OpenSky( Fetcher ):
 			raise exception
 	
 	def fetch( self, mode: str='states_bbox', icao24: str='', airport: str='',
-			begin: int=None, end: int=None, time_value: int=None,
+			begin: Optional[ int ]=None, end: Optional[ int ]=None, time_value: Optional[ int ]=None,
 			lamin: float | None = None, lomin: float | None = None, lamax: float | None = None,
-			lomax: float | None = None, extended: bool=False, client_id: str=None,
-			client_secret: str=None, time: int=20 ) -> Dict[ str, Any ] | None:
+			lomax: float | None = None, extended: bool=False, client_id: Optional[ str ]=None,
+			client_secret: Optional[ str ]=None, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Fetch a result from the OpenSky provider.
 
 		Purpose:
