@@ -912,6 +912,13 @@ class SQLiteDatabase( ):
 
 	Attributes:
 		db_path (str): Current SQLite database file path from configuration.
+		table (str): Current table used by a database utility operation.
+		table_name (str): Current table name for DataFrame persistence.
+		column (str): Current column for database schema operations.
+		col_type (str): Column type for schema updates.
+		limit (Optional[int]): Maximum number of rows in the latest table read.
+		offset (int): Starting row offset in the latest table read.
+		df_input (Optional[pd.DataFrame]): Input DataFrame for persistence operations.
 	"""
 	
 	def __init__( self ) -> None:
@@ -924,6 +931,13 @@ class SQLiteDatabase( ):
 			None: Completes the operation through side effects.
 		"""
 		self.db_path = cfg.DB_PATH
+		self.table = ''
+		self.table_name = ''
+		self.column = ''
+		self.col_type = ''
+		self.limit = None
+		self.offset = 0
+		self.df_input: Optional[ pd.DataFrame ] = None
 
 	def create_connection( self ) -> sqlite3.Connection:
 		"""Open a connection to the configured SQLite database.
@@ -963,8 +977,12 @@ class SQLiteDatabase( ):
 		Returns:
 			List[ Tuple ]: Result of the create schema operation.
 		"""
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
 		with self.create_connection( ) as conn:
-			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
+			return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
 	
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
@@ -985,11 +1003,19 @@ class SQLiteDatabase( ):
 					DataFrame of plain Python scalar values.
 
 			"""
-		if not table:
-			return pd.DataFrame( )
-		query = f'SELECT * FROM "{table}"'
-		if limit:
-			query += f' LIMIT {int( limit )} OFFSET {int( offset )}'
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		if limit is not None and (type( limit ) is not int or limit <= 0):
+			raise ValueError( 'limit must be a positive integer when provided.' )
+		if type( offset ) is not int or offset < 0:
+			raise ValueError( 'offset must be a nonnegative integer.' )
+		self.table = table
+		self.limit = limit
+		self.offset = offset
+		query = f'SELECT * FROM "{self.table}"'
+		if self.limit is not None:
+			query += f' LIMIT {self.limit} OFFSET {self.offset}'
 		with self.create_connection( ) as conn:
 			cur = conn.cursor( )
 			cur.execute( query )
@@ -1105,10 +1131,12 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		if not table:
-			return
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
 		with self.create_connection( ) as conn:
-			conn.execute( f'DROP TABLE IF EXISTS "{table}";' )
+			conn.execute( f'DROP TABLE IF EXISTS "{self.table}";' )
 			conn.commit( )
 	
 	def create_index( self, table: str, column: str ) -> None:
@@ -1133,29 +1161,33 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		if not table or not column:
-			return
+		throw_if( 'table', table )
+		throw_if( 'column', column )
+		if not isinstance( table, str ) or not isinstance( column, str ):
+			raise TypeError( 'table and column must be strings.' )
+		self.table = table
+		self.column = column
 		# ------------------------------------------------------------------
 		# Validate table exists
 		# ------------------------------------------------------------------
 		tables = self.list_tables( )
-		if table not in tables:
+		if self.table not in tables:
 			raise ValueError( 'Invalid table name.' )
 		# ------------------------------------------------------------------
 		# Validate column exists
 		# ------------------------------------------------------------------
-		schema = self.create_schema( table )
+		schema = self.create_schema( self.table )
 		valid_columns = [ col[ 1 ] for col in schema ]
-		if column not in valid_columns:
+		if self.column not in valid_columns:
 			raise ValueError( 'Invalid column name.' )
 		# ------------------------------------------------------------------
 		# Sanitize index name (identifier only)
 		# ------------------------------------------------------------------
-		safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{table}_{column}" )
+		safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{self.table}_{self.column}" )
 		# ------------------------------------------------------------------
 		# Create index safely (quote identifiers)
 		# ------------------------------------------------------------------
-		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{table}"("{column}");'
+		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{self.table}"("{self.column}");'
 		with self.create_connection( ) as conn:
 			conn.execute( sql )
 			conn.commit( )
@@ -1355,12 +1387,18 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the convert dataframe operation.
 		"""
+		throw_if( 'table_name', table_name )
+		throw_if( 'df', df )
+		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+		self.table_name = table_name
+		self.df_input = df
 		columns = [ ]
-		for col in df.columns:
-			sql_type = self.get_sqlite_type( df[ col ].dtype )
+		for col in self.df_input.columns:
+			sql_type = self.get_sqlite_type( self.df_input[ col ].dtype )
 			safe_col = col.replace( ' ', '_' )
 			columns.append( f'{safe_col} {sql_type}' )
-		create_stmt = f'CREATE TABLE IF NOT EXISTS {table_name} ({", ".join( columns )});'
+		create_stmt = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({", ".join( columns )});'
 		with self.create_connection( ) as conn:
 			conn.execute( create_stmt )
 			conn.commit( )
@@ -1378,10 +1416,16 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the insert data operation.
 		"""
-		df = df.copy( )
+		throw_if( 'table_name', table_name )
+		throw_if( 'df', df )
+		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+		self.table_name = table_name
+		self.df_input = df
+		df = self.df_input.copy( )
 		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
 		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
-		stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
+		stmt = f'INSERT INTO {self.table_name} VALUES ({placeholders});'
 		with self.create_connection( ) as conn:
 			conn.executemany( stmt, df.values.tolist( ) )
 			conn.commit( )
@@ -1571,8 +1615,12 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the get indexes operation.
 		"""
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
 		with self.create_connection( ) as conn:
-			rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
+			rows = conn.execute( f'PRAGMA index_list("{self.table}");' ).fetchall( )
 			return rows
 	
 	def add_column( self, table: str, column: str, col_type: str ):
@@ -1589,10 +1637,16 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the add column operation.
 		"""
-		column = self.create_identifier( column )
-		col_type = col_type.upper( )
+		throw_if( 'table', table )
+		throw_if( 'column', column )
+		throw_if( 'col_type', col_type )
+		if not all( isinstance( item, str ) for item in (table, column, col_type) ):
+			raise TypeError( 'table, column, and col_type must be strings.' )
+		self.table = table
+		self.column = self.create_identifier( column )
+		self.col_type = col_type.upper( )
 		with self.create_connection( ) as conn:
-			conn.execute( f'ALTER TABLE "{table}" ADD COLUMN "{column}" {col_type};' )
+			conn.execute( f'ALTER TABLE "{self.table}" ADD COLUMN "{self.column}" {self.col_type};' )
 			conn.commit( )
 	
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
@@ -1692,7 +1746,11 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the create profile table operation.
 		"""
-		df = self.read_table( table )
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
+		df = self.read_table( self.table )
 		profile_rows = [ ]
 		total_rows = len( df )
 		for col in df.columns:
