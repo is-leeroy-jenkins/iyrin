@@ -186,6 +186,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'read( self, path: str, sheet: Optional[ str ] )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def write( self, df: pd.DataFrame, path: str, sheet: Optional[ str ] ) -> None:
@@ -226,6 +227,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'write( self, df: pd.DataFrame, path: str, sheet: Optional[ str ] )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_outputs( self ) -> Dict[ str, List ]:
@@ -248,6 +250,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'create_outputs( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def append_empty( self, outputs: Dict[ str, List ], status: str='skipped_empty',
@@ -286,6 +289,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'append_empty( self, outputs: Dict[ str, List ], status: str=skipped_empty )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def append_result( self, outputs: Dict[ str, List ], result: Dict,
@@ -327,6 +331,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'append_result( self, **args )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def summarize( self, df: pd.DataFrame ) -> Dict:
@@ -362,6 +367,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'summarize( self, df: pd.DataFrame )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def detect_columns( self, df: pd.DataFrame ) -> Dict:
@@ -409,6 +415,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'detect_columns( self, df: pd.DataFrame )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def resolve_address( self, address: str, country: Optional[ str ] = None ) -> Dict:
@@ -452,6 +459,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'resolve_address( self, address: str, country: Optional[ str ]=None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def resolve_city_state_country( self, city: str, state: Optional[ str ],
@@ -499,6 +507,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'resolve_city_state_country( self, **args )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def enrich_from_address( self, inpath: str, outpath: str, address: str, sheet: Optional[ str ],
@@ -562,6 +571,7 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'enrich_from_address( self, **kwargs )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def enrich( self, inpath: str, outpath: str, city: str, state: Optional[ str ], cntry: str,
@@ -636,4 +646,5 @@ class Excel:
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
 			exception.method = 'enrich( self, **kwargs)'
+			Logger( ).write( exception )
 			raise exception
