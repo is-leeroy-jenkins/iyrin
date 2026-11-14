@@ -30,6 +30,7 @@ from exceptions import NotFound
 import html as html_lib
 import inspect
 import json
+import math
 import os
 import tempfile
 import matplotlib
@@ -63,14 +64,14 @@ from embedders import EmbeddingFactory
 from storage import ChromaStore, PineconeStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from processors import PdfParser
-from chunk_ids import chunk_identifier
+from embedders import chunk_identifier
 from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData, TidesAndCurrents,
                       AirNow, UvIndex, OpenAQ, PurpleAir, EnviroFacts, Firms, EoNet,
                       USGSEarthquakes, USGSWaterData, USGSTheNationalMap, GlobalImagery,
                       NavalObservatory, SatelliteCenter, SpaceWeather, AstroCatalog, AstroQuery,
                       StarMap, StarChart, WebFetcher, EarthObservatory, NearbyObjects, OpenScience,
                       USGSScienceBase, CensusData, Socrata, HealthData, GlobalHealthData,
-                      UnitedNations, WorldPopulation, Wonder, WebFetcher)
+                      UnitedNations, WorldPopulation, Wonder)
 
 # ------- Session State Initialization
 
