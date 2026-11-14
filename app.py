@@ -412,7 +412,7 @@ def throw_if( name: str, value: object ) -> None:
 		value (object): Candidate value to validate or normalize.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Validates the supplied argument without producing a return value.
 
 	Raises:
 		ValueError: Raised when the method cannot satisfy its documented value requirement.
@@ -436,7 +436,7 @@ def render_result_metadata( result: Dict[ str, Any ] ) -> None:
 		result (Dict[ str, Any ]): Structured fetcher result.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders metadata associated with a structured API response.
 	"""
 	throw_if( 'result', result )
 	metadata = { key: result.get( key ) for key in [ 'source', 'mode', 'status', 'url' ]
@@ -455,7 +455,7 @@ def render_summary_kv( title: str, values: Dict[ str, Any ] ) -> None:
 		values (Dict[ str, Any ]): Summary values to display.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders a two-column key/value summary in Streamlit.
 	"""
 	throw_if( 'title', title )
 	throw_if( 'values', values )
@@ -474,7 +474,7 @@ def render_rows_table( title: str, rows: List[ Dict[ str, Any ] ] ) -> None:
 		rows (List[ Dict[ str, Any ] ]): Records to display.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders structured API rows in a read-only data editor.
 	"""
 	throw_if( 'title', title )
 	st.markdown( title )
@@ -494,7 +494,7 @@ def render_fallback_raw( result: Dict[ str, Any ] ) -> None:
 		result (Dict[ str, Any ]): Structured fetcher result.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Displays an expandable raw API response.
 	"""
 	throw_if( 'result', result )
 	with st.expander( 'Raw Response', expanded=False ):
@@ -511,7 +511,7 @@ def render_html_preview( title: str, html_text: str ) -> None:
 		html_text (str): HTML payload to render.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders HTML source in an isolated Streamlit component.
 	"""
 	throw_if( 'title', title )
 	throw_if( 'html_text', html_text )
@@ -529,7 +529,7 @@ def render_xml_preview( title: str, xml_text: str ) -> None:
 		xml_text (str): XML payload to display.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders XML content for inspection.
 	"""
 	throw_if( 'title', title )
 	throw_if( 'xml_text', xml_text )
@@ -548,7 +548,7 @@ def style_subheaders( ) -> None:
 		_________ Sets the style of subheaders in the main UI.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Applies the configured Streamlit subheader styling.
 	"""
 	st.markdown(
 		"""
@@ -574,7 +574,7 @@ def init_state( key: str, value: Any ) -> None:
 		value (Any): Default value assigned only when the key is absent.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Initializes a session-state value when the key is absent.
 	"""
 	if key not in st.session_state:
 		st.session_state[ key ] = value
@@ -592,7 +592,7 @@ def init_env_state( key: str, config_name: str, env_name: str ) -> None:
 		env_name (str): Environment variable name to assign.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Initializes session state from configuration and mirror configured credentials to the environment.
 	"""
 	init_state( key, '' )
 	if st.session_state.get( key, '' ) == '':
@@ -635,7 +635,7 @@ def blue_divider( ) -> None:
 		Render the configured application divider.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders the configured application divider.
 	"""
 	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
@@ -649,7 +649,7 @@ def log_step( msg: str ) -> None:
 		msg (str): Processing log message.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Append a processing step to the active pipeline log.
 	"""
 	st.session_state.pipeline_log.append( msg )
 
@@ -679,7 +679,7 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 		zoom (Optional[ int ]): Initial Leaflet location-picker zoom level.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders the interactive Celestial Map using local browser assets and observer coordinates.
 	"""
 	try:
 		root = Path( asset_root )
@@ -865,7 +865,7 @@ def set_coordinates( latitude: object, longitude: object ) -> None:
 		longitude (object): Longitude value.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Updates the global latitude, longitude, and coordinate pair together.
 	"""
 	if not has_valid_coordinates( latitude, longitude ):
 		return
@@ -926,7 +926,7 @@ def set_location_state( location: Optional[ str ] = None, city: Optional[ str ] 
 		longitude (Optional[ float ]): Longitude value.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Updates selected location fields without modifying unrelated session state.
 	"""
 	if location is not None:
 		st.session_state[ 'location' ] = str( location ).strip( )
@@ -1084,7 +1084,7 @@ def set_global_coordinates_from_result( latitude: object, longitude: object,
 		description (Optional[ str ]): Optional description of the source result.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Store a resolved coordinate pair in the global location state.
 	"""
 	if not has_valid_coordinates( latitude, longitude ):
 		return
@@ -1234,7 +1234,7 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 		geocoder (Geocoder): Existing geocoder instance used to reverse geocode browser coordinates.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Initializes the active location using browser coordinates when available.
 	"""
 	try:
 		if not st.session_state.get( 'browser_geolocation_enabled', True ):
@@ -1316,7 +1316,7 @@ def ensure_active_location_state( ) -> None:
 		second. Leave location state empty when neither source is available.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Ensures the application has initialized location state.
 	"""
 	browser_enabled = bool( st.session_state.get( 'browser_geolocation_enabled', True ) )
 	browser_loaded = bool( st.session_state.get( 'browser_geolocation_loaded', False ) )
@@ -1378,7 +1378,7 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 		source_name (str): Active database table or custom dataset name displayed as the map header.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders a map of report locations and optional overlay data.
 	"""
 	try:
 		active_source = str( source_name or st.session_state.get( 'active_dataset_name', '' )
@@ -2029,7 +2029,7 @@ def append_geocoding_map_result( query: str, source: str, result: object ) -> No
 		result (object): Raw geocoding response object.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Add a resolved location result to the interactive map state.
 	"""
 	try:
 		throw_if( 'query', query )
@@ -2261,7 +2261,7 @@ def initialize_mode_document_state( prefix: str ) -> None:
 		prefix (str): Source-mode session-state namespace.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Initializes isolated document state for one API mode.
 	"""
 	throw_if( 'prefix', prefix )
 	defaults = { f'{prefix}_documents': [ ], f'{prefix}_chunks': [ ], f'{prefix}_embeddings': [ ],
@@ -2303,7 +2303,7 @@ def sync_mode_document( prefix: str, result_key: str, source_key: str ) -> None:
 		source_key (str): Session-state key containing the source label.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Synchronize the latest API result into a LangChain Document.
 	"""
 	throw_if( 'prefix', prefix )
 	throw_if( 'result_key', result_key )
@@ -2345,7 +2345,7 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 		key_prefix (str): Streamlit widget key namespace.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders Foo-style processing controls inside one source/API expander.
 	"""
 	throw_if( 'prefix', prefix )
 	throw_if( 'result_key', result_key )
@@ -2436,7 +2436,7 @@ def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) 
 		loaded_label (str): Caption for the loaded-document tab.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders Loaded, Chunks, and Embeddings tabs for one API mode.
 	"""
 	throw_if( 'prefix', prefix )
 	initialize_mode_document_state( prefix )
@@ -2484,7 +2484,7 @@ def initialize_loading_state( ) -> None:
 		Initialize the shared document-loading state used by every Loading-mode execution path.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Initializes the shared document-loading session state.
 	"""
 	defaults = { 'documents': [ ], 'raw_documents': [ ], 'raw_text': '', 'processed_text': None,
 			'lines': None, 'tokens': [ ], 'chunked_documents': [ ], 'df_chunks': pd.DataFrame( ),
@@ -2521,7 +2521,7 @@ def reset_document_processing_controls( key_prefix: str ) -> None:
 		key_prefix (str): Stable loader-control key prefix.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Reset processing widget values without changing unrelated state.
 	"""
 	throw_if( 'key_prefix', key_prefix )
 	initialize_loading_state( )
@@ -2543,7 +2543,7 @@ def clear_if_active( loader_name: str ) -> None:
 		loader_name (str): Loader metadata name to clear.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Clears previously loaded content when changing active loaders.
 	"""
 	throw_if( 'loader_name', loader_name )
 	initialize_loading_state( )
@@ -2576,7 +2576,7 @@ def render_document_processing_inputs( loader_name: str, key_prefix: str ) -> No
 		key_prefix (str): Stable Streamlit widget key prefix.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders shared document processing settings.
 	"""
 	throw_if( 'loader_name', loader_name )
 	throw_if( 'key_prefix', key_prefix )
@@ -2614,7 +2614,7 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 		key_prefix (str): Stable Streamlit widget key prefix.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders chunk, embed, and vector-store actions for the selected loader.
 	"""
 	throw_if( 'loader_name', loader_name )
 	throw_if( 'key_prefix', key_prefix )
@@ -2701,7 +2701,7 @@ def render_document_processing_controls( loader_name: str, key_prefix: str ) -> 
 		key_prefix (str): Streamlit widget key namespace.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders document-processing inputs and actions for one loader.
 	"""
 	throw_if( 'loader_name', loader_name )
 	throw_if( 'key_prefix', key_prefix )
@@ -2715,7 +2715,7 @@ def render_loading_tabs( ) -> None:
 		Render the shared Loaded, Chunks, and Embeddings tabs.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders shared Loaded, Chunks, and Embeddings tabs for Loading mode.
 	"""
 	initialize_loading_state( )
 	loaded_tab, chunks_tab, embeddings_tab = st.tabs( [ '📄 Loaded', '✂️ Chunks', '🔢 Embeddings' ] )
@@ -2752,7 +2752,7 @@ def initialize_web_state( ) -> None:
 		Initialize isolated web-document processing state.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Initializes isolated web-document state.
 	"""
 	defaults = { 'web_documents': [ ], 'web_document_url': '', 'web_chunks': [ ],
 	             'web_embeddings': [ ], 'web_embedder': None, 'web_vector_store': None,
@@ -2770,7 +2770,7 @@ def clear_web_state( ) -> None:
 		Clear scraped documents and their derived processing state.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Clears scraped documents and all derived web state.
 	"""
 	initialize_web_state( )
 	st.session_state[ 'web_documents' ] = [ ]
@@ -2792,7 +2792,7 @@ def render_web_document_processing( ) -> None:
 		Render the site crawler with document processing tabs and controls.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Renders Foo-style Site Crawler document processing.
 	"""
 	initialize_web_state( )
 	st.subheader( '🕷️ Site Crawler' )
@@ -3091,7 +3091,7 @@ def store_loaded_dataset( df_dataset: pd.DataFrame, df_original: pd.DataFrame | 
 		df_original (pd.DataFrame | None): Optional original copy.
 
 	Returns:
-		None: Updates the application UI, session state, or other state as described.
+		None: Store the active dataset and its original copy in session state.
 	"""
 	if not has_loaded_dataset( df_dataset ):
 		return
@@ -10286,7 +10286,7 @@ elif mode == 'Artificial Intelligence':
 			result (Any): Response returned by the provider wrapper.
 
 		Returns:
-			None: Updates the application UI, session state, or other state as described.
+			None: Promote a provider response into the shared generation document state.
 		"""
 		if not str( provider or '' ).strip( ):
 			raise ValueError( 'Provider cannot be empty.' )
@@ -10331,7 +10331,7 @@ elif mode == 'Artificial Intelligence':
 			provider (str): Name of the provider whose controls are being cleared.
 
 		Returns:
-			None: Updates the application UI, session state, or other state as described.
+			None: Clears the shared generation result for the active provider.
 		"""
 		if st.session_state.get( 'generation_active_source', '' ) != provider:
 			return

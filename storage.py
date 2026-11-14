@@ -60,17 +60,16 @@ from langchain_core.embeddings import Embeddings
 
 def throw_if( name: str, value: object ) -> None:
 	"""
-	
-		Purpose:
+
+	Purpose:
 		Validate that a required value is not empty.
-		
-		Args:
-			name (str): Name of the argument being validated.
-			value (object): Value to validate.
-		
-		Returns:
-			None:
-		
+
+	Args:
+		name (str): Name of the argument being validated.
+		value (object): Value to validate.
+
+	Returns:
+		None: Validates the required argument and raises for empty values.
 		"""
 	if value is None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
@@ -203,29 +202,26 @@ class BaseCache( ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = ''
-			exception.cause = ''
-			exception.method = ''
+			exception.module = 'Iyrin'
+			exception.cause = 'BaseCache'
+			exception.method = 'contains( self, key: str ) -> bool'
+			Logger( ).write( exception )
 			raise exception
 	
 	def namespace_key( self, namespace: str, key: str ) -> str:
 		"""
 
-			Purpose:
-				Create a cache key prefixed by a namespace.
+		Purpose:
+			Create a cache key prefixed by a namespace.
 
-			Args:
-				namespace (str):
-					Logical cache namespace, such as geocode, places, weather,
-					distance, or fetcher.
+		Args:
+			namespace (str): Logical cache namespace, such as geocode, places, weather,
+				distance, or fetcher.
 
-				key (str):
-					Raw cache key.
+			key (str): Raw cache key.
 
-			Returns:
-				str:
-					Namespace-qualified cache key.
-
+		Returns:
+			str: Namespace-qualified cache key.
 		"""
 		try:
 			throw_if( 'namespace', namespace )
@@ -236,6 +232,7 @@ class BaseCache( ):
 			exception.module = 'Iyrin'
 			exception.cause = 'BaseCache'
 			exception.method = 'namespace_key( self, namespace: str, key: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 			
 	def stats( self ) -> Dict[ str, Any ]:
@@ -286,15 +283,11 @@ class InMemoryCache( BaseCache ):
 	def now( self ) -> float:
 		"""
 
-			Purpose:
-				Return the current Unix timestamp.
+		Purpose:
+			Return the current Unix timestamp.
 
-			Args:
-				None.
-
-			Returns:
-				float: Current Unix timestamp.
-
+		Returns:
+			float: Current Unix timestamp.
 		"""
 		try:
 			return time.time( )
@@ -303,29 +296,25 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'now( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def make_record( self, key: str, value: Dict[ str, Any ],
 			ttl: Optional[ int ] = None ) -> Dict[ str, Any ]:
 		"""
 
-			Purpose:
-				Create a cache metadata record for the supplied key and value.
+		Purpose:
+			Create a cache metadata record for the supplied key and value.
 
-			Args:
-				key (str):
-					Cache key.
+		Args:
+			key (str): Cache key.
 
-				value (Dict[str, Any]):
-					JSON-serializable cache value.
+			value (Dict[str, Any]): JSON-serializable cache value.
 
-				ttl (Optional[int]):
-					Optional time-to-live in seconds.
+			ttl (Optional[int]): Optional time-to-live in seconds.
 
-			Returns:
-				Dict[str, Any]:
-					Cache metadata record.
-
+		Returns:
+			Dict[str, Any]: Cache metadata record.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -341,20 +330,20 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'make_record( self, **kwargs )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def is_expired( self, record: Dict[ str, Any ] ) -> bool:
 		"""
 
-			Purpose:
-				Determine whether an in-memory cache record has expired.
+		Purpose:
+			Determine whether an in-memory cache record has expired.
 
-			Args:
-				record (Dict[str, Any]): Cache metadata record.
+		Args:
+			record (Dict[str, Any]): Cache metadata record.
 
-			Returns:
-				bool: True if expired; otherwise False.
-
+		Returns:
+			bool: True if expired; otherwise False.
 		"""
 		try:
 			throw_if( 'record', record )
@@ -369,20 +358,20 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'is_expired( self, record: Dict[ str, Any ] )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
 
-			Purpose:
-				Return a cached value by key when present and not expired.
+		Purpose:
+			Return a cached value by key when present and not expired.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				Optional[Dict[str, Any]]: Cached value or None.
-
+		Returns:
+			Optional[Dict[str, Any]]: Cached value or None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -405,27 +394,24 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'get( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
 		"""
 
-			Purpose:
-				Set a cache value by key.
+		Purpose:
+			Set a cache value by key.
 
-			Args:
-				key (str):
-					Cache key.
+		Args:
+			key (str): Cache key.
 
-				value (Dict[str, Any]):
-					JSON-serializable cache value.
+			value (Dict[str, Any]): JSON-serializable cache value.
 
-				ttl (Optional[int]):
-					Optional time-to-live in seconds.
+			ttl (Optional[int]): Optional time-to-live in seconds.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -437,21 +423,20 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'set( self, **kwargs )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def delete( self, key: str ) -> None:
 		"""
 
-			Purpose:
-				Delete a cache entry by key.
+		Purpose:
+			Delete a cache entry by key.
 
-			Args:
-				key (str):
-					Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -463,21 +448,20 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'delete( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
 		"""
 
-			Purpose:
-				Clear all cache entries or only entries under a namespace prefix.
+		Purpose:
+			Clear all cache entries or only entries under a namespace prefix.
 
-			Args:
-				namespace (Optional[str]):
-					Optional namespace prefix.
+		Args:
+			namespace (Optional[str]): Optional namespace prefix.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			if namespace:
@@ -494,22 +478,20 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def contains( self, key: str ) -> bool:
 		"""
 
-			Purpose:
-				Determine whether a cache key exists and is not expired.
+		Purpose:
+			Determine whether a cache key exists and is not expired.
 
-			Args:
-				key (str):
-					Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				bool:
-					True if the key exists and is not expired.
-
+		Returns:
+			bool: True if the key exists and is not expired.
 		"""
 		try:
 			return self.get( key ) is not None
@@ -518,21 +500,17 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'contains( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
 
-			Purpose:
-				Return cache diagnostics.
+		Purpose:
+			Return cache diagnostics.
 
-			Args:
-				None.
-
-			Returns:
-				Dict[str, Any]:
-					Cache diagnostics.
-
+		Returns:
+			Dict[str, Any]: Cache diagnostics.
 		"""
 		try:
 			expired = 0
@@ -547,6 +525,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'stats( self )'
+			Logger( ).write( exception )
 			raise exception
 
 class SQLiteCache( BaseCache ):
@@ -584,15 +563,11 @@ class SQLiteCache( BaseCache ):
 	def initialize( self ) -> None:
 		"""
 
-			Purpose:
-				Create the SQLite cache table when it does not already exist.
+		Purpose:
+			Create the SQLite cache table when it does not already exist.
 
-			Args:
-				None.
-
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			self.connection.execute( '''
@@ -611,20 +586,17 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'initialize( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def migrate( self ) -> None:
 		"""
 
-			Purpose:
-				Add metadata columns to older kv tables that only contain k and v.
+		Purpose:
+			Add metadata columns to older kv tables that only contain k and v.
 
-			Args:
-				None.
-
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			cursor = self.connection.execute( 'PRAGMA table_info(kv)' )
@@ -644,20 +616,17 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'migrate( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def now( self ) -> float:
 		"""
 
-			Purpose:
-				Return the current Unix timestamp.
+		Purpose:
+			Return the current Unix timestamp.
 
-			Args:
-				None.
-
-			Returns:
-				float: Current Unix timestamp.
-
+		Returns:
+			float: Current Unix timestamp.
 		"""
 		try:
 			return time.time( )
@@ -666,18 +635,17 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'now( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
 
-			Purpose:
-				Return a cached value by key when present and not expired.
+		Purpose:
+			Return a cached value by key when present and not expired.
 
-			Args:
-				key (str): Cached value or None.
-
-		
+		Args:
+			key (str): Cached value or None.
 
 		Returns:
 			Optional[ Dict[ str, Any ] ]: Result of the get operation.
@@ -706,22 +674,22 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'get( self, key: str ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:
 		"""
 
-			Purpose:
-				Set a cache value by key.
+		Purpose:
+			Set a cache value by key.
 
-			Args:
-				key (str): Cache key.
-				value (Dict[str, Any]): JSON-serializable cache value.
-				ttl (Optional[int]): Optional time-to-live in seconds.
+		Args:
+			key (str): Cache key.
+			value (Dict[str, Any]): JSON-serializable cache value.
+			ttl (Optional[int]): Optional time-to-live in seconds.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -744,20 +712,20 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'set( self, **args )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def delete( self, key: str ) -> None:
 		"""
 
-			Purpose:
-				Delete a cache entry by key.
+		Purpose:
+			Delete a cache entry by key.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -768,20 +736,20 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'delete( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def clear( self, namespace: Optional[ str ]=None ) -> None:
 		"""
 
-			Purpose:
-				Clear all cache entries or only entries under a namespace prefix.
+		Purpose:
+			Clear all cache entries or only entries under a namespace prefix.
 
-			Args:
-				namespace (Optional[str]): Optional namespace prefix.
+		Args:
+			namespace (Optional[str]): Optional namespace prefix.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			if namespace:
@@ -796,20 +764,20 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def contains( self, key: str ) -> bool:
 		"""
 
-			Purpose:
-				Determine whether a cache key exists and is not expired.
+		Purpose:
+			Determine whether a cache key exists and is not expired.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				bool: True if the key exists and is not expired.
-
+		Returns:
+			bool: True if the key exists and is not expired.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -819,21 +787,17 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'contains( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def purge_expired( self ) -> int:
 		"""
 
-			Purpose:
-				Delete expired cache entries.
+		Purpose:
+			Delete expired cache entries.
 
-			Args:
-				None.
-
-			Returns:
-				int:
-					Number of rows deleted.
-
+		Returns:
+			int: Number of rows deleted.
 		"""
 		try:
 			cursor = self.connection.execute(
@@ -850,20 +814,17 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'purge_expired( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
 
-			Purpose:
-				Return SQLite cache diagnostics.
+		Purpose:
+			Return SQLite cache diagnostics.
 
-			Args:
-				None.
-
-			Returns:
-				Dict[str, Any]: Cache diagnostics.
-
+		Returns:
+			Dict[str, Any]: Cache diagnostics.
 		"""
 		try:
 			total = self.connection.execute( 'SELECT COUNT(*) FROM kv' ).fetchone( )[ 0 ]
@@ -879,20 +840,17 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'stats( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def close( self ) -> None:
 		"""
 
-			Purpose:
-				Close the SQLite connection.
+		Purpose:
+			Close the SQLite connection.
 
-			Args:
-				None.
-
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			self.connection.close( )
@@ -901,6 +859,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'close( self )'
+			Logger( ).write( exception )
 			raise exception
 
 class SQLiteDatabase( ):
@@ -977,114 +936,123 @@ class SQLiteDatabase( ):
 		Returns:
 			List[ Tuple ]: Result of the create schema operation.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		with self.create_connection( ) as conn:
-			return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			with self.create_connection( ) as conn:
+				return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'create_schema( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
 
-			Purpose:
+		Purpose:
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
-			Args:
-				table (str):
-					Table name.
-				limit : int = None
-					Optional row limit.
-				offset : int = 0
-					Optional row offset.
+		Args:
+			table (str): Table name.
+			limit (Optional[int]): Maximum rows to retrieve; None selects all rows.
+			offset (int): Number of rows to skip, starting at zero.
 
-			Returns:
-				pd.DataFrame:
-					DataFrame of plain Python scalar values.
-
+		Returns:
+			pd.DataFrame: DataFrame of plain Python scalar values.
 			"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		if limit is not None and (type( limit ) is not int or limit <= 0):
-			raise ValueError( 'limit must be a positive integer when provided.' )
-		if type( offset ) is not int or offset < 0:
-			raise ValueError( 'offset must be a nonnegative integer.' )
-		self.table = table
-		self.limit = limit
-		self.offset = offset
-		query = f'SELECT * FROM "{self.table}"'
-		if self.limit is not None:
-			query += f' LIMIT {self.limit} OFFSET {self.offset}'
-		with self.create_connection( ) as conn:
-			cur = conn.cursor( )
-			cur.execute( query )
-			raw_columns = [ d[ 0 ] for d in (cur.description or [ ]) ]
-			rows = cur.fetchall( )
-		seen: Dict[ str, int ] = { }
-		columns: List[ str ] = [ ]
-		for col in raw_columns:
-			name = str( col )
-			if name not in seen:
-				seen[ name ] = 0
-				columns.append( name )
-			else:
-				seen[ name ] += 1
-				columns.append( f'{name}_{seen[ name ]}' )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			if limit is not None and (type( limit ) is not int or limit <= 0):
+				raise ValueError( 'limit must be a positive integer when provided.' )
+			if type( offset ) is not int or offset < 0:
+				raise ValueError( 'offset must be a nonnegative integer.' )
+			self.table = table
+			self.limit = limit
+			self.offset = offset
+			query = f'SELECT * FROM "{self.table}"'
+			if self.limit is not None:
+				query += f' LIMIT {self.limit} OFFSET {self.offset}'
+			with self.create_connection( ) as conn:
+				cur = conn.cursor( )
+				cur.execute( query )
+				raw_columns = [ d[ 0 ] for d in (cur.description or [ ]) ]
+				rows = cur.fetchall( )
+			seen: Dict[ str, int ] = { }
+			columns: List[ str ] = [ ]
+			for col in raw_columns:
+				name = str( col )
+				if name not in seen:
+					seen[ name ] = 0
+					columns.append( name )
+				else:
+					seen[ name ] += 1
+					columns.append( f'{name}_{seen[ name ]}' )
 		
-		def _scalarize( value: Any ) -> Any:
-			"""Prepare SQLite result values for tabular presentation.
+			def _scalarize( value: Any ) -> Any:
+				"""Prepare SQLite result values for tabular presentation.
 
-			Purpose:
-				Decodes binary values and converts unsupported payloads at the display boundary.
+				Purpose:
+					Decodes binary values and converts unsupported payloads at the display boundary.
 
-			Args:
-				value (Any): Value returned from SQLite.
+				Args:
+					value (Any): Value returned from SQLite.
 
-			Returns:
-				Any: Scalar or serialized representation of the database value.
-			"""
-			if value is None or isinstance( value, (str, int, float, bool) ):
-				return value
-			if isinstance( value, bytes ):
-				try:
-					return value.decode( 'utf-8' )
-				except Exception:
-					return value.hex( )
-			if isinstance( value, (list, tuple, set, dict) ):
-				try:
-					return str( normalize( value ) )
-				except Exception:
-					return str( value )
-			if hasattr( value, 'model_dump' ):
-				try:
-					return str( value.model_dump( ) )
-				except Exception:
-					return str( value )
-			return str( value )
+				Returns:
+					Any: Scalar or serialized representation of the database value.
+				"""
+				if value is None or isinstance( value, (str, int, float, bool) ):
+					return value
+				if isinstance( value, bytes ):
+					try:
+						return value.decode( 'utf-8' )
+					except Exception:
+						return value.hex( )
+				if isinstance( value, (list, tuple, set, dict) ):
+					try:
+						return str( normalize( value ) )
+					except Exception:
+						return str( value )
+				if hasattr( value, 'model_dump' ):
+					try:
+						return str( value.model_dump( ) )
+					except Exception:
+						return str( value )
+				return str( value )
 		
-		normalized_rows: List[ Dict[ str, Any ] ] = [ ]
-		for row in rows:
-			record: Dict[ str, Any ] = { }
-			for idx, col in enumerate( columns ):
-				record[ col ] = _scalarize( row[ idx ] )
-			normalized_rows.append( record )
-		return pd.DataFrame( normalized_rows, columns=columns )
+			normalized_rows: List[ Dict[ str, Any ] ] = [ ]
+			for row in rows:
+				record: Dict[ str, Any ] = { }
+				for idx, col in enumerate( columns ):
+					record[ col ] = _scalarize( row[ idx ] )
+				normalized_rows.append( record )
+			return pd.DataFrame( normalized_rows, columns=columns )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'read_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def render_table( self, df: pd.DataFrame ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
 			first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
 
-			Args:
-				df (pd.DataFrame):
-					The DataFrame to render.
+		Args:
+			df (pd.DataFrame): The DataFrame to render.
 
-			Returns:
-				None:
-
+		Returns:
+			None: Renders the selected database table in Streamlit.
 			"""
 		if df is None:
 			st.info( 'No data available.' )
@@ -1120,78 +1088,91 @@ class SQLiteDatabase( ):
 	
 	def drop_table( self, table: str ) -> None:
 		"""
-			Purpose:
+
+		Purpose:
 			Safely drop a table if it exists.
 
-			Args:
-				table (str):
-					Table name.
-		
+		Args:
+			table (str): Table name.
 
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		with self.create_connection( ) as conn:
-			conn.execute( f'DROP TABLE IF EXISTS "{self.table}";' )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			with self.create_connection( ) as conn:
+				conn.execute( f'DROP TABLE IF EXISTS "{self.table}";' )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'drop_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
 		"""
-			Purpose:
+
+		Purpose:
 			Create a safe SQLite index on a specified table column.
 
 			Handles:
-				- Spaces in column names
-				- Special characters
-				- Reserved words
-				- Duplicate index names
-				- Validation against actual table schema
+			- Spaces in column names
+			- Special characters
+			- Reserved words
+			- Duplicate index names
+			- Validation against actual table schema
 
-			Args:
-				table (str):
-					Table name.
-				column (str):
-					Column name to index.
-		
+		Args:
+			table (str): Table name.
+			column (str): Column name to index.
 
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		throw_if( 'table', table )
-		throw_if( 'column', column )
-		if not isinstance( table, str ) or not isinstance( column, str ):
-			raise TypeError( 'table and column must be strings.' )
-		self.table = table
-		self.column = column
-		# ------------------------------------------------------------------
-		# Validate table exists
-		# ------------------------------------------------------------------
-		tables = self.list_tables( )
-		if self.table not in tables:
-			raise ValueError( 'Invalid table name.' )
-		# ------------------------------------------------------------------
-		# Validate column exists
-		# ------------------------------------------------------------------
-		schema = self.create_schema( self.table )
-		valid_columns = [ col[ 1 ] for col in schema ]
-		if self.column not in valid_columns:
-			raise ValueError( 'Invalid column name.' )
-		# ------------------------------------------------------------------
-		# Sanitize index name (identifier only)
-		# ------------------------------------------------------------------
-		safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{self.table}_{self.column}" )
-		# ------------------------------------------------------------------
-		# Create index safely (quote identifiers)
-		# ------------------------------------------------------------------
-		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{self.table}"("{self.column}");'
-		with self.create_connection( ) as conn:
-			conn.execute( sql )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			throw_if( 'column', column )
+			if not isinstance( table, str ) or not isinstance( column, str ):
+				raise TypeError( 'table and column must be strings.' )
+			self.table = table
+			self.column = column
+			# ------------------------------------------------------------------
+			# Validate table exists
+			# ------------------------------------------------------------------
+			tables = self.list_tables( )
+			if self.table not in tables:
+				raise ValueError( 'Invalid table name.' )
+			# ------------------------------------------------------------------
+			# Validate column exists
+			# ------------------------------------------------------------------
+			schema = self.create_schema( self.table )
+			valid_columns = [ col[ 1 ] for col in schema ]
+			if self.column not in valid_columns:
+				raise ValueError( 'Invalid column name.' )
+			# ------------------------------------------------------------------
+			# Sanitize index name (identifier only)
+			# ------------------------------------------------------------------
+			safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{self.table}_{self.column}" )
+			# ------------------------------------------------------------------
+			# Create index safely (quote identifiers)
+			# ------------------------------------------------------------------
+			sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{self.table}"("{self.column}");'
+			with self.create_connection( ) as conn:
+				conn.execute( sql )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'create_index( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
 		"""Render advanced DataFrame filters and return the filtered rows.
 
@@ -1227,7 +1208,7 @@ class SQLiteDatabase( ):
 				df = df[ df[ column ].astype( str ).str.contains( value ) ]
 		return df
 	
-	def create_aggregation( self, df: pd.DataFrame ):
+	def create_aggregation( self, df: pd.DataFrame ) -> None:
 		"""Calculate and display a selected numeric aggregation.
 
 		Purpose:
@@ -1237,7 +1218,7 @@ class SQLiteDatabase( ):
 			df (pd.DataFrame): Input pandas DataFrame.
 
 		Returns:
-			Any: Result of the create aggregation operation.
+			None: Displays the selected aggregation result in Streamlit, or an informational message when no numeric column exists.
 		"""
 		st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
@@ -1263,17 +1244,15 @@ class SQLiteDatabase( ):
 	def create_visualization( self, df: pd.DataFrame ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Render data visualizations without passing pandas objects directly into
 			Plotly/Narwhals.
 
-			Args:
-				df (pd.DataFrame):
-					The input DataFrame.
+		Args:
+			df (pd.DataFrame): The input DataFrame.
 
-			Returns:
-				None:
-
+		Returns:
+			None: Renders a visualization in the Streamlit interface.
 			"""
 		blue_divider( )
 		st.markdown( '##### Visualization Engine' )
@@ -1374,7 +1353,7 @@ class SQLiteDatabase( ):
 				y=corr.index.tolist( ) ) ] )
 			st.plotly_chart( fig, use_container_width=True )
 	
-	def convert_dataframe( self, table_name: str, df: pd.DataFrame ):
+	def convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None:
 		"""Create a SQLite table from the DataFrame's column types.
 
 		Purpose:
@@ -1385,25 +1364,33 @@ class SQLiteDatabase( ):
 			df (pd.DataFrame): Input pandas DataFrame.
 
 		Returns:
-			Any: Result of the convert dataframe operation.
+			None: Creates a SQLite table using the input DataFrame's inferred column types.
 		"""
-		throw_if( 'table_name', table_name )
-		throw_if( 'df', df )
-		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
-			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
-		self.table_name = table_name
-		self.df_input = df
-		columns = [ ]
-		for col in self.df_input.columns:
-			sql_type = self.get_sqlite_type( self.df_input[ col ].dtype )
-			safe_col = col.replace( ' ', '_' )
-			columns.append( f'{safe_col} {sql_type}' )
-		create_stmt = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({", ".join( columns )});'
-		with self.create_connection( ) as conn:
-			conn.execute( create_stmt )
-			conn.commit( )
+		try:
+			throw_if( 'table_name', table_name )
+			throw_if( 'df', df )
+			if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+				raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+			self.table_name = table_name
+			self.df_input = df
+			columns = [ ]
+			for col in self.df_input.columns:
+				sql_type = self.get_sqlite_type( self.df_input[ col ].dtype )
+				safe_col = col.replace( ' ', '_' )
+				columns.append( f'{safe_col} {sql_type}' )
+			create_stmt = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({", ".join( columns )});'
+			with self.create_connection( ) as conn:
+				conn.execute( create_stmt )
+				conn.commit( )
 	
-	def insert_data( self, table_name: str, df: pd.DataFrame ):
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'convert_dataframe( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
+	def insert_data( self, table_name: str, df: pd.DataFrame ) -> None:
 		"""Insert a DataFrame's rows into a SQLite table.
 
 		Purpose:
@@ -1414,34 +1401,41 @@ class SQLiteDatabase( ):
 			df (pd.DataFrame): Input pandas DataFrame.
 
 		Returns:
-			Any: Result of the insert data operation.
+			None: Inserts the DataFrame rows into the selected SQLite table.
 		"""
-		throw_if( 'table_name', table_name )
-		throw_if( 'df', df )
-		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
-			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
-		self.table_name = table_name
-		self.df_input = df
-		df = self.df_input.copy( )
-		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
-		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
-		stmt = f'INSERT INTO {self.table_name} VALUES ({placeholders});'
-		with self.create_connection( ) as conn:
-			conn.executemany( stmt, df.values.tolist( ) )
-			conn.commit( )
+		try:
+			throw_if( 'table_name', table_name )
+			throw_if( 'df', df )
+			if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+				raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+			self.table_name = table_name
+			self.df_input = df
+			df = self.df_input.copy( )
+			df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
+			placeholders = ', '.join( [ '?' ] * len( df.columns ) )
+			stmt = f'INSERT INTO {self.table_name} VALUES ({placeholders});'
+			with self.create_connection( ) as conn:
+				conn.executemany( stmt, df.values.tolist( ) )
+				conn.commit( )
 	
-	def get_sqlite_type( self, dtype ) -> str:
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'insert_data( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
+	def get_sqlite_type( self, dtype: Any ) -> str:
 		"""
-			Purpose:
+
+		Purpose:
 			Map a pandas dtype to an appropriate SQLite column type.
 
-			Args:
-				dtype (pandas dtype):
-					The dtype of a pandas Series.
+		Args:
+			dtype (pandas dtype): The dtype of a pandas Series.
 
-			Returns:
-				str:
-					SQLite column type.
+		Returns:
+			str: SQLite column type.
 			"""
 		dtype_str = str( dtype ).lower( )
 		# ------------------------------------------------------------------
@@ -1476,24 +1470,22 @@ class SQLiteDatabase( ):
 	
 	def create_custom_table( self, table_name: str, columns: list ) -> None:
 		"""
-			Purpose:
+
+		Purpose:
 			Create a custom SQLite table from column definitions.
 
-			Args:
-				table_name (str):
-					Name of table.
+		Args:
+			table_name (str): Name of table.
 
-				columns (list of dict):
-					[
-						{
-							"name": str,
-							"type": str,
-							"not_null": bool,
-							"primary_key": bool,
-							"auto_increment": bool
-						}
-					]
-		
+			columns (list of dict): [
+				{
+				"name": str,
+				"type": str,
+				"not_null": bool,
+				"primary_key": bool,
+				"auto_increment": bool
+				}
+				]
 
 		Returns:
 			None: Completes the operation through side effects.
@@ -1525,20 +1517,18 @@ class SQLiteDatabase( ):
 	def is_safe_query( self, query: str ) -> bool:
 		"""
 
-			Purpose:
+		Purpose:
 			Determine whether a SQL query is read-only and safe to execute.
 
 			Allows:
-				SELECT
-				WITH (CTE returning SELECT)
-				EXPLAIN SELECT
-				PRAGMA (read-only)
+			SELECT
+			WITH (CTE returning SELECT)
+			EXPLAIN SELECT
+			PRAGMA (read-only)
 
 			Blocks:
-				INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
-				DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
-
-		
+			INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
+			DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
 
 		Args:
 			query (str): SQL query or identifier to inspect.
@@ -1579,14 +1569,12 @@ class SQLiteDatabase( ):
 	def create_identifier( self, name: str ) -> str:
 		"""
 
-			Purpose:
+		Purpose:
 			Sanitize a string into a safe SQLite identifier.
 
 			- Replaces invalid characters with underscores
 			- Ensures it starts with a letter or underscore
 			- Prevents empty names
-
-		
 
 		Args:
 			name (str): Original identifier to sanitize.
@@ -1603,7 +1591,7 @@ class SQLiteDatabase( ):
 			raise ValueError( 'Invalid identifier after sanitization.' )
 		return safe
 	
-	def get_indexes( self, table: str ):
+	def get_indexes( self, table: str ) -> List[ Tuple ]:
 		"""Return index metadata for a SQLite table.
 
 		Purpose:
@@ -1613,17 +1601,25 @@ class SQLiteDatabase( ):
 			table (str): SQLite table name.
 
 		Returns:
-			Any: Result of the get indexes operation.
+			List[Tuple]: SQLite index metadata rows returned by PRAGMA index_list.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		with self.create_connection( ) as conn:
-			rows = conn.execute( f'PRAGMA index_list("{self.table}");' ).fetchall( )
-			return rows
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			with self.create_connection( ) as conn:
+				rows = conn.execute( f'PRAGMA index_list("{self.table}");' ).fetchall( )
+				return rows
 	
-	def add_column( self, table: str, column: str, col_type: str ):
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'get_indexes( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
+	def add_column( self, table: str, column: str, col_type: str ) -> None:
 		"""Add a typed column to an existing SQLite table.
 
 		Purpose:
@@ -1635,106 +1631,119 @@ class SQLiteDatabase( ):
 			col_type (str): SQLite column type.
 
 		Returns:
-			Any: Result of the add column operation.
+			None: Adds the specified column to the existing SQLite table.
 		"""
-		throw_if( 'table', table )
-		throw_if( 'column', column )
-		throw_if( 'col_type', col_type )
-		if not all( isinstance( item, str ) for item in (table, column, col_type) ):
-			raise TypeError( 'table, column, and col_type must be strings.' )
-		self.table = table
-		self.column = self.create_identifier( column )
-		self.col_type = col_type.upper( )
-		with self.create_connection( ) as conn:
-			conn.execute( f'ALTER TABLE "{self.table}" ADD COLUMN "{self.column}" {self.col_type};' )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			throw_if( 'column', column )
+			throw_if( 'col_type', col_type )
+			if not all( isinstance( item, str ) for item in (table, column, col_type) ):
+				raise TypeError( 'table, column, and col_type must be strings.' )
+			self.table = table
+			self.column = self.create_identifier( column )
+			self.col_type = col_type.upper( )
+			with self.create_connection( ) as conn:
+				conn.execute( f'ALTER TABLE "{self.table}" ADD COLUMN "{self.column}" {self.col_type};' )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'add_column( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
 			first; if it fails, falls back to a schema-safe rebuild preserving column order, data,
 			and indexes.
 
-			Args:
-				table_name (str):
-					Table containing the column.
+		Args:
+			table_name (str): Table containing the column.
 
-				old_name (str):
-					Existing column name.
+			old_name (str): Existing column name.
 
-				new_name (str):
-					New column name.
+			new_name (str): New column name.
 
-			Returns:
-				None:
-
+		Returns:
+			None: Renames the selected SQLite column.
 			"""
-		if not table_name or not old_name or not new_name:
-			return
-		with self.create_connection( ) as conn:
-			try:
+		try:
+			throw_if( 'table_name', table_name )
+			throw_if( 'old_name', old_name )
+			throw_if( 'new_name', new_name )
+			with self.create_connection( ) as conn:
+				try:
+					conn.execute(
+						f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}";' )
+					conn.commit( )
+					return
+				except Exception:
+					pass
+				row = conn.execute( """
+	                                SELECT sql
+	                                FROM sqlite_master
+	                                WHERE type ='table' AND name =?
+				                    """, (table_name,) ).fetchone( )
+				if not row or not row[ 0 ]:
+					raise ValueError( "Table definition not found." )
+				create_sql = row[ 0 ]
+				indexes = conn.execute( """
+	                                    SELECT sql
+	                                    FROM sqlite_master
+	                                    WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
+				                        """, (table_name,) ).fetchall( )
+				schema = conn.execute( f'PRAGMA table_info("{table_name}");' ).fetchall( )
+				cols = [ r[ 1 ] for r in schema ]
+				if old_name not in cols:
+					raise ValueError( "Column not found." )
+				mapped_cols = [ (new_name if c == old_name else c) for c in cols ]
+				temp_table = f"{table_name}__rebuild_temp"
+				col_defs: List[ str ] = [ ]
+				pk_cols = [ r for r in schema if int( r[ 5 ] or 0 ) > 0 ]
+				single_pk = len( pk_cols ) == 1
+				for row in schema:
+					col_name = row[ 1 ]
+					col_type = row[ 2 ] or ''
+					not_null = int( row[ 3 ] or 0 )
+					default_value = row[ 4 ]
+					pk = int( row[ 5 ] or 0 )
+					out_name = new_name if col_name == old_name else col_name
+					col_def = f'"{out_name}" {col_type}'.strip( )
+					if not_null:
+						col_def += ' NOT NULL'
+					if default_value is not None:
+						col_def += f' DEFAULT {default_value}'
+					if single_pk and pk == 1:
+						col_def += ' PRIMARY KEY'
+					col_defs.append( col_def )
+				new_create_sql = f'CREATE TABLE "{temp_table}" ({", ".join( col_defs )});'
+				old_select = ", ".join( [ f'"{c}"' for c in cols ] )
+				new_insert = ", ".join( [ f'"{c}"' for c in mapped_cols ] )
+				conn.execute( "BEGIN" )
+				conn.execute( new_create_sql )
 				conn.execute(
-					f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}";' )
+					f'INSERT INTO "{temp_table}" ({new_insert}) SELECT {old_select} FROM "{table_name}";' )
+				conn.execute( f'DROP TABLE "{table_name}";' )
+				conn.execute( f'ALTER TABLE "{temp_table}" RENAME TO "{table_name}";' )
+				for idx in indexes:
+					idx_sql = idx[ 0 ]
+					if idx_sql:
+						idx_sql = idx_sql.replace( f'"{old_name}"', f'"{new_name}"' )
+						conn.execute( idx_sql )
 				conn.commit( )
-				return
-			except Exception:
-				pass
-			row = conn.execute( """
-                                SELECT sql
-                                FROM sqlite_master
-                                WHERE type ='table' AND name =?
-			                    """, (table_name,) ).fetchone( )
-			if not row or not row[ 0 ]:
-				raise ValueError( "Table definition not found." )
-			create_sql = row[ 0 ]
-			indexes = conn.execute( """
-                                    SELECT sql
-                                    FROM sqlite_master
-                                    WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
-			                        """, (table_name,) ).fetchall( )
-			schema = conn.execute( f'PRAGMA table_info("{table_name}");' ).fetchall( )
-			cols = [ r[ 1 ] for r in schema ]
-			if old_name not in cols:
-				raise ValueError( "Column not found." )
-			mapped_cols = [ (new_name if c == old_name else c) for c in cols ]
-			temp_table = f"{table_name}__rebuild_temp"
-			col_defs: List[ str ] = [ ]
-			pk_cols = [ r for r in schema if int( r[ 5 ] or 0 ) > 0 ]
-			single_pk = len( pk_cols ) == 1
-			for row in schema:
-				col_name = row[ 1 ]
-				col_type = row[ 2 ] or ''
-				not_null = int( row[ 3 ] or 0 )
-				default_value = row[ 4 ]
-				pk = int( row[ 5 ] or 0 )
-				out_name = new_name if col_name == old_name else col_name
-				col_def = f'"{out_name}" {col_type}'.strip( )
-				if not_null:
-					col_def += ' NOT NULL'
-				if default_value is not None:
-					col_def += f' DEFAULT {default_value}'
-				if single_pk and pk == 1:
-					col_def += ' PRIMARY KEY'
-				col_defs.append( col_def )
-			new_create_sql = f'CREATE TABLE "{temp_table}" ({", ".join( col_defs )});'
-			old_select = ", ".join( [ f'"{c}"' for c in cols ] )
-			new_insert = ", ".join( [ f'"{c}"' for c in mapped_cols ] )
-			conn.execute( "BEGIN" )
-			conn.execute( new_create_sql )
-			conn.execute(
-				f'INSERT INTO "{temp_table}" ({new_insert}) SELECT {old_select} FROM "{table_name}";' )
-			conn.execute( f'DROP TABLE "{table_name}";' )
-			conn.execute( f'ALTER TABLE "{temp_table}" RENAME TO "{table_name}";' )
-			for idx in indexes:
-				idx_sql = idx[ 0 ]
-				if idx_sql:
-					idx_sql = idx_sql.replace( f'"{old_name}"', f'"{new_name}"' )
-					conn.execute( idx_sql )
-			conn.commit( )
 	
-	def create_profile_table( self, table: str ):
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'rename_column( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
+	def create_profile_table( self, table: str ) -> pd.DataFrame:
 		"""Build column-level descriptive statistics for a table.
 
 		Purpose:
@@ -1744,35 +1753,43 @@ class SQLiteDatabase( ):
 			table (str): SQLite table name.
 
 		Returns:
-			Any: Result of the create profile table operation.
+			pd.DataFrame: Per-column statistics including null counts, distinct counts, and numeric summaries.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		df = self.read_table( self.table )
-		profile_rows = [ ]
-		total_rows = len( df )
-		for col in df.columns:
-			series = df[ col ]
-			null_count = series.isna( ).sum( )
-			distinct_count = series.nunique( dropna=True )
-			row = { 'column': col, 'dtype': str( series.dtype ),
-					'null_%': round( (null_count / total_rows) * 100, 2 ) if total_rows else 0,
-					'distinct_%': round( (distinct_count / total_rows) * 100,
-						2 ) if total_rows else 0, }
-			if pd.api.types.is_numeric_dtype( series ):
-				row[ 'min' ] = series.min( )
-				row[ 'max' ] = series.max( )
-				row[ 'mean' ] = series.mean( )
-			else:
-				row[ 'min' ] = None
-				row[ 'max' ] = None
-				row[ 'mean' ] = None
-			profile_rows.append( row )
-		return pd.DataFrame( profile_rows )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			df = self.read_table( self.table )
+			profile_rows = [ ]
+			total_rows = len( df )
+			for col in df.columns:
+				series = df[ col ]
+				null_count = series.isna( ).sum( )
+				distinct_count = series.nunique( dropna=True )
+				row = { 'column': col, 'dtype': str( series.dtype ),
+						'null_%': round( (null_count / total_rows) * 100, 2 ) if total_rows else 0,
+						'distinct_%': round( (distinct_count / total_rows) * 100,
+							2 ) if total_rows else 0, }
+				if pd.api.types.is_numeric_dtype( series ):
+					row[ 'min' ] = series.min( )
+					row[ 'max' ] = series.max( )
+					row[ 'mean' ] = series.mean( )
+				else:
+					row[ 'min' ] = None
+					row[ 'max' ] = None
+					row[ 'mean' ] = None
+				profile_rows.append( row )
+			return pd.DataFrame( profile_rows )
 	
-	def drop_column( self, table: str, column: str ):
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'create_profile_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
+	def drop_column( self, table: str, column: str ) -> None:
 		"""Remove a column while rebuilding the table and restoring indexes.
 
 		Purpose:
@@ -1783,129 +1800,142 @@ class SQLiteDatabase( ):
 			column (str): SQLite column name.
 
 		Returns:
-			Any: Result of the drop column operation.
+			None: Rebuilds the table without the selected column and restores indexes.
 		"""
-		if not table or not column:
-			raise ValueError( 'Table and column required.' )
-		with self.create_connection( ) as conn:
-			# ------------------------------------------------------------
-			# Fetch original CREATE TABLE statement
-			# ------------------------------------------------------------
-			row = conn.execute( """
-                                SELECT sql
-                                FROM sqlite_master
-                                WHERE type ='table' AND name =?
-				""", (table,) ).fetchone( )
-			if not row or not row[ 0 ]:
-				raise ValueError( 'Table definition not found.' )
-			create_sql = row[ 0 ]
-			# ------------------------------------------------------------
-			# Extract column definitions
-			# ------------------------------------------------------------
-			open_paren = create_sql.find( "(" )
-			close_paren = create_sql.rfind( ")" )
-			if open_paren == -1 or close_paren == -1:
-				raise ValueError( "Malformed CREATE TABLE statement." )
-			inner = create_sql[ open_paren + 1: close_paren ]
-			column_defs = [ c.strip( ) for c in inner.split( "," ) ]
-			# Remove target column
-			new_defs = [ ]
-			for col_def in column_defs:
-				col_name = col_def.split( )[ 0 ].strip( '"' )
-				if col_name != column:
-					new_defs.append( col_def )
-			if len( new_defs ) == len( column_defs ):
-				raise ValueError( "Column not found." )
-			# ------------------------------------------------------------
-			# Build new CREATE TABLE statement
-			# ------------------------------------------------------------
-			temp_table = f"{table}_rebuild_temp"
-			new_create_sql = (f'CREATE TABLE "{temp_table}" (' + ", ".join( new_defs ) + ");")
-			# ------------------------------------------------------------
-			# Begin transaction
-			# ------------------------------------------------------------
-			conn.execute( "BEGIN" )
-			conn.execute( new_create_sql )
-			remaining_cols = [ c.split( )[ 0 ].strip( '"' ) for c in new_defs ]
-			col_list = ", ".join( [ f'"{c}"' for c in remaining_cols ] )
-			conn.execute( f'INSERT INTO "{temp_table}" ({col_list}) '
-			              f'SELECT {col_list} FROM "{table}";' )
-			# Preserve indexes
-			indexes = conn.execute( """
-                                    SELECT sql
-                                    FROM sqlite_master
-                                    WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
-				""", (table,) ).fetchall( )
-			conn.execute( f'DROP TABLE "{table}";' )
-			conn.execute( f'ALTER TABLE "{temp_table}" RENAME TO "{table}";' )
-			# Recreate indexes
-			for idx in indexes:
-				idx_sql = idx[ 0 ]
-				if column not in idx_sql:
-					conn.execute( idx_sql )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			throw_if( 'column', column )
+			with self.create_connection( ) as conn:
+				# ------------------------------------------------------------
+				# Fetch original CREATE TABLE statement
+				# ------------------------------------------------------------
+				row = conn.execute( """
+	                                SELECT sql
+	                                FROM sqlite_master
+	                                WHERE type ='table' AND name =?
+					""", (table,) ).fetchone( )
+				if not row or not row[ 0 ]:
+					raise ValueError( 'Table definition not found.' )
+				create_sql = row[ 0 ]
+				# ------------------------------------------------------------
+				# Extract column definitions
+				# ------------------------------------------------------------
+				open_paren = create_sql.find( "(" )
+				close_paren = create_sql.rfind( ")" )
+				if open_paren == -1 or close_paren == -1:
+					raise ValueError( "Malformed CREATE TABLE statement." )
+				inner = create_sql[ open_paren + 1: close_paren ]
+				column_defs = [ c.strip( ) for c in inner.split( "," ) ]
+				# Remove target column
+				new_defs = [ ]
+				for col_def in column_defs:
+					col_name = col_def.split( )[ 0 ].strip( '"' )
+					if col_name != column:
+						new_defs.append( col_def )
+				if len( new_defs ) == len( column_defs ):
+					raise ValueError( "Column not found." )
+				# ------------------------------------------------------------
+				# Build new CREATE TABLE statement
+				# ------------------------------------------------------------
+				temp_table = f"{table}_rebuild_temp"
+				new_create_sql = (f'CREATE TABLE "{temp_table}" (' + ", ".join( new_defs ) + ");")
+				# ------------------------------------------------------------
+				# Begin transaction
+				# ------------------------------------------------------------
+				conn.execute( "BEGIN" )
+				conn.execute( new_create_sql )
+				remaining_cols = [ c.split( )[ 0 ].strip( '"' ) for c in new_defs ]
+				col_list = ", ".join( [ f'"{c}"' for c in remaining_cols ] )
+				conn.execute( f'INSERT INTO "{temp_table}" ({col_list}) '
+				              f'SELECT {col_list} FROM "{table}";' )
+				# Preserve indexes
+				indexes = conn.execute( """
+	                                    SELECT sql
+	                                    FROM sqlite_master
+	                                    WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
+					""", (table,) ).fetchall( )
+				conn.execute( f'DROP TABLE "{table}";' )
+				conn.execute( f'ALTER TABLE "{temp_table}" RENAME TO "{table}";' )
+				# Recreate indexes
+				for idx in indexes:
+					idx_sql = idx[ 0 ]
+					if column not in idx_sql:
+						conn.execute( idx_sql )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'drop_column( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def rename_table( self, old_name: str, new_name: str ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
 			falls back to a schema-safe rebuild using the original CREATE TABLE statement and
 			preserves indexes.
 
-			Args:
-				old_name (str):
-					Existing table name.
+		Args:
+			old_name (str): Existing table name.
 
-				new_name (str):
-					New table name.
+			new_name (str): New table name.
 
-			Returns:
-				None:
-
+		Returns:
+			None: Renames the selected SQLite table.
 			"""
-		if not old_name or not new_name:
-			return
-		with self.create_connection( ) as conn:
-			try:
-				conn.execute( f'ALTER TABLE "{old_name}" RENAME TO "{new_name}";' )
+		try:
+			throw_if( 'old_name', old_name )
+			throw_if( 'new_name', new_name )
+			with self.create_connection( ) as conn:
+				try:
+					conn.execute( f'ALTER TABLE "{old_name}" RENAME TO "{new_name}";' )
+					conn.commit( )
+					return
+				except Exception:
+					pass
+				row = conn.execute( """
+	                                SELECT sql
+	                                FROM sqlite_master
+	                                WHERE type ='table' AND name =?
+					""", (old_name,) ).fetchone( )
+				if not row or not row[ 0 ]:
+					raise ValueError( "Table definition not found." )
+				create_sql = row[ 0 ]
+				indexes = conn.execute( """
+	                                    SELECT sql
+	                                    FROM sqlite_master
+	                                    WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
+					""", (old_name,) ).fetchall( )
+				open_paren = create_sql.find( "(" )
+				if open_paren == -1:
+					raise ValueError( "Malformed CREATE TABLE statement." )
+				temp_name = f"{new_name}__rebuild_temp"
+				conn.execute( "BEGIN" )
+				conn.execute( f'CREATE TABLE "{temp_name}" {create_sql[ open_paren: ]}' )
+				cols = [ r[ 1 ] for r in
+				         conn.execute( f'PRAGMA table_info("{old_name}");' ).fetchall( ) ]
+				col_list = ", ".join( [ f'"{c}"' for c in cols ] )
+				conn.execute(
+					f'INSERT INTO "{temp_name}" ({col_list}) SELECT {col_list} FROM "{old_name}";' )
+				conn.execute( f'DROP TABLE "{old_name}";' )
+				conn.execute( f'ALTER TABLE "{temp_name}" RENAME TO "{new_name}";' )
+				for idx in indexes:
+					idx_sql = idx[ 0 ]
+					if idx_sql:
+						idx_sql = idx_sql.replace( f'ON "{old_name}"', f'ON "{new_name}"' )
+						conn.execute( idx_sql )
 				conn.commit( )
-				return
-			except Exception:
-				pass
-			row = conn.execute( """
-                                SELECT sql
-                                FROM sqlite_master
-                                WHERE type ='table' AND name =?
-				""", (old_name,) ).fetchone( )
-			if not row or not row[ 0 ]:
-				raise ValueError( "Table definition not found." )
-			create_sql = row[ 0 ]
-			indexes = conn.execute( """
-                                    SELECT sql
-                                    FROM sqlite_master
-                                    WHERE type ='index' AND tbl_name=? AND sql IS NOT NULL
-				""", (old_name,) ).fetchall( )
-			open_paren = create_sql.find( "(" )
-			if open_paren == -1:
-				raise ValueError( "Malformed CREATE TABLE statement." )
-			temp_name = f"{new_name}__rebuild_temp"
-			conn.execute( "BEGIN" )
-			conn.execute( f'CREATE TABLE "{temp_name}" {create_sql[ open_paren: ]}' )
-			cols = [ r[ 1 ] for r in
-			         conn.execute( f'PRAGMA table_info("{old_name}");' ).fetchall( ) ]
-			col_list = ", ".join( [ f'"{c}"' for c in cols ] )
-			conn.execute(
-				f'INSERT INTO "{temp_name}" ({col_list}) SELECT {col_list} FROM "{old_name}";' )
-			conn.execute( f'DROP TABLE "{old_name}";' )
-			conn.execute( f'ALTER TABLE "{temp_name}" RENAME TO "{new_name}";' )
-			for idx in indexes:
-				idx_sql = idx[ 0 ]
-				if idx_sql:
-					idx_sql = idx_sql.replace( f'ON "{old_name}"', f'ON "{new_name}"' )
-					conn.execute( idx_sql )
-			conn.commit( )
 
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'rename_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 class ChromaStore( ):
 	"""ChromaStore persistence interface.
 
