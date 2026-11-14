@@ -6,7 +6,7 @@
 	  Created:                 09-08-2026
 	******************************************************************************************
 	<summary>
-		Vector storage package.
+		Application data directories for SQLite and CSV persistence.\n\nRuntime persistence wrappers are implemented in storage.py.
 	</summary>
 	******************************************************************************************
 '''
