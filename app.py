@@ -404,18 +404,18 @@ def throw_if( name: str, value: object ) -> None:
 	"""Throw if.
 
 	Purpose:
-	    Validates that a required argument contains a usable value so failures occur
-	    before provider, filesystem, or parsing work begins.
+		Validates that a required argument contains a usable value so failures occur before provider,
+		filesystem, or parsing work begins.
 
 	Args:
-	    name (str): Argument name included in validation error messages.
-	    value (object): Candidate value to validate or normalize.
+		name (str): Argument name included in validation error messages.
+		value (object): Candidate value to validate or normalize.
 
 	Returns:
-	    None: This method updates instance state or validates input and does not return a value.
+		None: Updates the application UI, session state, or other state as described.
 
 	Raises:
-	    ValueError: Raised when the method cannot satisfy its documented value requirement.
+		ValueError: Raised when the method cannot satisfy its documented value requirement.
 	"""
 	if value is None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
@@ -427,18 +427,16 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 def render_result_metadata( result: Dict[ str, Any ] ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render metadata associated with a structured API response.
+
+	Purpose:
 		Render common metadata returned by an API fetcher.
 
-		Parameters:
-		-----------
-		result (Dict[str, Any]): Structured fetcher result.
+	Args:
+		result (Dict[ str, Any ]): Structured fetcher result.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'result', result )
 	metadata = { key: result.get( key ) for key in [ 'source', 'mode', 'status', 'url' ]
@@ -447,19 +445,17 @@ def render_result_metadata( result: Dict[ str, Any ] ) -> None:
 		st.caption( ' | '.join( f'{key.title( )}: {value}' for key, value in metadata.items( ) ) )
 
 def render_summary_kv( title: str, values: Dict[ str, Any ] ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render a two-column key/value summary in Streamlit.
+
+	Purpose:
 		Render a two-column key/value summary table.
 
-		Parameters:
-		-----------
+	Args:
 		title (str): Markdown heading displayed above the summary.
-		values (Dict[str, Any]): Summary values to display.
+		values (Dict[ str, Any ]): Summary values to display.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'title', title )
 	throw_if( 'values', values )
@@ -468,19 +464,17 @@ def render_summary_kv( title: str, values: Dict[ str, Any ] ) -> None:
 	st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True, disabled=True )
 
 def render_rows_table( title: str, rows: List[ Dict[ str, Any ] ] ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render structured API rows in a read-only data editor.
+
+	Purpose:
 		Render structured API rows in a read-only data editor.
 
-		Parameters:
-		-----------
+	Args:
 		title (str): Markdown heading displayed above the rows.
-		rows (List[Dict[str, Any]]): Records to display.
+		rows (List[ Dict[ str, Any ] ]): Records to display.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'title', title )
 	st.markdown( title )
@@ -491,37 +485,33 @@ def render_rows_table( title: str, rows: List[ Dict[ str, Any ] ] ) -> None:
 		st.info( 'No rows returned.' )
 
 def render_fallback_raw( result: Dict[ str, Any ] ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Display an expandable raw API response.
+
+	Purpose:
 		Expose the complete structured API response for inspection.
 
-		Parameters:
-		-----------
-		result (Dict[str, Any]): Structured fetcher result.
+	Args:
+		result (Dict[ str, Any ]): Structured fetcher result.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'result', result )
 	with st.expander( 'Raw Response', expanded=False ):
 		st.json( result )
 
 def render_html_preview( title: str, html_text: str ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render HTML source in an isolated Streamlit component.
+
+	Purpose:
 		Render returned HTML content in an isolated Streamlit component.
 
-		Parameters:
-		-----------
+	Args:
 		title (str): Markdown heading displayed above the preview.
 		html_text (str): HTML payload to render.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'title', title )
 	throw_if( 'html_text', html_text )
@@ -529,19 +519,17 @@ def render_html_preview( title: str, html_text: str ) -> None:
 	components.html( html_text, height=500, scrolling=True )
 
 def render_xml_preview( title: str, xml_text: str ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render XML content for inspection.
+
+	Purpose:
 		Pretty-print returned XML content.
 
-		Parameters:
-		-----------
+	Args:
 		title (str): Markdown heading displayed above the preview.
 		xml_text (str): XML payload to display.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'title', title )
 	throw_if( 'xml_text', xml_text )
@@ -554,12 +542,13 @@ def render_xml_preview( title: str, xml_text: str ) -> None:
 	st.code( formatted, language='xml' )
 
 def style_subheaders( ) -> None:
-	"""
-	
-		Purpose:
-		_________
-		Sets the style of subheaders in the main UI
-		
+	"""Apply the configured Streamlit subheader styling.
+
+	Purpose:
+		_________ Sets the style of subheaders in the main UI.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	st.markdown(
 		"""
@@ -575,43 +564,35 @@ def style_subheaders( ) -> None:
 		unsafe_allow_html=True, )
 
 def init_state( key: str, value: Any ) -> None:
-	"""
-		
-		Purpose:
-		--------
+	"""Initialize a session-state value when the key is absent.
+
+	Purpose:
 		Initialize a Streamlit session-state key only when the key is not already present.
-	
-		Parameters:
-		-----------
+
+	Args:
 		key (str): Session-state key to initialize.
 		value (Any): Default value assigned only when the key is absent.
-	
-		Returns:
-		--------
-		None
-		
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	if key not in st.session_state:
 		st.session_state[ key ] = value
 
 def init_env_state( key: str, config_name: str, env_name: str ) -> None:
-	"""
-		
-		Purpose:
-		--------
-		Initialize a session-state API/configuration key from config.py and mirror the value to
-		os.environ when a configured value exists.
-	
-		Parameters:
-		-----------
+	"""Initialize session state from configuration and mirror configured credentials to the environment.
+
+	Purpose:
+		Initialize a session-state API/configuration key from config.py and mirror the value to os.environ
+		when a configured value exists.
+
+	Args:
 		key (str): Session-state key to initialize.
 		config_name (str): Attribute name to read from config.py.
 		env_name (str): Environment variable name to assign.
-	
-		Returns:
-		--------
-		None
-		
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	init_state( key, '' )
 	if st.session_state.get( key, '' ) == '':
@@ -620,7 +601,18 @@ def init_env_state( key: str, config_name: str, env_name: str ) -> None:
 			st.session_state[ key ] = default
 			os.environ[ env_name ] = default
 
-def normalize( obj ):
+def normalize( obj: object ) -> object:
+	"""Convert external API payloads into JSON-serializable Python values.
+
+	Purpose:
+		Convert external API payloads into JSON-serializable Python values.
+
+	Args:
+		obj (object): External payload value.
+
+	Returns:
+		object: Value produced by this operation.
+	"""
 	if obj is None or isinstance( obj, (str, int, float, bool) ):
 		return obj
 	
@@ -637,9 +629,28 @@ def normalize( obj ):
 	return str( obj )
 
 def blue_divider( ) -> None:
+	"""Render the configured application divider.
+
+	Purpose:
+		Render the configured application divider.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 def log_step( msg: str ) -> None:
+	"""Append a processing step to the active pipeline log.
+
+	Purpose:
+		Append a processing step to the active pipeline log.
+
+	Args:
+		msg (str): Processing log message.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	st.session_state.pipeline_log.append( msg )
 
 # ------------- CELESTIAL MAP UTILITY
@@ -647,33 +658,28 @@ def log_step( msg: str ) -> None:
 def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400,
 		latitude: Optional[ float ] = None, longitude: Optional[ float ] = None,
 		location: Optional[ str ] = None, zoom: Optional[ int ] = None ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Render the browser-based Celestial Map application inside Streamlit as a
-		self-contained HTML component. The function preserves the existing HTML, CSS,
-		JavaScript, D3, Leaflet, Pickr, star-map rendering, location picker, star detail
-		panel, animation controls, and image-export behavior while loading local JSON data
-		from the configured asset folder and passing iyr's observer location into the
-		embedded JavaScript application.
+	"""Render the interactive Celestial Map using local browser assets and observer coordinates.
 
-		Parameters:
-		-----------
-		asset_root (str): Root folder containing index.html, style.css, js/main.js,
-			js/modules/*.js, and data/*.json.
+	Purpose:
+		Render the browser-based Celestial Map application inside Streamlit as a self-contained HTML
+		component. The function preserves the existing HTML, CSS, JavaScript, D3, Leaflet, Pickr, star-map
+		rendering, location picker, star detail panel, animation controls, and image-export behavior while
+		loading local JSON data from the configured asset folder and passing iyr's observer location into
+		the embedded JavaScript application.
+
+	Args:
+		asset_root (str): Root folder containing index.html, style.css, js/main.js, js/modules/*.js, and
+			data/*.json.
 		height (int): Component iframe height in pixels.
-		latitude (Optional[float]): Observer latitude supplied by iyr Location State or
-			manual Celestial Map controls.
-		longitude (Optional[float]): Observer longitude supplied by iyr Location State or
-			manual Celestial Map controls.
-		location (Optional[str]): Human-readable observer location label.
-		zoom (Optional[int]): Initial Leaflet location-picker zoom level.
+		latitude (Optional[ float ]): Observer latitude supplied by iyr Location State or manual Celestial
+			Map controls.
+		longitude (Optional[ float ]): Observer longitude supplied by iyr Location State or manual
+			Celestial Map controls.
+		location (Optional[ str ]): Human-readable observer location label.
+		zoom (Optional[ int ]): Initial Leaflet location-picker zoom level.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	try:
 		root = Path( asset_root )
@@ -806,22 +812,17 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 # ------------- LOCATION STATE UTILITIES
 
 def has_valid_coordinates( latitude: object, longitude: object ) -> bool:
-	"""
-	
-		Purpose:
-		--------
+	"""Check whether a latitude/longitude pair is within valid geographic bounds.
+
+	Purpose:
 		Determine whether latitude and longitude values represent usable coordinates.
 
-		Parameters:
-		-----------
+	Args:
 		latitude (object): Latitude value to validate.
 		longitude (object): Longitude value to validate.
 
-		Returns:
-		--------
-		bool: True when both values are numeric, within valid geographic ranges, and not
-			the placeholder coordinate pair (0, 0).
-		
+	Returns:
+		bool: True when the condition holds; otherwise False.
 	"""
 	try:
 		lat_value = float( latitude )
@@ -841,41 +842,30 @@ def has_valid_coordinates( latitude: object, longitude: object ) -> bool:
 	return True
 
 def has_valid_global_coordinates( ) -> bool:
-	"""
-	
-		Purpose:
-		--------
+	"""Check the current global coordinate state for usable coordinates.
+
+	Purpose:
 		Determine whether the global Location State contains usable coordinates.
 
-		Parameters:
-		-----------
-		None
-
-		Returns:
-		--------
-		bool: True when global latitude and longitude are usable.
-		
+	Returns:
+		bool: True when the condition holds; otherwise False.
 	"""
 	return has_valid_coordinates(
 		st.session_state.get( 'latitude', None ),
 		st.session_state.get( 'longitude', None ) )
 
 def set_coordinates( latitude: object, longitude: object ) -> None:
-	"""
-	
-		Purpose:
-		--------
+	"""Update the global latitude, longitude, and coordinate pair together.
+
+	Purpose:
 		Update global latitude, longitude, and coordinates state together.
 
-		Parameters:
-		-----------
+	Args:
 		latitude (object): Latitude value.
 		longitude (object): Longitude value.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	if not has_valid_coordinates( latitude, longitude ):
 		return
@@ -887,20 +877,13 @@ def set_coordinates( latitude: object, longitude: object ) -> None:
 	st.session_state[ 'coordinates' ] = (lat_value, lon_value)
 
 def get_location_state( ) -> Dict[ str, object ]:
-	"""
-	
-		Purpose:
-		--------
+	"""Read the canonical location values from Streamlit session state.
+
+	Purpose:
 		Return the canonical global Location State values.
 
-		Parameters:
-		-----------
-		None
-
-		Returns:
-		--------
-		Dict[str, object]: Dictionary containing global geospatial state values.
-		
+	Returns:
+		Dict[ str, object ]: Value produced by this operation.
 	"""
 	return {
 			'coordinates': st.session_state.get( 'coordinates', ( ) ),
@@ -927,27 +910,23 @@ def set_location_state( location: Optional[ str ] = None, city: Optional[ str ] 
 		state: Optional[ str ] = None, country: Optional[ str ] = None,
 		zipcode: Optional[ str ] = None, description: Optional[ str ] = None,
 		latitude: Optional[ float ] = None, longitude: Optional[ float ] = None ) -> None:
-	"""
-	
-		Purpose:
-		--------
+	"""Update selected location fields without modifying unrelated session state.
+
+	Purpose:
 		Update global Location State values without touching unrelated state keys.
 
-		Parameters:
-		-----------
-		location (Optional[str]): Freeform location string.
-		city (Optional[str]): City value.
-		state (Optional[str]): State, province, or region value.
-		country (Optional[str]): Country value.
-		zipcode (Optional[str]): ZIP or postal code value.
-		description (Optional[str]): Description for the current location.
-		latitude (Optional[float]): Latitude value.
-		longitude (Optional[float]): Longitude value.
+	Args:
+		location (Optional[ str ]): Freeform location string.
+		city (Optional[ str ]): City value.
+		state (Optional[ str ]): State, province, or region value.
+		country (Optional[ str ]): Country value.
+		zipcode (Optional[ str ]): ZIP or postal code value.
+		description (Optional[ str ]): Description for the current location.
+		latitude (Optional[ float ]): Latitude value.
+		longitude (Optional[ float ]): Longitude value.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	if location is not None:
 		st.session_state[ 'location' ] = str( location ).strip( )
@@ -971,20 +950,13 @@ def set_location_state( location: Optional[ str ] = None, city: Optional[ str ] 
 		set_coordinates( latitude, longitude )
 
 def compose_location_from_state( ) -> str:
-	"""
-	
-		Purpose:
-		--------
+	"""Build a readable location description from the current geographic state.
+
+	Purpose:
 		Compose a geocoding query from the canonical global Location State.
 
-		Parameters:
-		-----------
-		None
-
-		Returns:
-		--------
-		str: Freeform location query.
-		
+	Returns:
+		str: Value produced by this operation.
 	"""
 	location = str( st.session_state.get( 'location', '' ) ).strip( )
 	if location:
@@ -1001,21 +973,17 @@ def compose_location_from_state( ) -> str:
 	return ', '.join( parts )
 
 def resolve_table_name( requested: str, tables: List[ str ] ) -> Optional[ str ]:
-	"""
-	
-		Purpose:
-		--------
+	"""Resolve a requested table name against available database tables.
+
+	Purpose:
 		Resolve a requested SQLite table name using case-insensitive matching.
 
-		Parameters:
-		-----------
+	Args:
 		requested (str): Requested table name.
-		tables (List[str]): Available table names.
+		tables (List[ str ]): Available table names.
 
-		Returns:
-		--------
-		Optional[str]: Actual table name when found; otherwise None.
-		
+	Returns:
+		Optional[ str ]: Value produced by this operation.
 	"""
 	if not requested or not tables:
 		return None
@@ -1032,21 +1000,17 @@ def resolve_table_name( requested: str, tables: List[ str ] ) -> Optional[ str ]
 	return None
 
 def get_global_location_default( fallback: str = '' ) -> str:
-	"""
-	
-		Purpose:
-		--------
+	"""Get the active location text or its configured fallback.
+
+	Purpose:
 		Return the best available global location text for location-based controls.
 
-		Parameters:
-		-----------
-		fallback (str): Fallback location text used when global Location State has no
-			usable location value.
+	Args:
+		fallback (str): Fallback location text used when global Location State has no usable location
+			value.
 
-		Returns:
-		--------
-		str: Location text suitable for geospatial query controls.
-		
+	Returns:
+		str: Value produced by this operation.
 	"""
 	location = compose_location_from_state( )
 	if location:
@@ -1055,20 +1019,16 @@ def get_global_location_default( fallback: str = '' ) -> str:
 	return fallback
 
 def get_global_zipcode_default( fallback: str='20001' ) -> str:
-	"""
-	
-		Purpose:
-		--------
+	"""Get the active postal code or its configured fallback.
+
+	Purpose:
 		Return the best available global ZIP or postal code value.
 
-		Parameters:
-		-----------
+	Args:
 		fallback (str): Fallback ZIP or postal code.
 
-		Returns:
-		--------
-		str: ZIP or postal code value.
-		
+	Returns:
+		str: Value produced by this operation.
 	"""
 	zipcode = str( st.session_state.get( 'zipcode', '' ) ).strip( )
 	if zipcode:
@@ -1077,20 +1037,16 @@ def get_global_zipcode_default( fallback: str='20001' ) -> str:
 	return fallback
 
 def get_global_latitude_default( fallback: float=0.0 ) -> float:
-	"""
-	
-		Purpose:
-		--------
+	"""Get the current latitude or a fallback value.
+
+	Purpose:
 		Return the best available global latitude value.
 
-		Parameters:
-		-----------
+	Args:
 		fallback (float): Fallback latitude.
 
-		Returns:
-		--------
-		float: Latitude value.
-		
+	Returns:
+		float: Value produced by this operation.
 	"""
 	if has_valid_global_coordinates( ):
 		return float( st.session_state.get( 'latitude', fallback ) )
@@ -1098,20 +1054,16 @@ def get_global_latitude_default( fallback: float=0.0 ) -> float:
 	return float( fallback )
 
 def get_global_longitude_default( fallback: float=0.0 ) -> float:
-	"""
-	
-		Purpose:
-		--------
+	"""Get the current longitude or a fallback value.
+
+	Purpose:
 		Return the best available global longitude value.
 
-		Parameters:
-		-----------
+	Args:
 		fallback (float): Fallback longitude.
 
-		Returns:
-		--------
-		float: Longitude value.
-		
+	Returns:
+		float: Value produced by this operation.
 	"""
 	if has_valid_global_coordinates( ):
 		return float( st.session_state.get( 'longitude', fallback ) )
@@ -1120,23 +1072,19 @@ def get_global_longitude_default( fallback: float=0.0 ) -> float:
 
 def set_global_coordinates_from_result( latitude: object, longitude: object,
 		location: Optional[ str ]=None, description: Optional[ str ]=None ) -> None:
-	"""
-	
-		Purpose:
-		--------
+	"""Store a resolved coordinate pair in the global location state.
+
+	Purpose:
 		Update global Location State from a service result when valid coordinates exist.
 
-		Parameters:
-		-----------
+	Args:
 		latitude (object): Latitude value returned by a service or derived from controls.
 		longitude (object): Longitude value returned by a service or derived from controls.
-		location (Optional[str]): Optional location text to save globally.
-		description (Optional[str]): Optional description of the source result.
+		location (Optional[ str ]): Optional location text to save globally.
+		description (Optional[ str ]): Optional description of the source result.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	if not has_valid_coordinates( latitude, longitude ):
 		return
@@ -1146,23 +1094,18 @@ def set_global_coordinates_from_result( latitude: object, longitude: object,
 
 def create_bounding_box_from_center( latitude: object, longitude: object,
 		delta: float=0.125 ) -> Dict[ str, float ]:
-	"""
-	
-		Purpose:
-		--------
+	"""Calculate a bounding box around the supplied center coordinate.
+
+	Purpose:
 		Create a simple bounding box around a center latitude and longitude.
 
-		Parameters:
-		-----------
+	Args:
 		latitude (object): Center latitude.
 		longitude (object): Center longitude.
 		delta (float): Decimal-degree offset used to build the box.
 
-		Returns:
-		--------
-		Dict[str, float]: Bounding box values with west, south, east, north, northwest,
-			and southeast coordinate keys.
-		
+	Returns:
+		Dict[ str, float ]: Value produced by this operation.
 	"""
 	lat_value = get_global_latitude_default( )
 	lng_value = get_global_longitude_default( )
@@ -1179,21 +1122,17 @@ def create_bounding_box_from_center( latitude: object, longitude: object,
 # ------------- BROWSER GEOLOCATION UTILITIES
 
 def get_geolocation_error_message( error_code: object, error_message: object ) -> str:
-	"""
-	
-		Purpose:
-		--------
+	"""Translate a browser geolocation error into a readable message.
+
+	Purpose:
 		Convert a browser geolocation error code into a readable application message.
 
-		Parameters:
-		-----------
+	Args:
 		error_code (object): Browser geolocation error code.
 		error_message (object): Browser geolocation error message.
 
-		Returns:
-		--------
-		str: User-facing error message.
-		
+	Returns:
+		str: Value produced by this operation.
 	"""
 	try:
 		code = int( error_code )
@@ -1219,20 +1158,16 @@ def get_geolocation_error_message( error_code: object, error_message: object ) -
 	return 'Browser geolocation failed.'
 
 def update_location_state_from_browser_geolocation( geo: Dict[ str, object ] ) -> bool:
-	"""
-	
-		Purpose:
-		--------
+	"""Update location state using the browser geolocation response.
+
+	Purpose:
 		Update global Location State from a browser geolocation payload.
 
-		Parameters:
-		-----------
-		geo (Dict[str, object]): Geolocation payload returned by streamlit-js-eval.
+	Args:
+		geo (Dict[ str, object ]): Geolocation payload returned by streamlit-js-eval.
 
-		Returns:
-		--------
-		bool: True when global coordinates were updated.
-		
+	Returns:
+		bool: True when the condition holds; otherwise False.
 	"""
 	try:
 		if not geo:
@@ -1289,21 +1224,17 @@ def update_location_state_from_browser_geolocation( geo: Dict[ str, object ] ) -
 		return False
 
 def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Request browser geolocation and keep the canonical global Location State synchronized
-		with the browser coordinates before location-dependent modes render.
+	"""Initialize the active location using browser coordinates when available.
 
-		Parameters:
-		-----------
+	Purpose:
+		Request browser geolocation and keep the canonical global Location State synchronized with the
+		browser coordinates before location-dependent modes render.
+
+	Args:
 		geocoder (Geocoder): Existing geocoder instance used to reverse geocode browser coordinates.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	try:
 		if not st.session_state.get( 'browser_geolocation_enabled', True ):
@@ -1378,17 +1309,14 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 		st.session_state[ 'browser_geolocation_error' ] = str( ex )
 
 def ensure_active_location_state( ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Apply the active-location priority: browser location first and the most recent
-		Geocoding result second. Leave location state empty when neither source is available.
-	
-		Returns:
-		--------
-		None
-		
+	"""Ensure the application has initialized location state.
+
+	Purpose:
+		Apply the active-location priority: browser location first and the most recent Geocoding result
+		second. Leave location state empty when neither source is available.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	browser_enabled = bool( st.session_state.get( 'browser_geolocation_enabled', True ) )
 	browser_loaded = bool( st.session_state.get( 'browser_geolocation_loaded', False ) )
@@ -1436,25 +1364,21 @@ def ensure_active_location_state( ) -> None:
 
 def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=None,
 		use_user_location: bool=True, key_prefix: str='reports_map', source_name: str='' ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Render an interactive PyDeck map for records containing Latitude and Longitude fields.
-		The map title, filters, tooltip fields, and mapped-record table adapt to known source schemas.
+	"""Render a map of report locations and optional overlay data.
 
-		Parameters:
-		-----------
+	Purpose:
+		Render an interactive PyDeck map for records containing Latitude and Longitude fields. The map
+		title, filters, tooltip fields, and mapped-record table adapt to known source schemas.
+
+	Args:
 		df (pd.DataFrame): Source DataFrame containing geospatial records.
-		df_overlay (Optional[pd.DataFrame]): Optional geocoded records rendered above the base layer.
+		df_overlay (Optional[ pd.DataFrame ]): Optional geocoded records rendered above the base layer.
 		use_user_location (bool): Use the global/user location as a fallback map point.
 		key_prefix (str): Unique Streamlit widget key prefix for this map instance.
 		source_name (str): Active database table or custom dataset name displayed as the map header.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	try:
 		active_source = str( source_name or st.session_state.get( 'active_dataset_name', '' )
@@ -1696,22 +1620,18 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 # ------------ GIS MAPPING UTILITIES
 
 def compose_location_query( city: object, state: object, country: object ) -> str:
-	"""
-	
-		Purpose:
-		--------
+	"""Compose a location query from city, state, and country fields.
+
+	Purpose:
 		Compose a clean geocoding query from city, state, and country values.
 
-		Parameters:
-		-----------
+	Args:
 		city (object): City value from the source row.
 		state (object): State, province, region, or equivalent value from the source row.
 		country (object): Country value from the source row.
 
-		Returns:
-		--------
-		str: Comma-delimited location query.
-		
+	Returns:
+		str: Value produced by this operation.
 	"""
 	parts = [ ]
 	
@@ -1726,23 +1646,19 @@ def compose_location_query( city: object, state: object, country: object ) -> st
 	return ', '.join( parts )
 
 def get_value_by_path( obj: object, path: List[ object ] ) -> object:
-	"""
-	
-		Purpose:
-		--------
-		Read a nested value from dictionaries, lists, tuples, or simple objects using a
-		specified lookup path.
+	"""Resolve a nested value using a sequence of dictionary or list keys.
 
-		Parameters:
-		-----------
+	Purpose:
+		Read a nested value from dictionaries, lists, tuples, or simple objects using a specified lookup
+		path.
+
+	Args:
 		obj (object): Source object to inspect.
-		path (List[object]): Lookup path containing dictionary keys, object attributes,
-			or integer sequence indexes.
+		path (List[ object ]): Lookup path containing dictionary keys, object attributes, or integer
+			sequence indexes.
 
-		Returns:
-		--------
-		object: Resolved value or None.
-		
+	Returns:
+		object: Value produced by this operation.
 	"""
 	current = obj
 	
@@ -1769,20 +1685,16 @@ def get_value_by_path( obj: object, path: List[ object ] ) -> object:
 	return current
 
 def extract_coordinates( result: object ) -> Tuple[ Optional[ float ], Optional[ float ] ]:
-	"""
-	
-		Purpose:
-		--------
+	"""Extract latitude and longitude from a structured result.
+
+	Purpose:
 		Extract latitude and longitude from common geocoding and places response shapes.
 
-		Parameters:
-		-----------
+	Args:
 		result (object): Geocoder or Places response object.
 
-		Returns:
-		--------
-		Tuple[Optional[float], Optional[float]]: Latitude and longitude when available.
-		
+	Returns:
+		Tuple[ Optional[ float ], Optional[ float ] ]: Value produced by this operation.
 	"""
 	if result is None:
 		return None, None
@@ -1832,21 +1744,16 @@ def extract_coordinates( result: object ) -> Tuple[ Optional[ float ], Optional[
 	return latitude, longitude
 
 def count_missing_report_coordinate_rows( table_name: str ) -> int:
-	"""
-	
-		Purpose:
-		--------
-		Count rows in a Reports-like table with missing, invalid, or placeholder
-		coordinates.
+	"""Count report rows needing coordinate enrichment.
 
-		Parameters:
-		-----------
+	Purpose:
+		Count rows in a Reports-like table with missing, invalid, or placeholder coordinates.
+
+	Args:
 		table_name (str): SQLite table name to inspect.
 
-		Returns:
-		--------
-		int: Count of rows requiring coordinate enrichment.
-		
+	Returns:
+		int: Value produced by this operation.
 	"""
 	try:
 		throw_if( 'table_name', table_name )
@@ -1876,22 +1783,18 @@ def count_missing_report_coordinate_rows( table_name: str ) -> int:
 		return 0
 
 def read_missing_report_locations( table_name: str, limit: Optional[ int ] = None ) -> pd.DataFrame:
-	"""
-	
-		Purpose:
-		--------
-		Read distinct City, State, and Country combinations from a Reports-like table
-		where coordinates are missing, invalid, or placeholder values.
+	"""Load report records with missing or invalid geographic coordinates.
 
-		Parameters:
-		-----------
+	Purpose:
+		Read distinct City, State, and Country combinations from a Reports-like table where coordinates
+		are missing, invalid, or placeholder values.
+
+	Args:
 		table_name (str): SQLite table name to inspect.
-		limit (Optional[int]): Optional maximum number of distinct locations to return.
+		limit (Optional[ int ]): Optional maximum number of distinct locations to return.
 
-		Returns:
-		--------
-		pd.DataFrame: Distinct location records requiring geocoding.
-		
+	Returns:
+		pd.DataFrame: Value produced by this operation.
 	"""
 	try:
 		throw_if( 'table_name', table_name )
@@ -1930,25 +1833,21 @@ def read_missing_report_locations( table_name: str, limit: Optional[ int ] = Non
 
 def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, places: Place,
 		use_places: bool=True, limit: Optional[ int ]=None ) -> pd.DataFrame:
-	"""
-	
-		Purpose:
-		--------
-		Geocode distinct missing City, State, and Country combinations and return a
-		dry-run preview without updating SQLite.
+	"""Preview coordinates produced by geocoding existing report records.
 
-		Parameters:
-		-----------
+	Purpose:
+		Geocode distinct missing City, State, and Country combinations and return a dry-run preview
+		without updating SQLite.
+
+	Args:
 		table_name (str): SQLite table name to inspect.
 		geocoder (Geocoder): Existing Geocoder service instance.
 		places (Place): Existing Places service instance.
 		use_places (bool): Use Places fallback when Geocoder lookup fails.
-		limit (Optional[int]): Optional maximum number of distinct locations to process.
+		limit (Optional[ int ]): Optional maximum number of distinct locations to process.
 
-		Returns:
-		--------
-		pd.DataFrame: Preview of proposed coordinate updates.
-		
+	Returns:
+		pd.DataFrame: Value produced by this operation.
 	"""
 	try:
 		throw_if( 'table_name', table_name )
@@ -2030,22 +1929,18 @@ def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, plac
 		return pd.DataFrame( )
 
 def apply_report_coordinate_updates( table_name: str, df_updates: pd.DataFrame ) -> int:
-	"""
-	
-		Purpose:
-		--------
-		Apply matched latitude and longitude values to all missing-coordinate rows in a
-		Reports-like table that share the same City, State, and Country values.
+	"""Apply confirmed geographic updates to report records.
 
-		Parameters:
-		-----------
+	Purpose:
+		Apply matched latitude and longitude values to all missing-coordinate rows in a Reports-like table
+		that share the same City, State, and Country values.
+
+	Args:
 		table_name (str): SQLite table name to update.
 		df_updates (pd.DataFrame): Preview DataFrame containing matched coordinates.
 
-		Returns:
-		--------
-		int: Number of SQLite rows updated.
-		
+	Returns:
+		int: Value produced by this operation.
 	"""
 	try:
 		throw_if( 'table_name', table_name )
@@ -2122,23 +2017,19 @@ def apply_report_coordinate_updates( table_name: str, df_updates: pd.DataFrame )
 		return 0
 
 def append_geocoding_map_result( query: str, source: str, result: object ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Append a resolved geocoding result to the temporary Geocoding Mode map overlay and
-		update the global Location State with the resolved coordinates.
+	"""Add a resolved location result to the interactive map state.
 
-		Parameters:
-		-----------
+	Purpose:
+		Append a resolved geocoding result to the temporary Geocoding Mode map overlay and update the
+		global Location State with the resolved coordinates.
+
+	Args:
 		query (str): User-entered location query.
 		source (str): Source label such as Geocoder or Places.
 		result (object): Raw geocoding response object.
 
-		Returns:
-		--------
-		None
-		
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	try:
 		throw_if( 'query', query )
@@ -2206,7 +2097,18 @@ EMBEDDING_MODELS: Dict[ str, List[ str ] ] = {
 				'sentence-transformers/all-mpnet-base-v2' ], 'Local GGUF': [ 'Local GGUF' ], }
 
 def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ str, object ]:
-	"""Render Foo-style chunking, embedding, and vector-storage controls."""
+	"""Render Foo-style chunking, embedding, and vector-storage controls.
+
+	Purpose:
+		Render processing settings for chunking, embeddings, and vector persistence.
+
+	Args:
+		key_prefix (str): Streamlit widget key namespace.
+		collection_name (str): Vector collection name.
+
+	Returns:
+		Dict[ str, object ]: Value produced by this operation.
+	"""
 	throw_if( 'key_prefix', key_prefix )
 	throw_if( 'collection_name', collection_name )
 	chunk_col, overlap_col = st.columns( 2, border=True, gap='xxsmall' )
@@ -2254,7 +2156,19 @@ def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ s
 	         'namespace': namespace, }
 
 def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap: int ) -> List[ Document ]:
-	"""Split LangChain documents into retrieval chunks."""
+	"""Split LangChain documents into retrieval chunks.
+
+	Purpose:
+		Split LangChain documents into chunks with deterministic identifiers.
+
+	Args:
+		documents (List[ Document ]): LangChain documents to process.
+		chunk_size (int): Maximum chunk size in characters.
+		chunk_overlap (int): Number of overlapping characters between chunks.
+
+	Returns:
+		List[ Document ]: Value produced by this operation.
+	"""
 	throw_if( 'documents', documents )
 	throw_if( 'chunk_size', chunk_size )
 	throw_if( 'chunk_overlap', chunk_overlap )
@@ -2271,7 +2185,20 @@ def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap
 
 def create_embeddings( chunks: List[ Document ],
            provider: str, model: str, model_path: str ) -> tuple[ object, List[ List[ float ] ] ]:
-	"""Create and validate embeddings for document chunks."""
+	"""Create and validate embeddings for document chunks.
+
+	Purpose:
+		Generate and verify document embedding vectors.
+
+	Args:
+		chunks (List[ Document ]): Document chunks to embed or store.
+		provider (str): Selected provider or provider wrapper.
+		model (str): Embedding or generation model name.
+		model_path (str): Optional local model file path.
+
+	Returns:
+		tuple[ object, List[ List[ float ] ] ]: Value produced by this operation.
+	"""
 	throw_if( 'chunks', chunks )
 	throw_if( 'provider', provider )
 	throw_if( 'model', model )
@@ -2289,7 +2216,22 @@ def create_embeddings( chunks: List[ Document ],
 
 def store_documents( chunks: List[ Document ], embedder: object, vector_backend: str,
                      vector_target: str, persist_directory: str, namespace: str ) -> object:
-	"""Persist document chunks to Chroma or Pinecone."""
+	"""Persist document chunks to Chroma or Pinecone.
+
+	Purpose:
+		Persist chunks using the selected vector backend.
+
+	Args:
+		chunks (List[ Document ]): Document chunks to embed or store.
+		embedder (object): LangChain embedding adapter.
+		vector_backend (str): Selected Chroma or Pinecone backend.
+		vector_target (str): Target collection or index name.
+		persist_directory (str): Directory for Chroma persistence.
+		namespace (str): Optional Pinecone namespace.
+
+	Returns:
+		object: Value produced by this operation.
+	"""
 	throw_if( 'chunks', chunks )
 	throw_if( 'embedder', embedder )
 	throw_if( 'vector_backend', vector_backend )
@@ -2310,7 +2252,17 @@ def store_documents( chunks: List[ Document ], embedder: object, vector_backend:
 	return store.create( chunks, embedder, vector_target, namespace, api_key )
 
 def initialize_mode_document_state( prefix: str ) -> None:
-	"""Initialize isolated document state for one API mode."""
+	"""Initialize isolated document state for one API mode.
+
+	Purpose:
+		Initialize processing state keys isolated by source mode.
+
+	Args:
+		prefix (str): Source-mode session-state namespace.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	throw_if( 'prefix', prefix )
 	defaults = { f'{prefix}_documents': [ ], f'{prefix}_chunks': [ ], f'{prefix}_embeddings': [ ],
 			f'{prefix}_embedder': None, f'{prefix}_vector_store': None,
@@ -2322,7 +2274,17 @@ def initialize_mode_document_state( prefix: str ) -> None:
 			st.session_state[ key ] = value
 
 def serialize_mode_result( result: object ) -> str:
-	"""Serialize a structured API result as LangChain document text."""
+	"""Serialize a structured API result as LangChain document text.
+
+	Purpose:
+		Serialize structured API data as LangChain document content.
+
+	Args:
+		result (object): Structured response or result to process.
+
+	Returns:
+		str: Value produced by this operation.
+	"""
 	if isinstance( result, pd.DataFrame ):
 		return result.to_json( orient='records', indent=2, default_handler=str )
 	if isinstance( result, str ):
@@ -2330,7 +2292,19 @@ def serialize_mode_result( result: object ) -> str:
 	return json.dumps( result, indent=2, sort_keys=True, default=str )
 
 def sync_mode_document( prefix: str, result_key: str, source_key: str ) -> None:
-	"""Synchronize the latest API result into a LangChain Document."""
+	"""Synchronize the latest API result into a LangChain Document.
+
+	Purpose:
+		Synchronize the latest source result into the mode's document state.
+
+	Args:
+		prefix (str): Source-mode session-state namespace.
+		result_key (str): Session-state key containing the provider result.
+		source_key (str): Session-state key containing the source label.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	throw_if( 'prefix', prefix )
 	throw_if( 'result_key', result_key )
 	throw_if( 'source_key', source_key )
@@ -2358,7 +2332,21 @@ def sync_mode_document( prefix: str, result_key: str, source_key: str ) -> None:
 
 def render_source_processing_controls( prefix: str, result_key: str, source_key: str,
                                        source_name: str, key_prefix: str ) -> None:
-	"""Render Foo-style processing controls inside one source/API expander."""
+	"""Render Foo-style processing controls inside one source/API expander.
+
+	Purpose:
+		Render source-specific chunk, embed, and store controls.
+
+	Args:
+		prefix (str): Source-mode session-state namespace.
+		result_key (str): Session-state key containing the provider result.
+		source_key (str): Session-state key containing the source label.
+		source_name (str): Value used by this operation.
+		key_prefix (str): Streamlit widget key namespace.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	throw_if( 'prefix', prefix )
 	throw_if( 'result_key', result_key )
 	throw_if( 'source_key', source_key )
@@ -2438,7 +2426,18 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 				st.error( str( exc ) )
 
 def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) -> None:
-	"""Render Loaded, Chunks, and Embeddings tabs for one API mode."""
+	"""Render Loaded, Chunks, and Embeddings tabs for one API mode.
+
+	Purpose:
+		Render loaded document, chunk, and embedding tabs.
+
+	Args:
+		prefix (str): Source-mode session-state namespace.
+		loaded_label (str): Caption for the loaded-document tab.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	throw_if( 'prefix', prefix )
 	initialize_mode_document_state( prefix )
 	loaded_tab, chunks_tab, embeddings_tab = st.tabs(
@@ -2479,14 +2478,13 @@ def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) 
 			st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
 
 def initialize_loading_state( ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Initialize the shared document-loading session state.
+
+	Purpose:
 		Initialize the shared document-loading state used by every Loading-mode execution path.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	defaults = { 'documents': [ ], 'raw_documents': [ ], 'raw_text': '', 'processed_text': None,
 			'lines': None, 'tokens': [ ], 'chunked_documents': [ ], 'df_chunks': pd.DataFrame( ),
@@ -2500,14 +2498,13 @@ def initialize_loading_state( ) -> None:
 initialize_loading_state( )
 
 def rebuild_raw_text_from_documents( ) -> str:
-	"""
-		Purpose:
-		--------
+	"""Reconstruct raw text from the documents currently loaded.
+
+	Purpose:
 		Rebuild the shared raw-text representation from the currently loaded documents.
 
-		Returns:
-		--------
-		str: Concatenated document text.
+	Returns:
+		str: Value produced by this operation.
 	"""
 	initialize_loading_state( )
 	return '\n\n'.join( document.page_content for document in st.session_state[ 'documents' ] if
@@ -2515,18 +2512,16 @@ def rebuild_raw_text_from_documents( ) -> str:
 		                    str ) and document.page_content.strip( ) )
 
 def reset_document_processing_controls( key_prefix: str ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Reset processing widget values without changing unrelated state.
+
+	Purpose:
 		Clear derived chunk, embedding, and vector-store state for one loader workflow.
 
-		Parameters:
-		-----------
+	Args:
 		key_prefix (str): Stable loader-control key prefix.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'key_prefix', key_prefix )
 	initialize_loading_state( )
@@ -2539,18 +2534,16 @@ def reset_document_processing_controls( key_prefix: str ) -> None:
 	st.session_state.pop( f'{key_prefix}_processing_settings', None )
 
 def clear_if_active( loader_name: str ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Clear previously loaded content when changing active loaders.
+
+	Purpose:
 		Remove documents owned by the selected loader while preserving documents from other loaders.
 
-		Parameters:
-		-----------
+	Args:
 		loader_name (str): Loader metadata name to clear.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'loader_name', loader_name )
 	initialize_loading_state( )
@@ -2573,19 +2566,17 @@ def clear_if_active( loader_name: str ) -> None:
 	st.session_state[ 'vector_store' ] = None
 
 def render_document_processing_inputs( loader_name: str, key_prefix: str ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render shared document processing settings.
+
+	Purpose:
 		Render chunking, embedding, and vector-storage controls for a document loader.
 
-		Parameters:
-		-----------
+	Args:
 		loader_name (str): Loader metadata name.
 		key_prefix (str): Stable Streamlit widget key prefix.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'loader_name', loader_name )
 	throw_if( 'key_prefix', key_prefix )
@@ -2594,7 +2585,17 @@ def render_document_processing_inputs( loader_name: str, key_prefix: str ) -> No
 		f'iyr-{key_prefix}-documents' )
 
 def get_loader_documents( loader_name: str ) -> List[ Document ]:
-	"""Return documents owned by one loader from shared Loading-mode state."""
+	"""Return documents owned by one loader from shared Loading-mode state.
+
+	Purpose:
+		Get the documents associated with a named loader.
+
+	Args:
+		loader_name (str): Name of the document loader.
+
+	Returns:
+		List[ Document ]: Value produced by this operation.
+	"""
 	throw_if( 'loader_name', loader_name )
 	initialize_loading_state( )
 	documents = st.session_state.get( 'documents', [ ] ) or [ ]
@@ -2603,19 +2604,17 @@ def get_loader_documents( loader_name: str ) -> List[ Document ]:
 	return matched
 
 def render_document_processing_actions( loader_name: str, key_prefix: str ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Render chunk, embed, and vector-store actions for the selected loader.
+
+	Purpose:
 		Execute chunking, embedding, and vector-storage actions for one document loader.
 
-		Parameters:
-		-----------
+	Args:
 		loader_name (str): Loader metadata name.
 		key_prefix (str): Stable Streamlit widget key prefix.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	throw_if( 'loader_name', loader_name )
 	throw_if( 'key_prefix', key_prefix )
@@ -2692,14 +2691,32 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 			st.error( str( exc ) )
 
 def render_document_processing_controls( loader_name: str, key_prefix: str ) -> None:
-	"""Render document-processing inputs and actions for one loader."""
+	"""Render document-processing inputs and actions for one loader.
+
+	Purpose:
+		Render the complete document processing interface.
+
+	Args:
+		loader_name (str): Name of the document loader.
+		key_prefix (str): Streamlit widget key namespace.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	throw_if( 'loader_name', loader_name )
 	throw_if( 'key_prefix', key_prefix )
 	render_document_processing_inputs( loader_name, key_prefix )
 	render_document_processing_actions( loader_name, key_prefix )
 
 def render_loading_tabs( ) -> None:
-	"""Render shared Loaded, Chunks, and Embeddings tabs for Loading mode."""
+	"""Render shared Loaded, Chunks, and Embeddings tabs for Loading mode.
+
+	Purpose:
+		Render the shared Loaded, Chunks, and Embeddings tabs.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	initialize_loading_state( )
 	loaded_tab, chunks_tab, embeddings_tab = st.tabs( [ '📄 Loaded', '✂️ Chunks', '🔢 Embeddings' ] )
 	with loaded_tab:
@@ -2729,7 +2746,14 @@ def render_loading_tabs( ) -> None:
 				disabled=True )
 
 def initialize_web_state( ) -> None:
-	"""Initialize isolated web-document state."""
+	"""Initialize isolated web-document state.
+
+	Purpose:
+		Initialize isolated web-document processing state.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	defaults = { 'web_documents': [ ], 'web_document_url': '', 'web_chunks': [ ],
 	             'web_embeddings': [ ], 'web_embedder': None, 'web_vector_store': None,
 	             'web_chunk_size_used': 0, 'web_chunk_overlap_used': 0,
@@ -2740,7 +2764,14 @@ def initialize_web_state( ) -> None:
 			st.session_state[ key ] = value
 
 def clear_web_state( ) -> None:
-	"""Clear scraped documents and all derived web state."""
+	"""Clear scraped documents and all derived web state.
+
+	Purpose:
+		Clear scraped documents and their derived processing state.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	initialize_web_state( )
 	st.session_state[ 'web_documents' ] = [ ]
 	st.session_state[ 'web_document_url' ] = ''
@@ -2755,7 +2786,14 @@ def clear_web_state( ) -> None:
 	st.session_state[ 'web_embedding_model_path_used' ] = ''
 
 def render_web_document_processing( ) -> None:
-	"""Render Foo-style Site Crawler document processing."""
+	"""Render Foo-style Site Crawler document processing.
+
+	Purpose:
+		Render the site crawler with document processing tabs and controls.
+
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
+	"""
 	initialize_web_state( )
 	st.subheader( '🕷️ Site Crawler' )
 	st.divider( )
@@ -2894,37 +2932,33 @@ def render_web_document_processing( ) -> None:
 				st.data_editor( pd.DataFrame( rows ), use_container_width=True, hide_index=True )
 
 def clear_loader_documents( loader_name: str ) -> int:
-	"""
-		Purpose:
-		--------
+	"""Clear the active loader's documents from session state.
+
+	Purpose:
 		Remove documents owned by one loader and return the remaining document count.
 
-		Parameters:
-		-----------
+	Args:
 		loader_name (str): Loader metadata name to clear.
 
-		Returns:
-		--------
-		int: Number of documents remaining in shared loading state.
+	Returns:
+		int: Value produced by this operation.
 	"""
 	throw_if( 'loader_name', loader_name )
 	clear_if_active( loader_name )
 	return len( st.session_state.get( 'documents', [ ] ) or [ ] )
 
 def promote_loader_documents( documents: List[ Document ], loader_name: str ) -> int:
-	"""
-		Purpose:
-		--------
+	"""Promote newly loaded documents into the shared processing state.
+
+	Purpose:
 		Promote loader output into shared document-processing state.
 
-		Parameters:
-		-----------
-		documents (List[Document]): Documents returned by the loader.
+	Args:
+		documents (List[ Document ]): Documents returned by the loader.
 		loader_name (str): Loader metadata name assigned to promoted documents.
 
-		Returns:
-		--------
-		int: Number of documents promoted.
+	Returns:
+		int: Value produced by this operation.
 	"""
 	throw_if( 'documents', documents )
 	throw_if( 'loader_name', loader_name )
@@ -2954,6 +2988,20 @@ def promote_loader_documents( documents: List[ Document ], loader_name: str ) ->
 # ------------- GEN AI
 
 def _model_selector( key_prefix: str, label: str, options: list[ str ], default_model: str ) -> str:
+	"""Render a provider model selector supporting custom model names.
+
+	Purpose:
+		Render a provider model selector supporting custom model names.
+
+	Args:
+		key_prefix (str): Streamlit widget key namespace.
+		label (str): Widget label.
+		options (list[ str ]): Supported model names.
+		default_model (str): Default model selection.
+
+	Returns:
+		str: Value produced by this operation.
+	"""
 	base_options = options[ : ]
 	if "Custom..." not in base_options:
 		base_options.append( "Custom..." )
@@ -2969,21 +3017,19 @@ def _model_selector( key_prefix: str, label: str, options: list[ str ], default_
 	return selected
 
 def invoke_provider( provider: object, prompt: str, parameters: Dict[ str, object ] ) -> object:
-	"""
-		Purpose:
-		--------
-		Invoke a provider's text-generation method using only parameters declared by the
-		provider method signature.
+	"""Call a provider's text-generation method using supported arguments.
 
-		Parameters:
-		-----------
+	Purpose:
+		Invoke a provider's text-generation method using only parameters declared by the provider method
+		signature.
+
+	Args:
 		provider (object): Provider wrapper instance.
 		prompt (str): Prompt submitted to the provider.
-		parameters (Dict[str, object]): Candidate provider parameters.
+		parameters (Dict[ str, object ]): Candidate provider parameters.
 
-		Returns:
-		--------
-		object: Provider response.
+	Returns:
+		object: Value produced by this operation.
 	"""
 	throw_if( 'provider', provider )
 	throw_if( 'prompt', prompt )
@@ -3004,38 +3050,29 @@ def invoke_provider( provider: object, prompt: str, parameters: Dict[ str, objec
 # ------------- DATASET UTILITIES
 
 def has_loaded_dataset( df_frame: object ) -> bool:
-	"""
-		Purpose:
-		--------
+	"""Determine whether a valid nonempty DataFrame is loaded.
+
+	Purpose:
 		Determine whether an object is a valid loaded dataframe.
 
-		Parameters:
-		-----------
-		df_frame ( object ): Candidate dataframe object.
+	Args:
+		df_frame (object): Candidate dataframe object.
 
-		Returns:
-		--------
-		bool:
-			True when the object is a non-empty dataframe with at least one column.
+	Returns:
+		bool: True when the condition holds; otherwise False.
 	"""
 	return ( isinstance( df_frame, pd.DataFrame )
 			and not df_frame.empty
 			and len( df_frame.columns ) > 0 )
 
 def get_loaded_dataset( ) -> pd.DataFrame | None:
-	"""
-		Purpose:
-		--------
+	"""Return a copy of the active dataset when available.
+
+	Purpose:
 		Return the currently loaded dataset from session state when valid.
 
-		Parameters:
-		-----------
-		None
-
-		Returns:
-		--------
-		pd.DataFrame | None:
-			Copy of the loaded dataset, or None when no valid dataset exists.
+	Returns:
+		pd.DataFrame | None: Value produced by this operation.
 	"""
 	df_frame = st.session_state.get( 'df_dataset', None )
 	if not has_loaded_dataset( df_frame ):
@@ -3044,19 +3081,17 @@ def get_loaded_dataset( ) -> pd.DataFrame | None:
 	return df_frame.copy( )
 
 def store_loaded_dataset( df_dataset: pd.DataFrame, df_original: pd.DataFrame | None=None ) -> None:
-	"""
-		Purpose:
-		--------
+	"""Store the active dataset and its original copy in session state.
+
+	Purpose:
 		Persist a successfully loaded dataset to session state.
 
-		Parameters:
-		-----------
-		df_dataset ( pd.DataFrame ): Loaded dataset.
-		df_original ( pd.DataFrame | None ): Optional original copy.
+	Args:
+		df_dataset (pd.DataFrame): Loaded dataset.
+		df_original (pd.DataFrame | None): Optional original copy.
 
-		Returns:
-		--------
-		None
+	Returns:
+		None: Updates the application UI, session state, or other state as described.
 	"""
 	if not has_loaded_dataset( df_dataset ):
 		return
@@ -8173,9 +8208,30 @@ elif mode == 'Public Health':
 			st.caption( 'API', help=cfg.CENSUS_DATA )
 			
 			def _clear_census_state( ) -> None:
+				"""
+				clear census state.
+
+				Purpose:
+					clear census state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'census_clear_request' ] = True
 			
 			def _validate_census_year( value: object ) -> str:
+				"""
+				validate census year.
+
+				Purpose:
+					validate census year.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				if not re.fullmatch( r'\d{4}', text ):
 					raise ValueError( 'Year must be a four-digit Census API vintage year.' )
@@ -8183,6 +8239,18 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_census_dataset( value: object ) -> str:
+				"""
+				validate census dataset.
+
+				Purpose:
+					validate census dataset.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).strip( '/' )
 				if not text:
 					raise ValueError( 'Dataset is required.' )
@@ -8195,6 +8263,18 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_census_fields( value: object ) -> str:
+				"""
+				validate census fields.
+
+				Purpose:
+					validate census fields.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -8213,6 +8293,20 @@ elif mode == 'Public Health':
 			
 			def _validate_census_geography_clause( name: str,
 			                                       value: object, required: bool = False ) -> str:
+				"""
+				validate census geography clause.
+
+				Purpose:
+					validate census geography clause.
+
+				Args:
+					name (str): Name of the required argument.
+					value (object): Value to validate or process.
+					required (bool): Value used by this operation.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -8329,9 +8423,30 @@ elif mode == 'Public Health':
 			SOCRATA_CDC_DOMAINS = [ 'data.cdc.gov', 'chronicdata.cdc.gov' ]
 			
 			def _clear_socrata_state( ) -> None:
+				"""
+				clear socrata state.
+
+				Purpose:
+					clear socrata state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'socrata_clear_request' ] = True
 			
 			def _validate_socrata_dataset_id( value: object ) -> str:
+				"""
+				validate socrata dataset id.
+
+				Purpose:
+					validate socrata dataset id.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
 				
 				if not text:
@@ -8470,9 +8585,30 @@ elif mode == 'Public Health':
 			HEALTHDATA_DOMAINS = [ 'healthdata.gov' ]
 			
 			def _clear_healthdata_state( ) -> None:
+				"""
+				clear healthdata state.
+
+				Purpose:
+					clear healthdata state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'healthdata_clear_request' ] = True
 			
 			def _validate_healthdata_dataset_id( value: object ) -> str:
+				"""
+				validate healthdata dataset id.
+
+				Purpose:
+					validate healthdata dataset id.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
 				
 				if not text:
@@ -8614,9 +8750,30 @@ elif mode == 'Public Health':
 			WHO_FORMATS = [ 'json', 'xml', 'csv', 'csv&profile=text', 'csv&profile=verbose' ]
 			
 			def _clear_who_state( ) -> None:
+				"""
+				clear who state.
+
+				Purpose:
+					clear who state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'who_clear_request' ] = True
 			
 			def _validate_who_query_path( value: object ) -> str:
+				"""
+				validate who query path.
+
+				Purpose:
+					validate who query path.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).lstrip( '/' )
 				
 				if not text:
@@ -8734,9 +8891,30 @@ elif mode == 'Public Health':
 			                     'Custom...' ]
 			
 			def _clear_un_state( ) -> None:
+				"""
+				clear un state.
+
+				Purpose:
+					clear un state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'un_clear_request' ] = True
 			
 			def _validate_un_query_path( value: object ) -> str:
+				"""
+				validate un query path.
+
+				Purpose:
+					validate un query path.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).lstrip( '/' )
 				
 				if not text:
@@ -8843,9 +9021,30 @@ elif mode == 'Public Health':
 			                           'data/pop/wpgp?iso3=BRA', 'Custom...' ]
 			
 			def _clear_worldpop_state( ) -> None:
+				"""
+				clear worldpop state.
+
+				Purpose:
+					clear worldpop state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'worldpop_clear_request' ] = True
 			
 			def _validate_worldpop_query( value: object ) -> str:
+				"""
+				validate worldpop query.
+
+				Purpose:
+					validate worldpop query.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -8854,6 +9053,18 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_worldpop_asset_path( value: object ) -> str:
+				"""
+				validate worldpop asset path.
+
+				Purpose:
+					validate worldpop asset path.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).lstrip( '/' )
 				
 				if not text:
@@ -8992,9 +9203,30 @@ elif mode == 'Public Health':
 			                    'D171', 'D172', 'D173', 'D174', 'D175', 'Other' ]
 			
 			def _clear_wonder_state( ) -> None:
+				"""
+				clear wonder state.
+
+				Purpose:
+					clear wonder state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'wonder_clear_request' ] = True
 			
 			def _validate_wonder_dataset_id( value: object ) -> str:
+				"""
+				validate wonder dataset id.
+
+				Purpose:
+					validate wonder dataset id.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).upper( )
 				
 				if not text:
@@ -9008,6 +9240,18 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_wonder_xml( value: object ) -> str:
+				"""
+				validate wonder xml.
+
+				Purpose:
+					validate wonder xml.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -9112,6 +9356,15 @@ elif mode == 'Public Health':
 		with st.expander( label='Pub Med Search', icon='🏥', expanded=False ):
 			st.caption( 'API', help=cfg.PUB_MED_SEARCH_LOADER )
 			def _clear_pubmed_state( ) -> None:
+				"""
+				clear pubmed state.
+
+				Purpose:
+					clear pubmed state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'pubmed_clear_request' ] = True
 			
 			if 'pubmed_results' not in st.session_state:
@@ -9181,9 +9434,30 @@ elif mode == 'Public Health':
 			                      'data.nashville.gov', 'Other' ]
 			
 			def _clear_open_city_state( ) -> None:
+				"""
+				clear open city state.
+
+				Purpose:
+					clear open city state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'open_city_clear_request' ] = True
 			
 			def _validate_open_city_domain( value: object ) -> str:
+				"""
+				validate open city domain.
+
+				Purpose:
+					validate open city domain.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).lower( )
 				text = text.replace( 'https://', '' ).replace( 'http://', '' )
 				text = text.strip( '/' )
@@ -9201,6 +9475,18 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_open_city_dataset_id( value: object ) -> str:
+				"""
+				validate open city dataset id.
+
+				Purpose:
+					validate open city dataset id.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					str: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
 				
 				if not text:
@@ -9992,16 +10278,15 @@ elif mode == 'Artificial Intelligence':
 		"""Promote a provider response into the shared generation document state.
 
 		Purpose:
-		    Converts the active provider response into LangChain documents used by the shared
-		    right-column viewer while retaining the original response object for provider-specific
-		    rendering.
+			Converts the active provider response into LangChain documents used by the shared right-column
+			viewer while retaining the original response object for provider-specific rendering.
 
 		Args:
-		    provider (str): Name of the provider that generated the response.
-		    result (Any): Response returned by the provider wrapper.
+			provider (str): Name of the provider that generated the response.
+			result (Any): Response returned by the provider wrapper.
 
 		Returns:
-		    None: This function updates Streamlit session state.
+			None: Updates the application UI, session state, or other state as described.
 		"""
 		if not str( provider or '' ).strip( ):
 			raise ValueError( 'Provider cannot be empty.' )
@@ -10039,15 +10324,14 @@ elif mode == 'Artificial Intelligence':
 		"""Clear the shared generation result for the active provider.
 
 		Purpose:
-		    Removes the shared generated document only when the provider being cleared currently
-		    owns
-		    the active result.
+			Removes the shared generated document only when the provider being cleared currently owns the
+			active result.
 
 		Args:
-		    provider (str): Name of the provider whose controls are being cleared.
+			provider (str): Name of the provider whose controls are being cleared.
 
 		Returns:
-		    None: This function updates Streamlit session state.
+			None: Updates the application UI, session state, or other state as described.
 		"""
 		if st.session_state.get( 'generation_active_source', '' ) != provider:
 			return
@@ -10071,10 +10355,31 @@ elif mode == 'Artificial Intelligence':
 			CHAT_REASONING_EFFORTS = [ 'minimal', 'low', 'medium', 'high' ]
 			
 			def _clear_chat_state( ) -> None:
+				"""
+				clear chat state.
+
+				Purpose:
+					clear chat state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'chat_clear_request' ] = True
 				_clear_generation_result( 'ChatGPT' )
 			
 			def _normalize_chat_domains( value: object ) -> list[ str ]:
+				"""
+				normalize chat domains.
+
+				Purpose:
+					normalize chat domains.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					list[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -10296,10 +10601,31 @@ elif mode == 'Artificial Intelligence':
 			GROK_REASONING_EFFORTS = [ 'none', 'low', 'medium', 'high' ]
 			
 			def _clear_grok_state( ) -> None:
+				"""
+				clear grok state.
+
+				Purpose:
+					clear grok state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'grok_clear_request' ] = True
 				_clear_generation_result( 'Grok' )
 			
 			def _normalize_grok_domains( value: object ) -> list[ str ]:
+				"""
+				normalize grok domains.
+
+				Purpose:
+					normalize grok domains.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					list[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -10335,6 +10661,18 @@ elif mode == 'Artificial Intelligence':
 				return values
 			
 			def _normalize_grok_stop_lines( value: object ) -> List[ str ]:
+				"""
+				normalize grok stop lines.
+
+				Purpose:
+					normalize grok stop lines.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					List[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' )
 				if not text.strip( ):
 					return [ ]
@@ -10541,39 +10879,31 @@ elif mode == 'Artificial Intelligence':
 		# ---- Expander Claude
 		with st.expander( label='Claude', expanded=False ):
 			def _clear_claude_state( ) -> None:
-				'''
-					Purpose:
-					--------
+				"""
+				clear claude state.
+
+				Purpose:
 					Flag the Claude generation state for reset on the next rerun.
 
-					Parameters:
-					-----------
-					None
-
-					Returns:
-					--------
-					None
-				'''
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'claude_clear_request' ] = True
 				_clear_generation_result( 'Claude' )
 			
 			def _normalize_claude_domains( value: object ) -> list[ str ]:
-				'''
-					Purpose:
-					--------
-					Normalize newline-, comma-, or semicolon-delimited Claude web-search
-					domain entries.
+				"""
+				normalize claude domains.
 
-					Parameters:
-					-----------
-					value (object):
-						Domain text supplied by the user.
+				Purpose:
+					Normalize newline-, comma-, or semicolon-delimited Claude web-search domain entries.
 
-					Returns:
-					--------
-					list[str]:
-						Canonical, de-duplicated domain names.
-				'''
+				Args:
+					value (object): Domain text supplied by the user.
+
+				Returns:
+					list[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -10609,21 +10939,18 @@ elif mode == 'Artificial Intelligence':
 				return values
 			
 			def _normalize_claude_stop_lines( value: object ) -> list[ str ]:
-				'''
-					Purpose:
-					--------
+				"""
+				normalize claude stop lines.
+
+				Purpose:
 					Normalize stop sequences entered one per line.
 
-					Parameters:
-					-----------
-					value (object):
-						Stop-sequence textarea value.
+				Args:
+					value (object): Stop-sequence textarea value.
 
-					Returns:
-					--------
-					list[str]:
-						Non-empty stop sequences.
-				'''
+				Returns:
+					list[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' )
 				
 				if not text.strip( ):
@@ -10806,10 +11133,31 @@ elif mode == 'Artificial Intelligence':
 			GEMINI_THINKING_LEVELS = [ 'minimal', 'low', 'medium', 'high' ]
 			
 			def _clear_gemini_state( ) -> None:
+				"""
+				clear gemini state.
+
+				Purpose:
+					clear gemini state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'gemini_clear_request' ] = True
 				_clear_generation_result( 'Gemini' )
 			
 			def _normalize_gemini_domains( value: object ) -> list[ str ]:
+				"""
+				normalize gemini domains.
+
+				Purpose:
+					normalize gemini domains.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					list[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' ).strip( )
 				
 				if not text:
@@ -10845,6 +11193,18 @@ elif mode == 'Artificial Intelligence':
 				return values
 			
 			def _normalize_gemini_stop_lines( value: object ) -> list[ str ]:
+				"""
+				normalize gemini stop lines.
+
+				Purpose:
+					normalize gemini stop lines.
+
+				Args:
+					value (object): Value to validate or process.
+
+				Returns:
+					list[ str ]: Value produced by this operation.
+				"""
 				text = str( value or '' )
 				
 				if not text.strip( ):
@@ -11065,6 +11425,15 @@ elif mode == 'Artificial Intelligence':
 		# ---- Expander Mistral
 		with st.expander( label='Mistral', expanded=False ):
 			def _clear_mistral_state( ) -> None:
+				"""
+				clear mistral state.
+
+				Purpose:
+					clear mistral state.
+
+				Returns:
+					None: Updates the application UI, session state, or other state as described.
+				"""
 				st.session_state[ 'mistral_clear_request' ] = True
 				_clear_generation_result( 'Mistral' )
 			
