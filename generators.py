@@ -1884,7 +1884,7 @@ class Claude( Generator ):
 			return _values
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = '_normalize_domains( self, domains: Any ) -> List[ str ]'
 			Logger( ).write( exception )
@@ -1965,7 +1965,7 @@ class Claude( Generator ):
 			return str( response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = 'extract_text( self, response: Any ) -> str'
 			Logger( ).write( exception )
@@ -2075,7 +2075,7 @@ class Claude( Generator ):
 			return self.extract_text( self.response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = 'fetch( self, **args ) -> str | None'
 			Logger( ).write( exception )
@@ -2121,7 +2121,7 @@ class Claude( Generator ):
 				blocked_domains=blocked_domains, )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = 'generate_text( self, query: str, ... ) -> str | None'
 			Logger( ).write( exception )
@@ -2165,7 +2165,7 @@ class Claude( Generator ):
 				web_search=True, search_domains=search_domains, blocked_domains=blocked_domains, )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = 'search_web( self, query: str, ... ) -> str | None'
 			Logger( ).write( exception )
@@ -2316,7 +2316,7 @@ class Mistral( Generator ):
 			return str( response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Mistral'
 			exception.method = 'extract_text( self, response: Any ) -> str'
 			Logger( ).write( exception )
@@ -2376,14 +2376,14 @@ class Mistral( Generator ):
 			return self.extract_text( self.response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Mistral'
 			exception.method = 'fetch( self, *args ) -> str | None'
 			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
+			description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create schema.
 
 		Purpose:
@@ -2394,7 +2394,7 @@ class Mistral( Generator ):
 		    tool (str): Service or tool name referenced by the generated schema.
 		    description (str): Human-readable explanation embedded in the generated schema.
 		    parameters (dict): JSON Schema property definitions for the tool arguments.
-		    required (list[str]): Argument names that callers must supply to the generated tool.
+		    required (list[str] | None): Required argument names; None includes all schema properties.
 
 		Returns:
 		    Dict[str, str] | None: Dictionary containing normalized provider data, configuration, metadata, or generated schema content.
@@ -2429,9 +2429,9 @@ class Mistral( Generator ):
 			return _schema
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Mistral'
-			exception.method = ('create_schema( self, **kwargs ) -> Dict[ str, str ]')
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None'
 			Logger( ).write( exception )
 			raise exception
 
