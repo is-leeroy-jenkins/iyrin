@@ -109,19 +109,71 @@ class BaseCache( ):
 	"""
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
-		raise NotImplementedError
+		"""Retrieve an entry by its cache key.
+
+		Purpose:
+			Retrieve an entry by its cache key.
+
+		Args:
+			key (str): Cache key identifying the record.
+
+		Returns:
+			Optional[ Dict[ str, Any ] ]: Result of the get operation.
+		"""raise NotImplementedError
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
-		raise NotImplementedError
+		"""Store a key/value pair with an optional time-to-live.
+
+		Purpose:
+			Store a key/value pair with an optional time-to-live.
+
+		Args:
+			key (str): Cache key identifying the record.
+			value (Dict[ str, Any ]): Value or user-entered filter value.
+			ttl (Optional[ int ]): Optional time-to-live in seconds.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""raise NotImplementedError
 	
 	def delete( self, key: str ) -> None:
-		raise NotImplementedError
+		"""Remove a cache entry.
+
+		Purpose:
+			Remove a cache entry.
+
+		Args:
+			key (str): Cache key identifying the record.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""raise NotImplementedError
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
-		raise NotImplementedError
+		"""Clear entries matching an optional namespace.
+
+		Purpose:
+			Clear entries matching an optional namespace.
+
+		Args:
+			namespace (Optional[ str ]): Optional cache namespace.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""raise NotImplementedError
 	
 	def contains( self, key: str ) -> bool:
-		try:
+		"""Determine whether a cache entry exists.
+
+		Purpose:
+			Determine whether a cache entry exists.
+
+		Args:
+			key (str): Cache key identifying the record.
+
+		Returns:
+			bool: Result of the contains operation.
+		"""try:
 			throw_if( 'key', key )
 			return self.get( key ) is not None
 		except Exception as e:
@@ -162,7 +214,14 @@ class BaseCache( ):
 			raise exception
 			
 	def stats( self ) -> Dict[ str, Any ]:
-		raise NotImplementedError
+		"""Return cache usage and diagnostic statistics.
+
+		Purpose:
+			Return cache usage and diagnostic statistics.
+
+		Returns:
+			Dict[ str, Any ]: Result of the stats operation.
+		"""raise NotImplementedError
 
 class InMemoryCache( BaseCache ):
 	"""InMemoryCache persistence interface.
@@ -184,7 +243,14 @@ class InMemoryCache( BaseCache ):
 	deletes: int
 	
 	def __init__( self ) -> None:
-		self.store = { }
+		"""Initialize empty cache records and operation counters.
+
+		Purpose:
+			Initialize empty cache records and operation counters.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""self.store = { }
 		self.hits = 0
 		self.misses = 0
 		self.sets = 0
@@ -470,7 +536,17 @@ class SQLiteCache( BaseCache ):
 	connection: sqlite3.Connection
 	
 	def __init__( self, path: str = 'mappy_cache.sqlite' ) -> None:
-		self.path = path
+		"""Open the SQLite cache file and initialize its schema.
+
+		Purpose:
+			Open the SQLite cache file and initialize its schema.
+
+		Args:
+			path (str): SQLite database filename.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""self.path = path
 		d = os.path.dirname( self.path )
 		if d:
 			os.makedirs( d, exist_ok=True )
@@ -573,6 +649,10 @@ class SQLiteCache( BaseCache ):
 			Args:
 				key (str): Cached value or None.
 
+		
+
+		Returns:
+			Optional[ Dict[ str, Any ] ]: Result of the get operation.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -807,20 +887,51 @@ class SQLiteDatabase( ):
 	"""
 	
 	def __init__( self ) -> None:
-		self.db_path = cfg.DB_PATH
+		"""Initialize the configured SQLite database path.
+
+		Purpose:
+			Initialize the configured SQLite database path.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""self.db_path = cfg.DB_PATH
 
 	def create_connection( self ) -> sqlite3.Connection:
-		self.db_path = cfg.DB_PATH
+		"""Open a connection to the configured SQLite database.
+
+		Purpose:
+			Open a connection to the configured SQLite database.
+
+		Returns:
+			sqlite3.Connection: Result of the create connection operation.
+		"""self.db_path = cfg.DB_PATH
 		return sqlite3.connect( self.db_path )
 	
 	def list_tables( self ) -> List[ str ]:
-		with self.create_connection( ) as conn:
+		"""List the tables present in the configured SQLite database.
+
+		Purpose:
+			List the tables present in the configured SQLite database.
+
+		Returns:
+			List[ str ]: Result of the list tables operation.
+		"""with self.create_connection( ) as conn:
 			_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
 			rows = conn.execute( _query ).fetchall( )
 			return [ r[ 0 ] for r in rows ]
 	
 	def create_schema( self, table: str ) -> List[ Tuple ]:
-		with self.create_connection( ) as conn:
+		"""Read the column metadata of a SQLite table.
+
+		Purpose:
+			Read the column metadata of a SQLite table.
+
+		Args:
+			table (str): SQLite table name.
+
+		Returns:
+			List[ Tuple ]: Result of the create schema operation.
+		"""with self.create_connection( ) as conn:
 			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
 	
 	def read_table( self, table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
@@ -922,7 +1033,17 @@ class SQLiteDatabase( ):
 		st.markdown( fallback_df.to_html( index=False, escape=True ), unsafe_allow_html=True )
 	
 	def make_display_safe( self, df: pd.DataFrame ) -> pd.DataFrame:
-		display_df = df.copy( )
+		"""Return a DataFrame with values suitable for Streamlit rendering.
+
+		Purpose:
+			Return a DataFrame with values suitable for Streamlit rendering.
+
+		Args:
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			pd.DataFrame: Result of the make display safe operation.
+		"""display_df = df.copy( )
 		for col in display_df.columns:
 			display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
 		return display_df
@@ -935,6 +1056,10 @@ class SQLiteDatabase( ):
 			Args:
 			table : str
 				Table name.
+		
+
+		Returns:
+			None: Completes the operation through side effects.
 		"""
 		if not table:
 			return
@@ -959,6 +1084,10 @@ class SQLiteDatabase( ):
 				Table name.
 			column : str
 				Column name to index.
+		
+
+		Returns:
+			None: Completes the operation through side effects.
 		"""
 		if not table or not column:
 			return
@@ -988,7 +1117,17 @@ class SQLiteDatabase( ):
 			conn.commit( )
 	
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
-		st.subheader( 'Advanced Filters' )
+		"""Render advanced DataFrame filters and return the filtered rows.
+
+		Purpose:
+			Render advanced DataFrame filters and return the filtered rows.
+
+		Args:
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			pd.DataFrame: Result of the apply filters operation.
+		"""st.subheader( 'Advanced Filters' )
 		conditions = [ ]
 		col1, col2, col3 = st.columns( 3 )
 		column = col1.selectbox( 'Column', df.columns )
@@ -1012,7 +1151,17 @@ class SQLiteDatabase( ):
 		return df
 	
 	def create_aggregation( self, df: pd.DataFrame ):
-		st.subheader( 'Aggregation Engine' )
+		"""Calculate and display a selected numeric aggregation.
+
+		Purpose:
+			Calculate and display a selected numeric aggregation.
+
+		Args:
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			Any: Result of the create aggregation operation.
+		"""st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
 		if not numeric_cols:
 			st.info( 'No numeric columns available.' )
@@ -1148,7 +1297,18 @@ class SQLiteDatabase( ):
 			st.plotly_chart( fig, use_container_width=True )
 	
 	def convert_dataframe( self, table_name: str, df: pd.DataFrame ):
-		columns = [ ]
+		"""Create a SQLite table from the DataFrame's column types.
+
+		Purpose:
+			Create a SQLite table from the DataFrame's column types.
+
+		Args:
+			table_name (str): SQLite table name.
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			Any: Result of the convert dataframe operation.
+		"""columns = [ ]
 		for col in df.columns:
 			sql_type = self.get_sqlite_type( df[ col ].dtype )
 			safe_col = col.replace( ' ', '_' )
@@ -1159,7 +1319,18 @@ class SQLiteDatabase( ):
 			conn.commit( )
 	
 	def insert_data( self, table_name: str, df: pd.DataFrame ):
-		df = df.copy( )
+		"""Insert a DataFrame's rows into a SQLite table.
+
+		Purpose:
+			Insert a DataFrame's rows into a SQLite table.
+
+		Args:
+			table_name (str): SQLite table name.
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			Any: Result of the insert data operation.
+		"""df = df.copy( )
 		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
 		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
 		stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
@@ -1230,6 +1401,10 @@ class SQLiteDatabase( ):
 						"auto_increment": bool
 					}
 				]
+		
+
+		Returns:
+			None: Completes the operation through side effects.
 		"""
 		if not table_name:
 			raise ValueError( 'Table name required.' )
@@ -1271,6 +1446,13 @@ class SQLiteDatabase( ):
 				INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
 				DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
 
+		
+
+		Args:
+			query (str): SQL query or identifier to inspect.
+
+		Returns:
+			bool: Result of the is safe query operation.
 		"""
 		if not query or not isinstance( query, str ):
 			return False
@@ -1312,6 +1494,13 @@ class SQLiteDatabase( ):
 			- Ensures it starts with a letter or underscore
 			- Prevents empty names
 
+		
+
+		Args:
+			name (str): Original identifier to sanitize.
+
+		Returns:
+			str: Result of the create identifier operation.
 		"""
 		if not name or not isinstance( name, str ):
 			raise ValueError( 'Invalid Identifier.' )
@@ -1323,12 +1512,34 @@ class SQLiteDatabase( ):
 		return safe
 	
 	def get_indexes( self, table: str ):
-		with self.create_connection( ) as conn:
+		"""Return index metadata for a SQLite table.
+
+		Purpose:
+			Return index metadata for a SQLite table.
+
+		Args:
+			table (str): SQLite table name.
+
+		Returns:
+			Any: Result of the get indexes operation.
+		"""with self.create_connection( ) as conn:
 			rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
 			return rows
 	
 	def add_column( self, table: str, column: str, col_type: str ):
-		column = self.create_identifier( column )
+		"""Add a typed column to an existing SQLite table.
+
+		Purpose:
+			Add a typed column to an existing SQLite table.
+
+		Args:
+			table (str): SQLite table name.
+			column (str): SQLite column name.
+			col_type (str): SQLite column type.
+
+		Returns:
+			Any: Result of the add column operation.
+		"""column = self.create_identifier( column )
 		col_type = col_type.upper( )
 		with self.create_connection( ) as conn:
 			conn.execute( f'ALTER TABLE "{table}" ADD COLUMN "{column}" {col_type};' )
@@ -1420,7 +1631,17 @@ class SQLiteDatabase( ):
 			conn.commit( )
 	
 	def create_profile_table( self, table: str ):
-		df = self.read_table( table )
+		"""Build column-level descriptive statistics for a table.
+
+		Purpose:
+			Build column-level descriptive statistics for a table.
+
+		Args:
+			table (str): SQLite table name.
+
+		Returns:
+			Any: Result of the create profile table operation.
+		"""df = self.read_table( table )
 		profile_rows = [ ]
 		total_rows = len( df )
 		for col in df.columns:
@@ -1443,7 +1664,18 @@ class SQLiteDatabase( ):
 		return pd.DataFrame( profile_rows )
 	
 	def drop_column( self, table: str, column: str ):
-		if not table or not column:
+		"""Remove a column while rebuilding the table and restoring indexes.
+
+		Purpose:
+			Remove a column while rebuilding the table and restoring indexes.
+
+		Args:
+			table (str): SQLite table name.
+			column (str): SQLite column name.
+
+		Returns:
+			Any: Result of the drop column operation.
+		"""if not table or not column:
 			raise ValueError( 'Table and column required.' )
 		with self.create_connection( ) as conn:
 			# ------------------------------------------------------------
@@ -1579,7 +1811,14 @@ class ChromaStore( ):
 	"""
 
 	def __init__( self ) -> None:
-		"""Initialize Chroma storage state."""
+		"""Initialize Chroma vector storage state without connecting to a provider.
+
+		Purpose:
+			Initialize Chroma vector storage state without connecting to a provider.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		self.documents: List[ Document ] = [ ]
 		self.embedder: Embeddings | None = None
 		self.collection_name = ''
@@ -1588,7 +1827,20 @@ class ChromaStore( ):
 
 	def create( self, documents: List[ Document ], embedder: Embeddings,
 		collection_name: str, persist_directory: str ) -> Chroma:
-		"""Add documents to a persistent Chroma collection without deleting existing records."""
+		"""Store LangChain document chunks in a persistent Chroma collection.
+
+		Purpose:
+			Store LangChain document chunks in a persistent Chroma collection.
+
+		Args:
+			documents (List[ Document ]): LangChain documents for vector storage.
+			embedder (Embeddings): LangChain embedding implementation.
+			collection_name (str): Chroma collection name.
+			persist_directory (str): Chroma persistence directory.
+
+		Returns:
+			Chroma: Result of the create operation.
+		"""
 		try:
 			throw_if( 'documents', documents )
 			throw_if( 'embedder', embedder )
@@ -1639,7 +1891,14 @@ class PineconeStore( ):
 	"""
 
 	def __init__( self ) -> None:
-		"""Initialize Pinecone storage state without importing Pinecone."""
+		"""Initialize Pinecone vector storage state without connecting to a provider.
+
+		Purpose:
+			Initialize Pinecone vector storage state without connecting to a provider.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		self.documents: List[ Document ] = [ ]
 		self.embedder: Embeddings | None = None
 		self.index_name = ''
@@ -1650,7 +1909,21 @@ class PineconeStore( ):
 
 	def create( self, documents: List[ Document ], embedder: Embeddings, index_name: str,
 		namespace: str, api_key: str ) -> Any:
-		"""Populate an existing Pinecone index."""
+		"""Store LangChain document chunks in an existing Pinecone index.
+
+		Purpose:
+			Store LangChain document chunks in an existing Pinecone index.
+
+		Args:
+			documents (List[ Document ]): LangChain documents for vector storage.
+			embedder (Embeddings): LangChain embedding implementation.
+			index_name (str): Existing Pinecone index name.
+			namespace (str): Optional cache namespace.
+			api_key (str): Pinecone API credential.
+
+		Returns:
+			Any: Result of the create operation.
+		"""
 		try:
 			throw_if( 'documents', documents )
 			throw_if( 'embedder', embedder )
