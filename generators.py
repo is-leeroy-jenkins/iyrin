@@ -573,10 +573,18 @@ class Grok( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'output_text' ) and response.output_text:
+			try:
+				available_output_text = response.output_text
+			except AttributeError:
+				available_output_text = None
+			if available_output_text:
 				return str( response.output_text )
 			
-			if hasattr( response, 'text' ) and response.text:
+			try:
+				available_text = response.text
+			except AttributeError:
+				available_text = None
+			if available_text:
 				return str( response.text )
 			
 			if isinstance( response, dict ):
@@ -1469,7 +1477,11 @@ class Gemini( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'text' ) and response.text:
+			try:
+				available_text = response.text
+			except AttributeError:
+				available_text = None
+			if available_text:
 				return str( response.text )
 			
 			if isinstance( response, dict ):
@@ -1911,7 +1923,11 @@ class Claude( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'content' ) and response.content:
+			try:
+				available_content = response.content
+			except AttributeError:
+				available_content = None
+			if available_content:
 				_parts = [ ]
 				for _block in response.content:
 					try:
@@ -2240,7 +2256,11 @@ class Mistral( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'choices' ) and response.choices:
+			try:
+				available_choices = response.choices
+			except AttributeError:
+				available_choices = None
+			if available_choices:
 				choice = response.choices[ 0 ]
 				
 				if hasattr( choice, 'message' ) and choice.message is not None:
@@ -2802,7 +2822,11 @@ class Chat( Generator ):
 		try:
 			throw_if( 'response', response )
 			
-			if hasattr( response, 'output_text' ) and response.output_text:
+			try:
+				available_output_text = response.output_text
+			except AttributeError:
+				available_output_text = None
+			if available_output_text:
 				return str( response.output_text )
 			
 			if isinstance( response, dict ):
@@ -3061,10 +3085,18 @@ class Chat( Generator ):
 			self.response = self.client.images.generate( model='gpt-image-1',
 				prompt=self.input_text, size='1024x1024' )
 			
-			if hasattr( self.response, 'data' ) and self.response.data:
+			try:
+				available_data = self.response.data
+			except AttributeError:
+				available_data = None
+			if available_data:
 				image = self.response.data[ 0 ]
 				
-				if hasattr( image, 'url' ) and image.url:
+				try:
+					available_url = image.url
+				except AttributeError:
+					available_url = None
+				if available_url:
 					return image.url
 			
 			return str( self.response )
@@ -3337,7 +3369,11 @@ class Chat( Generator ):
 		Returns:
 		    List[str]: Ordered values or records produced by the operation.
 		"""
-		if hasattr( cfg, 'GPT_MODELS' ) and cfg.GPT_MODELS:
+		try:
+			available_GPT_MODELS = cfg.GPT_MODELS
+		except AttributeError:
+			available_GPT_MODELS = None
+		if available_GPT_MODELS:
 			return list( cfg.GPT_MODELS )
 		
 		return [ 'gpt-5.4', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-5.1', 'gpt-5.2', 'gpt-4.1' ]
