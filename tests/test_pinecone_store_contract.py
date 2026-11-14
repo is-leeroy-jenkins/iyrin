@@ -14,13 +14,13 @@ class PineconeStoreContractTests( unittest.TestCase ):
 
     @classmethod
     def setUpClass( cls ) -> None:
-        cls.vector_source = (ROOT / 'stores' / 'vector.py').read_text(
+        cls.vector_source = (ROOT / 'storage.py').read_text(
             encoding='utf-8' )
 
     def create_store( self, index_exists: bool=True ):
         """Construct a production store with mocked provider SDK modules."""
         import ast
-        from chunk_ids import vector_document_ids
+        from embedders import vector_document_ids
 
         module = ast.parse( self.vector_source )
         store_class = next( node for node in module.body if isinstance( node, ast.ClassDef )
