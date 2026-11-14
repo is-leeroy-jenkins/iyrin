@@ -1514,8 +1514,8 @@ class TextParser( Processor ):
 			Error: Raised when validation or processing fails.
 		"""
 		try:
-			throw_if( 'src', source )
-			throw_if( 'dest', destination )
+			throw_if( 'source', source )
+			throw_if( 'destination', destination )
 			if not os.path.exists( source ):
 				raise FileNotFoundError( f'File not found: {source}' )
 			elif not os.path.exists( destination ):
@@ -1571,8 +1571,8 @@ class TextParser( Processor ):
 			Error: Raised when validation or processing fails.
 		"""
 		try:
-			throw_if( 'src', source )
-			throw_if( 'dest', destination )
+			throw_if( 'source', source )
+			throw_if( 'destination', destination )
 			if not os.path.exists( source ):
 				raise FileNotFoundError( f'File not found: {source}' )
 			elif not os.path.exists( destination ):
