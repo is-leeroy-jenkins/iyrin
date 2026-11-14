@@ -22,9 +22,9 @@ class EmptyFrame:
 
     empty = True
 
-    def __init__(self, columns: list[str] = []) -> None:
+    def __init__(self, columns: list[str] | None = None) -> None:
         """Capture optional column names for the empty-result contract."""
-        self.columns = columns
+        self.columns = columns if columns is not None else []
 
 
 class LiveWorldHistoryReplayTests(unittest.TestCase):
