@@ -1503,8 +1503,10 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		if not table_name:
-			raise ValueError( 'Table name required.' )
+		throw_if( 'table_name', table_name )
+		throw_if( 'columns', columns )
+		if not isinstance( table_name, str ) or not isinstance( columns, list ):
+			raise TypeError( 'table_name must be a string and columns a list.' )
 		# Validate identifier
 		if not re.match( r"^[A-Za-z_][A-Za-z0-9_]*$", table_name ):
 			raise ValueError( 'Invalid table name.' )
@@ -1549,7 +1551,9 @@ class SQLiteDatabase( ):
 		Returns:
 			bool: Result of the is safe query operation.
 		"""
-		if not query or not isinstance( query, str ):
+		if query is None:
+			throw_if( 'query', query )
+		if not isinstance( query, str ) or not query.strip( ):
 			return False
 		q = query.strip( ).lower( )
 		# ------------------------------------------------------------------
@@ -1605,8 +1609,9 @@ class SQLiteDatabase( ):
 		Returns:
 			str: Result of the create identifier operation.
 		"""
-		if not name or not isinstance( name, str ):
-			raise ValueError( 'Invalid Identifier.' )
+		throw_if( 'name', name )
+		if not isinstance( name, str ):
+			raise TypeError( 'name must be a string.' )
 		safe = re.sub( r'[^0-9a-zA-Z_]', '_', name.strip( ) )
 		if not re.match( r'^[A-Za-z_]', safe ):
 			safe = f'_{safe}'
@@ -2099,6 +2104,8 @@ class PineconeStore( ):
 				raise TypeError( 'embedder must implement LangChain Embeddings.' )
 			if not isinstance( index_name, str ) or not isinstance( api_key, str ):
 				raise TypeError( 'index_name and api_key must be strings.' )
+			if namespace is None:
+				throw_if( 'namespace', namespace )
 			if not isinstance( namespace, str ):
 				raise TypeError( 'namespace must be a string; empty is allowed.' )
 			self.documents = documents
