@@ -1477,13 +1477,13 @@ class TextParser( Processor ):
 				_sourcepath = filepath
 				_text = open( _sourcepath, 'r', encoding='utf-8', errors='ignore' ).read( )
 				_collapsed = self.collapse_whitespace( _text )
-				_compressed = self.compress_whitespace( _collapsed )
+				_compressed = self.collapse_whitespace( _collapsed )
 				_normalized = self.normalize_text( _compressed )
 				_encoded = self.remove_encodings( _normalized )
 				_special = self.remove_symbols( _encoded )
 				_cleaned = self.remove_fragments( _special )
-				_recompress = self.compress_whitespace( _cleaned )
-				_lemmatized = self.lemmatize_text( _recompress )
+				_recompress = self.collapse_whitespace( _cleaned )
+				_lemmatized = ' '.join( self.lemmatizer.lemmatize( token ) for token in _recompress.split( ) )
 				_stops = self.remove_stopwords( _lemmatized )
 				return _stops
 		except Exception as e:
@@ -1527,19 +1527,19 @@ class TextParser( Processor ):
 				for f in _files:
 					_processed = [ ]
 					_filename = os.path.basename( f )
-					_sourcepath = _source + '\\' + _filename
+					_sourcepath = os.path.join( _source, _filename )
 					_text = open( _sourcepath, 'r', encoding='utf-8', errors='ignore' ).read( )
 					_collapsed = self.collapse_whitespace( _text )
-					_compressed = self.compress_whitespace( _collapsed )
+					_compressed = self.collapse_whitespace( _collapsed )
 					_normalized = self.normalize_text( _compressed )
 					_encoded = self.remove_encodings( _normalized )
 					_special = self.remove_symbols( _encoded )
 					_cleaned = self.remove_fragments( _special )
-					_recompress = self.compress_whitespace( _cleaned )
-					_lemmatized = self.lemmatize_text( _recompress )
+					_recompress = self.collapse_whitespace( _cleaned )
+					_lemmatized = ' '.join( self.lemmatizer.lemmatize( token ) for token in _recompress.split( ) )
 					_stops = self.remove_stopwords( _lemmatized )
 					_sentences = self.split_sentences( _stops )
-					_destination = _destpath + '\\' + _filename
+					_destination = os.path.join( _destpath, _filename )
 					_clean = open( _destination, 'wt', encoding='utf-8', errors='ignore' )
 					_lines = ' '.join( _sentences )
 					_clean.write( _lines )

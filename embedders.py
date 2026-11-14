@@ -55,6 +55,9 @@ def chunk_identifier( document: object, position: int ) -> str:
     Returns:
     	str: Source-scoped, reproducible chunk identifier.
     """
+    throw_if( 'document', document )
+    if type( position ) is not int or position < 1:
+        raise ValueError( 'position must be a positive integer.' )
     metadata = document.metadata or { }
     source = str( metadata.get( 'source', '' ) )
     payload = f'{source}\x00{position}\x00{document.page_content}'
@@ -76,8 +79,12 @@ def vector_document_ids( documents: list[ object ] ) -> list[ str ]:
     Raises:
     	ValueError: Raised when two documents resolve to the same identifier.
     """
+    throw_if( 'documents', documents )
+    if not isinstance( documents, list ):
+        raise TypeError( 'documents must be a list.' )
     ids = [ ]
     for position, document in enumerate( documents, start=1 ):
+        throw_if( 'document', document )
         metadata = document.metadata or { }
         identifier = metadata.get( 'chunk_id' )
         ids.append( str( identifier ) if identifier else
