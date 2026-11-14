@@ -48,7 +48,8 @@ class RateLimiterTests( unittest.TestCase ):
                 with patch( 'rates.time.sleep' ) as sleep:
                     limiter.wait( )
                     limiter.wait( )
-        sleep.assert_called_once_with( 0.4 )
+        self.assertEqual( 1, sleep.call_count )
+        self.assertAlmostEqual( 0.4, sleep.call_args.args[ 0 ] )
 
     def test_disabled_limiter_does_not_sleep( self ) -> None:
         """Verify None and nonpositive rate ceilings preserve no-throttle behavior."""
