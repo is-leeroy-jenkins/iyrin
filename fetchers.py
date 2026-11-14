@@ -137,18 +137,6 @@ class Fetcher:
 		Purpose:
 			Base class for fetchers.
 
-		Legacy member listing:
-		timeout - int
-		headers - Dict[ str, Any ]
-		response - requests.Response
-		url - str
-		result - core.Result
-		query - string
-
-		Methods:
-		-----------
-		fetch( ) -> Dict[ str, Any ]
-
 		Attributes:
 			timeout (Optional[ int ]): Request timeout in seconds.
 			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
@@ -215,33 +203,6 @@ class WebFetcher( Fetcher ):
 
 		Purpose:
 			Fetches web pages with requests and extracts common HTML content structures.
-
-		Legacy member listing:
-		soup,
-		agents,
-		url,
-		html,
-		re_tag,
-		re_ws,
-		response,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		html_to_text(...): Performs the html_to_text operation for this fetcher.
-		scrape_paragraphs(...): Performs the scrape_paragraphs operation for this fetcher.
-		scrape_lists(...): Performs the scrape_lists operation for this fetcher.
-		scrape_tables(...): Performs the scrape_tables operation for this fetcher.
-		scrape_articles(...): Performs the scrape_articles operation for this fetcher.
-		scrape_headings(...): Performs the scrape_headings operation for this fetcher.
-		scrape_divisions(...): Performs the scrape_divisions operation for this fetcher.
-		scrape_sections(...): Performs the scrape_sections operation for this fetcher.
-		scrape_blockquotes(...): Performs the scrape_blockquotes operation for this fetcher.
-		scrape_hyperlinks(...): Performs the scrape_hyperlinks operation for this fetcher.
-		scrape_images(...): Performs the scrape_images operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			soup (Optional[ BeautifulSoup ]): Parsed Beautiful Soup HTML document.
@@ -824,17 +785,6 @@ class WebCrawler( WebFetcher ):
 		Purpose:
 			Extends web fetching with optional Playwright-backed page rendering.
 
-		Legacy member listing:
-		use_playwright,
-		browser_context,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		render_with_playwright(...): Performs the render_with_playwright operation for this fetcher.
-
 		Attributes:
 			use_playwright (Optional[ bool ]): Whether browser-backed retrieval is enabled.
 			browser_context (Optional[ Any ]): Configured browser session for page retrieval.
@@ -985,19 +935,6 @@ class ArXiv( Fetcher ):
 		Purpose:
 			Fetches ArXiv documents through the LangChain ArxivRetriever.
 
-		Legacy member listing:
-		fetcher,
-		documents,
-		max_documents,
-		full_documents,
-		include_metadata,
-		query,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-
 		Attributes:
 			fetcher (Optional[ ArxivRetriever ]): Provider-specific retrieval client.
 			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
@@ -1093,24 +1030,6 @@ class GoogleDrive( Fetcher ):
 
 		Purpose:
 			Fetches Google Drive documents through the LangChain GoogleDriveRetriever.
-
-		Legacy member listing:
-		fetcher,
-		documents,
-		num_results,
-		folder_id,
-		template,
-		query,
-		mime_type,
-		mode,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		mime_options(...): Performs the mime_options operation for this fetcher.
-		template_options(...): Performs the template_options operation for this fetcher.
-		mode_options(...): Performs the mode_options operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
 			fetcher (Optional[ GoogleDriveRetriever ]): Provider-specific retrieval client.
@@ -1291,19 +1210,6 @@ class Wikipedia( Fetcher ):
 
 		Purpose:
 			Fetches Wikipedia documents through the LangChain WikipediaRetriever.
-
-		Legacy member listing:
-		fetcher,
-		documents,
-		max_documents,
-		include_metadata,
-		language,
-		query,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
 			fetcher (Optional[ WikipediaRetriever ]): Provider-specific retrieval client.
@@ -1676,24 +1582,6 @@ class GoogleSearch( Fetcher ):
 
 		Purpose:
 			Fetches Google Custom Search results.
-	
-		Legacy member listing:
-		keywords,
-		url,
-		re_tag,
-		re_ws,
-		response,
-		api_key,
-		cse_id,
-		params,
-		results,
-		start,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
 			keywords (Optional[ str ]): Keywords supplied for text retrieval.
@@ -1911,28 +1799,6 @@ class GoogleMaps( Fetcher ):
 
 		Purpose:
 			Provides Google Maps geocoding, validation, and directions requests.
-
-		Legacy member listing:
-		file_path,
-		headers,
-		num_results,
-		api_key,
-		mode,
-		latitude,
-		longitude,
-		coordinates,
-		address,
-		directions,
-		params,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		geocode_location(...): Performs the geocode_location operation for this fetcher.
-		geocode_coordinates(...): Performs the geocode_coordinates operation for this fetcher.
-		validate_address(...): Performs the validate_address operation for this fetcher.
-		request_directions(...): Performs the request_directions operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			file_path (Optional[ str ]): Path of the current source or output file.
@@ -2302,30 +2168,6 @@ class GoogleWeather( Fetcher ):
 		Purpose:
 			Provides Google Weather current, forecast, and alert requests.
 
-		Legacy member listing:
-		gmaps,
-		headers,
-		api_key,
-		mode,
-		latitude,
-		longitude,
-		coordinates,
-		address,
-		params,
-		response,
-		result,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		resolve_coordinates(...): Performs the resolve_coordinates operation for this fetcher.
-		request(...): Performs the request operation for this fetcher.
-		fetch_current(...): Performs the fetch_current operation for this fetcher.
-		fetch_hourly_forecast(...): Performs the fetch_hourly_forecast operation for this fetcher.
-		fetch_daily_forecast(...): Performs the fetch_daily_forecast operation for this fetcher.
-		fetch_alerts(...): Performs the fetch_alerts operation for this fetcher.
-
 		Attributes:
 			gmaps (Optional[ GoogleMaps ]): Google Maps SDK or service client.
 			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
@@ -2623,30 +2465,6 @@ class GoogleWeather( Fetcher ):
 
 class NavalObservatory( Fetcher ):
 	'''Fetches celestial-navigation data from the U.S. Naval Observatory API.
-
-		Legacy member listing:
-		base_url,
-		url,
-		params,
-		date_value,
-		time_value,
-		latitude,
-		longitude,
-		location_label,
-		agents,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		validate_date(...): Performs the validate_date operation for this fetcher.
-		validate_time(...): Performs the validate_time operation for this fetcher.
-		validate_coordinates(...): Performs the validate_coordinates operation for this fetcher.
-		fetch_celnav(...): Performs the fetch_celnav operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
-
-	
 
 		Purpose:
 			Provides the NavalObservatory provider interface and request handling.
@@ -2995,25 +2813,6 @@ class NavalObservatory( Fetcher ):
 
 class SatelliteCenter( Fetcher ):
 	'''Fetches satellite observatory, ground-station, and location data from SSC Web Services.
-	
-		Legacy member listing:
-		ssc,
-		url,
-		params,
-		observatories,
-		ground_stations,
-		timeout,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		fetch_observatories(...): Performs the fetch_observatories operation for this fetcher.
-		fetch_ground_stations(...): Performs the fetch_ground_stations operation for this fetcher.
-		fetch_locations(...): Performs the fetch_locations operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-	
-	
 
 		Purpose:
 			Provides the SatelliteCenter provider interface and request handling.
@@ -3272,72 +3071,6 @@ class EarthObservatory( Fetcher ):
 			https://eonet.gsfc.nasa.gov/api/v3/layers
 			Optional category-specific path:
 				https://eonet.gsfc.nasa.gov/api/v3/layers/{category}
-
-		Legacy member listing:
-		base_url: Optional[str]
-			Base EONET API URL.
-
-		url: Optional[str]
-			Resolved request URL.
-
-		params: Optional[Dict[str, Any]]
-			Request parameters.
-
-		mode: Optional[str]
-			Selected API mode.
-
-		query: Optional[str]
-			Reserved generic query field.
-
-		status: Optional[str]
-			Event status filter.
-
-		category: Optional[str]
-			Event or layer category filter.
-
-		source: Optional[str]
-			Event source filter.
-
-		days: Optional[int]
-			Prior-day filter.
-
-		limit: Optional[int]
-			Returned record limit.
-
-		start_date: Optional[str]
-			Event-range start date in YYYY-MM-DD format.
-
-		end_date: Optional[str]
-			Event-range end date in YYYY-MM-DD format.
-
-		agents: Optional[str]
-			User-Agent string.
-
-		Methods:
-		--------
-		__init__() -> None
-			Initialize fetcher defaults.
-
-		__dir__() -> List[str]
-			Provide ordered member visibility.
-
-		fetch_events(...) -> Dict[str, Any] | None
-			Fetch event records.
-
-		fetch_categories() -> Dict[str, Any] | None
-			Fetch category metadata.
-
-		fetch_sources() -> Dict[str, Any] | None
-			Fetch source metadata.
-
-		fetch_layers(...) -> Dict[str, Any] | None
-			Fetch layer metadata, optionally filtered by category.
-
-		fetch(...) -> Dict[str, Any] | None
-			Unified dispatcher.
-
-		create_schema(...) -> Dict[str, str] | None
-			Construct a dynamic tool schema.
 
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
@@ -3757,33 +3490,6 @@ class EarthObservatory( Fetcher ):
 			
 class GlobalImagery( Fetcher ):
 	'''Fetches and renders global imagery and WMS map service data.
-	
-		Legacy member listing:
-		file_path,
-		api_key,
-		url,
-		latitude,
-		longitude,
-		coordinates,
-		calendar_date,
-		julian_date,
-		sidereal_time,
-		utc_time,
-		local_time,
-		params,
-		era,
-		year,
-		month,
-		day,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		fetch_map_services(...): Performs the fetch_map_services operation for this fetcher.
-		fetch_mercator_map(...): Performs the fetch_mercator_map operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
-	
-	
 
 		Purpose:
 			Provides the GlobalImagery provider interface and request handling.
@@ -3990,74 +3696,6 @@ class NearbyObjects( Fetcher ):
 			Common parameters used here:
 				- date-min
 				- limit
-
-		Legacy member listing:
-		base_url: Optional[str]
-			Base SSD API URL.
-
-		url: Optional[str]
-			Resolved request URL.
-
-		params: Optional[Dict[str, Any]]
-			Request parameters for the active call.
-
-		mode: Optional[str]
-			Selected operating mode.
-
-		start_date: Optional[str]
-			Inclusive start date in YYYY-MM-DD format.
-
-		end_date: Optional[str]
-			Inclusive end date in YYYY-MM-DD format.
-
-		query: Optional[str]
-			Generic object lookup string or designation.
-
-		dist_max: Optional[str]
-			Close-approach maximum distance filter.
-
-		body: Optional[str]
-			Close-approach body selector, typically Earth.
-
-		sort: Optional[str]
-			CAD sorting key.
-
-		limit: Optional[int]
-			Result limit.
-
-		agents: Optional[str]
-			User-Agent string.
-
-		Methods:
-		--------
-		__init__() -> None
-			Initialize fetcher defaults.
-
-		__dir__() -> List[str]
-			Provide ordered member visibility.
-
-		fetch_close_approaches(...) -> Dict[str, Any] | None
-			Fetch close-approach records from the CAD API.
-
-		fetch_object_lookup(...) -> Dict[str, Any] | None
-			Fetch detailed object information from the SBDB API.
-
-		fetch_nhats_summary(...) -> Dict[str, Any] | None
-			Fetch NHATS summary rows using screening constraints.
-
-		fetch_nhats_object(...) -> Dict[str, Any] | None
-			Fetch NHATS details for a single designation.
-
-		fetch_fireballs(...) -> Dict[str, Any] | None
-			Fetch fireball atmospheric impact records.
-
-		fetch(...) -> Dict[str, Any] | None
-			Unified dispatcher for NEO-related operations.
-
-		create_schema(...) -> Dict[str, str] | None
-			Construct a dynamic tool schema.
-
-	
 
 		Purpose:
 			Provides the NearbyObjects provider interface and request handling.
@@ -4588,29 +4226,6 @@ class OpenScience( Fetcher ):
 		Purpose:
 			Fetches open-science dataset, metadata, assay, and data resources.
 
-		Legacy member listing:
-		base_url,
-		url,
-		params,
-		query_text,
-		format_value,
-		size,
-		endpoint,
-		agents,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_validate_format(...): Performs the _validate_format operation for this fetcher.
-		_coerce_response(...): Performs the _coerce_response operation for this fetcher.
-		fetch_dataset(...): Performs the fetch_dataset operation for this fetcher.
-		fetch_metadata(...): Performs the fetch_metadata operation for this fetcher.
-		fetch_assays(...): Performs the fetch_assays operation for this fetcher.
-		fetch_data(...): Performs the fetch_data operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
-
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
 			url (Optional[ str ]): Current resource or endpoint URL.
@@ -5066,60 +4681,6 @@ class SpaceWeather( Fetcher ):
 			- speed
 			- halfAngle
 			- keyword
-
-		Legacy member listing:
-		base_url: Optional[str]
-			Base DONKI API URL.
-
-		api_key: Optional[str]
-			NASA API key from configuration.
-
-		url: Optional[str]
-			Resolved endpoint URL.
-
-		params: Optional[Dict[str, Any]]
-			Request parameters sent to DONKI.
-
-		mode: Optional[str]
-			Selected DONKI endpoint mode.
-
-		start_date: Optional[str]
-			Inclusive start date in YYYY-MM-DD format.
-
-		end_date: Optional[str]
-			Inclusive end date in YYYY-MM-DD format.
-
-		location: Optional[str]
-			IPS endpoint location filter.
-
-		catalog: Optional[str]
-			CMEAnalysis or IPS catalog filter.
-
-		notification_type: Optional[str]
-			Notifications endpoint event type filter.
-
-		limit_note: Optional[str]
-			Reserved descriptive note.
-
-		agents: Optional[str]
-			User-Agent string.
-
-		Methods:
-		--------
-		__init__() -> None
-			Initialize fetcher defaults.
-
-		__dir__() -> List[str]
-			Provide ordered member visibility.
-
-		fetch_endpoint(...) -> Dict[str, Any] | None
-			Fetch a single DONKI endpoint with normalized parameters.
-
-		fetch(...) -> Dict[str, Any] | None
-			Unified dispatcher for DONKI modes.
-
-		create_schema(...) -> Dict[str, str] | None
-			Construct a dynamic tool schema.
 
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
@@ -5858,25 +5419,6 @@ class AstroQuery( Fetcher ):
 	
 		Purpose:
 			Fetches astronomical object and region data with astroquery SIMBAD operations.
-	
-		Legacy member listing:
-		url,
-		radius,
-		name,
-		declination,
-		right_ascension,
-		params,
-		row_limit,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_table_to_records(...): Performs the _table_to_records operation for this fetcher.
-		object_search(...): Performs the object_search operation for this fetcher.
-		object_ids(...): Performs the object_ids operation for this fetcher.
-		region_search(...): Performs the region_search operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
 			url (Optional[ str ]): Current resource or endpoint URL.
@@ -6247,33 +5789,6 @@ class StarMap( Fetcher ):
 
 		Purpose:
 			Builds star-map links and image snapshots for objects or coordinates.
-
-		Legacy member listing:
-		base_url,
-		snapshot_url,
-		image_source,
-		object,
-		right_ascension,
-		declination,
-		box_color,
-		show_box,
-		show_grid,
-		show_lines,
-		show_boundaries,
-		show_const_names,
-		zoom,
-		params,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_normalize_bool(...): Performs the _normalize_bool operation for this fetcher.
-		_extract_snapshot_links(...): Performs the _extract_snapshot_links operation for this fetcher.
-		fetch_object_link(...): Performs the fetch_object_link operation for this fetcher.
-		fetch_coordinate_link(...): Performs the fetch_coordinate_link operation for this fetcher.
-		fetch_snapshot(...): Performs the fetch_snapshot operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
@@ -6869,36 +6384,6 @@ class GovData( Fetcher ):
 
 		Purpose:
 			Fetches Data.gov package search, package summary, and collection records.
-
-		Legacy member listing:
-		api_key,
-		base_url,
-		url,
-		params,
-		payload,
-		query,
-		page_size,
-		offset_mark,
-		sort_field,
-		sort_order,
-		package_id,
-		collection,
-		start_date,
-		agents,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_resolve_api_key(...): Performs the _resolve_api_key operation for this fetcher.
-		_validate_page_size(...): Performs the _validate_page_size operation for this fetcher.
-		_validate_sort_field(...): Performs the _validate_sort_field operation for this fetcher.
-		_validate_sort_order(...): Performs the _validate_sort_order operation for this fetcher.
-		fetch_search(...): Performs the fetch_search operation for this fetcher.
-		fetch_package_summary(...): Performs the fetch_package_summary operation for this fetcher.
-		fetch_collection(...): Performs the fetch_collection operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
@@ -7523,96 +7008,6 @@ class StarChart( Fetcher ):
 				- w
 				- h
 				- mag
-
-		Legacy member listing:
-		search_url: Optional[str]
-			SKY-MAP XML search endpoint.
-
-		link_url: Optional[str]
-			SKY-MAP site-link endpoint.
-
-		image_url: Optional[str]
-			SKY-MAP image-generator endpoint.
-
-		url: Optional[str]
-			Resolved request URL.
-
-		params: Optional[Dict[str, Any]]
-			Request parameters.
-
-		mode: Optional[str]
-			Selected chart mode.
-
-		query: Optional[str]
-			Object query string.
-
-		ra: Optional[float]
-			Right Ascension in decimal hours.
-
-		dec: Optional[float]
-			Declination in decimal degrees.
-
-		zoom: Optional[int]
-			Chart zoom level.
-
-		image_source: Optional[str]
-			Chart image source.
-
-		box_color: Optional[str]
-			Pointer box color.
-
-		show_box: Optional[bool]
-			Show highlight box.
-
-		show_grid: Optional[bool]
-			Show coordinate grid.
-
-		show_lines: Optional[bool]
-			Show constellation lines.
-
-		show_boundaries: Optional[bool]
-			Show constellation boundaries.
-
-		show_const_names: Optional[bool]
-			Show constellation names.
-
-		width: Optional[int]
-			Generated image width.
-
-		height: Optional[int]
-			Generated image height.
-
-		magnitude: Optional[float]
-			Image generator limiting magnitude.
-
-		agents: Optional[str]
-			User-Agent string.
-
-		Methods:
-		--------
-		__init__() -> None
-			Initialize chart defaults.
-
-		__dir__() -> List[str]
-			Provide ordered member visibility.
-
-		search_object(...) -> Dict[str, Any] | None
-			Resolve an object name through the SKY-MAP XML API.
-
-		fetch_object_chart(...) -> Dict[str, Any] | None
-			Build an object-based chart link.
-
-		fetch_coordinate_chart(...) -> Dict[str, Any] | None
-			Build a coordinate-based chart link.
-
-		fetch_static_chart(...) -> Dict[str, Any] | None
-			Build a static chart image URL.
-
-		fetch(...) -> Dict[str, Any] | None
-			Unified dispatcher.
-
-		create_schema(...) -> Dict[str, str] | None
-			Construct a dynamic tool schema.
 
 		Attributes:
 			search_url (Optional[ str ]): URL used to execute the provider's search request.
@@ -8283,48 +7678,6 @@ class Congress( Fetcher ):
 
 		Purpose:
 			Fetches Congress.gov congress, bill, law, and report resources.
-
-		Legacy member listing:
-		api_key,
-		base_url,
-		url,
-		params,
-		mode,
-		congress_number,
-		bill_type,
-		bill_number,
-		law_type,
-		law_number,
-		report_type,
-		report_number,
-		offset,
-		limit,
-		sort,
-		from_date_time,
-		to_date_time,
-		conference,
-		agents,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_resolve_api_key(...): Performs the _resolve_api_key operation for this fetcher.
-		_validate_limit(...): Performs the _validate_limit operation for this fetcher.
-		_validate_offset(...): Performs the _validate_offset operation for this fetcher.
-		_normalize_bill_type(...): Performs the _normalize_bill_type operation for this fetcher.
-		_normalize_law_type(...): Performs the _normalize_law_type operation for this fetcher.
-		_normalize_report_type(...): Performs the _normalize_report_type operation for this fetcher.
-		_base_params(...): Performs the _base_params operation for this fetcher.
-		fetch_congresses(...): Performs the fetch_congresses operation for this fetcher.
-		fetch_bills(...): Performs the fetch_bills operation for this fetcher.
-		fetch_bill(...): Performs the fetch_bill operation for this fetcher.
-		fetch_laws(...): Performs the fetch_laws operation for this fetcher.
-		fetch_law(...): Performs the fetch_law operation for this fetcher.
-		fetch_reports(...): Performs the fetch_reports operation for this fetcher.
-		fetch_report(...): Performs the fetch_report operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
@@ -9392,29 +8745,6 @@ class InternetArchive( Fetcher ):
 	
 		Purpose:
 			Fetches Internet Archive search records.
-	
-		Legacy member listing:
-		keywords,
-		url,
-		response,
-		fields,
-		rows,
-		page,
-		sort,
-		media_type,
-		collection,
-		params,
-		agents,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_validate_rows(...): Performs the _validate_rows operation for this fetcher.
-		_validate_page(...): Performs the _validate_page operation for this fetcher.
-		_build_query(...): Performs the _build_query operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			keywords (Optional[ str ]): Keywords supplied for text retrieval.
@@ -9815,81 +9145,6 @@ class OpenWeather( Fetcher ):
 				- temperature_unit
 				- wind_speed_unit
 				- precipitation_unit
-
-		Legacy member listing:
-		geocode_url: Optional[str]
-			The Open-Meteo geocoding endpoint.
-
-		forecast_url: Optional[str]
-			The Open-Meteo forecast endpoint.
-
-		location: Optional[str]
-			User-supplied location query.
-
-		latitude: Optional[float]
-			Resolved latitude from geocoding.
-
-		longitude: Optional[float]
-			Resolved longitude from geocoding.
-
-		timezone: Optional[str]
-			Resolved or user-requested timezone.
-
-		mode: Optional[str]
-			Forecast mode: current, hourly, or daily.
-
-		current_metrics: Optional[List[str]]
-			Current weather metrics requested from the API.
-
-		hourly_metrics: Optional[List[str]]
-			Hourly metrics requested from the API.
-
-		daily_metrics: Optional[List[str]]
-			Daily metrics requested from the API.
-
-		windspeed_unit: Optional[str]
-			Wind speed unit passed to the API.
-
-		temperature_unit: Optional[str]
-			Temperature unit passed to the API.
-
-		precipitation_unit: Optional[str]
-			Precipitation unit passed to the API.
-
-		params: Optional[Dict[str, Any]]
-			Request parameters for the forecast call.
-
-		geocode_params: Optional[Dict[str, Any]]
-			Request parameters for the geocoding call.
-
-		result_limit: Optional[int]
-			Maximum number of geocoding candidates to request.
-
-		Methods:
-		--------
-		__init__() -> None
-			Initialize the fetcher and default metric sets.
-
-		__dir__() -> List[str]
-			Provide ordered member visibility.
-
-		geocode_location(...) -> Dict[str, Any] | None
-			Resolve a place name into a selected geocoding record.
-
-		fetch(...) -> Dict[str, Any] | None
-			Resolve a location string and retrieve forecast weather.
-
-		fetch_current(...) -> Dict[str, Any] | None
-			Retrieve current forecast conditions only.
-
-		fetch_hourly(...) -> Dict[str, Any] | None
-			Retrieve hourly forecast data.
-
-		fetch_daily(...) -> Dict[str, Any] | None
-			Retrieve daily forecast data.
-
-		create_schema(...) -> Dict[str, str] | None
-			Generate a dynamic tool schema definition.
 
 		Attributes:
 			geocode_url (Optional[ str ]): Geocoding service endpoint URL.
@@ -10587,72 +9842,6 @@ class HistoricalWeather( Fetcher ):
 				- wind_speed_unit
 				- precipitation_unit
 
-		Legacy member listing:
-		geocode_url: Optional[str]
-			The Open-Meteo geocoding endpoint.
-
-		archive_url: Optional[str]
-			The Open-Meteo historical weather endpoint.
-
-		location: Optional[str]
-			User-supplied location query.
-
-		latitude: Optional[float]
-			Resolved latitude from geocoding.
-
-		longitude: Optional[float]
-			Resolved longitude from geocoding.
-
-		timezone: Optional[str]
-			Resolved or user-requested timezone. Defaults to 'auto'.
-
-		target_date: Optional[dt.date]
-			The requested historical date.
-
-		daily_metrics: Optional[List[str]]
-			Daily historical metrics requested from the archive API.
-
-		hourly_metrics: Optional[List[str]]
-			Hourly historical metrics requested from the archive API.
-
-		windspeed_unit: Optional[str]
-			Wind speed unit passed to the API.
-
-		temperature_unit: Optional[str]
-			Temperature unit passed to the API.
-
-		precipitation_unit: Optional[str]
-			Precipitation unit passed to the API.
-
-		params: Optional[Dict[str, Any]]
-			Request parameters for the historical weather call.
-
-		geocode_params: Optional[Dict[str, Any]]
-			Request parameters for the geocoding call.
-
-		result_limit: Optional[int]
-			Maximum number of geocoding candidates to request.
-
-		Methods:
-		--------
-		__init__() -> None
-			Initialize the fetcher and default metrics.
-
-		__dir__() -> List[str]
-			Provide ordered introspection members.
-
-		fetch(...) -> Dict[str, Any] | None
-			Resolve a location string and retrieve historical weather for one date.
-
-		geocode_location(...) -> Dict[str, Any] | None
-			Resolve a place name into a selected geocoding record.
-
-		fetch_historical(...) -> Dict[str, Any] | None
-			Retrieve historical weather for resolved coordinates and a date.
-
-		create_schema(...) -> Dict[str, str] | None
-			Generate a dynamic tool schema definition.
-
 		Attributes:
 			geocode_url (Optional[ str ]): Geocoding service endpoint URL.
 			archive_url (Optional[ str ]): Instance state retained for archive url operations.
@@ -11104,29 +10293,6 @@ class Grokipedia( Fetcher ):
 		Purpose:
 			Fetches Grokipedia search results and page content.
 
-		Legacy member listing:
-		api_key,
-		client,
-		query,
-		page,
-		limit,
-		offset,
-		include_content,
-		response,
-		params,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_validate_limit(...): Performs the _validate_limit operation for this fetcher.
-		_validate_offset(...): Performs the _validate_offset operation for this fetcher.
-		_get_client(...): Performs the _get_client operation for this fetcher.
-		fetch_search(...): Performs the fetch_search operation for this fetcher.
-		fetch_page(...): Performs the fetch_page operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
-
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
 			client (Optional[ GrokipediaClient ]): Provider SDK or HTTP client.
@@ -11542,34 +10708,6 @@ class GoogleGeocoding( Fetcher ):
 
 		Purpose:
 			Fetches Google Geocoding forward, reverse, and place lookup records.
-
-		Legacy member listing:
-		api_key,
-		url,
-		params,
-		mode,
-		query,
-		latitude,
-		longitude,
-		place_id,
-		language,
-		region,
-		result_type,
-		location_type,
-		timeout,
-		agents,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_resolve_api_key(...): Performs the _resolve_api_key operation for this fetcher.
-		request(...): Performs the request operation for this fetcher.
-		fetch_forward(...): Performs the fetch_forward operation for this fetcher.
-		fetch_reverse(...): Performs the fetch_reverse operation for this fetcher.
-		fetch_place(...): Performs the fetch_place operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
@@ -12114,32 +11252,6 @@ class CensusData( Fetcher ):
 		Purpose:
 			Fetches Census API variables and tabular data.
 
-		Legacy member listing:
-		api_key,
-		base_url,
-		year,
-		dataset,
-		mode,
-		fields,
-		geography_for,
-		geography_in,
-		predicates,
-		params,
-		payload,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_resolve_api_key(...): Performs the _resolve_api_key operation for this fetcher.
-		_normalize_fields(...): Performs the _normalize_fields operation for this fetcher.
-		_parse_predicates(...): Performs the _parse_predicates operation for this fetcher.
-		_shape_table(...): Performs the _shape_table operation for this fetcher.
-		fetch_variables(...): Performs the fetch_variables operation for this fetcher.
-		fetch_data(...): Performs the fetch_data operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
-
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
 			base_url (Optional[ str ]): Provider API base URL.
@@ -12668,33 +11780,6 @@ class Socrata( Fetcher ):
 		Purpose:
 			Fetches metadata and rows from Socrata-backed open-data portals.
 
-		Legacy member listing:
-		api_key,
-		base_url,
-		domain,
-		dataset_id,
-		mode,
-		select_clause,
-		where_clause,
-		order_clause,
-		group_clause,
-		limit_value,
-		offset_value,
-		params,
-		payload,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_resolve_api_key(...): Performs the _resolve_api_key operation for this fetcher.
-		_normalize_domain(...): Performs the _normalize_domain operation for this fetcher.
-		_normalize_dataset_id(...): Performs the _normalize_dataset_id operation for this fetcher.
-		fetch_metadata(...): Performs the fetch_metadata operation for this fetcher.
-		fetch_rows(...): Performs the fetch_rows operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
-
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
 			base_url (Optional[ str ]): Provider API base URL.
@@ -13175,33 +12260,6 @@ class HealthData( Fetcher ):
 
 		Purpose:
 			Fetches metadata and rows from HealthData.gov Socrata datasets.
-
-		Legacy member listing:
-		api_key,
-		base_url,
-		domain,
-		dataset_id,
-		mode,
-		select_clause,
-		where_clause,
-		order_clause,
-		group_clause,
-		limit_value,
-		offset_value,
-		params,
-		payload,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_resolve_api_key(...): Performs the _resolve_api_key operation for this fetcher.
-		_normalize_domain(...): Performs the _normalize_domain operation for this fetcher.
-		_normalize_dataset_id(...): Performs the _normalize_dataset_id operation for this fetcher.
-		fetch_metadata(...): Performs the fetch_metadata operation for this fetcher.
-		fetch_rows(...): Performs the fetch_rows operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
@@ -13687,24 +12745,6 @@ class GlobalHealthData( Fetcher ):
 	
 		Purpose:
 			Fetches United Nations SDMX catalog and query data.
-	
-		Legacy member listing:
-		base_url,
-		catalog_url,
-		mode,
-		query_path,
-		params,
-		payload,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_normalize_query_path(...): Performs the _normalize_query_path operation for this fetcher.
-		fetch_datasets(...): Performs the fetch_datasets operation for this fetcher.
-		fetch_sdmx_query(...): Performs the fetch_sdmx_query operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			api_key (Optional[ str ]): API credential retained for provider requests.
@@ -14078,24 +13118,6 @@ class UnitedNations( Fetcher ):
 		Purpose:
 			Fetch catalog and SDMX query results from the United Nations UNdata API.
 
-		Legacy member listing:
-		base_url - Optional[ str ]
-		catalog_url - Optional[ str ]
-		mode - Optional[ str ]
-		query_path - Optional[ str ]
-		params - Optional[ Dict[ str, Any ] ]
-		payload - Optional[ Any ]
-
-		Methods:
-		-----------
-		_normalize_query_path( query_path: str ) -> str
-		fetch_datasets( time: int=20 ) -> Dict[ str, Any ]
-		fetch_sdmx_query( query_path: str, time: int=20 ) -> Dict[ str, Any ]
-		fetch( mode: str='datasets', query_path: str='', time: int=20 )
-			-> Dict[ str, Any ]
-		create_schema( self, function: str, tool: str, description: str,
-			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None
-
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
 			catalog_url (Optional[ str ]): Instance state retained for catalog url operations.
@@ -14432,26 +13454,6 @@ class WorldPopulation( Fetcher ):
 
 		Purpose:
 			Fetches WorldPop catalog and raster metadata records.
-
-		Legacy member listing:
-		base_url,
-		stac_url,
-		mode,
-		query_text,
-		asset_path,
-		params,
-		payload,
-
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_normalize_asset_path(...): Performs the _normalize_asset_path operation for this fetcher.
-		fetch_catalog(...): Performs the fetch_catalog operation for this fetcher.
-		search_catalog(...): Performs the search_catalog operation for this fetcher.
-		fetch_raster_metadata(...): Performs the fetch_raster_metadata operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
@@ -14877,25 +13879,6 @@ class Wonder( Fetcher ):
 	
 		Purpose:
 			Builds and submits CDC WONDER query templates.
-	
-		Legacy member listing:
-		base_url,
-		mode,
-		dataset_id,
-		request_xml,
-		params,
-		payload,
-	
-		Methods:
-		--------
-		__init__(...): Performs the __init__ operation for this fetcher.
-		__dir__(...): Performs the __dir__ operation for this fetcher.
-		_normalize_dataset_id(...): Performs the _normalize_dataset_id operation for this fetcher.
-		build_template(...): Performs the build_template operation for this fetcher.
-		fetch_template(...): Performs the fetch_template operation for this fetcher.
-		submit_query(...): Performs the submit_query operation for this fetcher.
-		fetch(...): Performs the fetch operation for this fetcher.
-		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
 			base_url (Optional[ str ]): Provider API base URL.
