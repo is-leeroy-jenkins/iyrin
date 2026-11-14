@@ -145,11 +145,13 @@ def throw_if( name: str, value: object ) -> None:
 class Processor( ):
 	"""Processor processing component.
 	
-	Purpose (Initializes shared state used by text, Word, NLTK, and PDF parser subclasses,): Initializes shared state used by text, Word, NLTK, and PDF parser subclasses,
+	Purpose:
+		Initializes shared state used by text, Word, NLTK, and PDF parser subclasses,
 		including token caches, line/page buffers, vocabulary stores, NLP helpers,
 		and cleaned-text fields used across the processing workflow.
 		
-	Attributes (cleaned_text (str | None): Latest cleaned text retained for downstream processing.): cleaned_text (str | None): Latest cleaned text retained for downstream processing.
+	Attributes:
+		Latest cleaned text retained for downstream processing.
 		lowercase (str | None): Text converted to lowercase for normalization workflows.
 		chunks (list | None): List of document chunks generated during processing.
 		lemmatizer (Optional[ WordNetLemmatizer ]): WordNet lemmatizer used to reduce tokens to their canonical lexical forms.
@@ -247,11 +249,13 @@ class Processor( ):
 class TextParser( Processor ):
 	"""TextParser processing component.
 	
-	Purpose (Provides text cleanup, normalization, tokenization, chunking, vocabulary,): Provides text cleanup, normalization, tokenization, chunking, vocabulary,
+	Purpose:
+		Provides text cleanup, normalization, tokenization, chunking, vocabulary,
 		frequency-distribution, and semantic-preparation utilities used by the Text Processing,
 		Analysis, and Tokenization tabs.
 	
-	Attributes (vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.): vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.
+	Attributes:
+		TF-IDF vectorizer fitted to the latest token collection.
 		tokenizer (object | None): Tokenizer used by the active text parsing workflow.
 		translator (object | None): Character translation mapping for text normalization.
 		lowercase (Optional[ str ]): Runtime state used by ``TextParser`` during processing operations.
@@ -1862,11 +1866,13 @@ class TextParser( Processor ):
 class NltkParser( Processor ):
 	"""NltkParser processing component.
 	
-	Purpose (Provides NLTK-backed parsing utilities for corpus tokenization, stemming, lemmatization,): Provides NLTK-backed parsing utilities for corpus tokenization, stemming, lemmatization,
+	Purpose:
+		Provides NLTK-backed parsing utilities for corpus tokenization, stemming, lemmatization,
 		part-of-speech tagging, named-entity handling, and lexical diagnostics used by Chonky
 		analysis workflows.
 	
-	Attributes (word_tokens: Runtime state used by ``NltkParser`` during processing operations.): word_tokens: Runtime state used by ``NltkParser`` during processing operations.
+	Attributes:
+		word_tokens: Runtime state used by ``NltkParser`` during processing operations.
 		sentence_tokens (Optional[ List[ str ] ]): Runtime state used by ``NltkParser`` during processing operations.
 		stemmed_tokens (Optional[ List[ str ] ]): Runtime state used by ``NltkParser`` during processing operations.
 		lemmatized_tokens (Optional[ List[ str ] ]): Runtime state used by ``NltkParser`` during processing.
@@ -2232,10 +2238,12 @@ class NltkParser( Processor ):
 class WordParser( Processor ):
 	"""WordParser processing component.
 	
-	Purpose (Provides Microsoft Word document parsing utilities that extract paragraphs, tables,): Provides Microsoft Word document parsing utilities that extract paragraphs, tables,
+	Purpose:
+		Provides Microsoft Word document parsing utilities that extract paragraphs, tables,
 		metadata, and cleaned text for downstream processing and analysis.
 	
-	Attributes (page_text (str | None): Current document page text used for Word processing.): page_text (str | None): Current document page text used for Word processing.
+	Attributes:
+		Current document page text used for Word processing.
 		sentences (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing operations.
 		cleaned_sentences (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing
 			operations.
@@ -2458,11 +2466,13 @@ class WordParser( Processor ):
 class PdfParser( Processor ):
 	"""PdfParser processing component.
 	
-	Purpose (Provides geometry-aware PDF parsing and cleanup utilities that extract page blocks,): Provides geometry-aware PDF parsing and cleanup utilities that extract page blocks,
+	Purpose:
+		Provides geometry-aware PDF parsing and cleanup utilities that extract page blocks,
 		remove repeating headers and footers, repair line spacing, normalize artifacts,
 		and rebuild PDF text for downstream processing.
 	
-	Attributes (page (str | None): Current page text or identifier.): page (str | None): Current page text or identifier.
+	Attributes:
+		Current page text or identifier.
 		file_path (str | None): Current PDF file path.
 		tables (list | None): Tables extracted from the current PDF.
 		clean_lines (list | None): Lines retained after PDF cleanup.
