@@ -127,7 +127,8 @@ class Excel:
 
 		Returns:
 			None: Initializes the enrichment helper and its member attributes.
-		"""self.api_key = api
+		"""
+		self.api_key = api
 		self.cache = cache
 		self.maps = Map( api_key=self.api_key )
 		self.geocoder = Geocoder( self.maps, cache=self.cache )
