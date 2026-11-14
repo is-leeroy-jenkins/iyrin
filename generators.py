@@ -1921,7 +1921,7 @@ class Claude( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = '_normalize_domains( self, domains: Any ) -> List[ str ]'
+			exception.method = 'normalize_domains( self, domains: Any ) -> List[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
