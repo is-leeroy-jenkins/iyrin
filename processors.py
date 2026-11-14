@@ -2140,7 +2140,7 @@ class NltkParser( Processor ):
 			tree = nltk.ne_chunk( self.tagged_tokens )
 			self.named_entities = [ ]
 			for node in tree:
-				if hasattr( node, 'label' ):
+				if isinstance( node, nltk.Tree ):
 					label = node.label( )
 					entity_text = ' '.join( token for token, _ in node.leaves( ) if
 						isinstance( token, str ) and token.strip( ) )
@@ -2153,7 +2153,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'named_entity_recogniztion( self, text: str ) -> str'
+			exception.method = 'named_entity_recognition( self, text: str ) -> List[ Tuple[ str, str ] ] | None'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3229,7 +3229,7 @@ class PdfParser( Processor ):
 						break
 					
 					tables = page.find_tables( )
-					for table in getattr( tables, 'tables', [ ] ):
+					for table in tables.tables if tables is not None else [ ]:
 						self.tables.append( pd.DataFrame( table.extract( ) ) )
 			
 			return self.tables
