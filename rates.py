@@ -78,12 +78,15 @@ class RateLimiter( ):
 		between outbound requests. The limiter is intentionally lightweight and
 		designed for single-process Streamlit/API usage.
 
-		Args:
-		max (Optional[float]):
-		Maximum queries per second. If None or <= 0, throttling is disabled.
-
-		Returns:
-		Instance exposing wait() to call immediately before an outbound request.
+		Attributes:
+			query_per_second (Optional[float]): Configured queries per second.
+			interval (float): Minimum interval between requests, or zero if disabled.
+			last (Optional[float]): Last monotonic request timestamp.
+			now (float): Current monotonic timestamp.
+			delta (float): Seconds elapsed since previous request.
+			calls (int): Number of wait invocations.
+			total_sleep (float): Accumulated throttling sleep duration.
+			last_sleep (float): Most recent throttling sleep duration.
 
 	"""
 	query_per_second: Optional[ float ]
@@ -156,7 +159,7 @@ class RateLimiter( ):
 		except Exception as e:
 			from boogr import Error, Logger
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'rates'
 			exception.cause = 'RateLimiter'
 			exception.method = 'wait( self )'
 			Logger( ).write( exception )
