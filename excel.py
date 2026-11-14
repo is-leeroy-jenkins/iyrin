@@ -292,8 +292,8 @@ class Excel:
 			Logger( ).write( exception )
 			raise exception
 	
-	def append_result( self, outputs: Dict[ str, List ], result: Dict,
-			status: str, error: Optional[ str ] = None ) -> None:
+	def append_result( self, outputs: Dict[ str, List ], result: Dict | None,
+			status: str | None, error: Optional[ str ] = None ) -> None:
 		"""Append a normalized geocode or Places record.
 
 		Purpose:
@@ -310,6 +310,10 @@ class Excel:
 		"""
 		try:
 			throw_if( 'outputs', outputs )
+			if result is not None and not isinstance( result, dict ):
+				raise TypeError( 'result must be a dictionary or None.' )
+			if status is not None and not isinstance( status, str ):
+				raise TypeError( 'status must be a string or None.' )
 			result_value = result or { }
 			status_value = status or 'not_found'
 			outputs[ 'formatted_address' ].append( result_value.get( 'formatted_address' ) )
@@ -330,7 +334,7 @@ class Excel:
 			exception = Error( e )
 			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'append_result( self, outputs: Dict[ str, List ], result: Dict, status: str, error: Optional[ str ]=None ) -> None'
+			exception.method = 'append_result( self, outputs: Dict[ str, List ], result: Dict | None, status: str | None, error: Optional[ str ]=None ) -> None'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -466,8 +470,8 @@ class Excel:
 			Logger( ).write( exception )
 			raise exception
 	
-	def resolve_city_state_country( self, city: str, state: Optional[ str ],
-			country: str ) -> Dict:
+	def resolve_city_state_country( self, city: str | None, state: Optional[ str ],
+			country: str | None ) -> Dict:
 		"""Resolve a city, state, and country combination.
 
 		Purpose:
@@ -520,7 +524,7 @@ class Excel:
 			exception = Error( e )
 			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'resolve_city_state_country( self, city: str, state: Optional[ str ], country: str ) -> Dict'
+			exception.method = 'resolve_city_state_country( self, city: str | None, state: Optional[ str ], country: str | None ) -> Dict'
 			Logger( ).write( exception )
 			raise exception
 	
