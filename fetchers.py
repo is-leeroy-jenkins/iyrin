@@ -75,7 +75,7 @@ from owslib.wms import WebMapService
 from requests import Response
 from sscws.sscws import SscWs
 import config as cfg
-from boogr import Error
+from boogr import Error, Logger
 from core import Result
 import xml.etree.ElementTree as ET
 
@@ -344,6 +344,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
 			exception.method = 'fetch( self, url: str, time: int=10 ) -> List[ Document ]'
+			Logger( ).write( exception )
 			raise exception
 
 	def html_to_text( self, html: str ) -> str:
@@ -376,6 +377,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'html2text( )'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_paragraphs( self, uri: str ) -> List[ str ] | None:
@@ -409,6 +411,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_paragraphs( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_lists( self, uri: str ) -> List[ str ] | None:
@@ -441,6 +444,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_lists( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_tables( self, uri: str ) -> List[ str ] | None:
@@ -481,6 +485,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_tables( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_articles( self, uri: str ) -> List[ str ] | None:
@@ -514,6 +519,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_articles( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_headings( self, uri: str ) -> List[ str ] | None:
@@ -547,6 +553,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_headings( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_divisions( self, uri: str ) -> List[ str ] | None:
@@ -579,6 +586,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_divisions( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_sections( self, uri: str ) -> List[ str ] | None:
@@ -611,6 +619,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_sections( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_blockquotes( self, uri: str ) -> List[ str ] | None:
@@ -643,6 +652,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_blockquotes( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_hyperlinks( self, uri: str ) -> List[ str ] | None:
@@ -675,6 +685,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_hyperlinks( self, uri: str ) -> List[ str ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	def scrape_images( self, uri: str ) -> List[ str ] | None:
@@ -707,6 +718,7 @@ class WebFetcher( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
 			exception.method = 'scrape_images( self, uri: str ) -> List[ str ] '
+			Logger( ).write( exception )
 			raise exception
 			
 	def create_schema( self, function: str, tool: str,
@@ -803,6 +815,7 @@ class WebFetcher( Fetcher ):
 			exception.cause = ''
 			exception.method = ( 'create_schema( self, function: str, tool: str, description: str, '
 			                    'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]' )
+			Logger( ).write( exception )
 			raise exception
 			
 class WebCrawler( WebFetcher ):
@@ -919,6 +932,7 @@ class WebCrawler( WebFetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
 			exception.method = 'fetch( self, url: str, time: int=15 ) -> Result'
+			Logger( ).write( exception )
 			raise exception
 			
 	def render_with_playwright( self, url: str, timeout: int=15 ) -> str:
@@ -954,6 +968,7 @@ class WebCrawler( WebFetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
 			exception.method = 'render_with_playwright'
+			Logger( ).write( exception )
 			raise exception
 
 class ArXiv( Fetcher ):
@@ -1033,7 +1048,7 @@ class ArXiv( Fetcher ):
 			include_metadata (bool): Optional override indicating whether all available metadata should be included.
 
 		Returns:
-			List[Document] | None: Records produced by the operation for .
+			List[Document] | None: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -1062,6 +1077,7 @@ class ArXiv( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'ArXiv'
 			exception.method =  'ArXiv.fetch'
+			Logger( ).write( exception )
 			raise exception
 
 class GoogleDrive( Fetcher ):
@@ -1136,7 +1152,7 @@ class GoogleDrive( Fetcher ):
 			Return supported MIME types aligned to the Google Drive retriever docs.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [ '', 'text/text', 'text/plain', 'text/html', 'text/csv', 'text/markdown',
 				'image/png', 'image/jpeg', 'application/epub+zip', 'application/pdf',
@@ -1154,7 +1170,7 @@ class GoogleDrive( Fetcher ):
 			Return predefined template options supported by GoogleDriveRetriever.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [ 'gdrive-all-in-folder', 'gdrive-query', 'gdrive-by-name', 'gdrive-query-in-folder',
 				'gdrive-mime-type', 'gdrive-mime-type-in-folder', 'gdrive-query-with-mime-type',
@@ -1168,7 +1184,7 @@ class GoogleDrive( Fetcher ):
 			Return supported retrieval display modes.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [ 'documents', 'snippets' ]
 	
@@ -1258,6 +1274,7 @@ class GoogleDrive( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleDrive'
 			exception.method = 'GoogleDrive.fetch'
+			Logger( ).write( exception )
 			raise exception
 
 class Wikipedia( Fetcher ):
@@ -1349,7 +1366,7 @@ class Wikipedia( Fetcher ):
 			should be included.
 
 		Returns:
-			List[Document] | None: Records produced by the operation for .
+			List[Document] | None: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -1384,6 +1401,7 @@ class Wikipedia( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Wikipedia'
 			exception.method = 'Wikipedia.fetch'
+			Logger( ).write( exception )
 			raise exception
 
 class TheNews( Fetcher ):
@@ -1640,6 +1658,7 @@ class TheNews( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'TheNews'
 			exception.method =  'TheNews.fetch'
+			Logger( ).write( exception )
 			raise exception
 
 class GoogleSearch( Fetcher ):
@@ -1791,7 +1810,7 @@ class GoogleSearch( Fetcher ):
 			Optional runtime override. Falls back to cfg.GOOGLE_CSE_ID.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -1874,6 +1893,7 @@ class GoogleSearch( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleSearch'
 			exception.method = ( 'fetch( self, keywords: str, results: int=10 ) -> Dict[ str, Any ]')
+			Logger( ).write( exception )
 			raise exception
 			
 class GoogleMaps( Fetcher ):
@@ -2012,6 +2032,7 @@ class GoogleMaps( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
 			exception.method = ('geocode_location( self, address: str ) -> Tuple[ float, float ]')
+			Logger( ).write( exception )
 			raise exception
 	
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
@@ -2062,6 +2083,7 @@ class GoogleMaps( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
 			exception.method = 'fetch_location( self, address: str ) -> Tuple[ float, float ]'
+			Logger( ).write( exception )
 			raise exception
 			
 	
@@ -2105,6 +2127,7 @@ class GoogleMaps( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
 			exception.method = 'validate_address( self, address: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 			
 	
@@ -2163,6 +2186,7 @@ class GoogleMaps( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
 			exception.method = 'request_directions( self, origin: str, destination: str ) -> dict'
+			Logger( ).write( exception )
 			raise exception
 			
 		
@@ -2259,6 +2283,7 @@ class GoogleMaps( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
 			exception.method = 'create_schema( self, *params ) -> Dict[ str, str ]'
+			Logger( ).write( exception )
 			raise exception
 
 class GoogleWeather( Fetcher ):
@@ -2393,6 +2418,7 @@ class GoogleWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
 			exception.method = 'resolve_coordinates( self, address: str ) -> Tuple[ float, float ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None:
@@ -2407,7 +2433,7 @@ class GoogleWeather( Fetcher ):
 			time (int):  the requests timeout
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -2442,6 +2468,7 @@ class GoogleWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
 			exception.method = 'request( self, *params ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_current( self, address: str, units_system: str='METRIC',
@@ -2452,13 +2479,13 @@ class GoogleWeather( Fetcher ):
 			Retrieve current weather conditions for an address.
 
 		Args:
-			address (str) - The physical address of a location.
-			units_system (str) - The metric system used in a forecast.
-			language_code (str) - The language used in the results.
-			time (int) - The amount of time given for returning a forecast.
+			address (str): The physical address of a location.
+			units_system (str): The metric system used in a forecast.
+			language_code (str): The language used in the results.
+			time (int): The amount of time given for returning a forecast.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -2475,6 +2502,7 @@ class GoogleWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
 			exception.method = 'fetch_current( self, *params ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_hourly_forecast( self, address: str, hours: int=24, units_system: str='METRIC',
@@ -2485,14 +2513,14 @@ class GoogleWeather( Fetcher ):
 			Retrieve hourly weather forecast for an address.
 
 		Args:
-			address (str) - The physical address of a location.
-			hours (int) - The metric system used in a forecast.
-			units_system (str) - The system of metrics used.
-			language_code (str) - The language used in the results.
-			time (int) - The amount of time given for returning a forecast.
+			address (str): The physical address of a location.
+			hours (int): The metric system used in a forecast.
+			units_system (str): The system of metrics used.
+			language_code (str): The language used in the results.
+			time (int): The amount of time given for returning a forecast.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -2510,6 +2538,7 @@ class GoogleWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
 			exception.method = 'fetch_hourly_forecast( self, **params ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_daily_forecast( self, address: str, days: int=5, units_system: str='METRIC',
@@ -2520,14 +2549,14 @@ class GoogleWeather( Fetcher ):
 			Retrieve daily weather forecast for an address.
 
 		Args:
-			address (str) - The physical address of a location.
-			days (int) - The number of days for the forecase
-			units_system (str) - The system of metrics used.
-			language_code (str) - The language used in the results.
-			time (int) - The amount of time given for returning a forecast.
+			address (str): The physical address of a location.
+			days (int): The number of days for the forecase
+			units_system (str): The system of metrics used.
+			language_code (str): The language used in the results.
+			time (int): The amount of time given for returning a forecast.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -2545,6 +2574,7 @@ class GoogleWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
 			exception.method = 'fetch_daily_forecast( self, **params-> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_alerts( self, address: str, language_code: str='en',
@@ -2555,9 +2585,9 @@ class GoogleWeather( Fetcher ):
 			Retrieve public weather alerts for an address.
 
 		Args:
-			address (str) - The physical address of a location.
-			language_code (str) - The language used in the results.
-			time (int) - The amount of time given for returning a forecast.
+			address (str): The physical address of a location.
+			language_code (str): The language used in the results.
+			time (int): The amount of time given for returning a forecast.
 
 		Returns:
 			Dict[str, Any] | None: Response metadata and parsed data for public weather alerts for an address.
@@ -2577,6 +2607,7 @@ class GoogleWeather( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
 			exception.method = 'fetch_alerts( self, *params ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 
 class NavalObservatory( Fetcher ):
@@ -2667,7 +2698,7 @@ class NavalObservatory( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [ 'base_url', 'url', 'params', 'date_value', 'time_value', 'latitude', 'longitude', 
 		         'location_label', 'fetch_celnav', 'fetch', 'create_schema' ]
@@ -2699,6 +2730,7 @@ class NavalObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
 			exception.method = 'validate_date( self, date_value: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def validate_time( self, time_value: str ) -> str:
@@ -2736,6 +2768,7 @@ class NavalObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
 			exception.method = 'validate_time( self, time_value: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]:
@@ -2775,6 +2808,7 @@ class NavalObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
 			exception.method = 'validate_coordinates( self, *params ) -> tuple[ float, float ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_celnav( self, date_value: str, time_value: str, latitude: float,
@@ -2834,6 +2868,7 @@ class NavalObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
 			exception.method = 'fetch_celnav( self, *params ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='celnav', date_value: str='',
@@ -2879,6 +2914,7 @@ class NavalObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
 			exception.method = 'NavalObservatory.fetch'
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -2943,6 +2979,7 @@ class NavalObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
 			exception.method = 'create_schema( self, *params ) -> Dict[ str, str ]'
+			Logger( ).write( exception )
 			raise exception
 
 class SatelliteCenter( Fetcher ):
@@ -3047,6 +3084,7 @@ class SatelliteCenter( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
 			exception.method = 'fetch_observatories( self ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_ground_stations( self ) -> Dict[ str, Any ] | None:
@@ -3070,6 +3108,7 @@ class SatelliteCenter( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
 			exception.method = 'fetch_ground_stations( self ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_locations( self, observatories: str, start_time: str, end_time: str,
@@ -3132,6 +3171,7 @@ class SatelliteCenter( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
 			exception.method = 'fetch_locations( self, *params ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='observatories', query: str='', start_time: str='', end_time: str='',
@@ -3175,6 +3215,7 @@ class SatelliteCenter( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
 			exception.method = 'SatelliteCenter.fetch'
+			Logger( ).write( exception )
 			raise exception
 
 class EarthObservatory( Fetcher ):
@@ -3353,7 +3394,7 @@ class EarthObservatory( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -3454,6 +3495,7 @@ class EarthObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
 			exception.method = 'EarthObservatory.fetch_events'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3492,6 +3534,7 @@ class EarthObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
 			exception.method = 'fetch_categories( self, time: int=20 ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_sources( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3530,6 +3573,7 @@ class EarthObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
 			exception.method = 'fetch_sources( self, time: int=20 ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None:
@@ -3576,6 +3620,7 @@ class EarthObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
 			exception.method = 'EarthObservatory.fetch_layers'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20,
@@ -3631,6 +3676,7 @@ class EarthObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
 			exception.method = 'EarthObservatory.fetch'
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -3653,7 +3699,7 @@ class EarthObservatory( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -3694,6 +3740,7 @@ class EarthObservatory( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
 			exception.method = 'EarthObservatory.create_schema'
+			Logger( ).write( exception )
 			raise exception
 			
 class GlobalImagery( Fetcher ):
@@ -3827,6 +3874,7 @@ class GlobalImagery( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
 			exception.method = 'fetch_sidereal( self, date: str ) -> float'
+			Logger( ).write( exception )
 			raise exception
 			
 	def fetch_mercator_map( self , ccrs=None ):
@@ -3873,6 +3921,7 @@ class GlobalImagery( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
 			exception.method = 'fetch_sidereal( self, date: str ) -> float'
+			Logger( ).write( exception )
 			raise exception
 		
 class NearbyObjects( Fetcher ):
@@ -4068,7 +4117,7 @@ class NearbyObjects( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [ 'base_url', 'url', 'params', 'mode', 'start_date', 'end_date', 'query',
 		         'dist_max', 'body', 'sort', 'limit', 'fetch_close_approaches',
@@ -4132,6 +4181,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'NearbyObjects.fetch_close_approaches'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_object_lookup( self, query: str, query_type: str='sstr',
@@ -4207,6 +4257,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'NearbyObjects.fetch_object_lookup'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045',
@@ -4266,6 +4317,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'NearbyObjects.fetch_nhats_summary'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360,
@@ -4309,6 +4361,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'fetch_nhats_object( self, **args ) -> Dict[ str, Any ] | None'
+			Logger( ).write( exception )
 			raise exception from e
 
 	def fetch_fireballs( self, date_min: str='', limit: int=20,
@@ -4354,6 +4407,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'fetch_fireballs( self, **args ) -> Dict[ str, Any ] | None'
+			Logger( ).write( exception )
 			raise exception from e
 
 	def fetch( self, mode: str='close_approaches', start_date: str='',
@@ -4453,6 +4507,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'NearbyObjects.fetch'
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -4474,7 +4529,7 @@ class NearbyObjects( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4511,6 +4566,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = 'NearbyObjects.create_schema'
+			Logger( ).write( exception )
 			raise exception
 
 class OpenScience( Fetcher ):
@@ -4598,7 +4654,7 @@ class OpenScience( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [ 'base_url', 'url', 'params', 'query_text', 'format_value', 'size', 'endpoint',
 				'fetch_dataset', 'fetch_metadata', 'fetch_assays', 'fetch_data', 'fetch',
@@ -4614,7 +4670,7 @@ class OpenScience( Fetcher ):
 			format_value (str): Desired format.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4633,6 +4689,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = '_validate_format( self, format_value: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str:
@@ -4667,6 +4724,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = 'OpenScience._coerce_response'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -4681,7 +4739,7 @@ class OpenScience( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4703,6 +4761,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = 'OpenScience.fetch_dataset'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_metadata( self, query: str, format_value: str='json',
@@ -4720,7 +4779,7 @@ class OpenScience( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4743,6 +4802,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = 'OpenScience.fetch_metadata'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
@@ -4760,7 +4820,7 @@ class OpenScience( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4784,6 +4844,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = 'OpenScience.fetch_assays'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
@@ -4801,7 +4862,7 @@ class OpenScience( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4842,6 +4903,7 @@ class OpenScience( Fetcher ):
 					'fetch_data( self, query: str, format_value: str=json, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json',
@@ -4867,7 +4929,7 @@ class OpenScience( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4890,6 +4952,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = 'OpenScience.fetch'
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
@@ -4911,7 +4974,7 @@ class OpenScience( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -4945,6 +5008,7 @@ class OpenScience( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
 			exception.method = 'OpenScience.create_schema'
+			Logger( ).write( exception )
 			raise exception
 
 class SpaceWeather( Fetcher ):
@@ -5111,7 +5175,7 @@ class SpaceWeather( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -5168,7 +5232,7 @@ class SpaceWeather( Fetcher ):
 			api_key (str | None): Optional runtime override for NASA API key.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -5294,7 +5358,7 @@ class SpaceWeather( Fetcher ):
 			api_key (str | None): Optional runtime override for NASA API key.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -5372,7 +5436,7 @@ class SpaceWeather( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -5416,6 +5480,7 @@ class SpaceWeather( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class AstroCatalog( Fetcher ):
@@ -5503,7 +5568,7 @@ class AstroCatalog( Fetcher ):
 			attributes (str): attributes value for the AstroCatalog operation.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 		"""
 		parts: list[ str ] = [ ]
 		if quantity and quantity.strip( ):
@@ -5594,6 +5659,7 @@ class AstroCatalog( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
 			exception.method = 'request( self, route: str, params: Dict[ str, Any ] | None=None, time: int=20 ) -> Any'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_object( self, name: str, quantity: str='', attributes: str='',
@@ -5644,6 +5710,7 @@ class AstroCatalog( Fetcher ):
 					'fetch_object( self, name: str, quantity: str=, attributes: str=, '
 					'arguments: str=, data_format: str=json, time: int=20 ) -> Any'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def cone_search( self, ra: str, dec: str, radius: int=2, quantity: str='',
@@ -5704,6 +5771,7 @@ class AstroCatalog( Fetcher ):
 					'quantity: str=, attributes: str=, arguments: str=, '
 					'data_format: str=json, time: int=20 ) -> Any'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='object_query', query: str='', quantity: str='',
@@ -5766,6 +5834,7 @@ class AstroCatalog( Fetcher ):
 					'attributes: str=, arguments: str=, ra: str=, dec: str=, '
 					'radius: int=2, data_format: str=json, time: int=20 ) -> Any'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class AstroQuery( Fetcher ):
@@ -5866,7 +5935,7 @@ class AstroQuery( Fetcher ):
 			An astropy.table.Table returned by astroquery.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -5899,6 +5968,7 @@ class AstroQuery( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
 			exception.method = '_table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None:
@@ -5915,7 +5985,7 @@ class AstroQuery( Fetcher ):
 			Maximum number of rows to return.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -5943,6 +6013,7 @@ class AstroQuery( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
 			exception.method = 'object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None:
@@ -5958,7 +6029,7 @@ class AstroQuery( Fetcher ):
 			Maximum number of rows to return.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -5986,6 +6057,7 @@ class AstroQuery( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
 			exception.method = 'object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def region_search( self, ra: str, dec: str, radius: float=0.5,
@@ -6019,7 +6091,7 @@ class AstroQuery( Fetcher ):
 			Maximum number of rows to return.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6073,6 +6145,7 @@ class AstroQuery( Fetcher ):
 					'region_search( self, ra: str, dec: str, radius: float=0.5, '
 					'radius_unit: str=deg, row_limit: int=100 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='object_search', query: str='',
@@ -6109,7 +6182,7 @@ class AstroQuery( Fetcher ):
 			Maximum number of rows to return.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6148,6 +6221,7 @@ class AstroQuery( Fetcher ):
 					'dec: str=, radius: float=0.5, radius_unit: str=deg, '
 					'row_limit: int=100 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class StarMap( Fetcher ):
@@ -6295,7 +6369,7 @@ class StarMap( Fetcher ):
 			Boolean value to convert.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 		"""
 		throw_if( 'value', value )
 		self.value = value
@@ -6314,7 +6388,7 @@ class StarMap( Fetcher ):
 			Base URL used to resolve relative hyperlinks.
 
 		Returns:
-			Dict[str, str]: Response metadata and parsed data for .
+			Dict[str, str]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6343,6 +6417,7 @@ class StarMap( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
 			exception.method = '_extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_object_link(
@@ -6372,7 +6447,7 @@ class StarMap( Fetcher ):
 			Request timeout in seconds used for validation.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6423,6 +6498,7 @@ class StarMap( Fetcher ):
 					'fetch_object_link( self, name: str, zoom: int=5, box_color: str=yellow, '
 					'show_box: bool=True, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_coordinate_link(
@@ -6470,7 +6546,7 @@ class StarMap( Fetcher ):
 			Request timeout in seconds used for validation.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6530,6 +6606,7 @@ class StarMap( Fetcher ):
 					'show_lines: bool=True, show_boundaries: bool=True, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_snapshot(
@@ -6577,7 +6654,7 @@ class StarMap( Fetcher ):
 			Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6644,6 +6721,7 @@ class StarMap( Fetcher ):
 					'show_boundaries: bool=True, show_const_names: bool=False, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch(
@@ -6710,7 +6788,7 @@ class StarMap( Fetcher ):
 			Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6877,7 +6955,7 @@ class GovData( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -6907,7 +6985,7 @@ class GovData( Fetcher ):
 			Resolve the GovInfo API key, falling back to DEMO_KEY if none is set.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6921,6 +6999,7 @@ class GovData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
 			exception.method = '_resolve_api_key( self ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_page_size( self, page_size: int ) -> int:
@@ -6952,6 +7031,7 @@ class GovData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
 			exception.method = '_validate_page_size( self, page_size: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_sort_field( self, sort_field: str ) -> str:
@@ -6964,7 +7044,7 @@ class GovData( Fetcher ):
 			sort_field (str): Sort field.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -6986,6 +7066,7 @@ class GovData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
 			exception.method = '_validate_sort_field( self, sort_field: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_sort_order( self, sort_order: str ) -> str:
@@ -6998,7 +7079,7 @@ class GovData( Fetcher ):
 			sort_order (str): Sort order.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7018,6 +7099,7 @@ class GovData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
 			exception.method = '_validate_sort_order( self, sort_order: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_search( self, query: str, page_size: int=10,
@@ -7046,7 +7128,7 @@ class GovData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7103,6 +7185,7 @@ class GovData( Fetcher ):
 					'offset_mark: str=*, sort_field: str=score, '
 					'sort_order: str=DESC, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_package_summary( self, package_id: str,
@@ -7118,7 +7201,7 @@ class GovData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7147,6 +7230,7 @@ class GovData( Fetcher ):
 			exception.method = (
 					'fetch_package_summary( self, package_id: str, '
 					'time: int=20 ) -> Dict[ str, Any ]' )
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_collection( self, collection: str, start_date: str,
@@ -7169,7 +7253,7 @@ class GovData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7217,6 +7301,7 @@ class GovData( Fetcher ):
 					'page_size: int=10, offset_mark: str=*, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='search', query: str='',
@@ -7254,7 +7339,7 @@ class GovData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7301,6 +7386,7 @@ class GovData( Fetcher ):
 					'sort_order: str=DESC, package_id: str=, collection: str=, '
 					'start_date: str=, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -7323,7 +7409,7 @@ class GovData( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7370,6 +7456,7 @@ class GovData( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class StarChart( Fetcher ):
@@ -7603,7 +7690,7 @@ class StarChart( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'search_url',
@@ -7670,7 +7757,7 @@ class StarChart( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7734,6 +7821,7 @@ class StarChart( Fetcher ):
 					'search_object( self, name: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_object_chart( self, name: str, zoom: int=5,
@@ -7758,7 +7846,7 @@ class StarChart( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7805,6 +7893,7 @@ class StarChart( Fetcher ):
 					'box_color: str=yellow, show_box: bool=True, image_source: str=, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_coordinate_chart( self, ra: float, dec: float, zoom: int=5,
@@ -7836,7 +7925,7 @@ class StarChart( Fetcher ):
 			image_source (str): Optional image source such as SDSS.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7891,6 +7980,7 @@ class StarChart( Fetcher ):
 					'show_lines: bool=True, show_boundaries: bool=True, image_source: str= ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_static_chart( self, ra: float, dec: float, zoom: int=5,
@@ -7927,7 +8017,7 @@ class StarChart( Fetcher ):
 			magnitude (float): Limiting magnitude.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -7988,6 +8078,7 @@ class StarChart( Fetcher ):
 					'width: int=900, height: int=450, magnitude: float=7.5 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='object_chart', query: str='',
@@ -8041,7 +8132,7 @@ class StarChart( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8120,7 +8211,7 @@ class StarChart( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8163,6 +8254,7 @@ class StarChart( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class Congress( Fetcher ):
@@ -8301,7 +8393,7 @@ class Congress( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -8340,7 +8432,7 @@ class Congress( Fetcher ):
 			Resolve the Congress.gov API key.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8355,6 +8447,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = '_resolve_api_key( self ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_limit( self, limit: int ) -> int:
@@ -8386,6 +8479,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = '_validate_limit( self, limit: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_offset( self, offset: int ) -> int:
@@ -8417,6 +8511,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = '_validate_offset( self, offset: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _normalize_bill_type( self, bill_type: str ) -> str:
@@ -8429,7 +8524,7 @@ class Congress( Fetcher ):
 			bill_type (str): Bill type code.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8458,6 +8553,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = '_normalize_bill_type( self, bill_type: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _normalize_law_type( self, law_type: str ) -> str:
@@ -8470,7 +8566,7 @@ class Congress( Fetcher ):
 			law_type (str): Law type code.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8493,6 +8589,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = '_normalize_law_type( self, law_type: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _normalize_report_type( self, report_type: str ) -> str:
@@ -8505,7 +8602,7 @@ class Congress( Fetcher ):
 			report_type (str): Committee report type code.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8530,6 +8627,7 @@ class Congress( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
 			exception.method = '_normalize_report_type( self, report_type: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _base_params( self, limit: int=20, offset: int=0,
@@ -8547,7 +8645,7 @@ class Congress( Fetcher ):
 			sort (str): Sort directive.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8569,6 +8667,7 @@ class Congress( Fetcher ):
 					'_base_params( self, limit: int=20, offset: int=0, '
 					'sort: str=updateDate+desc ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_congresses( self, limit: int=20, offset: int=0,
@@ -8586,7 +8685,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8622,6 +8721,7 @@ class Congress( Fetcher ):
 					'fetch_congresses( self, limit: int=20, offset: int=0, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_bills( self, congress: int, bill_type: str='',
@@ -8651,7 +8751,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8705,6 +8805,7 @@ class Congress( Fetcher ):
 					'to_date_time: str=, sort: str=updateDate+desc, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_bill( self, congress: int, bill_type: str,
@@ -8724,7 +8825,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8771,6 +8872,7 @@ class Congress( Fetcher ):
 					'fetch_bill( self, congress: int, bill_type: str, '
 					'bill_number: int, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_laws( self, congress: int, law_type: str='',
@@ -8793,7 +8895,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8840,6 +8942,7 @@ class Congress( Fetcher ):
 					'offset: int=0, limit: int=20, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_law( self, congress: int, law_type: str,
@@ -8859,7 +8962,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8906,6 +9009,7 @@ class Congress( Fetcher ):
 					'fetch_law( self, congress: int, law_type: str, '
 					'law_number: int, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_reports( self, congress: int, report_type: str='',
@@ -8930,7 +9034,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -8982,6 +9086,7 @@ class Congress( Fetcher ):
 					'offset: int=0, limit: int=20, conference: bool=False, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_report( self, congress: int, report_type: str,
@@ -9001,7 +9106,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -9048,6 +9153,7 @@ class Congress( Fetcher ):
 					'fetch_report( self, congress: int, report_type: str, '
 					'report_number: int, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='congresses', congress: int=0,
@@ -9101,7 +9207,7 @@ class Congress( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -9210,7 +9316,7 @@ class Congress( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -9257,6 +9363,7 @@ class Congress( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class InternetArchive( Fetcher ):
@@ -9364,7 +9471,7 @@ class InternetArchive( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'keywords',
@@ -9412,6 +9519,7 @@ class InternetArchive( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
 			exception.method = '_validate_rows( self, rows: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_page( self, page: int ) -> int:
@@ -9443,6 +9551,7 @@ class InternetArchive( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
 			exception.method = '_validate_page( self, page: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _build_query( self, keywords: str, media_type: str='',
@@ -9460,7 +9569,7 @@ class InternetArchive( Fetcher ):
 			collection (str): Optional collection filter.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -9487,6 +9596,7 @@ class InternetArchive( Fetcher ):
 					'_build_query( self, keywords: str, media_type: str=, '
 					'collection: str= ) -> str'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, keywords: str, fields: List[ str ] | None = None,
@@ -9516,7 +9626,7 @@ class InternetArchive( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -9580,6 +9690,7 @@ class InternetArchive( Fetcher ):
 					'media_type: str=, collection: str=, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -9602,7 +9713,7 @@ class InternetArchive( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -9649,6 +9760,7 @@ class InternetArchive( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class OpenWeather( Fetcher ):
@@ -9985,6 +10097,7 @@ class OpenWeather( Fetcher ):
 					'geocode_location( self, location: str, count: int=10 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_current( self, lat: float, long: float, zone: str='auto',
@@ -10066,6 +10179,7 @@ class OpenWeather( Fetcher ):
 					'fetch_current( self, lat: float, long: float, zone: str=auto, '
 					'past_days: int=0 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_hourly( self, lat: float, long: float, zone: str='auto',
@@ -10150,6 +10264,7 @@ class OpenWeather( Fetcher ):
 					'fetch_hourly( self, lat: float, long: float, zone: str=auto, '
 					'forecast_days: int=7, past_days: int=0 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_daily( self, lat: float, long: float, zone: str='auto',
@@ -10234,6 +10349,7 @@ class OpenWeather( Fetcher ):
 					'fetch_daily( self, lat: float, long: float, zone: str=auto, '
 					'forecast_days: int=7, past_days: int=0 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, location: str, mode: str='current', zone: str='auto',
@@ -10345,6 +10461,7 @@ class OpenWeather( Fetcher ):
 					'forecast_days: int=7, past_days: int=0, count: int=10 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -10417,6 +10534,7 @@ class OpenWeather( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class HistoricalWeather( Fetcher ):
@@ -10716,6 +10834,7 @@ class HistoricalWeather( Fetcher ):
 					'geocode_location( self, location: str, count: int=10 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_historical( self, lat: float, long: float, date: dt.date,
@@ -10802,6 +10921,7 @@ class HistoricalWeather( Fetcher ):
 					'fetch_historical( self, lat: float, long: float, date: dt.date, '
 					'zone: str=auto ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, location: str, date: dt.date,
@@ -10881,6 +11001,7 @@ class HistoricalWeather( Fetcher ):
 					'fetch( self, location: str, date: dt.date, zone: str=auto, '
 					'count: int=10 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -10953,6 +11074,7 @@ class HistoricalWeather( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class Grokipedia( Fetcher ):
@@ -11041,7 +11163,7 @@ class Grokipedia( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -11088,6 +11210,7 @@ class Grokipedia( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
 			exception.method = '_validate_limit( self, limit: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _validate_offset( self, offset: int ) -> int:
@@ -11119,6 +11242,7 @@ class Grokipedia( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
 			exception.method = '_validate_offset( self, offset: int ) -> int'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _get_client( self ) -> GrokipediaClient:
@@ -11141,6 +11265,7 @@ class Grokipedia( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
 			exception.method = '_get_client( self ) -> GrokipediaClient'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_search( self, query: str, limit: int=12,
@@ -11158,7 +11283,7 @@ class Grokipedia( Fetcher ):
 			offset (int): Result offset for pagination.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11199,6 +11324,7 @@ class Grokipedia( Fetcher ):
 					'fetch_search( self, query: str, limit: int=12, '
 					'offset: int=0 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_page( self, page: str,
@@ -11214,7 +11340,7 @@ class Grokipedia( Fetcher ):
 			include_content (bool): If True, request full page content.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11252,6 +11378,7 @@ class Grokipedia( Fetcher ):
 					'fetch_page( self, page: str, include_content: bool=True ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='search', query: str='',
@@ -11278,7 +11405,7 @@ class Grokipedia( Fetcher ):
 			include_content (bool): Whether to request full page content for page mode.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11310,6 +11437,7 @@ class Grokipedia( Fetcher ):
 					'limit: int=12, offset: int=0, include_content: bool=True ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -11332,7 +11460,7 @@ class Grokipedia( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11384,6 +11512,7 @@ class Grokipedia( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class GoogleGeocoding( Fetcher ):
@@ -11493,7 +11622,7 @@ class GoogleGeocoding( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -11526,7 +11655,7 @@ class GoogleGeocoding( Fetcher ):
 			api_key (Optional[str]): Optional explicit API key override.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11541,6 +11670,7 @@ class GoogleGeocoding( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
 			exception.method = '_resolve_api_key( self, api_key: Optional[ str ]=None ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, params: Dict[ str, Any ], time: int=10,
@@ -11558,7 +11688,7 @@ class GoogleGeocoding( Fetcher ):
 			api_key (Optional[str]): Optional explicit API key override.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11601,6 +11731,7 @@ class GoogleGeocoding( Fetcher ):
 					'request( self, params: Dict[ str, Any ], time: int=10, '
 					'api_key: Optional[ str ]=None ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_forward( self, query: str, language: str='en',
@@ -11623,7 +11754,7 @@ class GoogleGeocoding( Fetcher ):
 			api_key (Optional[str]): Optional explicit API key override.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11660,6 +11791,7 @@ class GoogleGeocoding( Fetcher ):
 					'region: str=, time: int=10, api_key: Optional[ str ]=None ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_reverse( self, latitude: float, longitude: float,
@@ -11687,7 +11819,7 @@ class GoogleGeocoding( Fetcher ):
 			api_key (Optional[str]): Optional explicit API key override.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11730,6 +11862,7 @@ class GoogleGeocoding( Fetcher ):
 					'language: str=en, result_type: str=, location_type: str=, '
 					'time: int=10, api_key: Optional[ str ]=None ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_place( self, place_id: str, language: str='en',
@@ -11752,7 +11885,7 @@ class GoogleGeocoding( Fetcher ):
 			api_key (Optional[str]): Optional explicit API key override.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11788,6 +11921,7 @@ class GoogleGeocoding( Fetcher ):
 					'fetch_place( self, place_id: str, language: str=en, region: str=, '
 					'time: int=10, api_key: Optional[ str ]=None ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='forward', query: str='',
@@ -11827,7 +11961,7 @@ class GoogleGeocoding( Fetcher ):
 			api_key (Optional[str]): Optional explicit API key override.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11877,6 +12011,7 @@ class GoogleGeocoding( Fetcher ):
 					'time: int=10, api_key: Optional[ str ]=None ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -11899,7 +12034,7 @@ class GoogleGeocoding( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -11946,6 +12081,7 @@ class GoogleGeocoding( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class CensusData( Fetcher ):
@@ -12046,7 +12182,7 @@ class CensusData( Fetcher ):
 			Return ordered CensusData members.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -12077,7 +12213,7 @@ class CensusData( Fetcher ):
 			Resolve the configured Census API key.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 		"""
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -12092,7 +12228,7 @@ class CensusData( Fetcher ):
 			fields (str): Comma-delimited field list.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12110,6 +12246,7 @@ class CensusData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
 			exception.method = '_normalize_fields( self, fields: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _parse_predicates( self, predicates: str ) -> Dict[ str, Any ]:
@@ -12122,7 +12259,7 @@ class CensusData( Fetcher ):
 			predicates (str): Newline-delimited key=value pairs.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12161,6 +12298,7 @@ class CensusData( Fetcher ):
 			exception.method = (
 					'_parse_predicates( self, predicates: str ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]:
@@ -12173,7 +12311,7 @@ class CensusData( Fetcher ):
 			rows (List[Any]): Raw Census API response payload.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12210,6 +12348,7 @@ class CensusData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
 			exception.method = '_shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_variables( self, year: str, dataset: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -12226,7 +12365,7 @@ class CensusData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12267,6 +12406,7 @@ class CensusData( Fetcher ):
 					'fetch_variables( self, year: str, dataset: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_data( self, year: str, dataset: str, fields: str,
@@ -12293,7 +12433,7 @@ class CensusData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12355,6 +12495,7 @@ class CensusData( Fetcher ):
 					'geography_for: str="", geography_in: str="", predicates: str="", '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='variables', year: str='2022',
@@ -12384,7 +12525,7 @@ class CensusData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12421,6 +12562,7 @@ class CensusData( Fetcher ):
 					'geography_for: str="state:*", geography_in: str="", '
 					'predicates: str="", time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -12493,6 +12635,7 @@ class CensusData( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class Socrata( Fetcher ):
@@ -12599,7 +12742,7 @@ class Socrata( Fetcher ):
 			Return ordered Socrata members.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -12631,7 +12774,7 @@ class Socrata( Fetcher ):
 			Resolve the configured Socrata application token.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 		"""
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -12646,7 +12789,7 @@ class Socrata( Fetcher ):
 			domain (str): Domain such as data.cdc.gov.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12664,6 +12807,7 @@ class Socrata( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
 			exception.method = '_normalize_domain( self, domain: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _normalize_dataset_id( self, dataset_id: str ) -> str:
@@ -12676,7 +12820,7 @@ class Socrata( Fetcher ):
 			dataset_id (str): 4x4 dataset identifier.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12694,6 +12838,7 @@ class Socrata( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
 			exception.method = '_normalize_dataset_id( self, dataset_id: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_metadata( self, domain: str, dataset_id: str,
@@ -12711,7 +12856,7 @@ class Socrata( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12752,6 +12897,7 @@ class Socrata( Fetcher ):
 					'fetch_metadata( self, domain: str, dataset_id: str, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_rows( self, domain: str, dataset_id: str, select: str='',
@@ -12783,7 +12929,7 @@ class Socrata( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12853,6 +12999,7 @@ class Socrata( Fetcher ):
 					'where: str="", order: str="", group: str="", limit: int=25, '
 					'offset: int=0, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='rows', domain: str='data.cdc.gov',
@@ -12886,7 +13033,7 @@ class Socrata( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -12923,6 +13070,7 @@ class Socrata( Fetcher ):
 					'group: str="", limit: int=25, offset: int=0, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -12995,6 +13143,7 @@ class Socrata( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class HealthData( Fetcher ):
@@ -13101,7 +13250,7 @@ class HealthData( Fetcher ):
 			Return ordered HealthData members.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'api_key',
@@ -13133,7 +13282,7 @@ class HealthData( Fetcher ):
 			Resolve the configured HealthData.gov application token.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 		"""
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -13148,7 +13297,7 @@ class HealthData( Fetcher ):
 			domain (str): Domain such as healthdata.gov.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13166,6 +13315,7 @@ class HealthData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
 			exception.method = '_normalize_domain( self, domain: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _normalize_dataset_id( self, dataset_id: str ) -> str:
@@ -13178,7 +13328,7 @@ class HealthData( Fetcher ):
 			dataset_id (str): Dataset identifier.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13196,6 +13346,7 @@ class HealthData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
 			exception.method = '_normalize_dataset_id( self, dataset_id: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_metadata( self, domain: str, dataset_id: str,
@@ -13213,7 +13364,7 @@ class HealthData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13254,6 +13405,7 @@ class HealthData( Fetcher ):
 					'fetch_metadata( self, domain: str, dataset_id: str, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_rows( self, domain: str, dataset_id: str, select: str='',
@@ -13285,7 +13437,7 @@ class HealthData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13355,6 +13507,7 @@ class HealthData( Fetcher ):
 					'where: str="", order: str="", group: str="", limit: int=25, '
 					'offset: int=0, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='rows', domain: str='healthdata.gov',
@@ -13388,7 +13541,7 @@ class HealthData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13425,6 +13578,7 @@ class HealthData( Fetcher ):
 					'group: str="", limit: int=25, offset: int=0, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -13447,7 +13601,7 @@ class HealthData( Fetcher ):
 			required (list[str]): Required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13501,6 +13655,7 @@ class HealthData( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class GlobalHealthData( Fetcher ):
@@ -13644,6 +13799,7 @@ class GlobalHealthData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
 			exception.method = '_normalize_query_path( self, query_path: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_indicator_registry( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -13656,7 +13812,7 @@ class GlobalHealthData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13700,6 +13856,7 @@ class GlobalHealthData( Fetcher ):
 					'fetch_indicator_registry( self, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_athena( self, query_path: str, fmt: str='json',
@@ -13717,7 +13874,7 @@ class GlobalHealthData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13767,6 +13924,7 @@ class GlobalHealthData( Fetcher ):
 					'fetch_athena( self, query_path: str, fmt: str="json", '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='indicator_registry', query_path: str='',
@@ -13786,7 +13944,7 @@ class GlobalHealthData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -13815,6 +13973,7 @@ class GlobalHealthData( Fetcher ):
 					'fetch( self, mode: str="indicator_registry", query_path: str="", '
 					'fmt: str="json", time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -13887,6 +14046,7 @@ class GlobalHealthData( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class UnitedNations( Fetcher ):
@@ -13962,7 +14122,7 @@ class UnitedNations( Fetcher ):
 			Return ordered UnitedNations members.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -13988,7 +14148,7 @@ class UnitedNations( Fetcher ):
 			query_path (str): Path appended after the UNdata REST base endpoint.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14006,6 +14166,7 @@ class UnitedNations( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
 			exception.method = '_normalize_query_path( self, query_path: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -14018,7 +14179,7 @@ class UnitedNations( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14057,6 +14218,7 @@ class UnitedNations( Fetcher ):
 			exception.method = (
 					'fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_sdmx_query( self, query_path: str,
@@ -14072,7 +14234,7 @@ class UnitedNations( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14115,6 +14277,7 @@ class UnitedNations( Fetcher ):
 					'fetch_sdmx_query( self, query_path: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='datasets', query_path: str='',
@@ -14132,7 +14295,7 @@ class UnitedNations( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14160,6 +14323,7 @@ class UnitedNations( Fetcher ):
 					'fetch( self, mode: str="datasets", query_path: str="", '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -14182,7 +14346,7 @@ class UnitedNations( Fetcher ):
 			required (list[str]): Required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14236,6 +14400,7 @@ class UnitedNations( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class WorldPopulation( Fetcher ):
@@ -14317,7 +14482,7 @@ class WorldPopulation( Fetcher ):
 			Return ordered WorldPopulation members.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -14345,7 +14510,7 @@ class WorldPopulation( Fetcher ):
 			asset_path (str): Path appended after the API base endpoint.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14363,6 +14528,7 @@ class WorldPopulation( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
 			exception.method = '_normalize_asset_path( self, asset_path: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_catalog( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -14375,7 +14541,7 @@ class WorldPopulation( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14414,6 +14580,7 @@ class WorldPopulation( Fetcher ):
 			exception.method = (
 					'fetch_catalog( self, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def search_catalog( self, query: str='', page: int=1, page_size: int=25,
@@ -14433,7 +14600,7 @@ class WorldPopulation( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14480,6 +14647,7 @@ class WorldPopulation( Fetcher ):
 					'search_catalog( self, query: str="", page: int=1, '
 					'page_size: int=25, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_raster_metadata( self, asset_path: str,
@@ -14495,7 +14663,7 @@ class WorldPopulation( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14538,6 +14706,7 @@ class WorldPopulation( Fetcher ):
 					'fetch_raster_metadata( self, asset_path: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='catalog', query: str='',
@@ -14562,7 +14731,7 @@ class WorldPopulation( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14598,6 +14767,7 @@ class WorldPopulation( Fetcher ):
 					'page: int=1, page_size: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -14620,7 +14790,7 @@ class WorldPopulation( Fetcher ):
 			required (list[str]): Required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14674,6 +14844,7 @@ class WorldPopulation( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class Wonder( Fetcher ):
@@ -14752,7 +14923,7 @@ class Wonder( Fetcher ):
 			Return ordered Wonder members.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -14779,7 +14950,7 @@ class Wonder( Fetcher ):
 			dataset_id (str): Database identifier such as D76.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14796,6 +14967,7 @@ class Wonder( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
 			exception.method = '_normalize_dataset_id( self, dataset_id: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def build_template( self, dataset_id: str='D76' ) -> str:
@@ -14808,7 +14980,7 @@ class Wonder( Fetcher ):
 			dataset_id (str): Database identifier such as D76.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14843,6 +15015,7 @@ class Wonder( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
 			exception.method = 'build_template( self, dataset_id: str="D76" ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_template( self, dataset_id: str='D76' ) -> Dict[ str, Any ] | None:
@@ -14855,7 +15028,7 @@ class Wonder( Fetcher ):
 			dataset_id (str): Database identifier such as D76.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14887,6 +15060,7 @@ class Wonder( Fetcher ):
 					'fetch_template( self, dataset_id: str="D76" ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def submit_query( self, dataset_id: str, request_xml: str,
@@ -14904,7 +15078,7 @@ class Wonder( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -14953,6 +15127,7 @@ class Wonder( Fetcher ):
 					'submit_query( self, dataset_id: str, request_xml: str, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='metadata_template', dataset_id: str='D76',
@@ -14972,7 +15147,7 @@ class Wonder( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15001,6 +15176,7 @@ class Wonder( Fetcher ):
 					'fetch( self, mode: str="metadata_template", dataset_id: str="D76", '
 					'request_xml: str="", time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -15023,7 +15199,7 @@ class Wonder( Fetcher ):
 			required (list[str]): Required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15077,6 +15253,7 @@ class Wonder( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class USGSEarthquakes( Fetcher ):
@@ -15201,7 +15378,7 @@ class USGSEarthquakes( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'feed_url',
@@ -15239,7 +15416,7 @@ class USGSEarthquakes( Fetcher ):
 			features (List[Dict[str, Any]]): Feature collection returned by the USGS feed or search API.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15308,6 +15485,7 @@ class USGSEarthquakes( Fetcher ):
 					'_shape_feature_rows( self, features: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_features( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -15320,7 +15498,7 @@ class USGSEarthquakes( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized earthquake rows.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15361,6 +15539,7 @@ class USGSEarthquakes( Fetcher ):
 					'_summarize_features( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_feed( self, feed: str='all_day.geojson',
@@ -15381,7 +15560,7 @@ class USGSEarthquakes( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15427,6 +15606,7 @@ class USGSEarthquakes( Fetcher ):
 					'fetch_feed( self, feed: str=all_day.geojson, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_search( self, start_date: str, end_date: str, min_magnitude: float=1.0,
@@ -15468,7 +15648,7 @@ class USGSEarthquakes( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15590,7 +15770,7 @@ class USGSEarthquakes( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15655,7 +15835,7 @@ class USGSEarthquakes( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15702,6 +15882,7 @@ class USGSEarthquakes( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class USGSWaterData( Fetcher ):
@@ -15784,7 +15965,7 @@ class USGSWaterData( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -15815,7 +15996,7 @@ class USGSWaterData( Fetcher ):
 			Resolve an API key for the USGS Water Data APIs.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15838,6 +16019,7 @@ class USGSWaterData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
 			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
@@ -15850,7 +16032,7 @@ class USGSWaterData( Fetcher ):
 			payload (Any): Decoded JSON payload returned by the API.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15875,6 +16057,7 @@ class USGSWaterData( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
 			exception.method = '_coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, collection: str,
@@ -15893,7 +16076,7 @@ class USGSWaterData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -15937,6 +16120,7 @@ class USGSWaterData( Fetcher ):
 					'params: Optional[ Dict[ str, Any ] ]=None, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_monitoring_locations( self,
@@ -15950,7 +16134,7 @@ class USGSWaterData( Fetcher ):
 			records (List[Dict[str, Any]]): Monitoring location records.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16030,6 +16214,7 @@ class USGSWaterData( Fetcher ):
 					'_shape_monitoring_locations( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_time_series_metadata( self,
@@ -16043,7 +16228,7 @@ class USGSWaterData( Fetcher ):
 			records (List[Dict[str, Any]]): Time-series metadata records.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16103,6 +16288,7 @@ class USGSWaterData( Fetcher ):
 					'_shape_time_series_metadata( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_latest_values( self,
@@ -16116,7 +16302,7 @@ class USGSWaterData( Fetcher ):
 			records (List[Dict[str, Any]]): Value records.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16183,6 +16369,7 @@ class USGSWaterData( Fetcher ):
 					'_shape_latest_values( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -16195,7 +16382,7 @@ class USGSWaterData( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16230,6 +16417,7 @@ class USGSWaterData( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_monitoring_locations( self, monitoring_location_id: str='',
@@ -16254,7 +16442,7 @@ class USGSWaterData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16294,6 +16482,7 @@ class USGSWaterData( Fetcher ):
 					'state_code: str=, county_code: str=, site_type: str=, '
 					'limit: int=25, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_time_series_metadata( self, monitoring_location_id: str='',
@@ -16314,7 +16503,7 @@ class USGSWaterData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16352,6 +16541,7 @@ class USGSWaterData( Fetcher ):
 					'parameter_code: str=, limit: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_latest_continuous( self, monitoring_location_id: str='',
@@ -16372,7 +16562,7 @@ class USGSWaterData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16410,6 +16600,7 @@ class USGSWaterData( Fetcher ):
 					'parameter_code: str=, limit: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_latest_daily( self, monitoring_location_id: str='',
@@ -16430,7 +16621,7 @@ class USGSWaterData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16468,6 +16659,7 @@ class USGSWaterData( Fetcher ):
 					'parameter_code: str=, limit: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='monitoring-locations',
@@ -16502,7 +16694,7 @@ class USGSWaterData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16559,6 +16751,7 @@ class USGSWaterData( Fetcher ):
 					'county_code: str=, site_type: str=, parameter_code: str=, '
 					'limit: int=25, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -16581,7 +16774,7 @@ class USGSWaterData( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16628,6 +16821,7 @@ class USGSWaterData( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class USGSTheNationalMap( Fetcher ):
@@ -16705,7 +16899,7 @@ class USGSTheNationalMap( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -16740,7 +16934,7 @@ class USGSTheNationalMap( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16784,6 +16978,7 @@ class USGSTheNationalMap( Fetcher ):
 					'params: Optional[ Dict[ str, Any ] ]=None, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
@@ -16796,7 +16991,7 @@ class USGSTheNationalMap( Fetcher ):
 			payload (Any): Decoded JSON payload returned by the API.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16821,6 +17016,7 @@ class USGSTheNationalMap( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
 			exception.method = '_coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_dataset_rows( self,
@@ -16834,7 +17030,7 @@ class USGSTheNationalMap( Fetcher ):
 			records (List[Dict[str, Any]]): Dataset records returned by TNMAccess.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16875,6 +17071,7 @@ class USGSTheNationalMap( Fetcher ):
 					'_shape_dataset_rows( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_product_rows( self,
@@ -16888,7 +17085,7 @@ class USGSTheNationalMap( Fetcher ):
 			records (List[Dict[str, Any]]): Product records returned by TNMAccess.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16955,6 +17152,7 @@ class USGSTheNationalMap( Fetcher ):
 					'_shape_product_rows( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -16967,7 +17165,7 @@ class USGSTheNationalMap( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -16999,6 +17197,7 @@ class USGSTheNationalMap( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -17011,7 +17210,7 @@ class USGSTheNationalMap( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17041,6 +17240,7 @@ class USGSTheNationalMap( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
 			exception.method = 'fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_products( self, dataset: str='', q: str='',
@@ -17067,7 +17267,7 @@ class USGSTheNationalMap( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17108,6 +17308,7 @@ class USGSTheNationalMap( Fetcher ):
 					'prod_formats: str=, max_items: int=25, offset: int=0, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='products', dataset: str='',
@@ -17139,7 +17340,7 @@ class USGSTheNationalMap( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17174,6 +17375,7 @@ class USGSTheNationalMap( Fetcher ):
 					'bbox: str=, prod_formats: str=, max_items: int=25, '
 					'offset: int=0, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -17196,7 +17398,7 @@ class USGSTheNationalMap( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17243,6 +17445,7 @@ class USGSTheNationalMap( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class USGSScienceBase( Fetcher ):
@@ -17320,7 +17523,7 @@ class USGSScienceBase( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -17355,7 +17558,7 @@ class USGSScienceBase( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17399,6 +17602,7 @@ class USGSScienceBase( Fetcher ):
 					'params: Optional[ Dict[ str, Any ] ]=None, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
@@ -17411,7 +17615,7 @@ class USGSScienceBase( Fetcher ):
 			payload (Any): Decoded JSON payload returned by the API.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17439,6 +17643,7 @@ class USGSScienceBase( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
 			exception.method = '_coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_item_rows( self,
@@ -17452,7 +17657,7 @@ class USGSScienceBase( Fetcher ):
 			records (List[Dict[str, Any]]): Item records returned by ScienceBase.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17521,6 +17726,7 @@ class USGSScienceBase( Fetcher ):
 					'_shape_item_rows( self, records: '
 					'List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_single_item( self, item: Dict[ str, Any ] ) -> Dict[ str, Any ]:
@@ -17533,7 +17739,7 @@ class USGSScienceBase( Fetcher ):
 			item (Dict[str, Any]): Single item payload returned by ScienceBase.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17576,6 +17782,7 @@ class USGSScienceBase( Fetcher ):
 					'_shape_single_item( self, item: Dict[ str, Any ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -17588,7 +17795,7 @@ class USGSScienceBase( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17623,6 +17830,7 @@ class USGSScienceBase( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_items( self, q: str='', max_items: int=25,
@@ -17645,7 +17853,7 @@ class USGSScienceBase( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17683,6 +17891,7 @@ class USGSScienceBase( Fetcher ):
 					'fetch_items( self, q: str=, max_items: int=25, offset: int=0, '
 					'fields: str=, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_item( self, item_id: str,
@@ -17698,7 +17907,7 @@ class USGSScienceBase( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17739,6 +17948,7 @@ class USGSScienceBase( Fetcher ):
 					'fetch_item( self, item_id: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='items', q: str='',
@@ -17767,7 +17977,7 @@ class USGSScienceBase( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17801,6 +18011,7 @@ class USGSScienceBase( Fetcher ):
 					'max_items: int=25, offset: int=0, fields: str=, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -17823,7 +18034,7 @@ class USGSScienceBase( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17870,6 +18081,7 @@ class USGSScienceBase( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class AirNow( Fetcher ):
@@ -17948,7 +18160,7 @@ class AirNow( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -17976,7 +18188,7 @@ class AirNow( Fetcher ):
 			Resolve the AirNow API key from environment variables.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -17998,6 +18210,7 @@ class AirNow( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
 			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ] = None,
@@ -18015,7 +18228,7 @@ class AirNow( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18066,6 +18279,7 @@ class AirNow( Fetcher ):
 					'request( self, endpoint: str, params: Optional[ Dict[ str, Any ] ]=None, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -18078,7 +18292,7 @@ class AirNow( Fetcher ):
 			records (List[Dict[str, Any]]): AirNow records returned by the API.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18119,6 +18333,7 @@ class AirNow( Fetcher ):
 					'_shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -18131,7 +18346,7 @@ class AirNow( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized AirNow row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18174,6 +18389,7 @@ class AirNow( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_current_zip( self, zip_code: str, distance: int=25,
@@ -18191,7 +18407,7 @@ class AirNow( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18230,6 +18446,7 @@ class AirNow( Fetcher ):
 					'fetch_current_zip( self, zip_code: str, distance: int=25, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_current_latlon( self, latitude: float, longitude: float,
@@ -18249,7 +18466,7 @@ class AirNow( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18290,6 +18507,7 @@ class AirNow( Fetcher ):
 					'fetch_current_latlon( self, latitude: float, longitude: float, '
 					'distance: int=25, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_forecast_zip( self, zip_code: str, date: str,
@@ -18309,7 +18527,7 @@ class AirNow( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18351,6 +18569,7 @@ class AirNow( Fetcher ):
 					'fetch_forecast_zip( self, zip_code: str, date: str, distance: int=25, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_forecast_latlon( self, latitude: float, longitude: float,
@@ -18372,7 +18591,7 @@ class AirNow( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18417,6 +18636,7 @@ class AirNow( Fetcher ):
 					'fetch_forecast_latlon( self, latitude: float, longitude: float, '
 					'date: str, distance: int=25, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='current-zip', zip_code: str='',
@@ -18448,7 +18668,7 @@ class AirNow( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18502,6 +18722,7 @@ class AirNow( Fetcher ):
 					'latitude: float | None=None, longitude: float | None=None, '
 					'date: str=, distance: int=25, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -18524,7 +18745,7 @@ class AirNow( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18571,6 +18792,7 @@ class AirNow( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class ClimateData( Fetcher ):
@@ -18659,7 +18881,7 @@ class ClimateData( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'data_url',
@@ -18693,7 +18915,7 @@ class ClimateData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18736,6 +18958,7 @@ class ClimateData( Fetcher ):
 					'request( self, url: str, params: Optional[ Dict[ str, Any ] ]=None, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -18748,7 +18971,7 @@ class ClimateData( Fetcher ):
 			records (List[Dict[str, Any]]): Dataset discovery records returned by the search service.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18788,6 +19011,7 @@ class ClimateData( Fetcher ):
 					'_shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -18800,7 +19024,7 @@ class ClimateData( Fetcher ):
 			records (List[Dict[str, Any]]): Climate data records returned by the data service.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18828,6 +19052,7 @@ class ClimateData( Fetcher ):
 					'_shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -18840,7 +19065,7 @@ class ClimateData( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18876,6 +19101,7 @@ class ClimateData( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_datasets( self, keyword: str='', start_date: str='',
@@ -18900,7 +19126,7 @@ class ClimateData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -18940,6 +19166,7 @@ class ClimateData( Fetcher ):
 					'fetch_datasets( self, keyword: str=, start_date: str=, end_date: str=, '
 					'limit: int=25, offset: int=0, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_data( self, dataset: str, start_date: str, end_date: str,
@@ -18966,7 +19193,7 @@ class ClimateData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19015,6 +19242,7 @@ class ClimateData( Fetcher ):
 					'stations: str=, data_types: str=, limit: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='datasets', keyword: str='', dataset: str='',
@@ -19050,7 +19278,7 @@ class ClimateData( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19090,6 +19318,7 @@ class ClimateData( Fetcher ):
 					'start_date: str=, end_date: str=, stations: str=, data_types: str=, '
 					'limit: int=25, offset: int=0, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -19112,7 +19341,7 @@ class ClimateData( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19159,6 +19388,7 @@ class ClimateData( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class EoNet( Fetcher ):
@@ -19239,7 +19469,7 @@ class EoNet( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -19273,7 +19503,7 @@ class EoNet( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19317,6 +19547,7 @@ class EoNet( Fetcher ):
 					'params: Optional[ Dict[ str, Any ] ]=None, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -19329,7 +19560,7 @@ class EoNet( Fetcher ):
 			records (List[Dict[str, Any]]): Event records returned by EONET.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19397,6 +19628,7 @@ class EoNet( Fetcher ):
 					'_shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -19409,7 +19641,7 @@ class EoNet( Fetcher ):
 			records (List[Dict[str, Any]]): Category records returned by EONET.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19438,6 +19670,7 @@ class EoNet( Fetcher ):
 					'_shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -19450,7 +19683,7 @@ class EoNet( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19485,6 +19718,7 @@ class EoNet( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_events( self, source: str='', category: str='',
@@ -19520,7 +19754,7 @@ class EoNet( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19564,6 +19798,7 @@ class EoNet( Fetcher ):
 					'limit: int=25, days: int=30, start_date: str=, end_date: str=, '
 					'bbox: str=, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -19576,7 +19811,7 @@ class EoNet( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19607,6 +19842,7 @@ class EoNet( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
 			exception.method = 'fetch_categories( self, time: int=20 ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='events', source: str='', category: str='',
@@ -19642,7 +19878,7 @@ class EoNet( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19679,6 +19915,7 @@ class EoNet( Fetcher ):
 					'status: str=open, limit: int=25, days: int=30, start_date: str=, '
 					'end_date: str=, bbox: str=, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -19701,7 +19938,7 @@ class EoNet( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19748,6 +19985,7 @@ class EoNet( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class EnviroFacts( Fetcher ):
@@ -19826,7 +20064,7 @@ class EnviroFacts( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -19861,7 +20099,7 @@ class EnviroFacts( Fetcher ):
 			limit (int): Maximum number of returned rows.
 
 		Returns:
-			str: Text result for .
+			str: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19908,6 +20146,7 @@ class EnviroFacts( Fetcher ):
 					'_resolve_table_path( self, table_name: str, state_code: str=, '
 					'facility_name: str=, limit: int=25 ) -> str'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -19922,7 +20161,7 @@ class EnviroFacts( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19957,6 +20196,7 @@ class EnviroFacts( Fetcher ):
 					'request( self, url: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -19969,7 +20209,7 @@ class EnviroFacts( Fetcher ):
 			records (List[Dict[str, Any]]): Envirofacts records returned by the service.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -19997,6 +20237,7 @@ class EnviroFacts( Fetcher ):
 					'_shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -20009,7 +20250,7 @@ class EnviroFacts( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20046,6 +20287,7 @@ class EnviroFacts( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_table( self, table_name: str, state_code: str='',
@@ -20071,7 +20313,7 @@ class EnviroFacts( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20134,6 +20376,7 @@ class EnviroFacts( Fetcher ):
 					'facility_name: str=, limit: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, table_name: str='TRI_FACILITY', state_code: str='',
@@ -20156,7 +20399,7 @@ class EnviroFacts( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20179,6 +20422,7 @@ class EnviroFacts( Fetcher ):
 					'facility_name: str=, limit: int=25, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -20201,7 +20445,7 @@ class EnviroFacts( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20248,6 +20492,7 @@ class EnviroFacts( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class TidesAndCurrents( Fetcher ):
@@ -20330,7 +20575,7 @@ class TidesAndCurrents( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'data_url',
@@ -20365,7 +20610,7 @@ class TidesAndCurrents( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20408,6 +20653,7 @@ class TidesAndCurrents( Fetcher ):
 					'request( self, url: str, params: Optional[ Dict[ str, Any ] ]=None, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_station_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -20420,7 +20666,7 @@ class TidesAndCurrents( Fetcher ):
 			payload (Dict[str, Any]): Station metadata payload.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20457,6 +20703,7 @@ class TidesAndCurrents( Fetcher ):
 					'_shape_station_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_data_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -20469,7 +20716,7 @@ class TidesAndCurrents( Fetcher ):
 			payload (Dict[str, Any]): Data API payload.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20501,6 +20748,7 @@ class TidesAndCurrents( Fetcher ):
 					'_shape_data_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -20513,7 +20761,7 @@ class TidesAndCurrents( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20555,6 +20803,7 @@ class TidesAndCurrents( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_station( self, station_id: str,
@@ -20570,7 +20819,7 @@ class TidesAndCurrents( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20607,6 +20856,7 @@ class TidesAndCurrents( Fetcher ):
 					'fetch_station( self, station_id: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_water_level( self, station_id: str, begin_date: str, end_date: str,
@@ -20633,7 +20883,7 @@ class TidesAndCurrents( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20685,6 +20935,7 @@ class TidesAndCurrents( Fetcher ):
 					'end_date: str, datum: str=MLLW, units: str=metric, '
 					'time_zone: str=gmt, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_tide_predictions( self, station_id: str, begin_date: str,
@@ -20714,7 +20965,7 @@ class TidesAndCurrents( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20768,6 +21019,7 @@ class TidesAndCurrents( Fetcher ):
 					'time_zone: str=gmt, interval: str=hilo, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='water-level', station_id: str='',
@@ -20802,7 +21054,7 @@ class TidesAndCurrents( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20854,6 +21106,7 @@ class TidesAndCurrents( Fetcher ):
 					'units: str=metric, time_zone: str=gmt, interval: str=hilo, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -20876,7 +21129,7 @@ class TidesAndCurrents( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -20923,6 +21176,7 @@ class TidesAndCurrents( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class UvIndex( Fetcher ):
@@ -20996,7 +21250,7 @@ class UvIndex( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -21027,7 +21281,7 @@ class UvIndex( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21062,6 +21316,7 @@ class UvIndex( Fetcher ):
 					'request( self, url: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
@@ -21074,7 +21329,7 @@ class UvIndex( Fetcher ):
 			records (List[Dict[str, Any]]): UV Index records returned by the EPA web services.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21102,6 +21357,7 @@ class UvIndex( Fetcher ):
 					'_shape_rows( self, records: List[ Dict[ str, Any ] ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -21114,7 +21370,7 @@ class UvIndex( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21159,6 +21415,7 @@ class UvIndex( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_daily_zip( self, zip_code: str,
@@ -21174,7 +21431,7 @@ class UvIndex( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21210,6 +21467,7 @@ class UvIndex( Fetcher ):
 					'fetch_daily_zip( self, zip_code: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_daily_city_state( self, city: str, state: str,
@@ -21227,7 +21485,7 @@ class UvIndex( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21271,6 +21529,7 @@ class UvIndex( Fetcher ):
 					'fetch_daily_city_state( self, city: str, state: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_hourly_zip( self, zip_code: str,
@@ -21286,7 +21545,7 @@ class UvIndex( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21322,6 +21581,7 @@ class UvIndex( Fetcher ):
 					'fetch_hourly_zip( self, zip_code: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_hourly_city_state( self, city: str, state: str,
@@ -21339,7 +21599,7 @@ class UvIndex( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21383,6 +21643,7 @@ class UvIndex( Fetcher ):
 					'fetch_hourly_city_state( self, city: str, state: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='daily-zip', zip_code: str='',
@@ -21409,7 +21670,7 @@ class UvIndex( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21456,6 +21717,7 @@ class UvIndex( Fetcher ):
 					'fetch( self, mode: str=daily-zip, zip_code: str=, city: str=, '
 					'state: str=, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -21478,7 +21740,7 @@ class UvIndex( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21525,6 +21787,7 @@ class UvIndex( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class PurpleAir( Fetcher ):
@@ -21616,7 +21879,7 @@ class PurpleAir( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -21643,7 +21906,7 @@ class PurpleAir( Fetcher ):
 			Resolve the PurpleAir API key from environment variables.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21665,6 +21928,7 @@ class PurpleAir( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
 			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, endpoint: str,
@@ -21683,7 +21947,7 @@ class PurpleAir( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21733,6 +21997,7 @@ class PurpleAir( Fetcher ):
 					'params: Optional[ Dict[ str, Any ] ]=None, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -21745,7 +22010,7 @@ class PurpleAir( Fetcher ):
 			payload (Dict[str, Any]): Sensor-list payload returned by PurpleAir.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21790,6 +22055,7 @@ class PurpleAir( Fetcher ):
 					'_shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -21802,7 +22068,7 @@ class PurpleAir( Fetcher ):
 			payload (Dict[str, Any]): Single-sensor payload returned by PurpleAir.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21838,6 +22104,7 @@ class PurpleAir( Fetcher ):
 					'_shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -21850,7 +22117,7 @@ class PurpleAir( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21890,6 +22157,7 @@ class PurpleAir( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_sensors( self, nwlng: float, nwlat: float, selng: float, selat: float,
@@ -21918,7 +22186,7 @@ class PurpleAir( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -21969,6 +22237,7 @@ class PurpleAir( Fetcher ):
 					'selat: float, location_type: int=0, max_age: int=0, '
 					'modified_since: int=0, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_sensor( self, sensor_index: int,
@@ -21984,7 +22253,7 @@ class PurpleAir( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22028,6 +22297,7 @@ class PurpleAir( Fetcher ):
 					'fetch_sensor( self, sensor_index: int, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='sensors', sensor_index: Optional[ int ]=None,
@@ -22064,7 +22334,7 @@ class PurpleAir( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22103,6 +22373,7 @@ class PurpleAir( Fetcher ):
 					'location_type: int=0, max_age: int=0, modified_since: int=0, '
 					'time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -22125,7 +22396,7 @@ class PurpleAir( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22172,6 +22443,7 @@ class PurpleAir( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class OpenAQ( Fetcher ):
@@ -22258,7 +22530,7 @@ class OpenAQ( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -22285,7 +22557,7 @@ class OpenAQ( Fetcher ):
 			Resolve the OpenAQ API key from environment variables.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22307,6 +22579,7 @@ class OpenAQ( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
 			exception.method = '_resolve_api_key( self ) -> Optional[ str ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, endpoint: str,
@@ -22325,7 +22598,7 @@ class OpenAQ( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22374,6 +22647,7 @@ class OpenAQ( Fetcher ):
 					'params: Optional[ Dict[ str, Any ] ]=None, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_location_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -22386,7 +22660,7 @@ class OpenAQ( Fetcher ):
 			payload (Dict[str, Any]): Location payload returned by OpenAQ.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22429,6 +22703,7 @@ class OpenAQ( Fetcher ):
 					'_shape_location_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _shape_latest_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
@@ -22441,7 +22716,7 @@ class OpenAQ( Fetcher ):
 			payload (Dict[str, Any]): Latest-measurement payload returned by OpenAQ.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22489,6 +22764,7 @@ class OpenAQ( Fetcher ):
 					'_shape_latest_rows( self, payload: Dict[ str, Any ] ) '
 					'-> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -22501,7 +22777,7 @@ class OpenAQ( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22539,6 +22815,7 @@ class OpenAQ( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_locations( self, country_id: Optional[ int ]=None,
@@ -22569,7 +22846,7 @@ class OpenAQ( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22611,6 +22888,7 @@ class OpenAQ( Fetcher ):
 					'radius: int=25000, providers_id: str=, parameters_id: str=, '
 					'limit: int=25, page: int=1, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_latest( self, location_id: int,
@@ -22626,7 +22904,7 @@ class OpenAQ( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22661,6 +22939,7 @@ class OpenAQ( Fetcher ):
 					'fetch_latest( self, location_id: int, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='locations', location_id: Optional[ int ]=None,
@@ -22697,7 +22976,7 @@ class OpenAQ( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22735,6 +23014,7 @@ class OpenAQ( Fetcher ):
 					'providers_id: str=, parameters_id: str=, limit: int=25, '
 					'page: int=1, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -22757,7 +23037,7 @@ class OpenAQ( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22804,6 +23084,7 @@ class OpenAQ( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class Firms( Fetcher ):
@@ -22887,7 +23168,7 @@ class Firms( Fetcher ):
 			Provide ordered member visibility.
 
 		Returns:
-			List[str]: Records produced by the operation for .
+			List[str]: Records returned by the provider.
 		"""
 		return [
 				'base_url',
@@ -22913,7 +23194,7 @@ class Firms( Fetcher ):
 			Resolve the NASA FIRMS MAP_KEY from environment variables.
 
 		Returns:
-			Optional[str]: Text result for .
+			Optional[str]: Text returned by the requested provider operation.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22935,6 +23216,7 @@ class Firms( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
 			exception.method = '_resolve_map_key( self ) -> Optional[ str ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request_csv( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -22949,7 +23231,7 @@ class Firms( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -22990,6 +23272,7 @@ class Firms( Fetcher ):
 					'request_csv( self, url: str, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]:
@@ -23002,7 +23285,7 @@ class Firms( Fetcher ):
 			csv_text (str): CSV response text.
 
 		Returns:
-			List[Dict[str, Any]]: Records produced by the operation for .
+			List[Dict[str, Any]]: Records returned by the provider.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -23033,6 +23316,7 @@ class Firms( Fetcher ):
 			exception.method = (
 					'_csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
@@ -23045,7 +23329,7 @@ class Firms( Fetcher ):
 			rows (List[Dict[str, Any]]): Normalized row dictionaries.
 
 		Returns:
-			Dict[str, Any]: Response metadata and parsed data for .
+			Dict[str, Any]: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -23080,6 +23364,7 @@ class Firms( Fetcher ):
 					'_summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_area( self, source: str, area_coordinates: str='world',
@@ -23110,7 +23395,7 @@ class Firms( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -23175,6 +23460,7 @@ class Firms( Fetcher ):
 					'day_range: int=1, date: str=, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch_data_availability( self, sensor: str='ALL',
@@ -23192,7 +23478,7 @@ class Firms( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -23227,6 +23513,7 @@ class Firms( Fetcher ):
 					'fetch_data_availability( self, sensor: str=ALL, time: int=20 ) '
 					'-> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='area', source: str='',
@@ -23255,7 +23542,7 @@ class Firms( Fetcher ):
 			time (int): Request timeout in seconds.
 
 		Returns:
-			Dict[str, Any] | None: Response metadata and parsed data for .
+			Dict[str, Any] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -23289,6 +23576,7 @@ class Firms( Fetcher ):
 					'area_coordinates: str=world, day_range: int=1, date: str=, '
 					'sensor: str=ALL, time: int=20 ) -> Dict[ str, Any ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -23311,7 +23599,7 @@ class Firms( Fetcher ):
 			required (list[str]): List of required parameter names.
 
 		Returns:
-			Dict[str, str] | None: Response metadata and parsed data for .
+			Dict[str, str] | None: Parsed provider data and request metadata, or None when unavailable.
 
 		Raises:
 			Error: Wraps and propagates the underlying provider or request exception.
@@ -23357,6 +23645,7 @@ class Firms( Fetcher ):
 					'create_schema( self, function: str, tool: str, description: str, '
 					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
 			)
+			Logger( ).write( exception )
 			raise exception
 
 class OpenSky( Fetcher ):
@@ -23507,6 +23796,7 @@ class OpenSky( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
 			exception.method = 'get_token( self, client_id: str, client_secret: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 	
 	def request( self, endpoint: str, params: Dict[ str, Any ], client_id: Optional[ str ]=None,
@@ -23586,6 +23876,7 @@ class OpenSky( Fetcher ):
 					'request( self, endpoint: str, params: Dict[ str, Any ], '
 					'client_id: str | None=None, client_secret: str | None=None ) -> Any'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def normalize_states( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
@@ -23652,6 +23943,7 @@ class OpenSky( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
 			exception.method = 'normalize_states( self, payload: Dict[ str, Any ] | None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def normalize_flights(
@@ -23718,6 +24010,7 @@ class OpenSky( Fetcher ):
 					'normalize_flights( self, payload: List[ Dict[ str, Any ] ] | None, '
 					'mode: str )'
 			)
+			Logger( ).write( exception )
 			raise exception
 	
 	def normalize_track( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
@@ -23777,6 +24070,7 @@ class OpenSky( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
 			exception.method = 'normalize_track( self, payload: Dict[ str, Any ] | None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def fetch( self, mode: str='states_bbox', icao24: str='', airport: str='',
