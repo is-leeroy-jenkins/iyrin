@@ -870,6 +870,7 @@ class Grok( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -918,6 +919,7 @@ class Grok( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -1268,6 +1270,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'model', model )
 			if not reasoning:
 				return None
 			
@@ -1375,6 +1378,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'model', model )
 			config_data: Dict[ str, Any ] = { 'temperature': float( temperature ),
 					'max_output_tokens': int( max_tokens ), 'top_p': float( top_p ),
 					'candidate_count': int( candidate_count ) }
@@ -1609,6 +1613,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k,
 				candidate_count=candidate_count, seed=seed, system=system,
@@ -1664,6 +1669,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k, candidate_count=candidate_count,
 				seed=seed, system=system, response_format=response_format,
@@ -2040,6 +2046,7 @@ class Claude( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k, system=system,
 				stop_sequences=stop_sequences, thinking=thinking, thinking_budget=thinking_budget,
@@ -2084,6 +2091,7 @@ class Claude( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k, system=system,
 				stop_sequences=stop_sequences, thinking=thinking, thinking_budget=thinking_budget,
@@ -2962,6 +2970,7 @@ class Chat( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -3149,6 +3158,7 @@ class Chat( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
