@@ -46,14 +46,14 @@ def chunk_identifier( document: object, position: int ) -> str:
     """Generate a deterministic identifier for a document chunk.
 
     Purpose:
-        Combines the source, ordinal position, and content of a chunk into a stable SHA-256 ID.
+    	Combines the source, ordinal position, and content of a chunk into a stable SHA-256 ID.
 
     Args:
-        document (object): Document-like value containing the source metadata and chunk text.
-        position (int): One-based position of the chunk within the source sequence.
+    	document (object): Document-like value containing the source metadata and chunk text.
+    	position (int): One-based position of the chunk within the source sequence.
 
     Returns:
-        str: Source-scoped, reproducible chunk identifier.
+    	str: Source-scoped, reproducible chunk identifier.
     """
     metadata = document.metadata or { }
     source = str( metadata.get( 'source', '' ) )
@@ -64,17 +64,17 @@ def vector_document_ids( documents: list[ object ] ) -> list[ str ]:
     """Resolve unique identifiers for a collection of document chunks.
 
     Purpose:
-        Preserves explicit chunk IDs and generates deterministic IDs for missing entries.
-        Duplicate identifiers are rejected before a vector store receives the documents.
+    	Preserves explicit chunk IDs and generates deterministic IDs for missing entries.
+    	Duplicate identifiers are rejected before a vector store receives the documents.
 
     Args:
-        documents (list[object]): Documents to identify for vector storage.
+    	documents (list[object]): Documents to identify for vector storage.
 
     Returns:
-        list[str]: Identifiers in the same order as the supplied documents.
+    	list[str]: Identifiers in the same order as the supplied documents.
 
     Raises:
-        ValueError: Raised when two documents resolve to the same identifier.
+    	ValueError: Raised when two documents resolve to the same identifier.
     """
     ids = [ ]
     for position, document in enumerate( documents, start=1 ):
