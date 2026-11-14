@@ -86,19 +86,16 @@ class OpenSkyLive( ):
 	def __init__( self, client_id: str='', client_secret: str='', timeout: int=20 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenSky REST API access. Credentials are optional because OpenSky can
 			serve anonymous requests subject to the provider's current access limits.
 
-			Parameters:
-			-----------
+		Args:
 			client_id (str): OpenSky API Client identifier.
 			client_secret (str): OpenSky API Client secret.
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -114,12 +111,10 @@ class OpenSkyLive( ):
 	def get_access_token( self ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Obtain an OpenSky OAuth2 access token using the configured API Client.
 
-			Returns:
-			--------
+		Returns:
 			str: Bearer access token, or an empty string when credentials were not supplied.
 
 		'''
@@ -147,19 +142,16 @@ class OpenSkyLive( ):
 			radius_degrees: float=2.0 ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve live aircraft state vectors within a geographic bounding box centered
 			on the supplied latitude and longitude.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Bounding-box center latitude.
 			longitude (float): Bounding-box center longitude.
 			radius_degrees (float): Decimal-degree half-width of the bounding box.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: OpenSky state-vector payload.
 
 		'''
@@ -216,16 +208,13 @@ class AdsbLolMilitary( ):
 	def __init__( self, timeout: int=20 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize ADSB.lol military-aircraft access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -237,19 +226,16 @@ class AdsbLolMilitary( ):
 			radius_nm: float=250.0 ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve ADSB.lol aircraft around a geographic point and retain records
 			whose database flags identify them as military aircraft.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Geographic center latitude.
 			longitude (float): Geographic center longitude.
 			radius_nm (float): Search radius in nautical miles.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: ADSB.lol payload containing only military-tagged aircraft.
 
 		'''
@@ -304,19 +290,16 @@ class AisStreamLive( ):
 			retry_delay: float=0.5 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize AIS Stream server-side WebSocket access with bounded reconnect behavior.
 
-			Parameters:
-			-----------
+		Args:
 			api_key (str): AIS Stream API key.
 			timeout (int): WebSocket connection and receive timeout in seconds.
 			max_retries (int): Maximum reconnect attempts after the initial connection.
 			retry_delay (float): Initial reconnect delay in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -338,21 +321,18 @@ class AisStreamLive( ):
 			duration_seconds: float=3.0 ) -> List[ Dict[ str, Any ] ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Collect a bounded sample of live AIS vessel position messages around a geographic
 			center point while reconnecting after transient WebSocket failures.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Bounding-box center latitude.
 			longitude (float): Bounding-box center longitude.
 			radius_degrees (float): Decimal-degree half-width of the bounding box.
 			max_messages (int): Maximum matching AIS messages returned.
 			duration_seconds (float): Maximum total receive window in seconds.
 
-			Returns:
-			--------
+		Returns:
 			List[Dict[str, Any]]: AIS Stream message envelopes containing vessel positions.
 
 		'''
@@ -472,16 +452,13 @@ class CelesTrakLive( ):
 	def __init__( self, timeout: int=20 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize current CelesTrak GP-data access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -492,19 +469,16 @@ class CelesTrakLive( ):
 	def fetch_group( self, group: str, limit: int=250 ) -> List[ Dict[ str, Any ] ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve current general-perturbation records for one CelesTrak satellite group
 			in OMM JSON format.
 
-			Parameters:
-			-----------
+		Args:
 			group (str): CelesTrak group identifier such as stations, visual, weather,
 				gps-ops, or active.
 			limit (int): Maximum records returned to the caller.
 
-			Returns:
-			--------
+		Returns:
 			List[Dict[str, Any]]: OMM records.
 
 		'''
@@ -530,18 +504,15 @@ class CelesTrakLive( ):
 	def propagate( self, record: Dict[ str, Any ], when: dt.datetime ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Propagate one OMM record to the requested UTC time and transform its TEME
 			position into Earth-fixed geodetic coordinates.
 
-			Parameters:
-			-----------
+		Args:
 			record (Dict[str, Any]): CelesTrak OMM record.
 			when (datetime): UTC propagation time.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Propagated latitude, longitude, altitude, velocity, and identity.
 
 		'''
@@ -609,18 +580,15 @@ class OverpassClient( ):
 	def __init__( self, timeout: int=30, retries: int=2, retry_delay: float=0.75 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize shared Overpass request identity, endpoints, and retry policy.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 			retries (int): Retries per endpoint for transient provider responses.
 			retry_delay (float): Initial exponential-backoff delay in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -643,17 +611,14 @@ class OverpassClient( ):
 	def execute( self, query: str ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Execute one Overpass query with request identification, bounded retry, and
 			alternate-endpoint fallback.
 
-			Parameters:
-			-----------
+		Args:
 			query (str): Overpass QL query.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Decoded Overpass JSON response.
 
 		'''
@@ -720,16 +685,13 @@ class OverpassInfrastructure( OverpassClient ):
 	def __init__( self, timeout: int=30 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenStreetMap Overpass infrastructure access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -745,20 +707,17 @@ class OverpassInfrastructure( OverpassClient ):
 			radius_km: float, categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve tagged OpenStreetMap infrastructure within a circular search radius.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Search-origin latitude.
 			longitude (float): Search-origin longitude.
 			radius_km (float): Search radius in kilometers.
 			categories (List[str]): Infrastructure categories to retrieve.
 			max_results (int): Maximum normalized Overpass elements to return.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Overpass elements with an added InfrastructureCategory field.
 
 		'''
@@ -831,16 +790,13 @@ class OverpassInfrastructure( OverpassClient ):
 	def classify_infrastructure( self, tags: Dict[ str, Any ] ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Classify one OpenStreetMap tag collection into a supported infrastructure category.
 
-			Parameters:
-			-----------
+		Args:
 			tags (Dict[str, Any]): OpenStreetMap feature tags.
 
-			Returns:
-			--------
+		Returns:
 			str: Infrastructure category, or an empty string when unsupported.
 
 		'''
@@ -887,16 +843,13 @@ class OverpassCameras( OverpassClient ):
 	def __init__( self, timeout: int=30 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenStreetMap Overpass camera access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -910,20 +863,17 @@ class OverpassCameras( OverpassClient ):
 			categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve tagged public camera features within a circular search radius.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Search-origin latitude.
 			longitude (float): Search-origin longitude.
 			radius_km (float): Search radius in kilometers.
 			categories (List[str]): Camera categories to retrieve.
 			max_results (int): Maximum normalized Overpass elements to return.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Overpass elements with an added CameraCategory field.
 
 		'''
@@ -996,16 +946,13 @@ class OverpassCameras( OverpassClient ):
 	def classify_camera( self, tags: Dict[ str, Any ] ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Classify one OpenStreetMap camera feature into a supported camera category.
 
-			Parameters:
-			-----------
+		Args:
 			tags (Dict[str, Any]): OpenStreetMap feature tags.
 
-			Returns:
-			--------
+		Returns:
 			str: Camera category, or an empty string when unsupported.
 
 		'''
@@ -1044,16 +991,13 @@ class OverpassMapLayers( OverpassClient ):
 	def __init__( self, timeout: int=30 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenStreetMap Overpass contextual map-layer access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -1074,20 +1018,17 @@ class OverpassMapLayers( OverpassClient ):
 			categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve selected contextual map features within a circular search radius.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Search-origin latitude.
 			longitude (float): Search-origin longitude.
 			radius_km (float): Search radius in kilometers.
 			categories (List[str]): Contextual map categories to retrieve.
 			max_results (int): Maximum normalized Overpass elements to return.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Overpass elements with an added MapLayerCategory field.
 
 		'''
@@ -1160,16 +1101,13 @@ class OverpassMapLayers( OverpassClient ):
 	def classify_feature( self, tags: Dict[ str, Any ] ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Classify one OpenStreetMap feature into a supported contextual map category.
 
-			Parameters:
-			-----------
+		Args:
 			tags (Dict[str, Any]): OpenStreetMap feature tags.
 
-			Returns:
-			--------
+		Returns:
 			str: Contextual map category, or an empty string when unsupported.
 
 		'''
