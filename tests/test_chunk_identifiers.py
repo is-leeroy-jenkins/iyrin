@@ -14,7 +14,7 @@ def load_identifier_functions( ):
     """Load production identifier helpers without importing optional model providers."""
     source = (ROOT / 'embedders.py').read_text( encoding='utf-8' )
     tree = ast.parse( source )
-    names = { 'chunk_identifier', 'vector_document_ids' }
+    names = { 'throw_if', 'chunk_identifier', 'vector_document_ids' }
     functions = [ node for node in tree.body
         if isinstance( node, ast.FunctionDef ) and node.name in names ]
     if { node.name for node in functions } != names:
