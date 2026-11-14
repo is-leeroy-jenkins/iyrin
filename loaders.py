@@ -1934,13 +1934,20 @@ class JsonLoader( Loader ):
 		"""
 		try:
 			throw_if( 'filepath', filepath )
+			throw_if( 'jq_schema', jq_schema )
+			if not isinstance( filepath, str ) or not isinstance( jq_schema, str ):
+				raise TypeError( 'filepath and jq_schema must be strings.' )
+			if content_key is not None:
+				throw_if( 'content_key', content_key )
+				if not isinstance( content_key, str ):
+					raise TypeError( 'content_key must be a string or None.' )
+			if type( is_text ) is not bool or type( is_lines ) is not bool:
+				raise TypeError( 'is_text and is_lines must be booleans.' )
 			self.file_path = self.verify_exists( filepath )
-			self.jq_schema = jq_schema if isinstance( jq_schema,
-				str ) and jq_schema.strip( ) else '.'
-			self.content_key = (content_key.strip( ) if isinstance( content_key,
-				str ) and content_key.strip( ) else None)
-			self.text_content = bool( is_text )
-			self.json_lines = bool( is_lines )
+			self.jq_schema = jq_schema
+			self.content_key = content_key
+			self.text_content = is_text
+			self.json_lines = is_lines
 			kwargs = { 'file_path': self.file_path, 'jq_schema': self.jq_schema,
 				'text_content': self.text_content, 'json_lines': self.json_lines, }
 			
@@ -1953,9 +1960,9 @@ class JsonLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'loaders'
 			exception.cause = 'JsonLoader'
-			exception.method = 'JsonLoader.load'
+			exception.method = 'load( self, filepath: str, jq_schema: str=".", content_key: Optional[ str ]=None, is_text: bool=True, is_lines: bool=False ) -> List[ Document ] | None'
 			Logger( ).write( exception )
 			raise exception
 	
