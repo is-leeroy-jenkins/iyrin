@@ -119,7 +119,8 @@ class BaseCache( ):
 
 		Returns:
 			Optional[ Dict[ str, Any ] ]: Result of the get operation.
-		"""raise NotImplementedError
+		"""
+		raise NotImplementedError
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
 		"""Store a key/value pair with an optional time-to-live.
@@ -134,7 +135,8 @@ class BaseCache( ):
 
 		Returns:
 			None: Completes the operation through side effects.
-		"""raise NotImplementedError
+		"""
+		raise NotImplementedError
 	
 	def delete( self, key: str ) -> None:
 		"""Remove a cache entry.
@@ -147,7 +149,8 @@ class BaseCache( ):
 
 		Returns:
 			None: Completes the operation through side effects.
-		"""raise NotImplementedError
+		"""
+		raise NotImplementedError
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
 		"""Clear entries matching an optional namespace.
@@ -160,7 +163,8 @@ class BaseCache( ):
 
 		Returns:
 			None: Completes the operation through side effects.
-		"""raise NotImplementedError
+		"""
+		raise NotImplementedError
 	
 	def contains( self, key: str ) -> bool:
 		"""Determine whether a cache entry exists.
@@ -173,7 +177,8 @@ class BaseCache( ):
 
 		Returns:
 			bool: Result of the contains operation.
-		"""try:
+		"""
+		try:
 			throw_if( 'key', key )
 			return self.get( key ) is not None
 		except Exception as e:
@@ -221,7 +226,8 @@ class BaseCache( ):
 
 		Returns:
 			Dict[ str, Any ]: Result of the stats operation.
-		"""raise NotImplementedError
+		"""
+		raise NotImplementedError
 
 class InMemoryCache( BaseCache ):
 	"""InMemoryCache persistence interface.
@@ -250,7 +256,8 @@ class InMemoryCache( BaseCache ):
 
 		Returns:
 			None: Completes the operation through side effects.
-		"""self.store = { }
+		"""
+		self.store = { }
 		self.hits = 0
 		self.misses = 0
 		self.sets = 0
@@ -546,7 +553,8 @@ class SQLiteCache( BaseCache ):
 
 		Returns:
 			None: Completes the operation through side effects.
-		"""self.path = path
+		"""
+		self.path = path
 		d = os.path.dirname( self.path )
 		if d:
 			os.makedirs( d, exist_ok=True )
@@ -894,7 +902,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			None: Completes the operation through side effects.
-		"""self.db_path = cfg.DB_PATH
+		"""
+		self.db_path = cfg.DB_PATH
 
 	def create_connection( self ) -> sqlite3.Connection:
 		"""Open a connection to the configured SQLite database.
@@ -904,7 +913,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			sqlite3.Connection: Result of the create connection operation.
-		"""self.db_path = cfg.DB_PATH
+		"""
+		self.db_path = cfg.DB_PATH
 		return sqlite3.connect( self.db_path )
 	
 	def list_tables( self ) -> List[ str ]:
@@ -915,7 +925,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			List[ str ]: Result of the list tables operation.
-		"""with self.create_connection( ) as conn:
+		"""
+		with self.create_connection( ) as conn:
 			_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
 			rows = conn.execute( _query ).fetchall( )
 			return [ r[ 0 ] for r in rows ]
@@ -931,7 +942,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			List[ Tuple ]: Result of the create schema operation.
-		"""with self.create_connection( ) as conn:
+		"""
+		with self.create_connection( ) as conn:
 			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
 	
 	def read_table( self, table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
@@ -1043,7 +1055,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			pd.DataFrame: Result of the make display safe operation.
-		"""display_df = df.copy( )
+		"""
+		display_df = df.copy( )
 		for col in display_df.columns:
 			display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
 		return display_df
@@ -1127,7 +1140,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			pd.DataFrame: Result of the apply filters operation.
-		"""st.subheader( 'Advanced Filters' )
+		"""
+		st.subheader( 'Advanced Filters' )
 		conditions = [ ]
 		col1, col2, col3 = st.columns( 3 )
 		column = col1.selectbox( 'Column', df.columns )
@@ -1161,7 +1175,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the create aggregation operation.
-		"""st.subheader( 'Aggregation Engine' )
+		"""
+		st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
 		if not numeric_cols:
 			st.info( 'No numeric columns available.' )
@@ -1308,7 +1323,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the convert dataframe operation.
-		"""columns = [ ]
+		"""
+		columns = [ ]
 		for col in df.columns:
 			sql_type = self.get_sqlite_type( df[ col ].dtype )
 			safe_col = col.replace( ' ', '_' )
@@ -1330,7 +1346,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the insert data operation.
-		"""df = df.copy( )
+		"""
+		df = df.copy( )
 		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
 		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
 		stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
@@ -1522,7 +1539,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the get indexes operation.
-		"""with self.create_connection( ) as conn:
+		"""
+		with self.create_connection( ) as conn:
 			rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
 			return rows
 	
@@ -1539,7 +1557,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the add column operation.
-		"""column = self.create_identifier( column )
+		"""
+		column = self.create_identifier( column )
 		col_type = col_type.upper( )
 		with self.create_connection( ) as conn:
 			conn.execute( f'ALTER TABLE "{table}" ADD COLUMN "{column}" {col_type};' )
@@ -1641,7 +1660,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the create profile table operation.
-		"""df = self.read_table( table )
+		"""
+		df = self.read_table( table )
 		profile_rows = [ ]
 		total_rows = len( df )
 		for col in df.columns:
@@ -1675,7 +1695,8 @@ class SQLiteDatabase( ):
 
 		Returns:
 			Any: Result of the drop column operation.
-		"""if not table or not column:
+		"""
+		if not table or not column:
 			raise ValueError( 'Table and column required.' )
 		with self.create_connection( ) as conn:
 			# ------------------------------------------------------------
