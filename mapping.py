@@ -546,6 +546,8 @@ class Geocoder( ):
 
 		"""
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
 			self.latitude, self.longitude = self.validate_coordinates( latitude, longitude )
 			self.key = self.key_for( 'reverse_geocode', [ str( self.latitude ),
 				str( self.longitude ) ] )
@@ -853,6 +855,7 @@ class DistanceMatrix( ):
 
 		"""
 		try:
+			throw_if( 'element', element )
 			throw_if( 'origin', origin )
 			throw_if( 'destination', destination )
 			throw_if( 'mode', mode )
@@ -1544,6 +1547,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			latitude, longitude = self.validate_coordinates( lat, lng )
 			timestamp_value = int( time.time( ) )
 			self.latitude = latitude
@@ -1579,6 +1584,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			self.data = self.lookup( lat, lng )
 			if not isinstance( self.data, dict ):
 				return None
@@ -1611,6 +1618,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			self.data = self.lookup( lat, lng )
 			if not isinstance( self.data, dict ):
 				return None
@@ -1652,6 +1661,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			self.data = self.lookup( lat, lng )
 			if not isinstance( self.data, dict ):
 				return None
