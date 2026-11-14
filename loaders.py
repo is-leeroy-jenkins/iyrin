@@ -267,6 +267,7 @@ class Loader( ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'path', path )
 			self.file_path = self.verify_exists( path )
 			self.encoding = encoding
 			self.csv_args = csv_args
@@ -438,7 +439,7 @@ class TextLoader( Loader ):
 			
 			self.documents = self.splitter.create_documents( texts=[ self.raw_text ] )
 			for document in self.documents:
-				if not isinstance( getattr( document, 'metadata', None ), dict ):
+				if not isinstance( document.metadata, dict ):
 					document.metadata = { }
 				
 				document.metadata.setdefault( 'source',
@@ -487,7 +488,7 @@ class TextLoader( Loader ):
 			
 			self.documents = self.splitter.create_documents( texts=[ self.raw_text ] )
 			for document in self.documents:
-				if not isinstance( getattr( document, 'metadata', None ), dict ):
+				if not isinstance( document.metadata, dict ):
 					document.metadata = { }
 				
 				document.metadata.setdefault( 'source',
@@ -723,6 +724,7 @@ class XmlLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'filepath', filepath )
 			self.file_path = self.verify_exists( filepath )
 			self.loader = UnstructuredXMLLoader( file_path=self.file_path, mode='elements' )
 			self.documents = self.loader.load( )
@@ -784,6 +786,7 @@ class XmlLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'filepath', filepath )
 			self.file_path = self.verify_exists( filepath )
 			parser = etree.XMLParser( recover=True, remove_comments=True, remove_blank_text=True )
 			self.xml_tree = etree.parse( self.file_path, parser )
@@ -817,6 +820,7 @@ class XmlLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'xpath', xpath )
 			if self.xml_root is None:
 				raise ValueError( 'XML tree not loaded. Call load_tree() first.' )
 			elements = self.xml_root.xpath( xpath, namespaces=self.xml_namespaces )
@@ -931,6 +935,7 @@ class WebLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'urls', urls )
 			if self.recursive:
 				return self.load_recursive( urls=urls, depth=depth, timeout=timeout, ignore=ignore,
 					prevent_outside=prevent_outside )
@@ -1259,6 +1264,7 @@ class PdfLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'filepath', filepath )
 			throw_if( 'path', filepath )
 			self.file_path = self.verify_exists( filepath )
 			self.mode = self._normalize_mode( mode )
@@ -2528,6 +2534,7 @@ class PowerPointLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'path', path )
 			return self.load( path, mode='elements' )
 		
 		except Exception as e:
@@ -2798,6 +2805,7 @@ class WebCrawler( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'urls', urls )
 			if self.recursive:
 				return self.load_recursive( urls=urls, depth=depth, timeout=timeout, ignore=ignore,
 					prevent_outside=prevent_outside )
@@ -3190,6 +3198,9 @@ class OneDriveDocLoader( Loader ):
 		"""
 		try:
 			throw_if( 'drive_id', drive_id )
+			throw_if( 'auth_with_token', auth_with_token )
+			if type( auth_with_token ) is not bool:
+				raise TypeError( 'auth_with_token must be a boolean.' )
 			self.drive_id = drive_id
 			self.folder_path = folder_path
 			self.object_ids = object_ids
@@ -3227,6 +3238,7 @@ class OneDriveDocLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'path', path )
 			throw_if( 'id', id )
 			self.drive_id = id
 			self.file_path = path

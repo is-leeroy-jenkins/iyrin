@@ -1514,8 +1514,8 @@ class TextParser( Processor ):
 			Error: Raised when validation or processing fails.
 		"""
 		try:
-			throw_if( 'src', source )
-			throw_if( 'dest', destination )
+			throw_if( 'source', source )
+			throw_if( 'destination', destination )
 			if not os.path.exists( source ):
 				raise FileNotFoundError( f'File not found: {source}' )
 			elif not os.path.exists( destination ):
@@ -1571,8 +1571,8 @@ class TextParser( Processor ):
 			Error: Raised when validation or processing fails.
 		"""
 		try:
-			throw_if( 'src', source )
-			throw_if( 'dest', destination )
+			throw_if( 'source', source )
+			throw_if( 'destination', destination )
 			if not os.path.exists( source ):
 				raise FileNotFoundError( f'File not found: {source}' )
 			elif not os.path.exists( destination ):
@@ -1676,6 +1676,7 @@ class TextParser( Processor ):
 			Error: Raised when validation or processing fails.
 		"""
 		try:
+			throw_if( 'source', source )
 			throw_if( 'filepath', source )
 			throw_if( 'destination', destination )
 			if not os.path.exists( source ):
@@ -1847,7 +1848,7 @@ class TextParser( Processor ):
 		try:
 			throw_if( 'query', query )
 			throw_if( 'tokens', tokens )
-			throw_if( 'embedding', embeddings )
+			throw_if( 'embeddings', embeddings )
 			throw_if( 'model', model )
 			query_vec = model.encode( [ query ] )
 			sims = cosine_similarity( query_vec, embeddings )[ 0 ]
@@ -1859,7 +1860,7 @@ class TextParser( Processor ):
 			exception.cause = 'TextParser'
 			exception.method = ('semantic_search( self, query: str, tokens: List[ str ], '
 			                    'embeddings: np.ndarray, model: SentenceTransformer,  '
-			                    'top_k: int=5 ) -> List[ tuple[ str, float ] ]')
+			                    'top: int=5 ) -> List[ tuple[ str, float ] ]')
 			Logger( ).write( exception )
 			raise exception
 
@@ -2140,7 +2141,7 @@ class NltkParser( Processor ):
 			tree = nltk.ne_chunk( self.tagged_tokens )
 			self.named_entities = [ ]
 			for node in tree:
-				if hasattr( node, 'label' ):
+				if isinstance( node, nltk.Tree ):
 					label = node.label( )
 					entity_text = ' '.join( token for token, _ in node.leaves( ) if
 						isinstance( token, str ) and token.strip( ) )
@@ -2153,7 +2154,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'named_entity_recogniztion( self, text: str ) -> str'
+			exception.method = 'named_entity_recognition( self, text: str ) -> List[ Tuple[ str, str ] ] | None'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3229,7 +3230,7 @@ class PdfParser( Processor ):
 						break
 					
 					tables = page.find_tables( )
-					for table in getattr( tables, 'tables', [ ] ):
+					for table in tables.tables if tables is not None else [ ]:
 						self.tables.append( pd.DataFrame( table.extract( ) ) )
 			
 			return self.tables

@@ -59,6 +59,7 @@ from google import genai
 from google.genai import types
 from openai import OpenAI
 from pathlib import Path
+from collections.abc import Iterable
 from typing import Any, Dict, Optional, Pattern, List, Tuple
 from requests import Response
 from xai_sdk import Client as Xai
@@ -194,6 +195,7 @@ class Grok( Generator ):
 	    api_key (Optional[str]): Provider credential loaded from application configuration.
 	    query (Optional[str]): Most recent search text or model prompt submitted by the instance.
 	    params (Optional[Dict[str, Any]]): Request parameters assembled for the most recent provider call.
+    payload (Dict[str, Any]): Validated request data for the current API call.
 	    temperature (Optional[float]): Sampling temperature applied to eligible generation requests.
 	    max_tokens (Optional[int]): Maximum output-token allowance for generation requests.
 	    top_p (Optional[float]): Nucleus-sampling threshold applied to eligible generation requests.
@@ -218,6 +220,7 @@ class Grok( Generator ):
 	api_key: Optional[ str ]
 	query: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
+	payload: Dict[ str, Any ]
 	temperature: Optional[ float ]
 	max_tokens: Optional[ int ]
 	top_p: Optional[ float ]
@@ -256,6 +259,7 @@ class Grok( Generator ):
 		self.content = None
 		self.query = None
 		self.params = None
+		self.payload = { }
 		self.response = None
 		self.system_instructions = None
 		self.web_search = False
@@ -570,10 +574,18 @@ class Grok( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'output_text' ) and response.output_text:
+			try:
+				available_output_text = response.output_text
+			except AttributeError:
+				available_output_text = None
+			if available_output_text:
 				return str( response.output_text )
 			
-			if hasattr( response, 'text' ) and response.text:
+			try:
+				available_text = response.text
+			except AttributeError:
+				available_text = None
+			if available_text:
 				return str( response.text )
 			
 			if isinstance( response, dict ):
@@ -600,19 +612,28 @@ class Grok( Generator ):
 					if parts:
 						return '\n'.join( parts ).strip( )
 			
-			if hasattr( response, '__iter__' ) and not isinstance( response, (str, bytes, dict) ):
+			if isinstance( response, Iterable ) and not isinstance( response, (str, bytes, dict) ):
 				parts: List[ str ]=[ ]
 				
 				for event in response:
-					event_type = getattr( event, 'type', '' )
+					try:
+						event_type = event.type
+					except AttributeError:
+						event_type = ''
 					
 					if event_type == 'response.output_text.delta':
-						delta = getattr( event, 'delta', '' )
+						try:
+							delta = event.delta
+						except AttributeError:
+							delta = ''
 						if delta:
 							parts.append( str( delta ) )
 					
 					elif event_type == 'response.completed':
-						final_response = getattr( event, 'response', None )
+						try:
+							final_response = event.response
+						except AttributeError:
+							final_response = None
 						if final_response is not None:
 							text = self.extract_output_text( final_response )
 							if text:
@@ -621,16 +642,25 @@ class Grok( Generator ):
 				if parts:
 					return ''.join( parts )
 			
-			output = getattr( response, 'output', None )
+			try:
+				output = response.output
+			except AttributeError:
+				output = None
 			if output:
 				parts: List[ str ]=[ ]
 				
 				for item in output:
-					content = getattr( item, 'content', None )
+					try:
+						content = item.content
+					except AttributeError:
+						content = None
 					
 					if content:
 						for block in content:
-							text = getattr( block, 'text', None )
+							try:
+								text = block.text
+							except AttributeError:
+								text = None
 							
 							if text:
 								parts.append( str( text ) )
@@ -655,7 +685,7 @@ class Grok( Generator ):
 		    Submits an assembled payload through the available provider response or chat endpoint.
 
 		Args:
-		    payload (Dict[str, Any]): Validated request dictionary forwarded to the provider client.
+		    payload (Dict[str, Any]): Request dictionary forwarded to the configured provider after validation.
 
 		Returns:
 		    Any: Provider, loader, or normalized application value produced by the operation.
@@ -665,47 +695,60 @@ class Grok( Generator ):
 		"""
 		try:
 			throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dictionary.' )
+			self.payload = payload
 			
-			if hasattr( self.client, 'responses' ) and hasattr( self.client.responses, 'create' ):
-				return self.client.responses.create( **payload )
-			
-			if hasattr( self.client, 'chat' ) and hasattr( self.client.chat, 'create' ):
-				messages = payload.get( 'input', [ ] )
+			try:
+				responses_create = self.client.responses.create
+			except AttributeError:
+				responses_create = None
+
+			if responses_create is not None:
+				return responses_create( **self.payload )
+
+			try:
+				chat_create = self.client.chat.create
+			except AttributeError:
+				chat_create = None
+
+			if chat_create is not None:
+				messages = self.payload.get( 'input', [ ] )
 				
 				if isinstance( messages, str ):
 					messages = [ { 'role': 'user', 'content': messages } ]
 				
-				chat_payload = { 'model': payload.get( 'model' ),
-						'messages': messages, 'stream': payload.get( 'stream', False ) }
+				chat_payload = { 'model': self.payload.get( 'model' ),
+						'messages': messages, 'stream': self.payload.get( 'stream', False ) }
 				
-				if payload.get( 'temperature' ) is not None:
-					chat_payload[ 'temperature' ] = payload.get( 'temperature' )
+				if self.payload.get( 'temperature' ) is not None:
+					chat_payload[ 'temperature' ] = self.payload.get( 'temperature' )
 				
-				if payload.get( 'top_p' ) is not None:
-					chat_payload[ 'top_p' ] = payload.get( 'top_p' )
+				if self.payload.get( 'top_p' ) is not None:
+					chat_payload[ 'top_p' ] = self.payload.get( 'top_p' )
 				
-				if payload.get( 'max_output_tokens' ) is not None:
-					chat_payload[ 'max_tokens' ] = payload.get( 'max_output_tokens' )
+				if self.payload.get( 'max_output_tokens' ) is not None:
+					chat_payload[ 'max_tokens' ] = self.payload.get( 'max_output_tokens' )
 				
-				if payload.get( 'tools' ):
-					chat_payload[ 'tools' ] = payload.get( 'tools' )
+				if self.payload.get( 'tools' ):
+					chat_payload[ 'tools' ] = self.payload.get( 'tools' )
 				
-				if payload.get( 'tool_choice' ):
-					chat_payload[ 'tool_choice' ] = payload.get( 'tool_choice' )
+				if self.payload.get( 'tool_choice' ):
+					chat_payload[ 'tool_choice' ] = self.payload.get( 'tool_choice' )
 				
-				if payload.get( 'stop' ):
-					chat_payload[ 'stop' ] = payload.get( 'stop' )
+				if self.payload.get( 'stop' ):
+					chat_payload[ 'stop' ] = self.payload.get( 'stop' )
 				
-				if payload.get( 'response_format' ):
-					chat_payload[ 'response_format' ] = payload.get( 'response_format' )
+				if self.payload.get( 'response_format' ):
+					chat_payload[ 'response_format' ] = self.payload.get( 'response_format' )
 				
-				if payload.get( 'reasoning_effort' ):
-					chat_payload[ 'reasoning_effort' ] = payload.get( 'reasoning_effort' )
+				if self.payload.get( 'reasoning_effort' ):
+					chat_payload[ 'reasoning_effort' ] = self.payload.get( 'reasoning_effort' )
 				
-				if payload.get( 'reasoning' ):
-					chat_payload[ 'reasoning' ] = payload.get( 'reasoning' )
+				if self.payload.get( 'reasoning' ):
+					chat_payload[ 'reasoning' ] = self.payload.get( 'reasoning' )
 				
-				return self.client.chat.create( **chat_payload )
+				return chat_create( **chat_payload )
 			
 			raise RuntimeError( 'The xAI client does not expose responses.create or chat.create.' )
 		
@@ -854,6 +897,7 @@ class Grok( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -902,6 +946,7 @@ class Grok( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -1252,6 +1297,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'model', model )
 			if not reasoning:
 				return None
 			
@@ -1275,8 +1321,12 @@ class Gemini( Generator ):
 			if include_thoughts:
 				thinking_data[ 'include_thoughts' ] = True
 			
-			if hasattr( types, 'ThinkingConfig' ):
-				return types.ThinkingConfig( **thinking_data )
+			try:
+				thinking_constructor = types.ThinkingConfig
+			except AttributeError:
+				thinking_constructor = None
+			if thinking_constructor is not None:
+				return thinking_constructor( **thinking_data )
 			
 			return thinking_data
 		
@@ -1307,8 +1357,14 @@ class Gemini( Generator ):
 			if not grounding:
 				return [ ]
 			
-			if hasattr( types, 'Tool' ) and hasattr( types, 'GoogleSearch' ):
-				return [ types.Tool( google_search=types.GoogleSearch( ) ) ]
+			try:
+				tool_constructor = types.Tool
+				search_constructor = types.GoogleSearch
+			except AttributeError:
+				tool_constructor = None
+				search_constructor = None
+			if tool_constructor is not None and search_constructor is not None:
+				return [ tool_constructor( google_search=search_constructor( ) ) ]
 			
 			return [ { 'google_search': { } } ]
 		
@@ -1359,6 +1415,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'model', model )
 			config_data: Dict[ str, Any ] = { 'temperature': float( temperature ),
 					'max_output_tokens': int( max_tokens ), 'top_p': float( top_p ),
 					'candidate_count': int( candidate_count ) }
@@ -1398,8 +1455,12 @@ class Gemini( Generator ):
 			if thinking_config:
 				config_data[ 'thinking_config' ] = thinking_config
 			
-			if hasattr( types, 'GenerateContentConfig' ):
-				return types.GenerateContentConfig( **config_data )
+			try:
+				config_constructor = types.GenerateContentConfig
+			except AttributeError:
+				config_constructor = None
+			if config_constructor is not None:
+				return config_constructor( **config_data )
 			
 			return config_data
 		
@@ -1431,26 +1492,42 @@ class Gemini( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'text' ) and response.text:
+			try:
+				available_text = response.text
+			except AttributeError:
+				available_text = None
+			if available_text:
 				return str( response.text )
 			
 			if isinstance( response, dict ):
 				if response.get( 'text' ):
 					return str( response.get( 'text' ) )
 			
-			candidates = getattr( response, 'candidates', None )
+			try:
+				candidates = response.candidates
+			except AttributeError:
+				candidates = None
 			if candidates:
 				parts: List[ str ]=[ ]
 				
 				for candidate in candidates:
-					content = getattr( candidate, 'content', None )
-					candidate_parts = getattr( content, 'parts', None ) if content else None
+					try:
+						content = candidate.content
+					except AttributeError:
+						content = None
+					try:
+						candidate_parts = content.parts if content else None
+					except AttributeError:
+						candidate_parts = None
 					
 					if not candidate_parts:
 						continue
 					
 					for part in candidate_parts:
-						text = getattr( part, 'text', None )
+						try:
+							text = part.text
+						except AttributeError:
+							text = None
 						
 						if text:
 							parts.append( str( text ) )
@@ -1593,6 +1670,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k,
 				candidate_count=candidate_count, seed=seed, system=system,
@@ -1648,6 +1726,7 @@ class Gemini( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k, candidate_count=candidate_count,
 				seed=seed, system=system, response_format=response_format,
@@ -1862,12 +1941,22 @@ class Claude( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'content' ) and response.content:
+			try:
+				available_content = response.content
+			except AttributeError:
+				available_content = None
+			if available_content:
 				_parts = [ ]
 				for _block in response.content:
-					_type = getattr( _block, 'type', None )
+					try:
+						_type = _block.type
+					except AttributeError:
+						_type = None
 					if _type == 'text':
-						_text = getattr( _block, 'text', '' )
+						try:
+							_text = _block.text
+						except AttributeError:
+							_text = ''
 						if _text:
 							_parts.append( _text )
 				if _parts:
@@ -2024,6 +2113,7 @@ class Claude( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k, system=system,
 				stop_sequences=stop_sequences, thinking=thinking, thinking_budget=thinking_budget,
@@ -2068,6 +2158,7 @@ class Claude( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'query', query )
 			return self.fetch( query=query, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, top_k=top_k, system=system,
 				stop_sequences=stop_sequences, thinking=thinking, thinking_budget=thinking_budget,
@@ -2183,14 +2274,24 @@ class Mistral( Generator ):
 			if response is None:
 				return ''
 			
-			if hasattr( response, 'choices' ) and response.choices:
+			try:
+				available_choices = response.choices
+			except AttributeError:
+				available_choices = None
+			if available_choices:
 				choice = response.choices[ 0 ]
 				
-				if hasattr( choice, 'message' ) and choice.message is not None:
+				try:
 					message = choice.message
+				except AttributeError:
+					message = None
+				if message is not None:
 					
-					if hasattr( message, 'content' ):
+					try:
 						content = message.content
+					except AttributeError:
+						content = None
+					if content is not None:
 						
 						if isinstance( content, str ):
 							return content.strip( )
@@ -2200,8 +2301,11 @@ class Mistral( Generator ):
 							for item in content:
 								if isinstance( item, str ) and item.strip( ):
 									parts.append( item.strip( ) )
-								elif hasattr( item, 'text' ):
-									text_value = getattr( item, 'text', '' )
+								else:
+									try:
+										text_value = item.text
+									except AttributeError:
+										text_value = ''
 									if text_value:
 										parts.append( str( text_value ).strip( ) )
 							
@@ -2742,7 +2846,11 @@ class Chat( Generator ):
 		try:
 			throw_if( 'response', response )
 			
-			if hasattr( response, 'output_text' ) and response.output_text:
+			try:
+				available_output_text = response.output_text
+			except AttributeError:
+				available_output_text = None
+			if available_output_text:
 				return str( response.output_text )
 			
 			if isinstance( response, dict ):
@@ -2751,35 +2859,57 @@ class Chat( Generator ):
 				if response.get( 'text' ):
 					return str( response.get( 'text' ) )
 			
-			if hasattr( response, '__iter__' ) and not isinstance( response, (str, bytes, dict) ):
+			if isinstance( response, Iterable ) and not isinstance( response, (str, bytes, dict) ):
 				parts: List[ str ]=[ ]
 				
 				for event in response:
-					event_type = getattr( event, 'type', '' )
+					try:
+						event_type = event.type
+					except AttributeError:
+						event_type = ''
 					
 					if event_type == 'response.output_text.delta':
-						delta = getattr( event, 'delta', '' )
+						try:
+							delta = event.delta
+						except AttributeError:
+							delta = ''
 						if delta:
 							parts.append( str( delta ) )
 					
 					elif event_type == 'response.completed':
-						final_response = getattr( event, 'response', None )
-						if final_response is not None and hasattr( final_response, 'output_text' ):
-							text = str( final_response.output_text or '' )
+						try:
+							final_response = event.response
+						except AttributeError:
+							final_response = None
+						try:
+							final_output_text = final_response.output_text if final_response is not None else None
+						except AttributeError:
+							final_output_text = None
+						if final_output_text is not None:
+							text = str( final_output_text or '' )
 							if text:
 								return text
 				
 				if parts:
 					return ''.join( parts )
 			
-			output = getattr( response, 'output', None )
+			try:
+				output = response.output
+			except AttributeError:
+				output = None
 			if output:
 				parts: List[ str ]=[ ]
 				for item in output:
-					content = getattr( item, 'content', None )
+					try:
+						content = item.content
+					except AttributeError:
+						content = None
 					if content:
 						for block in content:
-							text = getattr( block, 'text', None )
+							try:
+								text = block.text
+							except AttributeError:
+								text = None
 							if text:
 								parts.append( str( text ) )
 				
@@ -2946,6 +3076,7 @@ class Chat( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -2982,10 +3113,18 @@ class Chat( Generator ):
 			self.response = self.client.images.generate( model='gpt-image-1',
 				prompt=self.input_text, size='1024x1024' )
 			
-			if hasattr( self.response, 'data' ) and self.response.data:
+			try:
+				available_data = self.response.data
+			except AttributeError:
+				available_data = None
+			if available_data:
 				image = self.response.data[ 0 ]
 				
-				if hasattr( image, 'url' ) and image.url:
+				try:
+					available_url = image.url
+				except AttributeError:
+					available_url = None
+				if available_url:
 					return image.url
 			
 			return str( self.response )
@@ -3133,6 +3272,7 @@ class Chat( Generator ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'prompt', prompt )
 			return self.fetch( prompt=prompt, model=model, temperature=temperature,
 				max_tokens=max_tokens, top_p=top_p, seed=seed, system=system,
 				response_format=response_format, reasoning_effort=reasoning_effort,
@@ -3257,7 +3397,11 @@ class Chat( Generator ):
 		Returns:
 		    List[str]: Ordered values or records produced by the operation.
 		"""
-		if hasattr( cfg, 'GPT_MODELS' ) and cfg.GPT_MODELS:
+		try:
+			available_GPT_MODELS = cfg.GPT_MODELS
+		except AttributeError:
+			available_GPT_MODELS = None
+		if available_GPT_MODELS:
 			return list( cfg.GPT_MODELS )
 		
 		return [ 'gpt-5.4', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-5.1', 'gpt-5.2', 'gpt-4.1' ]
