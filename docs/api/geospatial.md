@@ -2,27 +2,27 @@
 
 ## Maps
 
-::: maps.Maps
+::: mapping.Map
 
 ## Geocoder
 
-::: geocode.Geocoder
+::: mapping.Geocoder
 
 ## Place
 
-::: places.Place
+::: mapping.Place
 
 ## Distance Matrix
 
-::: distances.DistanceMatrix
+::: mapping.DistanceMatrix
 
 ## Timezone
 
-::: timezones.Timezone
+::: mapping.Timezone
 
 ## Static Map
 
-::: staticmaps.StaticMap
+::: mapping.StaticMap
 
 ## Excel
 
