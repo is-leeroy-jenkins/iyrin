@@ -151,6 +151,9 @@ class Processor( ):
 		and cleaned-text fields used across the processing workflow.
 		
 	Attributes:
+		cleaned_text (str | None): Latest cleaned text retained for downstream processing.
+		lowercase (str | None): Text converted to lowercase for normalization workflows.
+		chunks (list | None): List of document chunks generated during processing.
 		lemmatizer: WordNet lemmatizer used to reduce tokens to their canonical lexical forms.
 		stemmer: Porter stemmer used to reduce tokens to word stems.
 		file_path: Path of the file currently being loaded, parsed, cleaned, or exported.
@@ -252,6 +255,9 @@ class TextParser( Processor ):
 		Analysis, and Tokenization tabs.
 	
 	Attributes:
+		vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.
+		tokenizer (object | None): Tokenizer used by the active text parsing workflow.
+		translator (object | None): Character translation mapping for text normalization.
 		lowercase: Runtime state used by ``TextParser`` during processing operations.
 		cleaned_text: Runtime state used by ``TextParser`` during processing operations.
 		cleaned_lines: Runtime state used by ``TextParser`` during processing operations.
@@ -288,6 +294,9 @@ class TextParser( Processor ):
 		Purpose:
 			Initializes parser state, reusable helper objects, and runtime caches used by later
 			processing methods.
+
+		Returns:
+			None: Initializes the class processing state.
 		"""
 		super( ).__init__( )
 		self.PUNCTUATION = PUNCTUATION
@@ -1883,6 +1892,9 @@ class NltkParser( Processor ):
 		Purpose:
 			Initializes parser state, reusable helper objects, and runtime caches used by later
 			processing methods.
+
+		Returns:
+			None: Initializes the class processing state.
 		"""
 		super( ).__init__( )
 		self.initialize_resources( )
@@ -2231,6 +2243,7 @@ class WordParser( Processor ):
 		metadata, and cleaned text for downstream processing and analysis.
 	
 	Attributes:
+		page_text (str | None): Current document page text used for Word processing.
 		sentences: Runtime state used by ``WordParser`` during processing operations.
 		cleaned_sentences: Runtime state used by ``WordParser`` during processing
 			operations.
@@ -2259,6 +2272,9 @@ class WordParser( Processor ):
 		
 		Args:
 			filepath: Filepath value used by the processing operation. Expected type: ``str``.
+
+		Returns:
+			None: Initializes the class processing state.
 		"""
 		super( ).__init__( )
 		self.file_path = filepath
@@ -2456,6 +2472,13 @@ class PdfParser( Processor ):
 		and rebuild PDF text for downstream processing.
 	
 	Attributes:
+		page (str | None): Current page text or identifier.
+		file_path (str | None): Current PDF file path.
+		tables (list | None): Tables extracted from the current PDF.
+		clean_lines (list | None): Lines retained after PDF cleanup.
+		blocks (list | None): Geometric PDF content blocks.
+		lines (list | None): Extracted text lines from the active PDF.
+		pages (list | None): Parsed PDF page structures.
 		strip_headers: Runtime state used by ``PdfParser`` during processing operations.
 		minimum_length: Runtime state used by ``PdfParser`` during processing operations.
 		extract_tables_enabled: Runtime state used by ``PdfParser`` during processing
@@ -2485,6 +2508,9 @@ class PdfParser( Processor ):
 				``10``.
 			tables: Tables value used by the processing operation. Expected type: ``bool``.
 				Defaults to ``True``.
+
+		Returns:
+			None: Initializes the class processing state.
 		"""
 		super( ).__init__( )
 		self.strip_headers = headers
