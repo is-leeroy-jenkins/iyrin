@@ -666,7 +666,10 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = 'batch_freeform( self, *kwargs )'
+			exception.method = (
+				"batch_freeform( self, addresses: List[ str ], country: str='US' ) -> List[ Dict[ str, "
+				"Any ] ]:"
+			)
 			raise exception
 
 class DistanceMatrix( ):
@@ -891,7 +894,10 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = 'flatten_element( self, **args )'
+			exception.method = (
+				"flatten_element( self, origin: str, destination: str, mode: str, element: Dict[ str, "
+				"Any ] ) -> Dict[ str, Any ]:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -973,7 +979,12 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "matrix( self, **args )"
+			exception.method = (
+				"matrix( self, origins: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | "
+				"AddressOrCoord, destinations: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | "
+				"AddressOrCoord, mode: str='driving', departure_time: str='' ) -> List[ Dict[ str, Any "
+				"] ]:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -1237,7 +1248,10 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'component_value( self, *args )'
+			exception.method = (
+				"component_value( self, components: List[ Dict[ str, Any ] ], kind: str, want_long: "
+				"bool = False ) -> Optional[ str ]:"
+			)
 			raise exception
 	
 	def flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[
@@ -1289,7 +1303,11 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'flatten_place_details( self, *args )'
+			exception.method = (
+				"flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[ "
+				"str, Any ]: \"\"\" Purpose: Convert a Place Details result into the same flattened "
+				"output shape used by Geocoder.flatten_geocode(...). Args: details (Dict[str, Any]):"
+			)
 			raise exception
 	
 	def place_details( self, place_id: str ) -> Dict[ str, Any ] | None:
@@ -1330,7 +1348,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'place_details( self, *args )'
+			exception.method = "place_details( self, place_id: str ) -> Dict[ str, Any ] | None:"
 			raise exception
 	
 	def text_to_location( self, query: str, country: str = 'US' ) -> Dict[ str, Any ] | None:
@@ -1391,7 +1409,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'text_to_location( self, *args )'
+			exception.method = "text_to_location( self, query: str, country: str = 'US' ) -> Dict[ str, Any ] | None:"
 			raise exception
 	
 	def search_candidates( self, query: str, country: str = 'US', lmt: int = 5 ) -> List[
@@ -1431,7 +1449,12 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'search_candidates( self, *args )'
+			exception.method = (
+				"search_candidates( self, query: str, country: str = 'US', lmt: int = 5 ) -> List[ "
+				"Dict[ str, Any ] ]: \"\"\" Purpose: Return multiple Places Text Search candidates for a "
+				"query. This is intended for future UI candidate-selection workflows. Args: query "
+				"(str):"
+			)
 			raise exception
 
 class Timezone:
@@ -1881,7 +1904,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = 'validate_coordinate( self, *args )'
+			exception.method = "validate_coordinate( self, lat: float, lng: float ) -> tuple:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2003,7 +2026,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = 'pin( self, *args )'
+			exception.method = "pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2067,7 +2090,10 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMapUrl'
-			exception.method = 'pins( self, *args )'
+			exception.method = (
+				"pins( self, points: list, zoom: int=0, size: int='600x400', maptype: int='roadmap', "
+				"color: int='red' ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
