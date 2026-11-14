@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          pyflakes app.py pipelines.py processors.py loaders.py fetchers.py generators.py 2>&1 | tee pyflakes.log || true
+          pyflakes app.py mapping.py storage.py embedders.py processors.py loaders.py fetchers.py generators.py 2>&1 | tee pyflakes.log || true
           if grep -E "undefined name|referenced before assignment" pyflakes.log; then
             exit 1
           fi
@@ -62,11 +62,18 @@ jobs:
       - name: Audit application processing boundary
         run: |
           python - <<'PY'
+          import ast
           from pathlib import Path
-          app = Path('app.py').read_text(encoding='utf-8')
-          if 'from processing import' in app:
-              raise SystemExit('Stale processing.py import found in app.py')
-          if 'from pipelines import' not in app:
-              raise SystemExit('pipelines.py import boundary missing from app.py')
-          print('Processing boundary OK.')
+
+          app_path = Path('app.py')
+          app = app_path.read_text(encoding='utf-8')
+          if 'from pipelines import' in app or 'from processing import' in app:
+              raise SystemExit('Stale processing import found in app.py')
+          required = {'chunk_documents', 'create_embeddings', 'store_documents',
+                      'render_loading_tabs', 'render_web_document_processing'}
+          defined = {node.name for node in ast.parse(app).body
+                     if isinstance(node, ast.FunctionDef)}
+          if missing := required - defined:
+              raise SystemExit(f'Consolidated processing functions missing: {sorted(missing)}')
+          print('Consolidated processing boundary OK.')
           PY
