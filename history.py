@@ -416,7 +416,6 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
     """
     try:
 	    throw_if( 'hours', hours )
-	    throw_if( 'entity_types', entity_types )
 	    throw_if( 'snapshot', snapshot )
 	    throw_if( 'limit', limit )
 	    if type( hours ) is not int or hours < 0:
@@ -439,7 +438,7 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 	    clauses = [ f'EntityType IN ({placeholders})', 'ObservedAt <= ?' ]
 	    parameters: List[ object ] = list( entity_types ) + [ snapshot ]
 	    if hours > 0:
-	        cutoff = dt.datetime.now( dt.timezone.utc ) - dt.timedelta( hours=hours )
+	        cutoff = snapshot_time - dt.timedelta( hours=hours )
 	        clauses.append( 'ObservedAt >= ?' )
 	        parameters.append( cutoff.isoformat( ) )
 	    parameters.append( limit )
