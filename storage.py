@@ -99,12 +99,12 @@ def normalize( obj: Any ) -> Any:
 		return { k: normalize( v ) for k, v in obj.items( ) }
 	if isinstance( obj, (list, tuple, set) ):
 		return [ normalize( v ) for v in obj ]
-	if hasattr( obj, "model_dump" ):
-		try:
-			return obj.model_dump( )
-		except Exception:
-			return str( obj )
-	return str( obj )
+	try:
+		return obj.model_dump( )
+	except AttributeError:
+		return str( obj )
+	except Exception:
+		return str( obj )
 
 def blue_divider( ) -> None:
 	"""Render the configured Streamlit divider.
@@ -202,7 +202,7 @@ class BaseCache( ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'BaseCache'
 			exception.method = 'contains( self, key: str ) -> bool'
 			Logger( ).write( exception )
@@ -229,7 +229,7 @@ class BaseCache( ):
 			return f'{namespace}::{key}'
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'BaseCache'
 			exception.method = 'namespace_key( self, namespace: str, key: str ) -> str'
 			Logger( ).write( exception )
@@ -293,7 +293,7 @@ class InMemoryCache( BaseCache ):
 			return time.time( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'now( self )'
 			Logger( ).write( exception )
@@ -327,7 +327,7 @@ class InMemoryCache( BaseCache ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'make_record( self, **kwargs )'
 			Logger( ).write( exception )
@@ -355,7 +355,7 @@ class InMemoryCache( BaseCache ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'is_expired( self, record: Dict[ str, Any ] )'
 			Logger( ).write( exception )
@@ -391,7 +391,7 @@ class InMemoryCache( BaseCache ):
 			return record.get( 'value' )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'get( self, key: str )'
 			Logger( ).write( exception )
@@ -420,7 +420,7 @@ class InMemoryCache( BaseCache ):
 			self.sets += 1
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'set( self, **kwargs )'
 			Logger( ).write( exception )
@@ -445,7 +445,7 @@ class InMemoryCache( BaseCache ):
 				self.deletes += 1
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'delete( self, key: str )'
 			Logger( ).write( exception )
@@ -475,7 +475,7 @@ class InMemoryCache( BaseCache ):
 				self.deletes += deleted
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
 			Logger( ).write( exception )
@@ -497,7 +497,7 @@ class InMemoryCache( BaseCache ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'contains( self, key: str )'
 			Logger( ).write( exception )
@@ -522,7 +522,7 @@ class InMemoryCache( BaseCache ):
 					'deletes': self.deletes }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'stats( self )'
 			Logger( ).write( exception )
@@ -583,7 +583,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'initialize( self )'
 			Logger( ).write( exception )
@@ -613,7 +613,7 @@ class SQLiteCache( BaseCache ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'migrate( self )'
 			Logger( ).write( exception )
@@ -632,7 +632,7 @@ class SQLiteCache( BaseCache ):
 			return time.time( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'now( self )'
 			Logger( ).write( exception )
@@ -671,7 +671,7 @@ class SQLiteCache( BaseCache ):
 			return json.loads( payload )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'get( self, key: str ) -> Dict[ str, Any ]'
 			Logger( ).write( exception )
@@ -709,7 +709,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'set( self, **args )'
 			Logger( ).write( exception )
@@ -733,7 +733,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'delete( self, key: str )'
 			Logger( ).write( exception )
@@ -761,7 +761,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
 			Logger( ).write( exception )
@@ -784,7 +784,7 @@ class SQLiteCache( BaseCache ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'contains( self, key: str )'
 			Logger( ).write( exception )
@@ -811,7 +811,7 @@ class SQLiteCache( BaseCache ):
 			return count
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'purge_expired( self )'
 			Logger( ).write( exception )
@@ -837,7 +837,7 @@ class SQLiteCache( BaseCache ):
 					'expired_entries': int( expired or 0 ), 'hits': int( hits or 0 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'stats( self )'
 			Logger( ).write( exception )
@@ -856,7 +856,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.close( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'close( self )'
 			Logger( ).write( exception )
@@ -946,7 +946,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'create_schema( self, **args )'
 			Logger( ).write( exception )
@@ -995,7 +995,7 @@ class SQLiteDatabase( ):
 					seen[ name ] += 1
 					columns.append( f'{name}_{seen[ name ]}' )
 		
-			def _scalarize( value: Any ) -> Any:
+			def scalarize( value: Any ) -> Any:
 				"""Prepare SQLite result values for tabular presentation.
 
 				Purpose:
@@ -1019,24 +1019,24 @@ class SQLiteDatabase( ):
 						return str( normalize( value ) )
 					except Exception:
 						return str( value )
-				if hasattr( value, 'model_dump' ):
-					try:
-						return str( value.model_dump( ) )
-					except Exception:
-						return str( value )
-				return str( value )
+				try:
+					return str( value.model_dump( ) )
+				except AttributeError:
+					return str( value )
+				except Exception:
+					return str( value )
 		
 			normalized_rows: List[ Dict[ str, Any ] ] = [ ]
 			for row in rows:
 				record: Dict[ str, Any ] = { }
 				for idx, col in enumerate( columns ):
-					record[ col ] = _scalarize( row[ idx ] )
+					record[ col ] = scalarize( row[ idx ] )
 				normalized_rows.append( record )
 			return pd.DataFrame( normalized_rows, columns=columns )
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'read_table( self, **args )'
 			Logger( ).write( exception )
@@ -1109,7 +1109,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'drop_table( self, **args )'
 			Logger( ).write( exception )
@@ -1168,7 +1168,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'create_index( self, **args )'
 			Logger( ).write( exception )
@@ -1385,7 +1385,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'convert_dataframe( self, **args )'
 			Logger( ).write( exception )
@@ -1420,7 +1420,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'insert_data( self, **args )'
 			Logger( ).write( exception )
@@ -1556,9 +1556,16 @@ class SQLiteDatabase( ):
 		allowed_starts = ('select', 'with', 'explain', 'pragma')
 		if not q.startswith( allowed_starts ):
 			return False
-		# PRAGMA assignments mutate connection or database configuration.
-		if q.startswith( 'pragma' ) and '=' in q:
-			return False
+		# Explicitly allow only read-only PRAGMA inspection names. PRAGMA assignments,
+		# parenthesized setters, checkpoints, and other state changes are rejected.
+		if q.startswith( 'pragma' ):
+			pragma_name = re.match( r'^pragma\\s+(?:[a-z_][a-z0-9_]*\\.)?([a-z_][a-z0-9_]*)', q )
+			allowed_pragmas = { 'table_info', 'table_xinfo', 'table_list',
+				'index_list', 'index_info', 'index_xinfo', 'foreign_key_list',
+				'database_list', 'compile_options', 'collation_list' }
+			if (pragma_name is None or pragma_name.group( 1 ) not in allowed_pragmas or
+					'=' in q):
+				return False
 		# ------------------------------------------------------------------
 		# Block dangerous keywords anywhere
 		# ------------------------------------------------------------------
@@ -1617,7 +1624,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'get_indexes( self, **args )'
 			Logger( ).write( exception )
@@ -1651,7 +1658,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'add_column( self, **args )'
 			Logger( ).write( exception )
@@ -1741,7 +1748,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'rename_column( self, **args )'
 			Logger( ).write( exception )
@@ -1787,7 +1794,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'create_profile_table( self, **args )'
 			Logger( ).write( exception )
@@ -1868,7 +1875,7 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'drop_column( self, **args )'
 			Logger( ).write( exception )
@@ -1934,7 +1941,7 @@ class SQLiteDatabase( ):
 
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
 			exception.method = 'rename_table( self, **args )'
 			Logger( ).write( exception )
@@ -2011,7 +2018,7 @@ class ChromaStore( ):
 			return self.vector_store
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'ChromaStore'
 			exception.method = 'create( self, documents, embedder, collection_name, persist_directory ) -> Chroma'
 			Logger( ).write( exception )
@@ -2106,7 +2113,7 @@ class PineconeStore( ):
 			return self.vector_store
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'PineconeStore'
 			exception.method = 'create( self, documents, embedder, index_name, namespace, api_key ) -> Any'
 			Logger( ).write( exception )
