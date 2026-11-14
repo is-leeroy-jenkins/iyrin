@@ -59,6 +59,7 @@ from google import genai
 from google.genai import types
 from openai import OpenAI
 from pathlib import Path
+from collections.abc import Iterable
 from typing import Any, Dict, Optional, Pattern, List, Tuple
 from requests import Response
 from xai_sdk import Client as Xai
@@ -611,7 +612,7 @@ class Grok( Generator ):
 					if parts:
 						return '\n'.join( parts ).strip( )
 			
-			if hasattr( response, '__iter__' ) and not isinstance( response, (str, bytes, dict) ):
+			if isinstance( response, Iterable ) and not isinstance( response, (str, bytes, dict) ):
 				parts: List[ str ]=[ ]
 				
 				for event in response:
@@ -1320,8 +1321,12 @@ class Gemini( Generator ):
 			if include_thoughts:
 				thinking_data[ 'include_thoughts' ] = True
 			
-			if hasattr( types, 'ThinkingConfig' ):
-				return types.ThinkingConfig( **thinking_data )
+			try:
+				thinking_constructor = types.ThinkingConfig
+			except AttributeError:
+				thinking_constructor = None
+			if thinking_constructor is not None:
+				return thinking_constructor( **thinking_data )
 			
 			return thinking_data
 		
@@ -1352,8 +1357,14 @@ class Gemini( Generator ):
 			if not grounding:
 				return [ ]
 			
-			if hasattr( types, 'Tool' ) and hasattr( types, 'GoogleSearch' ):
-				return [ types.Tool( google_search=types.GoogleSearch( ) ) ]
+			try:
+				tool_constructor = types.Tool
+				search_constructor = types.GoogleSearch
+			except AttributeError:
+				tool_constructor = None
+				search_constructor = None
+			if tool_constructor is not None and search_constructor is not None:
+				return [ tool_constructor( google_search=search_constructor( ) ) ]
 			
 			return [ { 'google_search': { } } ]
 		
@@ -1444,8 +1455,12 @@ class Gemini( Generator ):
 			if thinking_config:
 				config_data[ 'thinking_config' ] = thinking_config
 			
-			if hasattr( types, 'GenerateContentConfig' ):
-				return types.GenerateContentConfig( **config_data )
+			try:
+				config_constructor = types.GenerateContentConfig
+			except AttributeError:
+				config_constructor = None
+			if config_constructor is not None:
+				return config_constructor( **config_data )
 			
 			return config_data
 		
@@ -1500,7 +1515,10 @@ class Gemini( Generator ):
 						content = candidate.content
 					except AttributeError:
 						content = None
-					candidate_parts = getattr( content, 'parts', None ) if content else None
+					try:
+						candidate_parts = content.parts if content else None
+					except AttributeError:
+						candidate_parts = None
 					
 					if not candidate_parts:
 						continue
@@ -2263,11 +2281,17 @@ class Mistral( Generator ):
 			if available_choices:
 				choice = response.choices[ 0 ]
 				
-				if hasattr( choice, 'message' ) and choice.message is not None:
+				try:
 					message = choice.message
+				except AttributeError:
+					message = None
+				if message is not None:
 					
-					if hasattr( message, 'content' ):
+					try:
 						content = message.content
+					except AttributeError:
+						content = None
+					if content is not None:
 						
 						if isinstance( content, str ):
 							return content.strip( )
@@ -2277,7 +2301,7 @@ class Mistral( Generator ):
 							for item in content:
 								if isinstance( item, str ) and item.strip( ):
 									parts.append( item.strip( ) )
-								elif hasattr( item, 'text' ):
+								else:
 									try:
 										text_value = item.text
 									except AttributeError:
@@ -2835,7 +2859,7 @@ class Chat( Generator ):
 				if response.get( 'text' ):
 					return str( response.get( 'text' ) )
 			
-			if hasattr( response, '__iter__' ) and not isinstance( response, (str, bytes, dict) ):
+			if isinstance( response, Iterable ) and not isinstance( response, (str, bytes, dict) ):
 				parts: List[ str ]=[ ]
 				
 				for event in response:
@@ -2857,8 +2881,12 @@ class Chat( Generator ):
 							final_response = event.response
 						except AttributeError:
 							final_response = None
-						if final_response is not None and hasattr( final_response, 'output_text' ):
-							text = str( final_response.output_text or '' )
+						try:
+							final_output_text = final_response.output_text if final_response is not None else None
+						except AttributeError:
+							final_output_text = None
+						if final_output_text is not None:
+							text = str( final_output_text or '' )
 							if text:
 								return text
 				
