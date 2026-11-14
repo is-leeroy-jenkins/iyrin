@@ -1,14 +1,14 @@
 '''
 	******************************************************************************************
 	  Assembly:                Iyrin
-	  Filename:                places.py
+	  Filename:                __init__.py
 	  Author:                  Terry D. Eppler
 	  Created:                 05-31-2022
 	
 	  Last Modified By:        Terry D. Eppler
 	  Last Modified On:        05-01-2025
 	******************************************************************************************
-	<copyright file="places.py" company="Terry D. Eppler">
+	<copyright file="__init__.py" company="Terry D. Eppler">
 	
 	 Iyrin is a python framework encapsulating the Google Maps functionality.
 	 Copyright ©  2022  Terry Eppler
@@ -38,7 +38,7 @@
 	
 	</copyright>
 	<summary>
-	places.py
+	__init__.py
 	</summary>
 	******************************************************************************************
 '''
@@ -50,7 +50,15 @@ import sys
 # Existing script modules resolve their application-local imports from the package root.
 sys.path.insert( 0, str( Path( __file__ ).resolve( ).parent ) )
 
-EXPORTS = {'IyrinError': 'exceptions', 'GatewayError': 'exceptions', 'NotFound': 'exceptions', 'RateLimiter': 'rates', 'BaseCache': 'caches', 'InMemoryCache': 'caches', 'SQLiteCache': 'caches', 'Maps': 'maps', 'Geocoder': 'geocode', 'Place': 'places', 'DistanceMatrix': 'distances', 'Timezone': 'timezones', 'StaticMap': 'staticmaps', 'Excel': 'excel'}
+EXPORTS = {
+    'IyrinError': 'exceptions', 'GatewayError': 'exceptions', 'NotFound': 'exceptions',
+    'RateLimiter': 'rates',
+    'BaseCache': 'storage', 'InMemoryCache': 'storage', 'SQLiteCache': 'storage',
+    'SQLiteDatabase': 'storage', 'ChromaStore': 'storage', 'PineconeStore': 'storage',
+    'Map': 'mapping', 'Maps': 'mapping', 'Geocoder': 'mapping', 'Place': 'mapping',
+    'DistanceMatrix': 'mapping', 'Timezone': 'mapping', 'StaticMap': 'mapping',
+    'Excel': 'excel',
+}
 __all__ = list( EXPORTS )
 
 
