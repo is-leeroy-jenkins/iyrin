@@ -412,7 +412,7 @@ def throw_if( name: str, value: object ) -> None:
 		value (object): Candidate value to validate or normalize.
 
 	Returns:
-		None: Throw if.
+		None: Validates the supplied argument without producing a return value.
 
 	Raises:
 		ValueError: Raised when the method cannot satisfy its documented value requirement.
