@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path( __file__ ).resolve( ).parents[ 1 ]
 APP = (ROOT / 'app.py').read_text( encoding='utf-8' )
-PIPELINES = (ROOT / 'pipelines.py').read_text( encoding='utf-8' )
+PIPELINES = (ROOT / 'app.py').read_text( encoding='utf-8' )
 
 
 class WeatherDisplayAndClearTests( unittest.TestCase ):
