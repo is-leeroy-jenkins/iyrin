@@ -438,7 +438,7 @@ class TextLoader( Loader ):
 			
 			self.documents = self.splitter.create_documents( texts=[ self.raw_text ] )
 			for document in self.documents:
-				if not isinstance( getattr( document, 'metadata', None ), dict ):
+				if not isinstance( document.metadata, dict ):
 					document.metadata = { }
 				
 				document.metadata.setdefault( 'source',
@@ -487,7 +487,7 @@ class TextLoader( Loader ):
 			
 			self.documents = self.splitter.create_documents( texts=[ self.raw_text ] )
 			for document in self.documents:
-				if not isinstance( getattr( document, 'metadata', None ), dict ):
+				if not isinstance( document.metadata, dict ):
 					document.metadata = { }
 				
 				document.metadata.setdefault( 'source',
