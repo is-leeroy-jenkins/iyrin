@@ -91,17 +91,15 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 def initialize_live_world_history( ) -> None:
-    '''
+    """
 
         Purpose:
-        --------
         Create the Live World history tables and supporting indexes when they do not exist.
 
         Returns:
-        --------
         None
 
-    '''
+    """
     try:
 	    database_path = Path( cfg.DB_PATH )
 	    database_path.parent.mkdir( parents=True, exist_ok=True )
@@ -144,22 +142,19 @@ def initialize_live_world_history( ) -> None:
 	    raise exception from e
 
 def create_live_world_history_fingerprint( row: pd.Series ) -> str:
-    '''
+    """
 
         Purpose:
-        --------
         Create a stable content fingerprint for event/static Live World entities so
         unchanged observations are not persisted repeatedly across refreshes.
 
-        Parameters:
-        -----------
+        Args:
         row (pd.Series): Normalized Live World entity row.
 
         Returns:
-        --------
         str: SHA-256 fingerprint of the entity's persisted state excluding observation time.
 
-    '''
+    """
     try:
 	    throw_if( 'row', row )
 	    if not isinstance( row, pd.Series ):
@@ -192,30 +187,33 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 
 def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
         observed_at: str, max_rows_per_source: int=5000 ) -> int:
-    '''
+    """
 
         Purpose:
-        --------
         Persist one normalized Live World refresh while bounding per-source growth and
         suppressing unchanged event/static observations across refreshes.
 
-        Parameters:
-        -----------
+        Args:
         df_entities (pd.DataFrame): Normalized Live World entity frame.
         refresh_id (str): Stable identifier for the refresh snapshot.
         observed_at (str): UTC ISO timestamp for the refresh.
         max_rows_per_source (int): Maximum rows persisted for one entity type in a refresh.
 
         Returns:
-        --------
         int: Number of newly inserted observations.
 
-    '''
+    """
     try:
 	    throw_if( 'df_entities', df_entities )
 	    throw_if( 'refresh_id', refresh_id )
 	    throw_if( 'observed_at', observed_at )
 	    throw_if( 'max_rows_per_source', max_rows_per_source )
+	    if not isinstance( df_entities, pd.DataFrame ):
+	        raise TypeError( 'df_entities must be a pandas DataFrame.' )
+	    if not isinstance( refresh_id, str ) or not isinstance( observed_at, str ):
+	        raise TypeError( 'refresh_id and observed_at must be strings.' )
+	    if type( max_rows_per_source ) is not int or max_rows_per_source < 1:
+	        raise ValueError( 'max_rows_per_source must be a positive integer.' )
 	    timestamp = dt.datetime.fromisoformat( observed_at.replace( 'Z', '+00:00' ) )
 	    if timestamp.tzinfo is None or timestamp.utcoffset( ) != dt.timedelta( 0 ):
 		    raise ValueError( 'observed_at must be an ISO 8601 UTC timestamp.' )
@@ -299,22 +297,19 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 	    raise exception from e
 
 def purge_live_world_history( retention_days: int ) -> int:
-    '''
+    """
 
         Purpose:
-        --------
         Delete persisted Live World observations older than the configured retention period
         and remove deduplication state for entities no longer present in retained history.
 
-        Parameters:
-        -----------
+        Args:
         retention_days (int): Number of days of history to retain.
 
         Returns:
-        --------
         int: Number of deleted observations.
 
-    '''
+    """
     try:
 	    throw_if( 'retention_days', retention_days )
 	    if type( retention_days ) is not int or retention_days < 1:
@@ -342,17 +337,15 @@ def purge_live_world_history( retention_days: int ) -> int:
 	    raise exception from e
 
 def clear_live_world_history( ) -> int:
-    '''
+    """
 
         Purpose:
-        --------
         Delete all persisted Live World historical observations and deduplication state.
 
         Returns:
-        --------
         int: Number of deleted observations.
 
-    '''
+    """
     try:
 	    initialize_live_world_history( )
 	    with sqlite3.connect( cfg.DB_PATH ) as conn:
@@ -369,21 +362,18 @@ def clear_live_world_history( ) -> int:
 	    raise exception from e
 
 def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return persisted refresh timestamps within a replay window, newest first.
 
-        Parameters:
-        -----------
+        Args:
         hours (int): Replay lookback window in hours; zero returns all persisted snapshots.
 
         Returns:
-        --------
         List[str]: Persisted refresh timestamps.
 
-    '''
+    """
     try:
 	    throw_if( 'hours', hours )
 	    if type( hours ) is not int or hours < 0:
@@ -408,25 +398,22 @@ def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
 
 def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: str,
         limit: int=5000 ) -> pd.DataFrame:
-    '''
+    """
 
         Purpose:
-        --------
         Load the most recent bounded set of persisted observations through a selected replay
         snapshot and return those observations in chronological order.
 
-        Parameters:
-        -----------
+        Args:
         hours (int): Replay lookback window in hours; zero loads all retained history.
         entity_types (List[str]): Entity types to include.
         snapshot (str): Maximum replay timestamp to include.
         limit (int): Maximum number of historical observations returned.
 
         Returns:
-        --------
         pd.DataFrame: Recent historical observations ordered chronologically.
 
-    '''
+    """
     try:
 	    throw_if( 'hours', hours )
 	    throw_if( 'entity_types', entity_types )
@@ -484,17 +471,15 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 	    raise exception from e
 
 def get_live_world_history_summary( ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return aggregate persistence statistics for the Historical Replay interface.
 
         Returns:
-        --------
         Dict[str, object]: Observation count, snapshot count, and retained time bounds.
 
-    '''
+    """
     try:
 	    initialize_live_world_history( )
 	    with sqlite3.connect( cfg.DB_PATH ) as conn:
