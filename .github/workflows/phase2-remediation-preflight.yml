@@ -1,0 +1,46 @@
+name: Phase II Remediation Preflight
+
+on:
+  push:
+    branches:
+      - phase2-remediation-batch1-pr72-73
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile repository
+        run: python -m compileall -q .
+      - name: Install unit-test prerequisites
+        run: python -m pip install pyflakes requests beautifulsoup4
+      - name: Run unit-test suite
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Check undefined references
+        run: |
+          pyflakes storage.py embedders.py app.py excel.py 2>&1 | tee pyflakes.log || true
+          if grep -E 'undefined name|referenced before assignment' pyflakes.log; then exit 1; fi
+      - name: Validate Google docstrings without importing application modules
+        run: |
+          python -m pip install griffe
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in ('storage.py', 'embedders.py', 'app.py', 'excel.py'):
+              source = Path(path).read_text(encoding='utf-8')
+              tree = ast.parse(source, filename=path)
+              for node in ast.walk(tree):
+                  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      doc = ast.get_docstring(node)
+                      if doc is None:
+                          raise AssertionError(f'{path}:{node.lineno}: missing docstring')
+                      if 'Purpose:' not in doc or 'Returns:' not in doc:
+                          raise AssertionError(f'{path}:{node.lineno}: incomplete sections')
+          print('All reviewed functions have Purpose and Returns docstrings')
+          PY
