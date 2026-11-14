@@ -44,7 +44,6 @@
 import time
 from typing import Optional
 import math
-from boogr import Error, Logger
 
 def throw_if( name: str, value: object ) -> None:
 	"""
@@ -153,6 +152,7 @@ class RateLimiter( ):
 				self.total_sleep += self.last_sleep
 			self.last = time.time( )
 		except Exception as e:
+			from boogr import Error, Logger
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'RateLimiter'
