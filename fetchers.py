@@ -4035,7 +4035,10 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_object( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = (
+				"fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8, "
+				"launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -4090,7 +4093,10 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_fireballs( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = (
+				"fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, "
+				"Any ] | None:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 
