@@ -194,6 +194,7 @@ class Grok( Generator ):
 	    api_key (Optional[str]): Provider credential loaded from application configuration.
 	    query (Optional[str]): Most recent search text or model prompt submitted by the instance.
 	    params (Optional[Dict[str, Any]]): Request parameters assembled for the most recent provider call.
+    payload (Dict[str, Any]): Validated request data for the current API call.
 	    temperature (Optional[float]): Sampling temperature applied to eligible generation requests.
 	    max_tokens (Optional[int]): Maximum output-token allowance for generation requests.
 	    top_p (Optional[float]): Nucleus-sampling threshold applied to eligible generation requests.
@@ -218,6 +219,7 @@ class Grok( Generator ):
 	api_key: Optional[ str ]
 	query: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
+	payload: Dict[ str, Any ]
 	temperature: Optional[ float ]
 	max_tokens: Optional[ int ]
 	top_p: Optional[ float ]
@@ -256,6 +258,7 @@ class Grok( Generator ):
 		self.content = None
 		self.query = None
 		self.params = None
+		self.payload = { }
 		self.response = None
 		self.system_instructions = None
 		self.web_search = False
@@ -655,7 +658,7 @@ class Grok( Generator ):
 		    Submits an assembled payload through the available provider response or chat endpoint.
 
 		Args:
-		    payload (Dict[str, Any]): Validated request dictionary forwarded to the provider client.
+		    payload (Dict[str, Any]): Request dictionary forwarded to the configured provider after validation.
 
 		Returns:
 		    Any: Provider, loader, or normalized application value produced by the operation.
@@ -665,47 +668,60 @@ class Grok( Generator ):
 		"""
 		try:
 			throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dictionary.' )
+			self.payload = payload
 			
-			if hasattr( self.client, 'responses' ) and hasattr( self.client.responses, 'create' ):
-				return self.client.responses.create( **payload )
-			
-			if hasattr( self.client, 'chat' ) and hasattr( self.client.chat, 'create' ):
-				messages = payload.get( 'input', [ ] )
+			try:
+				responses_create = self.client.responses.create
+			except AttributeError:
+				responses_create = None
+
+			if responses_create is not None:
+				return responses_create( **self.payload )
+
+			try:
+				chat_create = self.client.chat.create
+			except AttributeError:
+				chat_create = None
+
+			if chat_create is not None:
+				messages = self.payload.get( 'input', [ ] )
 				
 				if isinstance( messages, str ):
 					messages = [ { 'role': 'user', 'content': messages } ]
 				
-				chat_payload = { 'model': payload.get( 'model' ),
-						'messages': messages, 'stream': payload.get( 'stream', False ) }
+				chat_payload = { 'model': self.payload.get( 'model' ),
+						'messages': messages, 'stream': self.payload.get( 'stream', False ) }
 				
-				if payload.get( 'temperature' ) is not None:
-					chat_payload[ 'temperature' ] = payload.get( 'temperature' )
+				if self.payload.get( 'temperature' ) is not None:
+					chat_payload[ 'temperature' ] = self.payload.get( 'temperature' )
 				
-				if payload.get( 'top_p' ) is not None:
-					chat_payload[ 'top_p' ] = payload.get( 'top_p' )
+				if self.payload.get( 'top_p' ) is not None:
+					chat_payload[ 'top_p' ] = self.payload.get( 'top_p' )
 				
-				if payload.get( 'max_output_tokens' ) is not None:
-					chat_payload[ 'max_tokens' ] = payload.get( 'max_output_tokens' )
+				if self.payload.get( 'max_output_tokens' ) is not None:
+					chat_payload[ 'max_tokens' ] = self.payload.get( 'max_output_tokens' )
 				
-				if payload.get( 'tools' ):
-					chat_payload[ 'tools' ] = payload.get( 'tools' )
+				if self.payload.get( 'tools' ):
+					chat_payload[ 'tools' ] = self.payload.get( 'tools' )
 				
-				if payload.get( 'tool_choice' ):
-					chat_payload[ 'tool_choice' ] = payload.get( 'tool_choice' )
+				if self.payload.get( 'tool_choice' ):
+					chat_payload[ 'tool_choice' ] = self.payload.get( 'tool_choice' )
 				
-				if payload.get( 'stop' ):
-					chat_payload[ 'stop' ] = payload.get( 'stop' )
+				if self.payload.get( 'stop' ):
+					chat_payload[ 'stop' ] = self.payload.get( 'stop' )
 				
-				if payload.get( 'response_format' ):
-					chat_payload[ 'response_format' ] = payload.get( 'response_format' )
+				if self.payload.get( 'response_format' ):
+					chat_payload[ 'response_format' ] = self.payload.get( 'response_format' )
 				
-				if payload.get( 'reasoning_effort' ):
-					chat_payload[ 'reasoning_effort' ] = payload.get( 'reasoning_effort' )
+				if self.payload.get( 'reasoning_effort' ):
+					chat_payload[ 'reasoning_effort' ] = self.payload.get( 'reasoning_effort' )
 				
-				if payload.get( 'reasoning' ):
-					chat_payload[ 'reasoning' ] = payload.get( 'reasoning' )
+				if self.payload.get( 'reasoning' ):
+					chat_payload[ 'reasoning' ] = self.payload.get( 'reasoning' )
 				
-				return self.client.chat.create( **chat_payload )
+				return chat_create( **chat_payload )
 			
 			raise RuntimeError( 'The xAI client does not expose responses.create or chat.create.' )
 		
