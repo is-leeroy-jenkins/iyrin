@@ -796,6 +796,15 @@ class SQLiteCache( BaseCache ):
 			raise exception
 
 class SQLiteDatabase( ):
+	"""SQLite database management and DataFrame persistence.
+
+	Purpose:
+		Provides Data Management table operations, DataFrame transformations,
+		interactive visualizations, and SQLite persistence.
+
+	Attributes:
+		db_path (str): Current SQLite database file path from configuration.
+	"""
 	
 	def __init__( self ) -> None:
 		self.db_path = cfg.DB_PATH
@@ -815,14 +824,24 @@ class SQLiteDatabase( ):
 			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
 	
 	def read_table( self, table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
-		"""SQLiteDatabase persistence interface.
+		"""
 
-	Purpose:
-		Provides Data Management table operations, DataFrame transformations, and SQLite persistence.
+			Purpose:
+			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
-	Attributes:
-		db_path (str): Current SQLite database file path from configuration.
-	"""
+			Args:
+			table : str
+				Table name.
+			limit : int = None
+				Optional row limit.
+			offset : int = 0
+				Optional row offset.
+
+			Returns:
+			pd.DataFrame
+				DataFrame of plain Python scalar values.
+
+		"""
 		if not table:
 			return pd.DataFrame( )
 		query = f'SELECT * FROM "{table}"'
