@@ -288,9 +288,6 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return the current Unix timestamp.
 
-			Args:
-				None.
-
 			Returns:
 				float: Current Unix timestamp.
 
@@ -522,9 +519,6 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return cache diagnostics.
 
-			Args:
-				None.
-
 			Returns:
 				Dict[str, Any]: Cache diagnostics.
 
@@ -583,9 +577,6 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Create the SQLite cache table when it does not already exist.
 
-			Args:
-				None.
-
 			Returns:
 				None.
 
@@ -615,9 +606,6 @@ class SQLiteCache( BaseCache ):
 
 			Purpose:
 				Add metadata columns to older kv tables that only contain k and v.
-
-			Args:
-				None.
 
 			Returns:
 				None.
@@ -649,9 +637,6 @@ class SQLiteCache( BaseCache ):
 
 			Purpose:
 				Return the current Unix timestamp.
-
-			Args:
-				None.
 
 			Returns:
 				float: Current Unix timestamp.
@@ -831,9 +816,6 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Delete expired cache entries.
 
-			Args:
-				None.
-
 			Returns:
 				int: Number of rows deleted.
 
@@ -862,9 +844,6 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return SQLite cache diagnostics.
 
-			Args:
-				None.
-
 			Returns:
 				Dict[str, Any]: Cache diagnostics.
 
@@ -891,9 +870,6 @@ class SQLiteCache( BaseCache ):
 
 			Purpose:
 				Close the SQLite connection.
-
-			Args:
-				None.
 
 			Returns:
 				None.
