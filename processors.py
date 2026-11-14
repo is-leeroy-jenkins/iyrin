@@ -1657,134 +1657,124 @@ class TextParser( Processor ):
 			raise exception
 	
 	def chunk_datasets( self, source: str, destination: str, size: int=10 ) -> DataFrame:
-		"""Chunk datasets.
-		
+		"""Clean text files, chunk their tokens, and save one workbook per source file.
+
 		Purpose:
-			Executes the ``chunk datasets`` operation for the ``TextParser`` workflow, updating
-			instance state where required and returning the processed result used by downstream
-			loading, processing, analysis, tokenization, or embedding steps.
-		
+			Apply the existing TextParser cleaning pipeline, write the Data column to
+			Excel workbooks, and return the combined processed chunks.
+
 		Args:
-			source (str): Source value used by the processing operation. Expected type: ``str``.
-			destination (str): Destination value used by the processing operation. Expected type: ``str``.
-			size (int): Size value used by the processing operation. Defaults to `10`.
-		
+			source (str): Existing directory containing source text files.
+			destination (str): Existing output directory for Excel workbooks.
+			size (int): Positive maximum number of tokens per chunk. Defaults to 10.
+
 		Returns:
-			DataFrame: Result produced by the processing operation.
-		
+			DataFrame: Combined chunks using the established Data column.
+
 		Raises:
-			Error: Raised when validation or processing fails.
+			Error: Raised when paths, chunk size, or text processing are invalid.
 		"""
 		try:
 			throw_if( 'source', source )
-			throw_if( 'filepath', source )
 			throw_if( 'destination', destination )
-			if not os.path.exists( source ):
-				raise FileNotFoundError( f'File not found: {source}' )
-			elif not os.path.exists( destination ):
-				raise FileNotFoundError( f'File not found: {destination}' )
-			else:
-				_src = source
-				_destination = destination
-				_files = os.listdir( _src )
-				_words = [ ]
-				for f in _files:
-					_processed = [ ]
-					_filename = os.path.basename( f )
-					_sourcepath = _src + '\\' + _filename
-					_text = open( _sourcepath, 'r', encoding='utf-8', errors='ignore' ).read( )
-					_collapsed = self.collapse_whitespace( _text )
-					_compressed = self.compress_whitespace( _collapsed )
-					_normalized = self.normalize_text( _compressed )
-					_encoded = self.remove_encodings( _normalized )
-					_special = self.remove_symbols( _encoded )
-					_cleaned = self.remove_fragments( _special )
-					_recompress = self.compress_whitespace( _cleaned )
-					_lemmatized = self.lemmatize_text( _recompress )
-					_stops = self.remove_stopwords( _lemmatized )
-					_tokens = _stops.split( None )
-					_chunks = [ _tokens[ i: i + size ] for i in range( 0, len( _tokens ), size ) ]
-					_datamap = [ ]
-					for i, c in enumerate( _chunks ):
-						_row = ' '.join( c )
-						_datamap.append( _row )
-					
-					for s in _datamap:
-						_processed.append( s )
-					
-					_name = _filename.replace( '.txt', '.xlsx' )
-					_savepath = (_destination + f'\\' + _name)
-					_data = pd.DataFrame( _processed, columns=[ 'Data', ] )
-					_data.to_excel( _savepath, sheet_name='Dataset', index=False,
-						columns=[ 'Data', ] )
+			if not isinstance( source, str ) or not isinstance( destination, str ):
+				raise TypeError( 'source and destination must be strings.' )
+			if type( size ) is not int or size <= 0:
+				raise ValueError( 'size must be a positive integer.' )
+			if not os.path.isdir( source ):
+				raise NotADirectoryError( f'Source directory not found: {source}' )
+			if not os.path.isdir( destination ):
+				raise NotADirectoryError( f'Destination directory not found: {destination}' )
+
+			processed: List[ str ] = [ ]
+			for filename in os.listdir( source ):
+				source_path = os.path.join( source, filename )
+				if not os.path.isfile( source_path ):
+					continue
+				with open( source_path, 'r', encoding='utf-8', errors='ignore' ) as stream:
+					text = stream.read( )
+				collapsed = self.collapse_whitespace( text )
+				compressed = self.collapse_whitespace( collapsed )
+				normalized = self.normalize_text( compressed )
+				encoded = self.remove_encodings( normalized )
+				special = self.remove_symbols( encoded )
+				cleaned = self.remove_fragments( special )
+				recompressed = self.collapse_whitespace( cleaned )
+				lemmatized = ' '.join(
+					self.lemmatizer.lemmatize( token ) for token in recompressed.split( ) )
+				stops = self.remove_stopwords( lemmatized )
+				tokens = stops.split( )
+				chunks = [ ' '.join( tokens[ i:i + size ] )
+					for i in range( 0, len( tokens ), size ) ]
+				processed.extend( chunks )
+				output_name = filename.replace( '.txt', '.xlsx' )
+				output_path = os.path.join( destination, output_name )
+				df_data = pd.DataFrame( chunks, columns=[ 'Data' ] )
+				df_data.to_excel( output_path, sheet_name='Dataset', index=False,
+					columns=[ 'Data' ] )
+			return pd.DataFrame( processed, columns=[ 'Data' ] )
+
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'chunk_data( self, filepath: str, size: int=15  ) -> DataFrame'
+			exception.method = (
+				'chunk_datasets( self, source: str, destination: str, size: int=10 ) -> DataFrame' )
 			Logger( ).write( exception )
 			raise exception
-	
+
 	def convert_jsonl( self, source: str, destination: str, size: int=10 ) -> None:
-		"""Convert jsonl.
-		
+		"""Convert text files into valid newline-delimited JSON chunks.
+
 		Purpose:
-			Executes the ``convert jsonl`` operation for the ``TextParser`` workflow, updating
-			instance state where required and returning the processed result used by downstream
-			loading, processing, analysis, tokenization, or embedding steps.
-		
+			Preserve one indexed list of tokens per chunk, writing valid JSON objects
+			without trailing commas or unreleased file handles.
+
 		Args:
-			source (str): Source value used by the processing operation. Expected type: ``str``.
-			destination (str): Destination value used by the processing operation. Expected type:
-				``str``.
-			size (int): Size value used by the processing operation. Expected type: ``int``. Defaults to
-				``10``.
-		
+			source (str): Existing source directory containing text files.
+			destination (str): Existing destination directory for JSONL files.
+			size (int): Positive maximum number of tokens per JSON record. Defaults to 10.
+
 		Returns:
-			None: Result produced by the processing operation.
-		
+			None: Writes one JSON Lines file for each source file.
+
 		Raises:
-			Error: Raised when validation or processing fails.
+			Error: Raised when input paths, size, or file processing are invalid.
 		"""
 		try:
 			throw_if( 'source', source )
 			throw_if( 'destination', destination )
-			if not os.path.exists( source ):
-				raise FileNotFoundError( f'File not found: {source}' )
-			elif not os.path.exists( destination ):
-				raise FileNotFoundError( f'File not found: {destination}' )
-			else:
-				_source = source
-				_destpath = destination
-				_files = os.listdir( _source )
-				_wordlist = [ ]
-				for f in _files:
-					_processed = [ ]
-					_filename = os.path.basename( f )
-					_sourcepath = _source + '\\' + _filename
-					_text = open( _sourcepath, 'r', encoding='utf-8', errors='ignore' ).read( )
-					_tokens = _text.split( ' ' )
-					_chunks = [ _tokens[ i: i + size ] for i in range( 0, len( _tokens ), size ) ]
-					_datamap = [ ]
-					for i, c in enumerate( _chunks ):
-						_value = '{ ' + f' {i} : [ ' + ' '.join( c ) + ' ] }, ' + "\n"
-						_datamap.append( _value )
-					
-					for s in _datamap:
-						_processed.append( s )
-					
-					_destination = _destpath + '\\' + _filename.replace( '.txt', '.jsonl' )
-					_clean = open( _destination, 'wt', encoding='utf-8', errors='ignore' )
-					for p in _processed:
-						_clean.write( p )
+			if not isinstance( source, str ) or not isinstance( destination, str ):
+				raise TypeError( 'source and destination must be strings.' )
+			if type( size ) is not int or size <= 0:
+				raise ValueError( 'size must be a positive integer.' )
+			if not os.path.isdir( source ):
+				raise NotADirectoryError( f'Source directory not found: {source}' )
+			if not os.path.isdir( destination ):
+				raise NotADirectoryError( f'Destination directory not found: {destination}' )
+
+			for filename in os.listdir( source ):
+				source_path = os.path.join( source, filename )
+				if not os.path.isfile( source_path ):
+					continue
+				with open( source_path, 'r', encoding='utf-8', errors='ignore' ) as stream:
+					tokens = stream.read( ).split( )
+				output_name = filename.replace( '.txt', '.jsonl' )
+				output_path = os.path.join( destination, output_name )
+				with open( output_path, 'wt', encoding='utf-8' ) as stream:
+					for i in range( 0, len( tokens ), size ):
+						record = { str( i // size ): tokens[ i:i + size ] }
+						stream.write( json.dumps( record, ensure_ascii=False ) + '\\n' )
+
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'convert_jsonl( self, source: str, desination: str )'
+			exception.method = (
+				'convert_jsonl( self, source: str, destination: str, size: int=10 ) -> None' )
 			Logger( ).write( exception )
 			raise exception
-	
+
 	def encode_sentences( self, tokens: List[ str ], model: str='all-MiniLM-L6-v2' ) -> Tuple[ List[ str ], np.ndarray ]:
 		"""Encode sentences.
 		
