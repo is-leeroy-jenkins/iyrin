@@ -322,6 +322,9 @@ class WebFetcher( Fetcher ):
 
 		Returns:
 			List[Document]: LangChain documents produced from the requested URL.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'url', url )
@@ -361,6 +364,9 @@ class WebFetcher( Fetcher ):
 			
 			Returns:
 				str: Plain text extracted from HTML.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'html', html )
@@ -392,6 +398,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Cleaned paragraph text entries.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -421,6 +430,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Clean list item text segments.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -451,6 +463,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Table cell values (one entry per <td> or <th>).
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -488,6 +503,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Article-level text blocks.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -517,6 +535,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Clean heading strings.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( "uri", uri )
@@ -547,6 +568,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Clean division text blocks.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -576,6 +600,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Clean section text blocks.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -605,6 +632,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Cleaned blockquote text entries.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -634,6 +664,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				List of hyperlink paths.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -663,6 +696,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				List[str]:
 				Image source values extracted from <img> elements.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -726,6 +762,9 @@ class WebFetcher( Fetcher ):
 			Returns:
 				dict:
 				A JSON-compatible dictionary defining the tool schema.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -848,6 +887,9 @@ class WebCrawler( WebFetcher ):
 				
 			Returns:
 				Optional[Result]: Result with url, status, text, html, headers on success.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -902,6 +944,9 @@ class WebCrawler( WebFetcher ):
 			
 			Returns:
 				str: Rendered HTML of the page.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -1000,6 +1045,9 @@ class ArXiv( Fetcher ):
 
 			Returns:
 				List[Document] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'question', question )
@@ -1161,6 +1209,9 @@ class GoogleDrive( Fetcher ):
 
 		Purpose:
 			Query Google Drive through LangChain's GoogleDriveRetriever and return LangChain Document objects. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			if not isinstance( question, str ):
@@ -1316,6 +1367,9 @@ class Wikipedia( Fetcher ):
 
 		Purpose:
 			Query Wikipedia through LangChain's WikipediaRetriever and return LangChain Document objects.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'question', question )
@@ -1492,6 +1546,9 @@ class TheNews( Fetcher ):
 
 		Purpose:
 			Send a request to The News API using one of the documented endpoints and return the parsed JSON response. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.endpoint = (endpoint or 'all').strip( ).lower( )
@@ -1753,6 +1810,9 @@ class GoogleSearch( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'keywords', keywords )
@@ -1938,6 +1998,9 @@ class GoogleMaps( Fetcher ):
 
 			Returns:
 				Tuple[float, float]: Latitude and longitude.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -1983,6 +2046,9 @@ class GoogleMaps( Fetcher ):
 
 		Purpose:
 			Uses the Google Maps API to get address from coordinates. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -2030,6 +2096,9 @@ class GoogleMaps( Fetcher ):
 	
 			Returns:
 				dict: Parsed JSON response from Google.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'address', address )
@@ -2073,6 +2142,9 @@ class GoogleMaps( Fetcher ):
 		
 			Returns:
 				dict: Parsed JSON response from Google Directions API.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'origin', origin )
@@ -2161,6 +2233,9 @@ class GoogleMaps( Fetcher ):
 			Returns:
 				dict:
 				A JSON-compatible dictionary defining the tool schema.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -2322,6 +2397,9 @@ class GoogleWeather( Fetcher ):
 		
 			Returns:
 				Tuple[float, float]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2354,6 +2432,9 @@ class GoogleWeather( Fetcher ):
 		
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'path', path )
@@ -2404,6 +2485,9 @@ class GoogleWeather( Fetcher ):
 		
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2437,6 +2521,9 @@ class GoogleWeather( Fetcher ):
 			
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2472,6 +2559,9 @@ class GoogleWeather( Fetcher ):
 		
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2506,6 +2596,9 @@ class GoogleWeather( Fetcher ):
 
 		Purpose:
 			Retrieve public weather alerts for an address. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2631,6 +2724,9 @@ class NavalObservatory( Fetcher ):
 
 		Purpose:
 			Validate and normalize a USNO date string. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'date_value', date_value )
@@ -2659,6 +2755,9 @@ class NavalObservatory( Fetcher ):
 
 		Purpose:
 			Validate and normalize a USNO time string. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'time_value', time_value )
@@ -2698,6 +2797,9 @@ class NavalObservatory( Fetcher ):
 
 		Purpose:
 			Validate latitude and longitude against documented decimal-degree ranges. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -2751,6 +2853,9 @@ class NavalObservatory( Fetcher ):
 
 		Purpose:
 			Fetch celestial navigation data for an assumed position and time. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'longitude', longitude )
@@ -2819,6 +2924,9 @@ class NavalObservatory( Fetcher ):
 
 		Purpose:
 			Unified dispatcher for Naval Observatory requests. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'celnav').strip( ).lower( )
@@ -2861,6 +2969,9 @@ class NavalObservatory( Fetcher ):
 
 		Purpose:
 			Construct and return a fully dynamic OpenAI Tool API schema definition. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -2993,6 +3104,9 @@ class SatelliteCenter( Fetcher ):
 
 		Purpose:
 			Get descriptions of the observatories available from SSC. Returns:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.ssc = SscWs( user_agent=self.agents, timeout=self.timeout )
@@ -3015,6 +3129,9 @@ class SatelliteCenter( Fetcher ):
 
 		Purpose:
 			Get descriptions of the ground stations available from SSC. Returns:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.ssc = SscWs( user_agent=self.agents, timeout=self.timeout )
@@ -3059,6 +3176,9 @@ class SatelliteCenter( Fetcher ):
 
 		Purpose:
 			Get location data for one or more observatories over a time range using the documented SSC REST GET endpoint.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'observatories', observatories )
@@ -3109,6 +3229,9 @@ class SatelliteCenter( Fetcher ):
 			coordinate_systems (str): coordinate systems value for the SatelliteCenter operation.
 			resolution_factor (int): resolution factor value for the SatelliteCenter operation.
 			time (int): time value for the SatelliteCenter operation.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			active_mode = (mode or 'observatories').strip( ).lower( )
@@ -3368,6 +3491,9 @@ class EarthObservatory( Fetcher ):
 
 		Purpose:
 			Fetch EONET events using documented v3 filters. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'events'
@@ -3433,6 +3559,9 @@ class EarthObservatory( Fetcher ):
 
 		Purpose:
 			Fetch EONET category metadata. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'categories'
@@ -3470,6 +3599,9 @@ class EarthObservatory( Fetcher ):
 
 		Purpose:
 			Fetch EONET source metadata. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'sources'
@@ -3510,6 +3642,9 @@ class EarthObservatory( Fetcher ):
 
 		Purpose:
 			Fetch EONET layer metadata, optionally scoped to a category. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'layers'
@@ -3578,6 +3713,9 @@ class EarthObservatory( Fetcher ):
 
 		Purpose:
 			Unified dispatcher for EONET v3 operations. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'events').strip( ).lower( )
@@ -3627,6 +3765,9 @@ class EarthObservatory( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -3780,6 +3921,9 @@ class GlobalImagery( Fetcher ):
 
 		Purpose:
 			Fetch a representative NASA GIBS Web Map Service image using the configured global imagery endpoint and default corrected reflectance layer.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			wms = WebMapService( 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?',
@@ -3817,6 +3961,9 @@ class GlobalImagery( Fetcher ):
 
 		Purpose:
 			Fetch a NASA GIBS Mercator map image and render it through the provided Cartopy coordinate reference system module.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			proj3857 = 'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?\
@@ -4077,6 +4224,9 @@ class NearbyObjects( Fetcher ):
 
 		Purpose:
 			Fetch close-approach data from the JPL SB Close Approach Data API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'start_date', start_date )
@@ -4151,6 +4301,9 @@ class NearbyObjects( Fetcher ):
 
 		Purpose:
 			Fetch a single-object record from the JPL SBDB API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4222,6 +4375,9 @@ class NearbyObjects( Fetcher ):
 
 		Purpose:
 			Fetch NHATS summary data using standard screening constraints. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'nhats_summary'
@@ -4285,6 +4441,9 @@ class NearbyObjects( Fetcher ):
 
 		Purpose:
 			Fetch NHATS details for a single object designation. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'designation', designation )
@@ -4328,6 +4487,9 @@ class NearbyObjects( Fetcher ):
 
 		Purpose:
 			Fetch atmospheric fireball records from the JPL Fireball API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'fireballs'
@@ -4435,6 +4597,9 @@ class NearbyObjects( Fetcher ):
 
 		Purpose:
 			Unified dispatcher for JPL SSD / CNEOS NEO-related endpoints. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'close_approaches').strip( ).lower( )
@@ -4494,6 +4659,9 @@ class NearbyObjects( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'function', function )
@@ -4635,6 +4803,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.format_value = format_value
@@ -4665,6 +4836,9 @@ class OpenScience( Fetcher ):
 
 		Purpose:
 			Convert an HTTP response into JSON when possible, otherwise text. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'response', response )
@@ -4699,6 +4873,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'accession', accession )
@@ -4737,6 +4914,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4776,6 +4956,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4816,6 +4999,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4884,6 +5070,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'dataset').strip( ).lower( )
@@ -4930,6 +5119,9 @@ class OpenScience( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'function', function )
@@ -5200,6 +5392,9 @@ class SpaceWeather( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -5335,6 +5530,9 @@ class SpaceWeather( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'cme').strip( ).lower( )
@@ -5414,6 +5612,9 @@ class SpaceWeather( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -5602,6 +5803,9 @@ class AstroCatalog( Fetcher ):
 			route (str): route value for the AstroCatalog operation.
 			params (Dict[ str, Any ] | None): params value for the AstroCatalog operation.
 			time (int): time value for the AstroCatalog operation.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'route', route )
@@ -5648,6 +5852,9 @@ class AstroCatalog( Fetcher ):
 			arguments (str): arguments value for the AstroCatalog operation.
 			data_format (str): data format value for the AstroCatalog operation.
 			time (int): time value for the AstroCatalog operation.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'name', name )
@@ -5697,6 +5904,9 @@ class AstroCatalog( Fetcher ):
 			arguments (str): arguments value for the AstroCatalog operation.
 			data_format (str): data format value for the AstroCatalog operation.
 			time (int): time value for the AstroCatalog operation.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'ra', ra )
@@ -5757,6 +5967,9 @@ class AstroCatalog( Fetcher ):
 			radius (int): radius value for the AstroCatalog operation.
 			data_format (str): data format value for the AstroCatalog operation.
 			time (int): time value for the AstroCatalog operation.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			active_mode = (mode or 'object_query').strip( ).lower( )
@@ -5894,6 +6107,9 @@ class AstroQuery( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.table = table
@@ -5940,6 +6156,9 @@ class AstroQuery( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'name', name )
@@ -5980,6 +6199,9 @@ class AstroQuery( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'name', name )
@@ -6038,6 +6260,9 @@ class AstroQuery( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'ra', ra )
@@ -6125,6 +6350,9 @@ class AstroQuery( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			active_mode = (mode or 'object_search').strip( ).lower( )
@@ -6329,6 +6557,9 @@ class StarMap( Fetcher ):
 
 			Returns:
 				Dict[str, str]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.html = html
@@ -6384,6 +6615,9 @@ class StarMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'name', name )
@@ -6479,6 +6713,9 @@ class StarMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -6584,6 +6821,9 @@ class StarMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -6715,6 +6955,9 @@ class StarMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'object_link').strip( ).lower( )
@@ -6915,6 +7158,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			value = str( self.api_key or '' ).strip( )
@@ -6938,6 +7184,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'page_size', page_size )
@@ -6966,6 +7215,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.sort_field = sort_field
@@ -6997,6 +7249,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.sort_order = sort_order
@@ -7048,6 +7303,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -7118,6 +7376,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'package_id', package_id )
@@ -7170,6 +7431,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'collection', collection )
@@ -7261,6 +7525,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'search').strip( ).lower( )
@@ -7331,6 +7598,9 @@ class GovData( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -7681,6 +7951,9 @@ class StarChart( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'name', name )
@@ -7771,6 +8044,9 @@ class StarChart( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'name', name )
@@ -7854,6 +8130,9 @@ class StarChart( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -7952,6 +8231,9 @@ class StarChart( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -8078,6 +8360,9 @@ class StarChart( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'object_chart').strip( ).lower( )
@@ -8158,6 +8443,9 @@ class StarChart( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -8381,6 +8669,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			value = str( self.api_key or '' ).strip( )
@@ -8405,6 +8696,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'limit', limit )
@@ -8433,6 +8727,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'offset', offset )
@@ -8461,6 +8758,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'bill_type', bill_type )
@@ -8499,6 +8799,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'law_type', law_type )
@@ -8531,6 +8834,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'report_type', report_type )
@@ -8572,6 +8878,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			return {
@@ -8610,6 +8919,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.url = f'{self.base_url}/congress'
@@ -8679,6 +8991,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8752,6 +9067,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8822,6 +9140,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8888,6 +9209,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8962,6 +9286,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -9033,6 +9360,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -9144,6 +9474,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'congresses').strip( ).lower( )
@@ -9254,6 +9587,9 @@ class Congress( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -9438,6 +9774,9 @@ class InternetArchive( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'rows', rows )
@@ -9466,6 +9805,9 @@ class InternetArchive( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'page', page )
@@ -9501,6 +9843,9 @@ class InternetArchive( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'keywords', keywords )
@@ -9561,6 +9906,9 @@ class InternetArchive( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'keywords', keywords )
@@ -9648,6 +9996,9 @@ class InternetArchive( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -9989,6 +10340,9 @@ class OpenWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				The selected geocoding record, typically the first result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10058,6 +10412,9 @@ class OpenWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				Normalized forecast response containing current conditions.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -10138,6 +10495,9 @@ class OpenWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				Normalized forecast response containing hourly data.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -10219,6 +10579,9 @@ class OpenWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				Normalized forecast response containing daily data.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -10307,6 +10670,9 @@ class OpenWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				Combined geocoding and forecast result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10409,6 +10775,9 @@ class OpenWeather( Fetcher ):
 			Returns:
 				Dict[str, str] | None:
 				A JSON-compatible dictionary defining the tool schema.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -10710,6 +11079,9 @@ class HistoricalWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				The selected geocoding record, typically the first result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10781,6 +11153,9 @@ class HistoricalWeather( Fetcher ):
 				Dict[str, Any] | None:
 				Normalized response payload including request metadata, selected
 				location metadata, and archive data.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -10864,6 +11239,9 @@ class HistoricalWeather( Fetcher ):
 			Returns:
 				Dict[str, Any] | None:
 				Combined geocoding and historical weather result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10941,6 +11319,9 @@ class HistoricalWeather( Fetcher ):
 			Returns:
 				Dict[str, str] | None:
 				A JSON-compatible dictionary defining the tool schema.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -11102,6 +11483,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'limit', limit )
@@ -11130,6 +11514,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				int
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'offset', offset )
@@ -11157,6 +11544,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				GrokipediaClient
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			return GrokipediaClient( )
@@ -11186,6 +11576,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -11240,6 +11633,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'page', page )
@@ -11306,6 +11702,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'search').strip( ).lower( )
@@ -11361,6 +11760,9 @@ class Grokipedia( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -11556,6 +11958,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			value = str( api_key or self.api_key or '' ).strip( )
@@ -11587,6 +11992,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			if not isinstance( params, dict ):
@@ -11653,6 +12061,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -11720,6 +12131,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -11786,6 +12200,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'place_id', place_id )
@@ -11868,6 +12285,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'forward').strip( ).lower( )
@@ -11941,6 +12361,9 @@ class GoogleGeocoding( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -12136,6 +12559,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'fields', fields )
@@ -12163,6 +12589,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.predicates = predicates
@@ -12211,6 +12640,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -12263,6 +12695,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'year', year )
@@ -12333,6 +12768,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'year', year )
@@ -12428,6 +12866,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = (mode or 'variables').strip( ).lower( )
@@ -12479,6 +12920,9 @@ class CensusData( Fetcher ):
 
 			Returns:
 				dict
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -12688,6 +13132,9 @@ class Socrata( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -12714,6 +13161,9 @@ class Socrata( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -12748,6 +13198,9 @@ class Socrata( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -12825,6 +13278,9 @@ class Socrata( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -12934,6 +13390,9 @@ class Socrata( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'rows').strip( ).lower( )
@@ -12985,6 +13444,9 @@ class Socrata( Fetcher ):
 
 			Returns:
 				dict
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -13195,6 +13657,9 @@ class HealthData( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -13222,6 +13687,9 @@ class HealthData( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -13256,6 +13724,9 @@ class HealthData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -13333,6 +13804,9 @@ class HealthData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -13442,6 +13916,9 @@ class HealthData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'rows').strip( ).lower( )
@@ -13502,6 +13979,9 @@ class HealthData( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -13680,6 +14160,9 @@ class GlobalHealthData( Fetcher ):
 		
 			Returns:
 				str: Normalized query path suitable for request URL composition.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -13707,6 +14190,9 @@ class GlobalHealthData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'indicator_registry'
@@ -13767,6 +14253,9 @@ class GlobalHealthData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -13836,6 +14325,9 @@ class GlobalHealthData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'indicator_registry').strip( ).lower( )
@@ -13880,6 +14372,9 @@ class GlobalHealthData( Fetcher ):
 
 		Returns:
 			Dict[ str, str ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -14036,6 +14531,9 @@ class UnitedNations( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -14063,6 +14561,9 @@ class UnitedNations( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'datasets'
@@ -14115,6 +14616,9 @@ class UnitedNations( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -14174,6 +14678,9 @@ class UnitedNations( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'datasets').strip( ).lower( )
@@ -14225,6 +14732,9 @@ class UnitedNations( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -14389,6 +14899,9 @@ class WorldPopulation( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'asset_path', asset_path )
@@ -14416,6 +14929,9 @@ class WorldPopulation( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'catalog'
@@ -14474,6 +14990,9 @@ class WorldPopulation( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'search'
@@ -14534,6 +15053,9 @@ class WorldPopulation( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'asset_path', asset_path )
@@ -14603,6 +15125,9 @@ class WorldPopulation( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'catalog').strip( ).lower( )
@@ -14662,6 +15187,9 @@ class WorldPopulation( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -14822,6 +15350,9 @@ class Wonder( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -14848,6 +15379,9 @@ class Wonder( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.dataset_id = self._normalize_dataset_id( dataset_id )
@@ -14892,6 +15426,9 @@ class Wonder( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'metadata_template'
@@ -14940,6 +15477,9 @@ class Wonder( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -15008,6 +15548,9 @@ class Wonder( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'metadata_template').strip( ).lower( )
@@ -15060,6 +15603,9 @@ class Wonder( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -15277,6 +15823,9 @@ class USGSEarthquakes( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.features = features
@@ -15355,6 +15904,9 @@ class USGSEarthquakes( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -15414,6 +15966,9 @@ class USGSEarthquakes( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'feed', feed )
@@ -15508,6 +16063,9 @@ class USGSEarthquakes( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'start_date', start_date )
@@ -15639,6 +16197,9 @@ class USGSEarthquakes( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'feed').strip( ).lower( )
@@ -15705,6 +16266,9 @@ class USGSEarthquakes( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -15868,6 +16432,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Optional[str]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -15901,6 +16468,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -15943,6 +16513,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'collection', collection )
@@ -15997,6 +16570,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16087,6 +16663,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16157,6 +16736,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16233,6 +16815,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -16294,6 +16879,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'monitoring-locations'
@@ -16355,6 +16943,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'time-series-metadata'
@@ -16413,6 +17004,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'latest-continuous'
@@ -16471,6 +17065,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'latest-daily'
@@ -16547,6 +17144,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'monitoring-locations').strip( ).lower( )
@@ -16627,6 +17227,9 @@ class USGSWaterData( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -16789,6 +17392,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -16842,6 +17448,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -16877,6 +17486,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16928,6 +17540,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -17004,6 +17619,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -17045,6 +17663,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'datasets'
@@ -17104,6 +17725,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'products'
@@ -17180,6 +17804,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'products').strip( ).lower( )
@@ -17238,6 +17865,9 @@ class USGSTheNationalMap( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -17400,6 +18030,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -17453,6 +18086,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -17491,6 +18127,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -17569,6 +18208,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.item = item
@@ -17621,6 +18263,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -17679,6 +18324,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'items'
@@ -17730,6 +18378,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'item_id', item_id )
@@ -17802,6 +18453,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'items').strip( ).lower( )
@@ -17859,6 +18513,9 @@ class USGSScienceBase( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -18015,6 +18672,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Optional[str]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -18053,6 +18713,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -18113,6 +18776,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -18163,6 +18829,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -18222,6 +18891,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -18280,6 +18952,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -18340,6 +19015,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -18404,6 +19082,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -18483,6 +19164,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'current-zip').strip( ).lower( )
@@ -18560,6 +19244,9 @@ class AirNow( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -18732,6 +19419,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -18784,6 +19474,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -18833,6 +19526,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -18870,6 +19566,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -18932,6 +19631,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'datasets'
@@ -19001,6 +19703,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset', dataset )
@@ -19091,6 +19796,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'datasets').strip( ).lower( )
@@ -19154,6 +19862,9 @@ class ClimateData( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -19318,6 +20029,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -19371,6 +20085,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -19448,6 +20165,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -19486,6 +20206,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -19561,6 +20284,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'events'
@@ -19614,6 +20340,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'categories'
@@ -19686,6 +20415,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'events').strip( ).lower( )
@@ -19746,6 +20478,9 @@ class EoNet( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -19910,6 +20645,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				str
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'table_name', table_name )
@@ -19969,6 +20707,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -20014,6 +20755,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -20051,6 +20795,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -20114,6 +20861,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'table_name', table_name )
@@ -20200,6 +20950,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			return self.fetch_table(
@@ -20246,6 +20999,9 @@ class EnviroFacts( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -20413,6 +21169,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -20465,6 +21224,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -20511,6 +21273,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -20552,6 +21317,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -20607,6 +21375,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'station_id', station_id )
@@ -20673,6 +21444,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'station_id', station_id )
@@ -20758,6 +21532,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'station_id', station_id )
@@ -20851,6 +21628,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'water-level').strip( ).lower( )
@@ -20926,6 +21706,9 @@ class TidesAndCurrents( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -21079,6 +21862,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -21123,6 +21909,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -21160,6 +21949,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -21218,6 +22010,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -21270,6 +22065,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'city', city )
@@ -21327,6 +22125,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -21379,6 +22180,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'city', city )
@@ -21450,6 +22254,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'daily-zip').strip( ).lower( )
@@ -21520,6 +22327,9 @@ class UvIndex( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -21688,6 +22498,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Optional[str]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -21727,6 +22540,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -21786,6 +22602,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -21840,6 +22659,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -21885,6 +22707,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -21957,6 +22782,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'nwlng', nwlng )
@@ -22021,6 +22849,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'sensor_index', sensor_index )
@@ -22108,6 +22939,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'sensors').strip( ).lower( )
@@ -22170,6 +23004,9 @@ class PurpleAir( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -22333,6 +23170,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Optional[str]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -22372,6 +23212,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -22430,6 +23273,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -22482,6 +23328,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -22539,6 +23388,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -22611,6 +23463,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'locations'
@@ -22666,6 +23521,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location_id', location_id )
@@ -22744,6 +23602,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'locations').strip( ).lower( )
@@ -22805,6 +23666,9 @@ class OpenAQ( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -22964,6 +23828,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Optional[str]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -22998,6 +23865,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -23048,6 +23918,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				List[Dict[str, Any]]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.csv_text = csv_text
@@ -23088,6 +23961,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Dict[str, Any]
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -23154,6 +24030,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'source', source )
@@ -23234,6 +24113,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'data-availability'
@@ -23300,6 +24182,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Dict[str, Any] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'area').strip( ).lower( )
@@ -23357,6 +24242,9 @@ class Firms( Fetcher ):
 
 			Returns:
 				Dict[str, str] | None
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -23513,6 +24401,9 @@ class OpenSky( Fetcher ):
 			Returns:
 				str:
 				Bearer access token.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'client_id', client_id )
@@ -23571,6 +24462,9 @@ class OpenSky( Fetcher ):
 			Returns:
 				Any:
 				Parsed JSON payload returned by OpenSky.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -23637,6 +24531,9 @@ class OpenSky( Fetcher ):
 			Returns:
 				Dict[ str, Any ] | None: Normalized state-vector records and metadata, or
 				None when normalization fails.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -23702,6 +24599,9 @@ class OpenSky( Fetcher ):
 
 		Returns:
 			Dict[ str, Any ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.payload = payload
@@ -23761,6 +24661,9 @@ class OpenSky( Fetcher ):
 
 		Returns:
 			Dict[ str, Any ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.payload = payload
@@ -23834,6 +24737,9 @@ class OpenSky( Fetcher ):
 
 		Returns:
 			Dict[ str, Any ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			if type( time ) is not int or time <= 0:
