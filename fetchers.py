@@ -900,6 +900,14 @@ class WebCrawler( WebFetcher ):
 			self.timeout = time
 			if crawl4ai is not None:
 				async def crawl_page( ) -> Any:
+					"""Retrieve HTML using the optional Crawl4AI renderer.
+
+					Purpose:
+						Runs the browser-based crawl with the configured timeout.
+
+					Returns:
+						Any: Crawl4AI result containing rendered page content.
+					"""
 					async with crawl4ai.AsyncWebCrawler( ) as crawler:
 						return await crawler.arun( url=self.raw_url,
 							config=crawl4ai.CrawlerRunConfig(
