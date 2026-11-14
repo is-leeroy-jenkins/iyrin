@@ -1225,6 +1225,7 @@ class GoogleDrive( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'question', question )
 			if not isinstance( question, str ):
 				raise TypeError( 'question must be a string.' )
 			throw_if( 'folder_id', folder_id )
@@ -1559,6 +1560,7 @@ class TheNews( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			self.endpoint = (endpoint or 'all').strip( ).lower( )
 			self.timeout = time
 			self.limit = max( 1, min( limit, 50 ) )
@@ -2447,6 +2449,7 @@ class GoogleWeather( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'path', path )
 			if not isinstance( params, dict ):
 				raise TypeError( 'params must be a dictionary.' )
@@ -3205,6 +3208,7 @@ class SatelliteCenter( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'observatories').strip( ).lower( )
 			if active_mode == 'observatories':
 				return self.fetch_observatories( )
@@ -4484,6 +4488,7 @@ class NearbyObjects( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'close_approaches').strip( ).lower( )
 			
 			if active_mode == 'close_approaches':
@@ -4943,6 +4948,7 @@ class OpenScience( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'dataset').strip( ).lower( )
 			if active_mode == 'dataset':
 				return self.fetch_dataset( accession=accession, time=time )
@@ -5642,6 +5648,7 @@ class AstroCatalog( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'route', route )
 			self.route = route
 			self.timeout = time
@@ -5809,6 +5816,7 @@ class AstroCatalog( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'object_query').strip( ).lower( )
 			
 			if active_mode == 'object_query':
@@ -6196,6 +6204,7 @@ class AstroQuery( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'object_search').strip( ).lower( )
 			
 			if active_mode == 'object_search':
@@ -6802,6 +6811,7 @@ class StarMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'object_link').strip( ).lower( )
 			
 			if active_mode == 'object_link':
@@ -7353,6 +7363,7 @@ class GovData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'search').strip( ).lower( )
 			
 			if active_mode == 'search':
@@ -8146,6 +8157,7 @@ class StarChart( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'object_chart').strip( ).lower( )
 			if active_mode == 'object_search':
 				return self.search_object( name=query, time=time )
@@ -11419,6 +11431,7 @@ class Grokipedia( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'search').strip( ).lower( )
 			
 			if active_mode == 'search':
@@ -11702,6 +11715,7 @@ class GoogleGeocoding( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			if not isinstance( params, dict ):
 				raise TypeError( 'params must be a dictionary.' )
 			if type( time ) is not int or time <= 0:
@@ -11975,6 +11989,7 @@ class GoogleGeocoding( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'forward').strip( ).lower( )
 			
 			if active_mode == 'forward':
@@ -14745,6 +14760,7 @@ class WorldPopulation( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'query', query )
 			active_mode = (mode or 'catalog').strip( ).lower( )
 			
 			if active_mode == 'catalog':
@@ -16090,6 +16106,7 @@ class USGSWaterData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'collection', collection )
 			self.collection = collection
 			
@@ -16948,6 +16965,7 @@ class USGSTheNationalMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -17572,6 +17590,7 @@ class USGSScienceBase( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -18242,6 +18261,7 @@ class AirNow( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -18929,6 +18949,7 @@ class ClimateData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'url', url )
 			self.url = url
 			
@@ -19517,6 +19538,7 @@ class EoNet( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -20624,6 +20646,7 @@ class TidesAndCurrents( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'url', url )
 			self.url = url
 			
@@ -21961,6 +21984,7 @@ class PurpleAir( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -22612,6 +22636,7 @@ class OpenAQ( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -23835,6 +23860,7 @@ class OpenSky( Fetcher ):
 				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
+			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			if not isinstance( endpoint, str ) or not endpoint.startswith( '/' ):
 				raise ValueError( 'endpoint must be a path beginning with /.' )
