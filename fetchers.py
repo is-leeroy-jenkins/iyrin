@@ -5246,12 +5246,17 @@ class AstroCatalog( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'route', route )
+			if not isinstance( route, str ):
+				raise TypeError( 'route must be a string.' )
+			if params is not None and not isinstance( params, dict ):
+				raise TypeError( 'params must be a dictionary or None.' )
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
 			self.route = route
 			self.timeout = time
 			self.url = f'{self.base_url}/{self.route.lstrip( "/" )}'
-			self.params = params or { }
+			self.params = params if params is not None else { }
 			
 			self.response = requests.get(
 				url=self.url,
