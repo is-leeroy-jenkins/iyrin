@@ -379,7 +379,7 @@ Iyrin reads provider credentials from environment variables where required. Lega
 
 ## 📂 Project Structure
 
-\`\`\`text
+```text
 iyrin/
 ├── app.py                  Streamlit application and document-processing orchestration
 ├── config.py               Application configuration and API metadata
