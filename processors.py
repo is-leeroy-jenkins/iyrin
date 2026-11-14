@@ -145,41 +145,39 @@ def throw_if( name: str, value: object ) -> None:
 class Processor( ):
 	"""Processor processing component.
 	
-	Purpose:
-		Initializes shared state used by text, Word, NLTK, and PDF parser subclasses,
+	Purpose (Initializes shared state used by text, Word, NLTK, and PDF parser subclasses,): Initializes shared state used by text, Word, NLTK, and PDF parser subclasses,
 		including token caches, line/page buffers, vocabulary stores, NLP helpers,
 		and cleaned-text fields used across the processing workflow.
 		
-	Attributes:
-		cleaned_text (str | None): Latest cleaned text retained for downstream processing.
+	Attributes (cleaned_text (str | None): Latest cleaned text retained for downstream processing.): cleaned_text (str | None): Latest cleaned text retained for downstream processing.
 		lowercase (str | None): Text converted to lowercase for normalization workflows.
 		chunks (list | None): List of document chunks generated during processing.
-		lemmatizer: WordNet lemmatizer used to reduce tokens to their canonical lexical forms.
-		stemmer: Porter stemmer used to reduce tokens to word stems.
-		file_path: Path of the file currently being loaded, parsed, cleaned, or exported.
-		normalized: Text produced by the active normalization operation.
-		lemmatized: Text produced after lemmatization.
-		tokenized: Text or serialized token content produced by tokenization.
-		encoding: TikToken encoding used to convert text into model-compatible token identifiers.
-		nlp: Optional spaCy language pipeline used for linguistic processing.
-		parts_of_speech: Token and part-of-speech tag pairs produced by linguistic analysis.
-		embedddings: Numeric embedding vectors generated for tokens, sentences, or document content.
-		chunk_size: Number of tokens, words, sentences, or records assigned to each generated chunk.
-		corrected: Text produced after spelling, extraction, or formatting corrections.
-		raw_input: Unmodified text supplied to the current processing operation.
-		raw_html: Original HTML content retained before markup removal.
-		raw_pages: Unprocessed page text extracted from a source document.
-		lines: Ordered text lines loaded from or extracted from the active source.
-		tokens: Ordered tokens produced from the active text.
-		files: File names or paths associated with a batch-processing operation.
-		pages: Logical pages or page structures extracted from the active document.
-		paragraphs: Paragraphs extracted from the active text or document.
-		ids: Numeric token, record, page, or chunk identifiers created during processing.
-		stop_words: Stopword vocabulary used to exclude common terms from lexical processing.
-		vocabulary: Unique terms produced from the active token collection or corpus.
-		corpus: Tabular corpus containing text, tokens, frequencies, or other processed records.
-		removed: Text fragments, symbols, tokens, or artifacts removed during cleanup.
-		frequency_distribution: Mapping or tabular representation of token frequencies.
+		lemmatizer (Optional[ WordNetLemmatizer ]): WordNet lemmatizer used to reduce tokens to their canonical lexical forms.
+		stemmer (Optional[ PorterStemmer ]): Porter stemmer used to reduce tokens to word stems.
+		file_path (Optional[ str ]): Path of the file currently being loaded, parsed, cleaned, or exported.
+		normalized (Optional[ str ]): Text produced by the active normalization operation.
+		lemmatized (Optional[ str ]): Text produced after lemmatization.
+		tokenized (Optional[ str ]): Text or serialized token content produced by tokenization.
+		encoding (Optional[ Encoding ]): TikToken encoding used to convert text into model-compatible token identifiers.
+		nlp (Optional[ Language ]): Optional spaCy language pipeline used for linguistic processing.
+		parts_of_speech (Optional[ List[ Tuple[ str, str ] ] ]): Token and part-of-speech tag pairs produced by linguistic analysis.
+		embedddings (Optional[ List[ np.ndarray ] ]): Numeric embedding vectors generated for tokens, sentences, or document content.
+		chunk_size (Optional[ int ]): Number of tokens, words, sentences, or records assigned to each generated chunk.
+		corrected (Optional[ str ]): Text produced after spelling, extraction, or formatting corrections.
+		raw_input (Optional[ str ]): Unmodified text supplied to the current processing operation.
+		raw_html (Optional[ str ]): Original HTML content retained before markup removal.
+		raw_pages (Optional[ List[ str ] ]): Unprocessed page text extracted from a source document.
+		lines (Optional[ List[ str ] ]): Ordered text lines loaded from or extracted from the active source.
+		tokens (Optional[ List[ str ] ]): Ordered tokens produced from the active text.
+		files (Optional[ List[ str ] ]): File names or paths associated with a batch-processing operation.
+		pages (Optional[ List[ str ] ]): Logical pages or page structures extracted from the active document.
+		paragraphs (Optional[ List[ str ] ]): Paragraphs extracted from the active text or document.
+		ids (Optional[ List[ int ] ]): Numeric token, record, page, or chunk identifiers created during processing.
+		stop_words (Optional[ set ]): Stopword vocabulary used to exclude common terms from lexical processing.
+		vocabulary (Optional[ set ]): Unique terms produced from the active token collection or corpus.
+		corpus (Optional[ DataFrame ]): Tabular corpus containing text, tokens, frequencies, or other processed records.
+		removed (Optional[ List[ str ] ]): Text fragments, symbols, tokens, or artifacts removed during cleanup.
+		frequency_distribution (Optional[ DataFrame ]): Mapping or tabular representation of token frequencies.
 	"""
 	lemmatizer: Optional[ WordNetLemmatizer ]
 	stemmer: Optional[ PorterStemmer ]
@@ -249,30 +247,28 @@ class Processor( ):
 class TextParser( Processor ):
 	"""TextParser processing component.
 	
-	Purpose:
-		Provides text cleanup, normalization, tokenization, chunking, vocabulary,
+	Purpose (Provides text cleanup, normalization, tokenization, chunking, vocabulary,): Provides text cleanup, normalization, tokenization, chunking, vocabulary,
 		frequency-distribution, and semantic-preparation utilities used by the Text Processing,
 		Analysis, and Tokenization tabs.
 	
-	Attributes:
-		vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.
+	Attributes (vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.): vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.
 		tokenizer (object | None): Tokenizer used by the active text parsing workflow.
 		translator (object | None): Character translation mapping for text normalization.
-		lowercase: Runtime state used by ``TextParser`` during processing operations.
-		cleaned_text: Runtime state used by ``TextParser`` during processing operations.
-		cleaned_lines: Runtime state used by ``TextParser`` during processing operations.
-		cleaned_tokens: Runtime state used by ``TextParser`` during processing operations.
-		cleaned_pages: Runtime state used by ``TextParser`` during processing operations.
-		cleaned_html: Runtime state used by ``TextParser`` during processing operations.
-		conditional_distribution: Runtime state used by ``TextParser`` during processing
+		lowercase (Optional[ str ]): Runtime state used by ``TextParser`` during processing operations.
+		cleaned_text (Optional[ str ]): Runtime state used by ``TextParser`` during processing operations.
+		cleaned_lines (Optional[ List[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		cleaned_tokens (Optional[ List[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		cleaned_pages (Optional[ List[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		cleaned_html (Optional[ str ]): Runtime state used by ``TextParser`` during processing operations.
+		conditional_distribution (Optional[ DataFrame ]): Runtime state used by ``TextParser`` during processing
 			operations.
-		PUNCTUATION: Runtime state used by ``TextParser`` during processing operations.
-		CONTROL_CHARACTERS: Runtime state used by ``TextParser`` during processing
+		PUNCTUATION (Optional[ Set[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		CONTROL_CHARACTERS (Optional[ Set[ str ] ]): Runtime state used by ``TextParser`` during processing
 			operations.
-		DELIMITERS: Runtime state used by ``TextParser`` during processing operations.
-		DIGITS: Runtime state used by ``TextParser`` during processing operations.
-		SYMBOLS: Runtime state used by ``TextParser`` during processing operations.
-		NUMERALS: Runtime state used by ``TextParser`` during processing operations.
+		DELIMITERS (Optional[ Set[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		DIGITS (Optional[ Set[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		SYMBOLS (Optional[ Set[ str ] ]): Runtime state used by ``TextParser`` during processing operations.
+		NUMERALS (Optional[ str ]): Runtime state used by ``TextParser`` during processing operations.
 	"""
 	lowercase: Optional[ str ]
 	cleaned_text: Optional[ str ]
@@ -1866,18 +1862,16 @@ class TextParser( Processor ):
 class NltkParser( Processor ):
 	"""NltkParser processing component.
 	
-	Purpose:
-		Provides NLTK-backed parsing utilities for corpus tokenization, stemming, lemmatization,
+	Purpose (Provides NLTK-backed parsing utilities for corpus tokenization, stemming, lemmatization,): Provides NLTK-backed parsing utilities for corpus tokenization, stemming, lemmatization,
 		part-of-speech tagging, named-entity handling, and lexical diagnostics used by Chonky
 		analysis workflows.
 	
-	Attributes:
-		word_tokens: Runtime state used by ``NltkParser`` during processing operations.
-		sentence_tokens: Runtime state used by ``NltkParser`` during processing operations.
-		stemmed_tokens: Runtime state used by ``NltkParser`` during processing operations.
-		lemmatized_tokens: Runtime state used by ``NltkParser`` during processing.
-		tagged_tokens: Runtime state used by ``NltkParser`` during processing operations.
-		named_entities: Runtime state used by ``NltkParser`` during processing operations.
+	Attributes (word_tokens: Runtime state used by ``NltkParser`` during processing operations.): word_tokens: Runtime state used by ``NltkParser`` during processing operations.
+		sentence_tokens (Optional[ List[ str ] ]): Runtime state used by ``NltkParser`` during processing operations.
+		stemmed_tokens (Optional[ List[ str ] ]): Runtime state used by ``NltkParser`` during processing operations.
+		lemmatized_tokens (Optional[ List[ str ] ]): Runtime state used by ``NltkParser`` during processing.
+		tagged_tokens (Optional[ List[ Tuple[ str, str ] ] ]): Runtime state used by ``NltkParser`` during processing operations.
+		named_entities (Optional[ List[ Tuple[ str, str ] ] ]): Runtime state used by ``NltkParser`` during processing operations.
 	"""
 	word_tokens: Optional[ List[ str ] ]
 	sentence_tokens: Optional[ List[ str ] ]
@@ -2238,21 +2232,19 @@ class NltkParser( Processor ):
 class WordParser( Processor ):
 	"""WordParser processing component.
 	
-	Purpose:
-		Provides Microsoft Word document parsing utilities that extract paragraphs, tables,
+	Purpose (Provides Microsoft Word document parsing utilities that extract paragraphs, tables,): Provides Microsoft Word document parsing utilities that extract paragraphs, tables,
 		metadata, and cleaned text for downstream processing and analysis.
 	
-	Attributes:
-		page_text (str | None): Current document page text used for Word processing.
-		sentences: Runtime state used by ``WordParser`` during processing operations.
-		cleaned_sentences: Runtime state used by ``WordParser`` during processing
+	Attributes (page_text (str | None): Current document page text used for Word processing.): page_text (str | None): Current document page text used for Word processing.
+		sentences (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing operations.
+		cleaned_sentences (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing
 			operations.
-		document: Runtime state used by ``WordParser`` during processing operations.
-		raw_text: Runtime state used by ``WordParser`` during processing operations.
-		paragraphs: Runtime state used by ``WordParser`` during processing operations.
-		file_path: Runtime state used by ``WordParser`` during processing operations.
-		vocabulary: Runtime state used by ``WordParser`` during processing operations.
-		document: Runtime state used by ``WordParser`` during processing operations.
+		document (Optional[ Document ]): Runtime state used by ``WordParser`` during processing operations.
+		raw_text (Optional[ str ]): Runtime state used by ``WordParser`` during processing operations.
+		paragraphs (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing operations.
+		file_path (Optional[ str ]): Runtime state used by ``WordParser`` during processing operations.
+		vocabulary (Optional[ set ]): Runtime state used by ``WordParser`` during processing operations.
+		document (Optional[ Document ]): Runtime state used by ``WordParser`` during processing operations.
 	"""
 	sentences: Optional[ List[ str ] ]
 	cleaned_sentences: Optional[ List[ str ] ]
@@ -2466,26 +2458,24 @@ class WordParser( Processor ):
 class PdfParser( Processor ):
 	"""PdfParser processing component.
 	
-	Purpose:
-		Provides geometry-aware PDF parsing and cleanup utilities that extract page blocks,
+	Purpose (Provides geometry-aware PDF parsing and cleanup utilities that extract page blocks,): Provides geometry-aware PDF parsing and cleanup utilities that extract page blocks,
 		remove repeating headers and footers, repair line spacing, normalize artifacts,
 		and rebuild PDF text for downstream processing.
 	
-	Attributes:
-		page (str | None): Current page text or identifier.
+	Attributes (page (str | None): Current page text or identifier.): page (str | None): Current page text or identifier.
 		file_path (str | None): Current PDF file path.
 		tables (list | None): Tables extracted from the current PDF.
 		clean_lines (list | None): Lines retained after PDF cleanup.
 		blocks (list | None): Geometric PDF content blocks.
 		lines (list | None): Extracted text lines from the active PDF.
 		pages (list | None): Parsed PDF page structures.
-		strip_headers: Runtime state used by ``PdfParser`` during processing operations.
-		minimum_length: Runtime state used by ``PdfParser`` during processing operations.
-		extract_tables_enabled: Runtime state used by ``PdfParser`` during processing
+		strip_headers (Optional[ bool ]): Runtime state used by ``PdfParser`` during processing operations.
+		minimum_length (Optional[ int ]): Runtime state used by ``PdfParser`` during processing operations.
+		extract_tables_enabled (Optional[ bool ]): Runtime state used by ``PdfParser`` during processing
 			operations.
-		extracted_lines: Runtime state used by ``PdfParser`` during processing operations.
-		extracted_tables: Runtime state used by ``PdfParser`` during processing operations.
-		extracted_pages: Runtime state used by ``PdfParser`` during processing operations.
+		extracted_lines (Optional[ List ]): Runtime state used by ``PdfParser`` during processing operations.
+		extracted_tables (Optional[ List ]): Runtime state used by ``PdfParser`` during processing operations.
+		extracted_pages (Optional[ List ]): Runtime state used by ``PdfParser`` during processing operations.
 	"""
 	strip_headers: Optional[ bool ]
 	minimum_length: Optional[ int ]
