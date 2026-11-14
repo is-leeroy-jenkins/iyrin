@@ -61,13 +61,20 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 class OpenSkyLive( ):
-	'''
+	"""OpenSkyLive Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve current OpenSky state vectors for a geographic bounding box.
 
-	'''
+	Attributes:
+		client_id (str): OpenSky OAuth client ID.
+		client_secret (str): OpenSky OAuth client secret.
+		timeout (int): Network timeout in seconds.
+		token_url (str): OpenSky OAuth token endpoint.
+		states_url (str): OpenSky aircraft state endpoint.
+		access_token (str): Most recently obtained OAuth access token.
+		response (Response | None): Most recent HTTP response.
+	"""
 	client_id: str
 	client_secret: str
 	timeout: int
@@ -79,19 +86,16 @@ class OpenSkyLive( ):
 	def __init__( self, client_id: str='', client_secret: str='', timeout: int=20 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenSky REST API access. Credentials are optional because OpenSky can
 			serve anonymous requests subject to the provider's current access limits.
 
-			Parameters:
-			-----------
+		Args:
 			client_id (str): OpenSky API Client identifier.
 			client_secret (str): OpenSky API Client secret.
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -107,12 +111,10 @@ class OpenSkyLive( ):
 	def get_access_token( self ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Obtain an OpenSky OAuth2 access token using the configured API Client.
 
-			Returns:
-			--------
+		Returns:
 			str: Bearer access token, or an empty string when credentials were not supplied.
 
 		'''
@@ -130,29 +132,26 @@ class OpenSkyLive( ):
 			return self.access_token
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'mappy'
-			exception.cause = 'StaticMap'
+			exception.module = 'sources'
+			exception.cause = 'OpenSkyLive'
 			exception.method = 'get_access_token( self ) -> str'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 	def fetch_states( self, latitude: float, longitude: float,
 			radius_degrees: float=2.0 ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve live aircraft state vectors within a geographic bounding box centered
 			on the supplied latitude and longitude.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Bounding-box center latitude.
 			longitude (float): Bounding-box center longitude.
 			radius_degrees (float): Decimal-degree half-width of the bounding box.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: OpenSky state-vector payload.
 
 		'''
@@ -160,9 +159,15 @@ class OpenSkyLive( ):
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
 			throw_if( 'radius_degrees', radius_degrees )
-			self.latitude = float( latitude )
-			self.longitude = float( longitude )
-			self.radius_degrees = float( radius_degrees )
+			if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
+				raise ValueError( 'latitude must be between -90 and 90 degrees.' )
+			if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
+				raise ValueError( 'longitude must be between -180 and 180 degrees.' )
+			if type( radius_degrees ) not in (int, float) or not 0 < radius_degrees <= 180:
+				raise ValueError( 'radius_degrees must be positive and no greater than 180.' )
+			self.latitude = latitude
+			self.longitude = longitude
+			self.radius_degrees = radius_degrees
 			self.lamin = max( -90.0, self.latitude - self.radius_degrees )
 			self.lamax = min( 90.0, self.latitude + self.radius_degrees )
 			self.lomin = max( -180.0, self.longitude - self.radius_degrees )
@@ -184,21 +189,24 @@ class OpenSkyLive( ):
 			return self.response.json( ) or { }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'mappy'
-			exception.cause = 'StaticMap'
-			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
-			Logger.write( exception )
+			exception.module = 'sources'
+			exception.cause = 'OpenSkyLive'
+			exception.method = 'OpenSkyLive.fetch_states'
+			Logger( ).write( exception )
 			raise exception
 
 
 class AdsbLolMilitary( ):
-	'''
+	"""AdsbLolMilitary Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve aircraft currently tagged as military by ADSB.lol.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -206,16 +214,13 @@ class AdsbLolMilitary( ):
 	def __init__( self, timeout: int=20 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize ADSB.lol military-aircraft access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -227,19 +232,16 @@ class AdsbLolMilitary( ):
 			radius_nm: float=250.0 ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve ADSB.lol aircraft around a geographic point and retain records
 			whose database flags identify them as military aircraft.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Geographic center latitude.
 			longitude (float): Geographic center longitude.
 			radius_nm (float): Search radius in nautical miles.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: ADSB.lol payload containing only military-tagged aircraft.
 
 		'''
@@ -263,20 +265,26 @@ class AdsbLolMilitary( ):
 			return payload
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'source'
-			exception.cause = 'SAdsbLolMilitary'
-			exception.method = 'fetch_militar( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.module = 'sources'
+			exception.cause = 'AdsbLolMilitary'
+			exception.method = 'AdsbLolMilitary.fetch_military'
+			Logger( ).write( exception )
 			raise exception
 
 class AisStreamLive( ):
-	'''
+	"""AisStreamLive Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve live maritime AIS position reports through the AIS Stream WebSocket API.
 
-	'''
+	Attributes:
+		api_key (str): AIS Stream credential for WebSocket subscriptions.
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		socket (WebSocket | None): Active AIS Stream WebSocket connection.
+		max_retries (int): Maximum reconnect attempts.
+		retry_delay (float): Initial delay between retry attempts, in seconds.
+	"""
 	api_key: str
 	timeout: int
 	url: str
@@ -288,26 +296,29 @@ class AisStreamLive( ):
 			retry_delay: float=0.5 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize AIS Stream server-side WebSocket access with bounded reconnect behavior.
 
-			Parameters:
-			-----------
+		Args:
 			api_key (str): AIS Stream API key.
 			timeout (int): WebSocket connection and receive timeout in seconds.
 			max_retries (int): Maximum reconnect attempts after the initial connection.
 			retry_delay (float): Initial reconnect delay in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
 		self.api_key = api_key
-		self.timeout = int( timeout )
-		self.max_retries = int( max_retries )
-		self.retry_delay = float( retry_delay )
+		if type( timeout ) is not int or timeout < 1:
+			raise ValueError( 'timeout must be a positive integer.' )
+		if type( max_retries ) is not int or max_retries < 0:
+			raise ValueError( 'max_retries must be a nonnegative integer.' )
+		if type( retry_delay ) not in (int, float) or retry_delay < 0:
+			raise ValueError( 'retry_delay must be nonnegative and numeric.' )
+		self.timeout = timeout
+		self.max_retries = max_retries
+		self.retry_delay = retry_delay
 		if self.timeout < 1:
 			raise ValueError( 'Argument "timeout" must be greater than zero.' )
 		if self.max_retries < 0:
@@ -322,21 +333,18 @@ class AisStreamLive( ):
 			duration_seconds: float=3.0 ) -> List[ Dict[ str, Any ] ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Collect a bounded sample of live AIS vessel position messages around a geographic
 			center point while reconnecting after transient WebSocket failures.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Bounding-box center latitude.
 			longitude (float): Bounding-box center longitude.
 			radius_degrees (float): Decimal-degree half-width of the bounding box.
 			max_messages (int): Maximum matching AIS messages returned.
 			duration_seconds (float): Maximum total receive window in seconds.
 
-			Returns:
-			--------
+		Returns:
 			List[Dict[str, Any]]: AIS Stream message envelopes containing vessel positions.
 
 		'''
@@ -346,9 +354,15 @@ class AisStreamLive( ):
 			throw_if( 'radius_degrees', radius_degrees )
 			throw_if( 'max_messages', max_messages )
 			throw_if( 'duration_seconds', duration_seconds )
-			self.latitude = float( latitude )
-			self.longitude = float( longitude )
-			self.radius_degrees = float( radius_degrees )
+			if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
+				raise ValueError( 'latitude must be between -90 and 90 degrees.' )
+			if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
+				raise ValueError( 'longitude must be between -180 and 180 degrees.' )
+			if type( radius_degrees ) not in (int, float) or not 0 < radius_degrees <= 180:
+				raise ValueError( 'radius_degrees must be positive and no greater than 180.' )
+			self.latitude = latitude
+			self.longitude = longitude
+			self.radius_degrees = radius_degrees
 			self.max_messages = int( max_messages )
 			self.duration_seconds = float( duration_seconds )
 			self.north = min( 90.0, self.latitude + self.radius_degrees )
@@ -433,20 +447,22 @@ class AisStreamLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'AisStreamLive'
-			exception.method = 'fetch_positions( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.method = 'AisStreamLive.fetch_positions'
+			Logger( ).write( exception )
 			raise exception
 
 
 class CelesTrakLive( ):
-	'''
+	"""CelesTrakLive Live World provider client.
 
-		Purpose:
-		--------
-		Retrieve current CelesTrak OMM records and propagate them to current Earth-fixed
-		latitude, longitude, and altitude values using SGP4.
+	Purpose:
+		Retrieve current CelesTrak OMM records and propagate them to current Earth-fixed latitude, longitude, and altitude values using SGP4.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -454,16 +470,13 @@ class CelesTrakLive( ):
 	def __init__( self, timeout: int=20 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize current CelesTrak GP-data access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -474,26 +487,25 @@ class CelesTrakLive( ):
 	def fetch_group( self, group: str, limit: int=250 ) -> List[ Dict[ str, Any ] ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve current general-perturbation records for one CelesTrak satellite group
 			in OMM JSON format.
 
-			Parameters:
-			-----------
+		Args:
 			group (str): CelesTrak group identifier such as stations, visual, weather,
 				gps-ops, or active.
 			limit (int): Maximum records returned to the caller.
 
-			Returns:
-			--------
+		Returns:
 			List[Dict[str, Any]]: OMM records.
 
 		'''
 		try:
 			throw_if( 'group', group )
 			self.group = group
-			self.limit = int( limit )
+			if type( limit ) is not int or limit < 1:
+				raise ValueError( 'limit must be a positive integer.' )
+			self.limit = limit
 			self.params = { 'GROUP': self.group, 'FORMAT': 'JSON' }
 			self.response = requests.get( self.url, params=self.params, timeout=self.timeout )
 			self.response.raise_for_status( )
@@ -505,25 +517,22 @@ class CelesTrakLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
-			exception.method = 'fetch_group( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.method = 'CelesTrakLive.fetch_group'
+			Logger( ).write( exception )
 			raise exception
 
 	def propagate( self, record: Dict[ str, Any ], when: dt.datetime ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Propagate one OMM record to the requested UTC time and transform its TEME
 			position into Earth-fixed geodetic coordinates.
 
-			Parameters:
-			-----------
+		Args:
 			record (Dict[str, Any]): CelesTrak OMM record.
 			when (datetime): UTC propagation time.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Propagated latitude, longitude, altitude, velocity, and identity.
 
 		'''
@@ -560,19 +569,26 @@ class CelesTrakLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
-			exception.method = 'propagate( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.method = 'CelesTrakLive.propagate'
+			Logger( ).write( exception )
 			raise exception
 
 
 class OverpassClient( ):
-	'''
+	"""OverpassClient Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Provide shared resilient HTTP transport for Iyr OpenStreetMap Overpass providers.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		retries (int): Maximum HTTP retry attempts per endpoint.
+		retry_delay (float): Initial delay between retry attempts, in seconds.
+		url (str): Provider endpoint URL.
+		endpoints (List[ str ]): Ordered Overpass endpoints used for fallback.
+		headers (Dict[ str, str ]): HTTP headers used for provider requests.
+		response (Response | None): Most recent HTTP response.
+	"""
 	timeout: int
 	retries: int
 	retry_delay: float
@@ -584,24 +600,27 @@ class OverpassClient( ):
 	def __init__( self, timeout: int=30, retries: int=2, retry_delay: float=0.75 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize shared Overpass request identity, endpoints, and retry policy.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 			retries (int): Retries per endpoint for transient provider responses.
 			retry_delay (float): Initial exponential-backoff delay in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
-		self.timeout = int( timeout )
-		self.retries = int( retries )
-		self.retry_delay = float( retry_delay )
+		if type( timeout ) is not int or timeout < 1:
+			raise ValueError( 'timeout must be a positive integer.' )
+		if type( retries ) is not int or retries < 0:
+			raise ValueError( 'retries must be a nonnegative integer.' )
+		if type( retry_delay ) not in (int, float) or retry_delay < 0:
+			raise ValueError( 'retry_delay must be nonnegative and numeric.' )
+		self.timeout = timeout
+		self.retries = retries
+		self.retry_delay = retry_delay
 		if self.timeout < 1:
 			raise ValueError( 'Argument "timeout" must be greater than zero.' )
 		if self.retries < 0:
@@ -618,17 +637,14 @@ class OverpassClient( ):
 	def execute( self, query: str ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Execute one Overpass query with request identification, bounded retry, and
 			alternate-endpoint fallback.
 
-			Parameters:
-			-----------
+		Args:
 			query (str): Overpass QL query.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Decoded Overpass JSON response.
 
 		'''
@@ -671,19 +687,22 @@ class OverpassClient( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassClient'
-			exception.method = 'execute( self, **args ) -> None'
-			Logger.write( exception )
+			exception.method = 'OverpassClient.execute'
+			Logger( ).write( exception )
 			raise exception
 
 class OverpassInfrastructure( OverpassClient ):
-	'''
+	"""OverpassInfrastructure Live World provider client.
 
-		Purpose:
-		--------
-		Retrieve nearby public infrastructure features from OpenStreetMap through the
-		Overpass API using explicit infrastructure categories.
+	Purpose:
+		Retrieve nearby public infrastructure features from OpenStreetMap through the Overpass API using explicit infrastructure categories.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+		category_filters (Dict[ str, List[ str ] ]): OpenStreetMap category names mapped to Overpass filters.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -692,16 +711,13 @@ class OverpassInfrastructure( OverpassClient ):
 	def __init__( self, timeout: int=30 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenStreetMap Overpass infrastructure access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -717,20 +733,17 @@ class OverpassInfrastructure( OverpassClient ):
 			radius_km: float, categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve tagged OpenStreetMap infrastructure within a circular search radius.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Search-origin latitude.
 			longitude (float): Search-origin longitude.
 			radius_km (float): Search radius in kilometers.
 			categories (List[str]): Infrastructure categories to retrieve.
 			max_results (int): Maximum normalized Overpass elements to return.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Overpass elements with an added InfrastructureCategory field.
 
 		'''
@@ -796,23 +809,20 @@ class OverpassInfrastructure( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
-			exception.method = 'fetch_infrastructure( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.method = 'OverpassInfrastructure.fetch_infrastructure'
+			Logger( ).write( exception )
 			raise exception
 
 	def classify_infrastructure( self, tags: Dict[ str, Any ] ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Classify one OpenStreetMap tag collection into a supported infrastructure category.
 
-			Parameters:
-			-----------
+		Args:
 			tags (Dict[str, Any]): OpenStreetMap feature tags.
 
-			Returns:
-			--------
+		Returns:
 			str: Infrastructure category, or an empty string when unsupported.
 
 		'''
@@ -835,19 +845,22 @@ class OverpassInfrastructure( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
-			exception.method = 'classify_infrastructure( self, **args ) -> str'
-			Logger.write( exception )
+			exception.method = 'OverpassInfrastructure.classify_infrastructure'
+			Logger( ).write( exception )
 			raise exception
 
 class OverpassCameras( OverpassClient ):
-	'''
+	"""OverpassCameras Live World provider client.
 
-		Purpose:
-		--------
-		Retrieve nearby public CCTV, surveillance-camera, and webcam features from
-		OpenStreetMap through the Overpass API.
+	Purpose:
+		Retrieve nearby public CCTV, surveillance-camera, and webcam features from OpenStreetMap through the Overpass API.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+		category_filters (Dict[ str, List[ str ] ]): OpenStreetMap category names mapped to Overpass filters.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -856,16 +869,13 @@ class OverpassCameras( OverpassClient ):
 	def __init__( self, timeout: int=30 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenStreetMap Overpass camera access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -879,20 +889,17 @@ class OverpassCameras( OverpassClient ):
 			categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve tagged public camera features within a circular search radius.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Search-origin latitude.
 			longitude (float): Search-origin longitude.
 			radius_km (float): Search radius in kilometers.
 			categories (List[str]): Camera categories to retrieve.
 			max_results (int): Maximum normalized Overpass elements to return.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Overpass elements with an added CameraCategory field.
 
 		'''
@@ -957,24 +964,21 @@ class OverpassCameras( OverpassClient ):
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'sources'
-			exception.cause = 'OverpassCamera'
-			exception.method = 'fetch_cameras( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.cause = 'OverpassCameras'
+			exception.method = 'OverpassCameras.fetch_cameras'
+			Logger( ).write( exception )
 			raise exception
 
 	def classify_camera( self, tags: Dict[ str, Any ] ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Classify one OpenStreetMap camera feature into a supported camera category.
 
-			Parameters:
-			-----------
+		Args:
 			tags (Dict[str, Any]): OpenStreetMap feature tags.
 
-			Returns:
-			--------
+		Returns:
 			str: Camera category, or an empty string when unsupported.
 
 		'''
@@ -989,18 +993,22 @@ class OverpassCameras( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassCameras'
-			exception.method = 'classify_camera( self, **args ) -> str'
-			Logger.write( exception )
+			exception.method = 'OverpassCameras.classify_camera'
+			Logger( ).write( exception )
 			raise exception
 
 class OverpassMapLayers( OverpassClient ):
-	'''
+	"""OverpassMapLayers Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve contextual public map features from OpenStreetMap through the Overpass API.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+		category_filters (Dict[ str, List[ str ] ]): OpenStreetMap category names mapped to Overpass filters.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -1009,16 +1017,13 @@ class OverpassMapLayers( OverpassClient ):
 	def __init__( self, timeout: int=30 ) -> None:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Initialize OpenStreetMap Overpass contextual map-layer access.
 
-			Parameters:
-			-----------
+		Args:
 			timeout (int): HTTP timeout in seconds.
 
-			Returns:
-			--------
+		Returns:
 			None
 
 		'''
@@ -1039,20 +1044,17 @@ class OverpassMapLayers( OverpassClient ):
 			categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Retrieve selected contextual map features within a circular search radius.
 
-			Parameters:
-			-----------
+		Args:
 			latitude (float): Search-origin latitude.
 			longitude (float): Search-origin longitude.
 			radius_km (float): Search radius in kilometers.
 			categories (List[str]): Contextual map categories to retrieve.
 			max_results (int): Maximum normalized Overpass elements to return.
 
-			Returns:
-			--------
+		Returns:
 			Dict[str, Any]: Overpass elements with an added MapLayerCategory field.
 
 		'''
@@ -1118,23 +1120,20 @@ class OverpassMapLayers( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
-			exception.method = 'fetch_features( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			exception.method = 'OverpassMapLayers.fetch_features'
+			Logger( ).write( exception )
 			raise exception
 
 	def classify_feature( self, tags: Dict[ str, Any ] ) -> str:
 		'''
 
-			Purpose:
-			--------
+		Purpose:
 			Classify one OpenStreetMap feature into a supported contextual map category.
 
-			Parameters:
-			-----------
+		Args:
 			tags (Dict[str, Any]): OpenStreetMap feature tags.
 
-			Returns:
-			--------
+		Returns:
 			str: Contextual map category, or an empty string when unsupported.
 
 		'''
@@ -1160,7 +1159,7 @@ class OverpassMapLayers( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
-			exception.method = 'classify_feature( self, **args ) -> str'
-			Logger.write( exception )
+			exception.method = 'OverpassMapLayers.classify_feature'
+			Logger( ).write( exception )
 			raise exception
 
