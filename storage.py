@@ -62,16 +62,13 @@ def throw_if( name: str, value: object ) -> None:
 	"""
 	
 		Purpose:
-		--------
 		Validate that a required value is not empty.
 		
-		Parameters:
-		-----------
+		Args:
 		name (str): Name of the argument being validated.
 		value (object): Value to validate.
 		
 		Returns:
-		--------
 		None
 		
 	"""
@@ -102,19 +99,13 @@ def blue_divider( ) -> None:
 	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 class BaseCache( ):
-	"""
-	
-		Purpose:
-			Minimal cache interface for mapping string keys to JSON-serializable
-			dictionary values, with optional TTL and diagnostics support.
+	"""BaseCache persistence interface.
 
-		Parameters:
-			None.
+	Purpose:
+		Defines the cache interface for dictionaries, expiration, and namespace keys.
 
-		Returns:
-			Subclasses implement get/set and may optionally implement delete,
-			clear, contains, stats, and namespace_key.
-			
+	Attributes:
+		None: The abstract interface has no declared instance attributes.
 	"""
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
@@ -146,7 +137,7 @@ class BaseCache( ):
 			Purpose:
 				Create a cache key prefixed by a namespace.
 
-			Parameters:
+			Args:
 				namespace (str):
 					Logical cache namespace, such as geocode, places, weather,
 					distance, or fetcher.
@@ -174,18 +165,17 @@ class BaseCache( ):
 		raise NotImplementedError
 
 class InMemoryCache( BaseCache ):
-	"""
+	"""InMemoryCache persistence interface.
 
-		Purpose:
-			Provide a fast, process-local dictionary cache with optional TTL,
-			hit/miss counters, deletion, clearing, and basic diagnostics.
+	Purpose:
+		Caches records in memory and tracks cache use, writes, and deletions.
 
-		Parameters:
-			None.
-
-		Returns:
-			O(1) get/set operations for this process lifetime.
-
+	Attributes:
+		store (Dict[str, Dict[str, Any]]): Internal cache record dictionary.
+		hits (int): Successful cache reads.
+		misses (int): Unsuccessful cache reads.
+		sets (int): Cache writes.
+		deletes (int): Deleted cache entries.
 	"""
 	store: Dict[ str, Dict[ str, Any ] ]
 	hits: int
@@ -206,7 +196,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return the current Unix timestamp.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -229,7 +219,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Create a cache metadata record for the supplied key and value.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -266,7 +256,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Determine whether an in-memory cache record has expired.
 
-			Parameters:
+			Args:
 				record (Dict[str, Any]): Cache metadata record.
 
 			Returns:
@@ -294,7 +284,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return a cached value by key when present and not expired.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 
 			Returns:
@@ -330,7 +320,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Set a cache value by key.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -362,7 +352,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Delete a cache entry by key.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -388,7 +378,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Clear all cache entries or only entries under a namespace prefix.
 
-			Parameters:
+			Args:
 				namespace (Optional[str]):
 					Optional namespace prefix.
 
@@ -419,7 +409,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Determine whether a cache key exists and is not expired.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -443,7 +433,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return cache diagnostics.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -467,19 +457,14 @@ class InMemoryCache( BaseCache ):
 			raise exception
 
 class SQLiteCache( BaseCache ):
-	"""
+	"""SQLiteCache persistence interface.
 
-		Purpose:
-			Persist a small cache on disk via sqlite3. Keys are text; values are
-			stored as JSON strings with optional TTL and metadata.
+	Purpose:
+		Persists cache records and time-to-live metadata in an on-disk SQLite database.
 
-		Parameters:
-			path (str):
-				File path for the SQLite database. Directory is created if needed.
-
-		Returns:
-			Durable cache across runs with upsert semantics and diagnostics.
-
+	Attributes:
+		path (Optional[str]): SQLite cache file path.
+		connection (sqlite3.Connection): Active SQLite cache connection.
 	"""
 	path: Optional[ str ]
 	connection: sqlite3.Connection
@@ -498,7 +483,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Create the SQLite cache table when it does not already exist.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -530,7 +515,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Add metadata columns to older kv tables that only contain k and v.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -563,7 +548,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return the current Unix timestamp.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -585,7 +570,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return a cached value by key when present and not expired.
 
-			Parameters:
+			Args:
 				key (str): Cached value or None.
 
 		"""
@@ -621,7 +606,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Set a cache value by key.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 				value (Dict[str, Any]): JSON-serializable cache value.
 				ttl (Optional[int]): Optional time-to-live in seconds.
@@ -659,7 +644,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Delete a cache entry by key.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 
 			Returns:
@@ -683,7 +668,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Clear all cache entries or only entries under a namespace prefix.
 
-			Parameters:
+			Args:
 				namespace (Optional[str]): Optional namespace prefix.
 
 			Returns:
@@ -711,7 +696,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Determine whether a cache key exists and is not expired.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 
 			Returns:
@@ -734,7 +719,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Delete expired cache entries.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -765,7 +750,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return SQLite cache diagnostics.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -794,7 +779,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Close the SQLite connection.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -812,11 +797,12 @@ class SQLiteCache( BaseCache ):
 
 class SQLiteDatabase( ):
 	
-	def __init__( self ):
-		pass
-	
+	def __init__( self ) -> None:
+		self.db_path = cfg.DB_PATH
+
 	def create_connection( self ) -> sqlite3.Connection:
-		return sqlite3.connect( cfg.DB_PATH )
+		self.db_path = cfg.DB_PATH
+		return sqlite3.connect( self.db_path )
 	
 	def list_tables( self ) -> List[ str ]:
 		with self.create_connection( ) as conn:
@@ -829,27 +815,14 @@ class SQLiteDatabase( ):
 			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
 	
 	def read_table( self, table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
-		"""
+		"""SQLiteDatabase persistence interface.
 
-			Purpose:
-			--------
-			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
+	Purpose:
+		Provides Data Management table operations, DataFrame transformations, and SQLite persistence.
 
-			Parameters:
-			-----------
-			table : str
-				Table name.
-			limit : int = None
-				Optional row limit.
-			offset : int = 0
-				Optional row offset.
-
-			Returns:
-			--------
-			pd.DataFrame
-				DataFrame of plain Python scalar values.
-
-		"""
+	Attributes:
+		db_path (str): Current SQLite database file path from configuration.
+	"""
 		if not table:
 			return pd.DataFrame( )
 		query = f'SELECT * FROM "{table}"'
@@ -903,17 +876,14 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
 			first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
 
-			Parameters:
-			-----------
+			Args:
 			df : pd.DataFrame
 				The DataFrame to render.
 
 			Returns:
-			--------
 			None
 
 		"""
@@ -941,11 +911,9 @@ class SQLiteDatabase( ):
 	def drop_table( self, table: str ) -> None:
 		"""
 			Purpose:
-			--------
 			Safely drop a table if it exists.
 
-			Parameters:
-			-----------
+			Args:
 			table : str
 				Table name.
 		"""
@@ -958,7 +926,6 @@ class SQLiteDatabase( ):
 	def create_index( self, table: str, column: str ) -> None:
 		"""
 			Purpose:
-			--------
 			Create a safe SQLite index on a specified table column.
 
 			Handles:
@@ -968,8 +935,7 @@ class SQLiteDatabase( ):
 				- Duplicate index names
 				- Validation against actual table schema
 
-			Parameters:
-			-----------
+			Args:
 			table : str
 				Table name.
 			column : str
@@ -1052,17 +1018,14 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Render data visualizations without passing pandas objects directly into
 			Plotly/Narwhals.
 
-			Parameters:
-			-----------
+			Args:
 			df : pd.DataFrame
 				The input DataFrame.
 
 			Returns:
-			--------
 			None
 
 		"""
@@ -1188,16 +1151,13 @@ class SQLiteDatabase( ):
 	def get_sqlite_type( self, dtype ) -> str:
 		"""
 			Purpose:
-			--------
 			Map a pandas dtype to an appropriate SQLite column type.
 
-			Parameters:
-			-----------
+			Args:
 			dtype : pandas dtype
 				The dtype of a pandas Series.
 
 			Returns:
-			--------
 			str
 				SQLite column type.
 		"""
@@ -1235,11 +1195,9 @@ class SQLiteDatabase( ):
 	def create_custom_table( self, table_name: str, columns: list ) -> None:
 		"""
 			Purpose:
-			--------
 			Create a custom SQLite table from column definitions.
 
-			Parameters:
-			-----------
+			Args:
 			table_name : str
 				Name of table.
 
@@ -1282,7 +1240,6 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Determine whether a SQL query is read-only and safe to execute.
 
 			Allows:
@@ -1330,7 +1287,6 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Sanitize a string into a safe SQLite identifier.
 
 			- Replaces invalid characters with underscores
@@ -1363,13 +1319,11 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
 			first; if it fails, falls back to a schema-safe rebuild preserving column order, data,
 			and indexes.
 
-			Parameters:
-			-----------
+			Args:
 			table_name : str
 				Table containing the column.
 
@@ -1380,7 +1334,6 @@ class SQLiteDatabase( ):
 				New column name.
 
 			Returns:
-			--------
 			None
 
 		"""
@@ -1535,13 +1488,11 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
 			falls back to a schema-safe rebuild using the original CREATE TABLE statement and
 			preserves indexes.
 
-			Parameters:
-			-----------
+			Args:
 			old_name : str
 				Existing table name.
 
@@ -1549,7 +1500,6 @@ class SQLiteDatabase( ):
 				New table name.
 
 			Returns:
-			--------
 			None
 
 		"""
@@ -1596,7 +1546,18 @@ class SQLiteDatabase( ):
 			conn.commit( )
 
 class ChromaStore( ):
-	"""Persistent local Chroma vector-store wrapper."""
+	"""ChromaStore persistence interface.
+
+	Purpose:
+		Adds LangChain documents to a persistent Chroma vector collection.
+
+	Attributes:
+		documents (List[Document]): Documents for the current write.
+		embedder (Embeddings | None): Embedding adapter.
+		collection_name (str): Chroma collection name.
+		persist_directory (str): Persistent collection directory.
+		vector_store (Chroma | None): Active Chroma vector-store instance.
+	"""
 
 	def __init__( self ) -> None:
 		"""Initialize Chroma storage state."""
@@ -1643,7 +1604,20 @@ class ChromaStore( ):
 			raise exception from e
 
 class PineconeStore( ):
-	"""Managed Pinecone vector-store wrapper."""
+	"""PineconeStore persistence interface.
+
+	Purpose:
+		Adds LangChain documents to an existing managed Pinecone index.
+
+	Attributes:
+		documents (List[Document]): Documents for the current write.
+		embedder (Embeddings | None): Embedding adapter.
+		index_name (str): Pinecone index name.
+		namespace (str): Pinecone namespace.
+		api_key (str): Pinecone credential.
+		client (Any): Pinecone client.
+		vector_store (Any): Active Pinecone vector-store adapter.
+	"""
 
 	def __init__( self ) -> None:
 		"""Initialize Pinecone storage state without importing Pinecone."""
