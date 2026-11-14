@@ -30,6 +30,8 @@ chunk_identifier, vector_document_ids = load_identifier_functions( )
 
 
 class ChunkIdentifierTests( unittest.TestCase ):
+    """Verify stable source-scoped identifiers and duplicate detection."""
+
     def test_same_source_content_and_position_retries_identically( self ) -> None:
         document = SimpleNamespace( page_content='First chunk',
             metadata={ 'source': 'one.txt' } )
@@ -53,6 +55,10 @@ class ChunkIdentifierTests( unittest.TestCase ):
             chunk_identifier( second, 1 ) )
         self.assertNotEqual( chunk_identifier( first, 1 ),
             chunk_identifier( first, 2 ) )
+
+    def test_empty_document_collection_is_safe( self ) -> None:
+        """An empty vector batch must not generate identifiers or reject valid input."""
+        self.assertEqual( [ ], vector_document_ids( [ ] ) )
 
     def test_explicit_metadata_id_is_preserved( self ) -> None:
         doc = SimpleNamespace( page_content='content',
