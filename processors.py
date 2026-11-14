@@ -1764,7 +1764,7 @@ class TextParser( Processor ):
 				with open( output_path, 'wt', encoding='utf-8' ) as stream:
 					for i in range( 0, len( tokens ), size ):
 						record = { str( i // size ): tokens[ i:i + size ] }
-						stream.write( json.dumps( record, ensure_ascii=False ) + '\\n' )
+						stream.write( json.dumps( record, ensure_ascii=False ) + '\n' )
 
 		except Exception as e:
 			exception = Error( e )
