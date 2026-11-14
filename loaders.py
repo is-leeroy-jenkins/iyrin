@@ -267,6 +267,7 @@ class Loader( ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'path', path )
 			self.file_path = self.verify_exists( path )
 			self.encoding = encoding
 			self.csv_args = csv_args
@@ -723,6 +724,7 @@ class XmlLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'filepath', filepath )
 			self.file_path = self.verify_exists( filepath )
 			self.loader = UnstructuredXMLLoader( file_path=self.file_path, mode='elements' )
 			self.documents = self.loader.load( )
@@ -784,6 +786,7 @@ class XmlLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'filepath', filepath )
 			self.file_path = self.verify_exists( filepath )
 			parser = etree.XMLParser( recover=True, remove_comments=True, remove_blank_text=True )
 			self.xml_tree = etree.parse( self.file_path, parser )
@@ -817,6 +820,7 @@ class XmlLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'xpath', xpath )
 			if self.xml_root is None:
 				raise ValueError( 'XML tree not loaded. Call load_tree() first.' )
 			elements = self.xml_root.xpath( xpath, namespaces=self.xml_namespaces )
@@ -931,6 +935,7 @@ class WebLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'urls', urls )
 			if self.recursive:
 				return self.load_recursive( urls=urls, depth=depth, timeout=timeout, ignore=ignore,
 					prevent_outside=prevent_outside )
@@ -1259,6 +1264,7 @@ class PdfLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'filepath', filepath )
 			throw_if( 'path', filepath )
 			self.file_path = self.verify_exists( filepath )
 			self.mode = self._normalize_mode( mode )
@@ -2528,6 +2534,7 @@ class PowerPointLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'path', path )
 			return self.load( path, mode='elements' )
 		
 		except Exception as e:
@@ -2798,6 +2805,7 @@ class WebCrawler( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'urls', urls )
 			if self.recursive:
 				return self.load_recursive( urls=urls, depth=depth, timeout=timeout, ignore=ignore,
 					prevent_outside=prevent_outside )
@@ -3227,6 +3235,7 @@ class OneDriveDocLoader( Loader ):
 		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
 		"""
 		try:
+			throw_if( 'path', path )
 			throw_if( 'id', id )
 			self.drive_id = id
 			self.file_path = path
