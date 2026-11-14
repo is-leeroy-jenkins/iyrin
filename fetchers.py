@@ -4426,12 +4426,9 @@ class OpenScience( Fetcher ):
 		try:
 			self.format_value = format_value
 			value = str( self.format_value or 'json' ).strip( ).lower( )
-			
 			allowed = { 'json', 'csv', 'tsv', 'browser' }
 			if value not in allowed:
-				raise ValueError(
-					"Unsupported format. Use one of: json, csv, tsv, browser."
-				)
+				raise ValueError( "Unsupported format. Use one of: json, csv, tsv, browser." )
 			
 			return value
 		
@@ -4458,7 +4455,6 @@ class OpenScience( Fetcher ):
 			throw_if( 'response', response )
 			self.response = response
 			content_type = str( self.response.headers.get( 'Content-Type', '' ) ).lower( )
-			
 			if 'application/json' in content_type:
 				return self.response.json( )
 			
@@ -4471,10 +4467,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = (
-					'_coerce_response( self, response: requests.Response ) '
-					'-> Dict[ str, Any ] | str'
-			)
+			exception.method = '_coerce_response( self, **args ) -> Dict[ str, Any ] | str'
 			raise exception
 	
 	def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -4505,13 +4498,8 @@ class OpenScience( Fetcher ):
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=time )
 			self.response.raise_for_status( )
-			
-			return {
-					'mode': 'dataset',
-					'url': self.url,
-					'params': self.params,
-					'data': self._coerce_response( self.response )
-			}
+			return { 'mode': 'dataset', 'url': self.url, 'params': self.params,
+					'data': self._coerce_response( self.response ) }
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -4548,29 +4536,17 @@ class OpenScience( Fetcher ):
 			self.format_value = self._validate_format( format_value )
 			self.endpoint = '/v2/query/metadata/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = {
-					'query': self.query_text,
-					'format': self.format_value
-			}
-			
-			self.response = requests.get( url=self.url, params=self.params,
-				headers=self.headers, timeout=time )
+			self.params = { 'query': self.query_text, 'format': self.format_value }
+			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
+				timeout=time )
 			self.response.raise_for_status( )
-			
-			return {
-					'mode': 'metadata',
-					'url': self.url,
-					'params': self.params,
-					'data': self._coerce_response( self.response )
-			}
+			return { 'mode': 'metadata', 'url': self.url, 'params': self.params,
+					'data': self._coerce_response( self.response ) }
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = (
-					'fetch_metadata( self, query: str, format_value: str=json, '
-					'time: int=20 ) -> Dict[ str, Any ]'
-			)
+			exception.method = 'fetch_metadata( self, **args ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
@@ -4598,35 +4574,22 @@ class OpenScience( Fetcher ):
 		try:
 			throw_if( 'query', query )
 			self.query = query
-			
 			self.query_text = self.query.strip( )
 			self.format_value = self._validate_format( format_value )
 			self.endpoint = '/v2/query/assays/'
 			self.url = f'{self.base_url}{self.endpoint}'
-			self.params = {
-					'query': self.query_text,
-					'format': self.format_value
-			}
-			
+			self.params = { 'query': self.query_text, 'format': self.format_value }
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=time )
 			self.response.raise_for_status( )
-			
-			return {
-					'mode': 'assays',
-					'url': self.url,
-					'params': self.params,
-					'data': self._coerce_response( self.response )
-			}
+			return { 'mode': 'assays', 'url': self.url, 'params': self.params,
+					'data': self._coerce_response( self.response ) }
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = (
-					'fetch_assays( self, query: str, format_value: str=json, '
-					'time: int=20 ) -> Dict[ str, Any ]'
-			)
+			exception.method = 'fetch_assays( self, **args ) -> Dict[ str, Any ]'
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
@@ -4724,46 +4687,22 @@ class OpenScience( Fetcher ):
 		'''
 		try:
 			active_mode = (mode or 'dataset').strip( ).lower( )
-			
 			if active_mode == 'dataset':
-				return self.fetch_dataset(
-					accession=accession,
-					time=time
-				)
-			
+				return self.fetch_dataset( accession=accession, time=time )
 			if active_mode == 'metadata':
-				return self.fetch_metadata(
-					query=query,
-					format_value=format_value,
-					time=time
-				)
-			
+				return self.fetch_metadata( query=query, format_value=format_value, time=time )
 			if active_mode == 'assays':
-				return self.fetch_assays(
-					query=query,
-					format_value=format_value,
-					time=time
-				)
-			
+				return self.fetch_assays( query=query, format_value=format_value, time=time )
 			if active_mode == 'data':
-				return self.fetch_data(
-					query=query,
-					format_value=format_value,
-					time=time
-				)
+				return self.fetch_data( query=query, format_value=format_value, time=time )
 			
-			raise ValueError(
-				"Unsupported mode. Use one of: dataset, metadata, assays, data."
-			)
+			raise ValueError( "Unsupported mode. Use one of: dataset, metadata, assays, data." )
 		
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = (
-					'fetch( self, mode: str=dataset, query: str=, accession: str=, '
-					'format_value: str=json, time: int=20 ) -> Dict[ str, Any ]'
-			)
+			exception.method = 'fetch( self, **args) -> Dict[ str, Any ]'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -4796,47 +4735,36 @@ class OpenScience( Fetcher ):
 			Dict[str, str] | None
 		'''
 		try:
-			self.required = required
 			throw_if( 'function', function )
-			self.function = function
 			throw_if( 'tool', tool )
-			self.tool = tool
 			throw_if( 'description', description )
-			self.description = description
 			throw_if( 'parameters', parameters )
+			self.required = required
+			self.function = function
+			self.tool = tool
+			self.description = description
 			self.parameters = parameters
 			if not isinstance( self.parameters, dict ):
 				raise TypeError( 'parameters must be a dictionary.' )
 			if self.required is not None:
 				if not isinstance( self.required, list ) or any(
-					not isinstance( name, str ) or name not in self.parameters
-					for name in self.required ):
+						not isinstance( name, str ) or name not in self.parameters for name in
+						self.required ):
 					raise ValueError( 'required must contain declared parameter names.' )
-			
 			if self.required is None:
 				self.required = list( self.parameters.keys( ) )
-			
-			return {
-					'name': self.function.strip( ),
-					'description': (
-							f'{self.description.strip( )} '
-							f'This function uses the {self.tool.strip( )} service.'
-					),
-					'parameters': {
-							'type': 'object',
-							'properties': self.parameters,
-							'required': self.required
-					}
-			}
+			return { 'name': self.function.strip( ), 'description': (f'{self.description.strip( )} '
+			                                                         f'This function uses the {
+			                                                         self.tool.strip( )} '
+			                                                         f'service.'),
+					'parameters': { 'type': 'object', 'properties': self.parameters,
+							'required': self.required } }
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = (
-					'create_schema( self, function: str, tool: str, description: str, '
-					'parameters: dict, required: list[ str ] ) -> Dict[ str, str ]'
-			)
+			exception.method = 'create_schema( self, **args ) -> Dict[ str, str ]'
 			raise exception
 
 class SpaceWeather( Fetcher ):

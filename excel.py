@@ -45,33 +45,32 @@
 from typing import Optional, Dict, List
 import pandas as pd
 from storage import BaseCache
-from geocode import Geocoder
-from mapping import Map
-from places import Place
-from boogr import Error
+from mapping import Geocoder, Map, Place
+from boogr import Error, Logger
 
 def throw_if( name: str, value: object ) -> None:
-	"""
-	
-		Purpose:
-		--------
-		Validate that a required value is not empty.
-		
-		Parameters:
-		-----------
-		name (str): Name of the argument being validated.
-		value (object): Value to validate.
-		
-		Returns:
-		--------
-		None
-		
+	"""Throw if.
+
+	Purpose:
+	    Validates that a required argument contains a usable value so failures occur
+	    before provider, filesystem, or parsing work begins.
+
+	Args:
+	    name (str): Argument name included in validation error messages.
+	    value (object): Candidate value to validate or normalize.
+
+	Returns:
+	    None: This method updates instance state or validates input and does not return a value.
+
+	Raises:
+	    ValueError: Raised when the method cannot satisfy its documented value requirement.
 	"""
 	if value is None:
-		raise ValueError( f'Argument "{name}" cannot be None.' )
-	
-	if isinstance( value, str ) and not value.strip( ):
-		raise ValueError( f'Argument "{name}" cannot be empty.' )
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+	if isinstance( value, str ) and (not value.strip( )):
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+	if isinstance( value, (list, tuple, dict, set) ) and len( value ) == 0:
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 class Excel:
 	"""
@@ -107,7 +106,6 @@ class Excel:
 	country: Optional[ str ]
 	
 	def __init__( self, api: str, cache: Optional[ BaseCache ] = None ) -> None:
-		throw_if( 'api', api )
 		self.api_key = api
 		self.cache = cache
 		self.maps = Map( api_key=self.api_key )
@@ -129,25 +127,22 @@ class Excel:
 		"""
 
             Purpose:
-            Robustly read CSV/XLSX and preserve strings, including leading zeros.
+                Robustly read CSV/XLSX and preserve strings, including leading zeros.
 
             Parameters:
-            path (str): Input file path, either .csv or .xlsx.
-            sheet (Optional[str]): Optional sheet name for Excel.
+	            path (str): Input file path, either .csv or .xlsx.
+	            sheet (Optional[str]): Optional sheet name for Excel.
 
             Returns:
-            pd.DataFrame: DataFrame with dtype=str for string-like columns.
+                pd.DataFrame: DataFrame with dtype=str for string-like columns.
 
         """
 		try:
 			throw_if( 'path', path )
-			
 			path_value = path
 			sheet_value = sheet
-			
 			self.file_path = path_value
 			self.worksheet = sheet_value
-			
 			if self.file_path.lower( ).endswith( '.csv' ):
 				self.dataframe = pd.read_csv( self.file_path, dtype=str )
 			else:
@@ -159,11 +154,7 @@ class Excel:
 			for column in self.dataframe.columns:
 				if self.dataframe[ column ].dtype == object:
 					self.dataframe[ column ] = (
-							self.dataframe[ column ]
-							.fillna( '' )
-							.astype( str )
-							.str.strip( )
-					)
+							self.dataframe[ column ].fillna( '' ).astype( str ).str.strip( ))
 			
 			return self.dataframe
 		
@@ -199,11 +190,9 @@ class Excel:
 			path_value = path
 			sheet_value = sheet or 'Sheet1'
 			dataframe_value = df.copy( )
-			
 			self.file_path = path_value
 			self.dataframe = dataframe_value
 			self.worksheet = sheet_value
-			
 			if self.file_path.lower( ).endswith( '.csv' ):
 				self.dataframe.to_csv( self.file_path, index=False )
 			else:
@@ -231,21 +220,10 @@ class Excel:
 
 		"""
 		try:
-			return {
-					'formatted_address': [ ],
-					'lat': [ ],
-					'lng': [ ],
-					'place_id': [ ],
-					'types': [ ],
-					'country_code': [ ],
-					'country_name': [ ],
-					'admin_level_1': [ ],
-					'admin_level_2': [ ],
-					'locality': [ ],
-					'postal_code': [ ],
-					'geocode_status': [ ],
-					'geocode_error': [ ],
-			}
+			return { 'formatted_address': [ ], 'lat': [ ], 'lng': [ ], 'place_id': [ ],
+					'types': [ ], 'country_code': [ ], 'country_name': [ ], 'admin_level_1': [ ],
+					'admin_level_2': [ ], 'locality': [ ], 'postal_code': [ ],
+					'geocode_status': [ ], 'geocode_error': [ ], }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -275,7 +253,6 @@ class Excel:
 		"""
 		try:
 			throw_if( 'outputs', outputs )
-			
 			outputs[ 'formatted_address' ].append( None )
 			outputs[ 'lat' ].append( None )
 			outputs[ 'lng' ].append( None )
@@ -320,10 +297,8 @@ class Excel:
 		"""
 		try:
 			throw_if( 'outputs', outputs )
-			
 			result_value = result or { }
 			status_value = status or 'not_found'
-			
 			outputs[ 'formatted_address' ].append( result_value.get( 'formatted_address' ) )
 			outputs[ 'lat' ].append( result_value.get( 'lat' ) )
 			outputs[ 'lng' ].append( result_value.get( 'lng' ) )
@@ -342,7 +317,7 @@ class Excel:
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
-			exception.method = 'append_result( self, outputs: Dict[ str, List ], result: Dict, status: str )'
+			exception.method = 'append_result( self, **args )'
 			raise exception
 	
 	def summarize( self, df: pd.DataFrame ) -> Dict:
@@ -362,24 +337,18 @@ class Excel:
 		"""
 		try:
 			throw_if( 'df', df )
-			
 			status_counts = { }
-			
 			if 'geocode_status' in df.columns:
 				status_counts = df[ 'geocode_status' ].value_counts( dropna=False ).to_dict( )
-			
-			summary = {
-					'rows_total': int( len( df ) ),
+			summary = { 'rows_total': int( len( df ) ),
 					'rows_ok': int( status_counts.get( 'ok', 0 ) ),
 					'rows_ok_places': int( status_counts.get( 'ok_places', 0 ) ),
 					'rows_not_found': int( status_counts.get( 'not_found', 0 ) ),
 					'rows_skipped_empty': int( status_counts.get( 'skipped_empty', 0 ) ),
 					'rows_error': int( status_counts.get( 'error', 0 ) ),
-					'status_counts': status_counts,
-			}
+					'status_counts': status_counts, }
 			
 			self.last_summary = summary
-			
 			return self.last_summary
 		
 		except Exception as e:
@@ -407,24 +376,20 @@ class Excel:
 		"""
 		try:
 			throw_if( 'df', df )
-			
 			columns = list( df.columns )
 			lower_map = { str( column ).strip( ).lower( ): column for column in columns }
-			
 			def find_first( names: List[ str ] ) -> Optional[ str ]:
 				for name in names:
 					if name in lower_map:
 						return lower_map[ name ]
 				return None
 			
-			return {
-					'address': find_first(
-						[ 'address', 'street address', 'full address', 'location',
-								'mailing address' ] ),
+			return { 'address': find_first(
+				[ 'address', 'street address', 'full address', 'location', 'mailing address' ] ),
 					'city': find_first( [ 'city', 'town', 'locality', 'municipality' ] ),
-					'state': find_first( [ 'state', 'st', 'province', 'region', 'admin_level_1' ] ),
-					'country': find_first( [ 'country', 'country_code', 'cntry', 'nation' ] )
-			}
+					'state': find_first( [ 'state', 'st', 'province', 'region', 'admin_level_1'
+					                       ] ),
+					'country': find_first( [ 'country', 'country_code', 'cntry', 'nation' ] ) }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -452,36 +417,22 @@ class Excel:
 		"""
 		try:
 			throw_if( 'address', address )
-			
 			address_value = str( address ).strip( )
 			country_value = str( country or 'US' ).strip( ).upper( )
-			
 			self.address = address_value
 			self.country = country_value
-			
 			try:
 				result = self.geocoder.freeform( self.address, country=self.country )
-				return {
-						'result': result or { },
-						'status': 'ok',
-						'error': None
-				}
+				return { 'result': result or { }, 'status': 'ok', 'error': None }
 			
 			except Exception as geocode_error:
 				try:
 					result = self.places.text_to_location( self.address, country=self.country )
-					return {
-							'result': result or { },
-							'status': 'ok_places',
-							'error': None
-					}
+					return { 'result': result or { }, 'status': 'ok_places', 'error': None }
 				
 				except Exception as places_error:
-					return {
-							'result': { },
-							'status': 'not_found',
-							'error': f'{geocode_error}; {places_error}'
-					}
+					return { 'result': { }, 'status': 'not_found',
+							'error': f'{geocode_error}; {places_error}' }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -515,53 +466,32 @@ class Excel:
 			city_value = str( city or '' ).strip( )
 			state_value = str( state or '' ).strip( )
 			country_value = str( country or '' ).strip( )
-			
 			if not any( [ city_value, state_value, country_value ] ):
-				return {
-						'result': { },
-						'status': 'skipped_empty',
-						'error': None
-				}
+				return { 'result': { }, 'status': 'skipped_empty', 'error': None }
 			
 			self.city = city_value
 			self.state = state_value
 			self.country = country_value
-			
 			try:
-				result = self.geocoder.city_state_country(
-					self.city,
-					self.state,
-					self.country )
-				return {
-						'result': result or { },
-						'status': 'ok',
-						'error': None
-				}
+				result = self.geocoder.city_state_country( self.city, self.state, self.country )
+				return { 'result': result or { }, 'status': 'ok', 'error': None }
 			
 			except Exception as geocode_error:
 				query = ', '.join(
 					[ value for value in [ self.city, self.state, self.country ] if value ] )
-				
 				try:
 					result = self.places.text_to_location( query, country=self.country )
-					return {
-							'result': result or { },
-							'status': 'ok_places',
-							'error': None
-					}
+					return { 'result': result or { }, 'status': 'ok_places', 'error': None }
 				
 				except Exception as places_error:
-					return {
-							'result': { },
-							'status': 'not_found',
-							'error': f'{geocode_error}; {places_error}'
-					}
+					return { 'result': { }, 'status': 'not_found',
+							'error': f'{geocode_error}; {places_error}' }
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'Excel'
-			exception.method = 'resolve_city_state_country( self, city: str, state: Optional[ str ], country: str )'
+			exception.method = 'resolve_city_state_country( self, **args )'
 			raise exception
 	
 	def enrich_from_address( self, inpath: str, outpath: str, address: str, sheet: Optional[ str ],
@@ -591,44 +521,31 @@ class Excel:
 			throw_if( 'inpath', inpath )
 			throw_if( 'outpath', outpath )
 			throw_if( 'address', address )
-			
 			self.input_path = inpath
 			self.output_path = outpath
 			self.address = address
 			self.worksheet = sheet
 			self.country = cntry
-			
 			df = self.read( self.input_path, self.worksheet )
-			
 			if self.address not in df.columns:
 				raise ValueError( f'Address column "{self.address}" was not found.' )
 			
 			outputs = self.create_outputs( )
 			resolved = { }
-			
 			for _, row in df.iterrows( ):
 				addr = str( row.get( self.address ) or '' ).strip( )
-				
 				if not addr:
 					self.append_empty( outputs )
 					continue
-				
-				hint = (
-						str( row.get( self.country ) or '' ).strip( ).upper( )
-						if (self.country and self.country in df.columns)
-						else 'US'
-				)
+				hint = (str( row.get( self.country ) or '' ).strip( ).upper( ) if (
+							self.country and self.country in df.columns) else 'US')
 				cache_key = f'{addr}::{hint}'
-				
 				if cache_key not in resolved:
 					resolved[ cache_key ] = self.resolve_address( addr, country=hint )
 				
 				item = resolved[ cache_key ]
-				self.append_result(
-					outputs,
-					item.get( 'result', { } ),
-					item.get( 'status', 'not_found' ),
-					item.get( 'error' ) )
+				self.append_result( outputs, item.get( 'result', { } ),
+					item.get( 'status', 'not_found' ), item.get( 'error' ) )
 			
 			for key, values in outputs.items( ):
 				df[ key ] = values
@@ -637,7 +554,6 @@ class Excel:
 			self.output = outputs
 			self.summarize( self.dataframe )
 			self.write( self.dataframe, self.output_path, self.worksheet )
-			
 			return self.dataframe
 		
 		except Exception as e:
@@ -652,19 +568,19 @@ class Excel:
 		"""
 
 			Purpose:
-			Enrich a file with City, State/Region, and Country columns by appending
-			lat/lng, place_id, canonical components, status, and error fields.
+				Enrich a file with City, State/Region, and Country columns by appending
+				lat/lng, place_id, canonical components, status, and error fields.
 	
 			Parameters:
-			inpath (str): Input CSV/XLSX path containing location columns.
-			outpath (str): Output CSV/XLSX path to write enriched results.
-			city (str): Column for city/locality.
-			state (Optional[str]): Column for state/region.
-			cntry (str): Column for country name or ISO-2 code.
-			sheet (Optional[str]): Excel sheet name if .xlsx.
+				inpath (str): Input CSV/XLSX path containing location columns.
+				outpath (str): Output CSV/XLSX path to write enriched results.
+				city (str): Column for city/locality.
+				state (Optional[str]): Column for state/region.
+				cntry (str): Column for country name or ISO-2 code.
+				sheet (Optional[str]): Excel sheet name if .xlsx.
 	
 			Returns:
-			pd.DataFrame: Enriched DataFrame. The output file is still written.
+				pd.DataFrame: Enriched DataFrame. The output file is still written.
 
 		"""
 		try:
@@ -672,16 +588,13 @@ class Excel:
 			throw_if( 'outpath', outpath )
 			throw_if( 'city', city )
 			throw_if( 'cntry', cntry )
-			
 			self.input_path = inpath
 			self.output_path = outpath
 			self.city = city
 			self.state = state
 			self.country = cntry
 			self.worksheet = sheet
-			
 			df = self.read( self.input_path, self.worksheet )
-			
 			if self.city not in df.columns:
 				raise ValueError( f'City column "{self.city}" was not found.' )
 			
@@ -693,34 +606,22 @@ class Excel:
 			
 			outputs = self.create_outputs( )
 			resolved = { }
-			
 			for _, row in df.iterrows( ):
 				city_value = str( row.get( self.city ) or '' ).strip( )
-				state_value = (
-						str( row.get( self.state ) or '' ).strip( )
-						if (self.state and self.state in df.columns)
-						else ''
-				)
+				state_value = (str( row.get( self.state ) or '' ).strip( ) if (
+							self.state and self.state in df.columns) else '')
 				country_value = str( row.get( self.country ) or '' ).strip( )
-				
 				if not any( [ city_value, state_value, country_value ] ):
 					self.append_empty( outputs )
 					continue
-				
 				cache_key = f'{city_value}::{state_value}::{country_value}'
-				
 				if cache_key not in resolved:
-					resolved[ cache_key ] = self.resolve_city_state_country(
-						city_value,
-						state_value,
-						country_value )
+					resolved[ cache_key ] = self.resolve_city_state_country( city_value,
+						state_value, country_value )
 				
 				item = resolved[ cache_key ]
-				self.append_result(
-					outputs,
-					item.get( 'result', { } ),
-					item.get( 'status', 'not_found' ),
-					item.get( 'error' ) )
+				self.append_result( outputs, item.get( 'result', { } ),
+					item.get( 'status', 'not_found' ), item.get( 'error' ) )
 			
 			for key, values in outputs.items( ):
 				df[ key ] = values
@@ -729,7 +630,6 @@ class Excel:
 			self.output = outputs
 			self.summarize( self.dataframe )
 			self.write( self.dataframe, self.output_path, self.worksheet )
-			
 			return self.dataframe
 		
 		except Exception as e:

@@ -64,29 +64,31 @@ HISTORY_COLUMNS: List[ str ] = [ 'RefreshId', 'ObservedAt', 'EntityId', 'EntityT
                                  'Latitude', 'Longitude', 'Altitude', 'Heading', 'Speed',
                                  'Timestamp', 'Source', 'Metadata' ]
 
-
 def throw_if( name: str, value: object ) -> None:
-    '''
+	"""Throw if.
 
-        Purpose:
-        --------
-        Validate that a required argument is not empty.
+	Purpose:
+	    Validates that a required argument contains a usable value so failures occur
+	    before provider, filesystem, or parsing work begins.
 
-        Parameters:
-        -----------
-        name (str): Argument name.
-        value (object): Argument value.
+	Args:
+	    name (str): Argument name included in validation error messages.
+	    value (object): Candidate value to validate or normalize.
 
-        Returns:
-        --------
-        None
+	Returns:
+	    None: This method updates instance state or validates input and does not return a value.
 
-    '''
-    if value is None:
-        raise ValueError( f'Argument "{name}" cannot be None.' )
-
-    if isinstance( value, str ) and not value.strip( ):
-        raise ValueError( f'Argument "{name}" cannot be empty.' )
+	Raises:
+	    ValueError: Raised when the method cannot satisfy its documented value requirement.
+	"""
+	if value is None:
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+	
+	if isinstance( value, str ) and (not value.strip( )):
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+	
+	if isinstance( value, (list, tuple, dict, set) ) and len( value ) == 0:
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 def initialize_live_world_history( ) -> None:
     '''
