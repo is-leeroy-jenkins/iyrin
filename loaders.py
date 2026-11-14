@@ -3198,6 +3198,9 @@ class OneDriveDocLoader( Loader ):
 		"""
 		try:
 			throw_if( 'drive_id', drive_id )
+			throw_if( 'auth_with_token', auth_with_token )
+			if type( auth_with_token ) is not bool:
+				raise TypeError( 'auth_with_token must be a boolean.' )
 			self.drive_id = drive_id
 			self.folder_path = folder_path
 			self.object_ids = object_ids
