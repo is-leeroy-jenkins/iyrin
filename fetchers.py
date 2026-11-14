@@ -11501,6 +11501,10 @@ class CensusData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			if not isinstance( self.rows, list ) or not self.rows:
 				return {
@@ -14478,6 +14482,10 @@ class USGSEarthquakes( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if features is None:
+				throw_if( 'features', features )
+			if not isinstance( features, list ):
+				raise TypeError( 'features must be a list.' )
 			self.features = features
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -14560,6 +14568,10 @@ class USGSEarthquakes( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			max_magnitude = None
@@ -15196,6 +15208,10 @@ class USGSWaterData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -15290,6 +15306,10 @@ class USGSWaterData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -15364,6 +15384,10 @@ class USGSWaterData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -15444,6 +15468,10 @@ class USGSWaterData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_site = ''
@@ -16092,6 +16120,10 @@ class USGSTheNationalMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -16147,6 +16179,10 @@ class USGSTheNationalMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -16227,6 +16263,10 @@ class USGSTheNationalMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_title = ''
@@ -16719,6 +16759,10 @@ class USGSScienceBase( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -16801,6 +16845,10 @@ class USGSScienceBase( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if item is None:
+				throw_if( 'item', item )
+			if not isinstance( item, dict ):
+				raise TypeError( 'item must be a dict.' )
 			self.item = item
 			files_value = self.item.get( 'files', [ ] ) or [ ]
 			file_count = len( files_value ) if isinstance( files_value, list ) else 0
@@ -16857,6 +16905,10 @@ class USGSScienceBase( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_title = ''
@@ -17354,6 +17406,10 @@ class AirNow( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -17408,6 +17464,10 @@ class AirNow( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			max_aqi = None
@@ -18033,6 +18093,10 @@ class ClimateData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -18086,6 +18150,10 @@ class ClimateData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -18127,6 +18195,10 @@ class ClimateData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_title = ''
@@ -18622,6 +18694,10 @@ class EoNet( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -18703,6 +18779,10 @@ class EoNet( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -18745,6 +18825,10 @@ class EoNet( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			open_count = 0
@@ -19271,6 +19355,10 @@ class EnviroFacts( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -19312,6 +19400,10 @@ class EnviroFacts( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_facility = ''
@@ -19728,6 +19820,10 @@ class TidesAndCurrents( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if payload is None:
+				throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dict.' )
 			self.payload = payload
 			station = self.payload.get( 'stations', None )
 			
@@ -19778,6 +19874,10 @@ class TidesAndCurrents( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if payload is None:
+				throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dict.' )
 			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			records = self.payload.get( 'data', None )
@@ -19823,6 +19923,10 @@ class TidesAndCurrents( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_time = ''
@@ -20391,6 +20495,10 @@ class UvIndex( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if records is None:
+				throw_if( 'records', records )
+			if not isinstance( records, list ):
+				raise TypeError( 'records must be a list.' )
 			self.records = records
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			
@@ -20432,6 +20540,10 @@ class UvIndex( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			max_uv = None
@@ -21072,6 +21184,10 @@ class PurpleAir( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if payload is None:
+				throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dict.' )
 			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			fields = self.payload.get( 'fields', [ ] ) or [ ]
@@ -21130,6 +21246,10 @@ class PurpleAir( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if payload is None:
+				throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dict.' )
 			self.payload = payload
 			sensor = self.payload.get( 'sensor', { } ) or { }
 			
@@ -21179,6 +21299,10 @@ class PurpleAir( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			max_pm25 = None
@@ -21722,6 +21846,10 @@ class OpenAQ( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if payload is None:
+				throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dict.' )
 			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			results = self.payload.get( 'results', [ ] ) or [ ]
@@ -21778,6 +21906,10 @@ class OpenAQ( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if payload is None:
+				throw_if( 'payload', payload )
+			if not isinstance( payload, dict ):
+				raise TypeError( 'payload must be a dict.' )
 			self.payload = payload
 			rows: List[ Dict[ str, Any ] ] = [ ]
 			results = self.payload.get( 'results', [ ] ) or [ ]
@@ -21839,6 +21971,10 @@ class OpenAQ( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_name = ''
@@ -22391,6 +22527,10 @@ class Firms( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if rows is None:
+				throw_if( 'rows', rows )
+			if not isinstance( rows, list ):
+				raise TypeError( 'rows must be a list.' )
 			self.rows = rows
 			count = len( self.rows or [ ] )
 			first_date = ''
