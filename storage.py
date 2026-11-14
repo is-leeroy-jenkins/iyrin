@@ -1556,6 +1556,9 @@ class SQLiteDatabase( ):
 		allowed_starts = ('select', 'with', 'explain', 'pragma')
 		if not q.startswith( allowed_starts ):
 			return False
+		# PRAGMA assignments mutate connection or database configuration.
+		if q.startswith( 'pragma' ) and '=' in q:
+			return False
 		# ------------------------------------------------------------------
 		# Block dangerous keywords anywhere
 		# ------------------------------------------------------------------
