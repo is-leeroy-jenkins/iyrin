@@ -1268,10 +1268,10 @@ class PdfLoader( Loader ):
 				raise TypeError( 'format must be a string.' )
 			value = format.strip( ).lower( )
 			if value == 'text':
-				raise ValueError( 'Unsupported format value.' )
+				return 'markdown-img'
 			
 			if value not in self.image_options:
-				return 'markdown-img'
+				raise ValueError( 'Unsupported format value.' )
 			
 			return value
 		except Exception as e:
