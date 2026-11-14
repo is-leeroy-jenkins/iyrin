@@ -3558,6 +3558,7 @@ class GlobalImagery( Fetcher ):
 	
 			mode (Any): Requested endpoint or output mode.
 			fetcher (Any): Configured provider-specific retrieval client.
+			ccrs (Any | None): Cartopy CRS provider for Mercator rendering.
 			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
 	'''
 	file_path: Optional[ str ]
@@ -3595,6 +3596,7 @@ class GlobalImagery( Fetcher ):
 		self.latitude = None
 		self.coordinates = None
 		self.fetcher = None
+		self.ccrs = None
 		self.calendar_date = None
 		self.julian_date = None
 		self.sidereal_time = None
