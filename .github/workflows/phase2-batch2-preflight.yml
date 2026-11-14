@@ -1,0 +1,57 @@
+name: Phase II Batch 2 Preflight
+
+on:
+  push:
+    branches:
+      - phase2-remediation-batch2-pr74-75
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile repository
+        run: python -m compileall -q .
+      - name: Run unit tests
+        run: |
+          python -m pip install pyflakes requests beautifulsoup4
+          python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Check undefined names
+        run: |
+          pyflakes loaders.py fetchers.py generators.py processors.py 2>&1 | tee pyflakes.log || true
+          if grep -E 'undefined name|referenced before assignment' pyflakes.log; then exit 1; fi
+      - name: Google docstring parsing
+        run: |
+          python -m pip install griffe
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          from griffe import Docstring
+          for path in ('loaders.py','fetchers.py','generators.py','processors.py'):
+              tree = ast.parse(Path(path).read_text(encoding='utf-8'),filename=path)
+              for node in ast.walk(tree):
+                  if not isinstance(node, (ast.FunctionDef,ast.AsyncFunctionDef)):
+                      continue
+                  doc = ast.get_docstring(node)
+                  if not doc:
+                      raise AssertionError(f'{path}:{node.lineno}: missing docstring')
+                  if 'Purpose:' not in doc or 'Returns:' not in doc:
+                      raise AssertionError(f'{path}:{node.lineno}: required docstring section missing')
+                  parts = Docstring(doc,lineno=node.lineno).parse('google')
+                  kinds = {str(part.kind).split('.')[-1].lower() for part in parts}
+                  if 'returns' not in kinds:
+                      raise AssertionError(f'{path}:{node.lineno}: Returns unparseable')
+                  if 'Args:' in doc and 'parameters' not in kinds:
+                      raise AssertionError(f'{path}:{node.lineno}: Args unparseable')
+          print('Documented functions parse as Google-style documentation.')
+          PY
+      - name: Strict documentation build
+        run: |
+          python -m pip install mkdocs-material 'mkdocstrings[python]'
+          mkdocs build --strict
