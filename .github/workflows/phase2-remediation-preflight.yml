@@ -44,3 +44,30 @@ jobs:
                           raise AssertionError(f'{path}:{node.lineno}: incomplete sections')
           print('All reviewed functions have Purpose and Returns docstrings')
           PY
+      - name: Parse Google-style docstring sections
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          from griffe import Docstring
+
+          for path in ('storage.py', 'embedders.py', 'app.py', 'excel.py'):
+              source = Path(path).read_text(encoding='utf-8')
+              for node in ast.walk(ast.parse(source, filename=path)):
+                  if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      continue
+                  doc = ast.get_docstring(node)
+                  if doc is None:
+                      continue
+                  sections = Docstring(doc, lineno=node.lineno).parse('google')
+                  kinds = {str(item.kind).split('.')[-1].lower() for item in sections}
+                  if 'returns' not in kinds:
+                      raise AssertionError(f'{path}:{node.lineno}: unparsed Returns section')
+                  if 'Args:' in doc and 'parameters' not in kinds:
+                      raise AssertionError(f'{path}:{node.lineno}: unparsed Args section')
+          print('Google parser recognized all declared Args and Returns sections')
+          PY
+      - name: Install documentation tools
+        run: python -m pip install mkdocs-material "mkdocstrings[python]"
+      - name: Build MkDocs documentation strictly
+        run: mkdocs build --strict
