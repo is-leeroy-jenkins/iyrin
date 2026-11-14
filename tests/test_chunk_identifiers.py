@@ -30,13 +30,17 @@ chunk_identifier, vector_document_ids = load_identifier_functions( )
 
 
 class ChunkIdentifierTests( unittest.TestCase ):
+    """Verify stable source-scoped identifiers and duplicate detection."""
+
     def test_same_source_content_and_position_retries_identically( self ) -> None:
+        """Verify repeated calls produce the same chunk identifier."""
         document = SimpleNamespace( page_content='First chunk',
             metadata={ 'source': 'one.txt' } )
         self.assertEqual( chunk_identifier( document, 1 ),
             chunk_identifier( document, 1 ) )
 
     def test_different_sources_do_not_collide( self ) -> None:
+        """Verify source paths distinguish otherwise equal chunks."""
         first = SimpleNamespace( page_content='Same text',
             metadata={ 'source': 'one.txt' } )
         second = SimpleNamespace( page_content='Same text',
@@ -45,6 +49,7 @@ class ChunkIdentifierTests( unittest.TestCase ):
             chunk_identifier( second, 1 ) )
 
     def test_modified_content_and_position_have_distinct_ids( self ) -> None:
+        """Verify different content and ordinal positions change identifiers."""
         first = SimpleNamespace( page_content='alpha',
             metadata={ 'source': 'one.txt' } )
         second = SimpleNamespace( page_content='beta',
@@ -54,12 +59,18 @@ class ChunkIdentifierTests( unittest.TestCase ):
         self.assertNotEqual( chunk_identifier( first, 1 ),
             chunk_identifier( first, 2 ) )
 
+    def test_empty_document_collection_is_safe( self ) -> None:
+        """An empty vector batch must not generate identifiers or reject valid input."""
+        self.assertEqual( [ ], vector_document_ids( [ ] ) )
+
     def test_explicit_metadata_id_is_preserved( self ) -> None:
+        """Preserve user-supplied chunk identifiers."""
         doc = SimpleNamespace( page_content='content',
             metadata={ 'source': 'one.txt', 'chunk_id': 'existing-001' } )
         self.assertEqual( [ 'existing-001' ], vector_document_ids( [ doc ] ) )
 
     def test_automatic_fallback_ids_are_stable( self ) -> None:
+        """Generate stable fallback identifiers for missing IDs."""
         docs = [ SimpleNamespace( page_content='alpha', metadata={ 'source': 'a' } ),
             SimpleNamespace( page_content='alpha', metadata={ 'source': 'b' } ) ]
         first = vector_document_ids( docs )
@@ -67,12 +78,14 @@ class ChunkIdentifierTests( unittest.TestCase ):
         self.assertEqual( 2, len( set( first ) ) )
 
     def test_duplicate_ids_are_rejected( self ) -> None:
+        """Prevent vector-store writes with duplicate identifiers."""
         docs = [ SimpleNamespace( page_content=str( i ),
             metadata={ 'chunk_id': 'duplicate' } ) for i in range( 2 ) ]
         with self.assertRaisesRegex( ValueError, 'Duplicate chunk identifiers' ):
             vector_document_ids( docs )
 
     def test_pipeline_and_both_backends_use_shared_identifiers( self ) -> None:
+        """Verify both vector stores use the shared chunk identifier contract."""
         pipeline = (ROOT / 'app.py').read_text( encoding='utf-8' )
         storage = (ROOT / 'storage.py').read_text( encoding='utf-8' )
         self.assertIn( "document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )",

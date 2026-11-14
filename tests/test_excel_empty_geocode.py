@@ -50,34 +50,40 @@ class ExcelResolutionTests( unittest.TestCase ):
         return excel
 
     def test_address_empty_geocoder_uses_places( self ) -> None:
+        """Fall back to Places when a freeform geocoder returns no result."""
         excel = self.create_excel( { }, { 'lat': 38.9 } )
         result = excel.resolve_address( 'Arlington, VA' )
         self.assertEqual( 'ok_places', result[ 'status' ] )
         excel.places.text_to_location.assert_called_once( )
 
     def test_address_both_empty_are_not_found( self ) -> None:
+        """Report not_found when both address providers return empty results."""
         excel = self.create_excel( { }, None )
         result = excel.resolve_address( 'Unrecognized place' )
         self.assertEqual( 'not_found', result[ 'status' ] )
         self.assertEqual( { }, result[ 'result' ] )
 
     def test_address_geocoder_success_skips_places( self ) -> None:
+        """Avoid unnecessary Places calls after geocoding succeeds."""
         excel = self.create_excel( { 'lat': 38.9 }, { 'lat': 39.0 } )
         result = excel.resolve_address( 'Arlington, VA' )
         self.assertEqual( 'ok', result[ 'status' ] )
         excel.places.text_to_location.assert_not_called( )
 
     def test_city_empty_geocoder_uses_places( self ) -> None:
+        """Resolve structured addresses through Places when geocoding is empty."""
         excel = self.create_excel( None, { 'lat': 38.9 } )
         result = excel.resolve_city_state_country( 'Arlington', 'VA', 'US' )
         self.assertEqual( 'ok_places', result[ 'status' ] )
 
     def test_city_both_empty_are_not_found( self ) -> None:
+        """Retain not_found for a structured location with no provider match."""
         excel = self.create_excel( { }, { } )
         result = excel.resolve_city_state_country( 'Missing', '', 'US' )
         self.assertEqual( 'not_found', result[ 'status' ] )
 
     def test_provider_exceptions_preserve_not_found( self ) -> None:
+        """Return combined provider errors without false-positive success."""
         excel = self.create_excel( None, None )
         excel.geocoder.freeform.side_effect = RuntimeError( 'geocoding unavailable' )
         excel.places.text_to_location.side_effect = RuntimeError( 'places unavailable' )

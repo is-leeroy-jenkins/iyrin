@@ -79,7 +79,8 @@ def vector_document_ids( documents: list[ object ] ) -> list[ str ]:
     Raises:
     	ValueError: Raised when two documents resolve to the same identifier.
     """
-    throw_if( 'documents', documents )
+    if documents is None:
+        throw_if( 'documents', documents )
     if not isinstance( documents, list ):
         raise TypeError( 'documents must be a list.' )
     ids = [ ]
@@ -159,7 +160,7 @@ class LocalEmbeddings( Embeddings ):
 			self.client = Llama( model_path=self.model_path, embedding=True, verbose=False )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'embedders'
 			exception.cause = 'LocalEmbeddings'
 			exception.method = 'load( self ) -> None'
 			Logger( ).write( exception )
@@ -186,27 +187,25 @@ class LocalEmbeddings( Embeddings ):
 			if not isinstance( texts, list ):
 				raise TypeError( 'texts must be a list of strings.' )
 			self.texts = texts
-			values: List[ str ] = [ ]
-			for text in texts:
+			for text in self.texts:
 				throw_if( 'text', text )
 				if not isinstance( text, str ):
 					raise TypeError( 'Argument "texts" must contain only strings.' )
-				values.append( text )
 	
 			self.load( )
-			self.response = self.client.create_embedding( values )
+			self.response = self.client.create_embedding( self.texts )
 			if isinstance( self.response, dict ) and 'data' in self.response:
 				vectors = [ item[ 'embedding' ] for item in self.response[ 'data' ] ]
 			else:
 				vectors = self.response
 	
-			if not isinstance( vectors, list ) or len( vectors ) != len( values ):
+			if not isinstance( vectors, list ) or len( vectors ) != len( self.texts ):
 				raise RuntimeError( 'Local GGUF embedding count does not match the input count.' )
 	
 			return vectors
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'embedders'
 			exception.cause = 'LocalEmbeddings'
 			exception.method = 'embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]'
 			Logger( ).write( exception )
@@ -232,7 +231,7 @@ class LocalEmbeddings( Embeddings ):
 			return self.embed_documents( [ self.text ] )[ 0 ]
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'embedders'
 			exception.cause = 'LocalEmbeddings'
 			exception.method = 'embed_query( self, text: str ) -> List[ float ]'
 			Logger( ).write( exception )
@@ -316,7 +315,7 @@ class EmbeddingFactory( ):
 			raise ValueError( f'Unsupported embedding provider: {self.provider}' )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'embedders'
 			exception.cause = 'EmbeddingFactory'
 			exception.method = "create( self, provider: str, model: str, model_path: str='' ) -> Embeddings"
 			Logger( ).write( exception )

@@ -99,12 +99,12 @@ def normalize( obj: Any ) -> Any:
 		return { k: normalize( v ) for k, v in obj.items( ) }
 	if isinstance( obj, (list, tuple, set) ):
 		return [ normalize( v ) for v in obj ]
-	if hasattr( obj, "model_dump" ):
-		try:
-			return obj.model_dump( )
-		except Exception:
-			return str( obj )
-	return str( obj )
+	try:
+		return obj.model_dump( )
+	except AttributeError:
+		return str( obj )
+	except Exception:
+		return str( obj )
 
 def blue_divider( ) -> None:
 	"""Render the configured Streamlit divider.
@@ -202,7 +202,7 @@ class BaseCache( ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'BaseCache'
 			exception.method = 'contains( self, key: str ) -> bool'
 			Logger( ).write( exception )
@@ -229,7 +229,7 @@ class BaseCache( ):
 			return f'{namespace}::{key}'
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'BaseCache'
 			exception.method = 'namespace_key( self, namespace: str, key: str ) -> str'
 			Logger( ).write( exception )
@@ -293,7 +293,7 @@ class InMemoryCache( BaseCache ):
 			return time.time( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'now( self )'
 			Logger( ).write( exception )
@@ -327,9 +327,12 @@ class InMemoryCache( BaseCache ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'make_record( self, **kwargs )'
+			exception.method = (
+				"make_record( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) "
+				"-> Dict[ str, Any ]:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -355,7 +358,7 @@ class InMemoryCache( BaseCache ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'is_expired( self, record: Dict[ str, Any ] )'
 			Logger( ).write( exception )
@@ -391,7 +394,7 @@ class InMemoryCache( BaseCache ):
 			return record.get( 'value' )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'get( self, key: str )'
 			Logger( ).write( exception )
@@ -420,9 +423,9 @@ class InMemoryCache( BaseCache ):
 			self.sets += 1
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'set( self, **kwargs )'
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -445,7 +448,7 @@ class InMemoryCache( BaseCache ):
 				self.deletes += 1
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'delete( self, key: str )'
 			Logger( ).write( exception )
@@ -475,7 +478,7 @@ class InMemoryCache( BaseCache ):
 				self.deletes += deleted
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
 			Logger( ).write( exception )
@@ -494,10 +497,11 @@ class InMemoryCache( BaseCache ):
 			bool: True if the key exists and is not expired.
 		"""
 		try:
+			throw_if( 'key', key )
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'contains( self, key: str )'
 			Logger( ).write( exception )
@@ -522,7 +526,7 @@ class InMemoryCache( BaseCache ):
 					'deletes': self.deletes }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'stats( self )'
 			Logger( ).write( exception )
@@ -583,7 +587,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'initialize( self )'
 			Logger( ).write( exception )
@@ -613,7 +617,7 @@ class SQLiteCache( BaseCache ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'migrate( self )'
 			Logger( ).write( exception )
@@ -632,7 +636,7 @@ class SQLiteCache( BaseCache ):
 			return time.time( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'now( self )'
 			Logger( ).write( exception )
@@ -671,7 +675,7 @@ class SQLiteCache( BaseCache ):
 			return json.loads( payload )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'get( self, key: str ) -> Dict[ str, Any ]'
 			Logger( ).write( exception )
@@ -709,9 +713,9 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'set( self, **args )'
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -733,7 +737,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'delete( self, key: str )'
 			Logger( ).write( exception )
@@ -761,7 +765,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.commit( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
 			Logger( ).write( exception )
@@ -784,7 +788,7 @@ class SQLiteCache( BaseCache ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'contains( self, key: str )'
 			Logger( ).write( exception )
@@ -811,7 +815,7 @@ class SQLiteCache( BaseCache ):
 			return count
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'purge_expired( self )'
 			Logger( ).write( exception )
@@ -837,7 +841,7 @@ class SQLiteCache( BaseCache ):
 					'expired_entries': int( expired or 0 ), 'hits': int( hits or 0 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'stats( self )'
 			Logger( ).write( exception )
@@ -856,7 +860,7 @@ class SQLiteCache( BaseCache ):
 			self.connection.close( )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'close( self )'
 			Logger( ).write( exception )
@@ -946,9 +950,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'create_schema( self, **args )'
+			exception.method = "create_schema( self, table: str ) -> List[ Tuple ]:"
 			Logger( ).write( exception )
 			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
@@ -995,7 +999,7 @@ class SQLiteDatabase( ):
 					seen[ name ] += 1
 					columns.append( f'{name}_{seen[ name ]}' )
 		
-			def _scalarize( value: Any ) -> Any:
+			def scalarize( value: Any ) -> Any:
 				"""Prepare SQLite result values for tabular presentation.
 
 				Purpose:
@@ -1019,29 +1023,32 @@ class SQLiteDatabase( ):
 						return str( normalize( value ) )
 					except Exception:
 						return str( value )
-				if hasattr( value, 'model_dump' ):
-					try:
-						return str( value.model_dump( ) )
-					except Exception:
-						return str( value )
-				return str( value )
+				try:
+					return str( value.model_dump( ) )
+				except AttributeError:
+					return str( value )
+				except Exception:
+					return str( value )
 		
 			normalized_rows: List[ Dict[ str, Any ] ] = [ ]
 			for row in rows:
 				record: Dict[ str, Any ] = { }
 				for idx, col in enumerate( columns ):
-					record[ col ] = _scalarize( row[ idx ] )
+					record[ col ] = scalarize( row[ idx ] )
 				normalized_rows.append( record )
 			return pd.DataFrame( normalized_rows, columns=columns )
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'read_table( self, **args )'
+			exception.method = (
+				"read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> "
+				"pd.DataFrame:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
-	def render_table( self, df: pd.DataFrame ) -> None:
+	def render_table( self, df: pd.DataFrame | None ) -> None:
 		"""
 
 		Purpose:
@@ -1081,6 +1088,9 @@ class SQLiteDatabase( ):
 		Returns:
 			pd.DataFrame: Result of the make display safe operation.
 		"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		display_df = df.copy( )
 		for col in display_df.columns:
 			display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
@@ -1109,9 +1119,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'drop_table( self, **args )'
+			exception.method = "drop_table( self, table: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
@@ -1168,9 +1178,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'create_index( self, **args )'
+			exception.method = "create_index( self, table: str, column: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
@@ -1185,6 +1195,9 @@ class SQLiteDatabase( ):
 		Returns:
 			pd.DataFrame: Result of the apply filters operation.
 		"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		st.subheader( 'Advanced Filters' )
 		conditions = [ ]
 		col1, col2, col3 = st.columns( 3 )
@@ -1220,6 +1233,9 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Displays the selected aggregation result in Streamlit, or an informational message when no numeric column exists.
 		"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
 		if not numeric_cols:
@@ -1254,6 +1270,9 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Renders a visualization in the Streamlit interface.
 			"""
+		throw_if( 'df', df )
+		if not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'df must be a DataFrame.' )
 		blue_divider( )
 		st.markdown( '##### Visualization Engine' )
 		if df is None or df.empty:
@@ -1385,9 +1404,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'convert_dataframe( self, **args )'
+			exception.method = "convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def insert_data( self, table_name: str, df: pd.DataFrame ) -> None:
@@ -1420,9 +1439,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'insert_data( self, **args )'
+			exception.method = "insert_data( self, table_name: str, df: pd.DataFrame ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def get_sqlite_type( self, dtype: Any ) -> str:
@@ -1490,8 +1509,10 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		if not table_name:
-			raise ValueError( 'Table name required.' )
+		throw_if( 'table_name', table_name )
+		throw_if( 'columns', columns )
+		if not isinstance( table_name, str ) or not isinstance( columns, list ):
+			raise TypeError( 'table_name must be a string and columns a list.' )
 		# Validate identifier
 		if not re.match( r"^[A-Za-z_][A-Za-z0-9_]*$", table_name ):
 			raise ValueError( 'Invalid table name.' )
@@ -1536,7 +1557,9 @@ class SQLiteDatabase( ):
 		Returns:
 			bool: Result of the is safe query operation.
 		"""
-		if not query or not isinstance( query, str ):
+		if query is None:
+			throw_if( 'query', query )
+		if not isinstance( query, str ) or not query.strip( ):
 			return False
 		q = query.strip( ).lower( )
 		# ------------------------------------------------------------------
@@ -1556,9 +1579,16 @@ class SQLiteDatabase( ):
 		allowed_starts = ('select', 'with', 'explain', 'pragma')
 		if not q.startswith( allowed_starts ):
 			return False
-		# PRAGMA assignments mutate connection or database configuration.
-		if q.startswith( 'pragma' ) and '=' in q:
-			return False
+		# Explicitly allow only read-only PRAGMA inspection names. PRAGMA assignments,
+		# parenthesized setters, checkpoints, and other state changes are rejected.
+		if q.startswith( 'pragma' ):
+			pragma_name = re.match( r'^pragma\s+(?:[a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)', q )
+			allowed_pragmas = { 'table_info', 'table_xinfo', 'table_list',
+				'index_list', 'index_info', 'index_xinfo', 'foreign_key_list',
+				'database_list', 'compile_options', 'collation_list' }
+			if (pragma_name is None or pragma_name.group( 1 ) not in allowed_pragmas or
+					'=' in q):
+				return False
 		# ------------------------------------------------------------------
 		# Block dangerous keywords anywhere
 		# ------------------------------------------------------------------
@@ -1585,8 +1615,9 @@ class SQLiteDatabase( ):
 		Returns:
 			str: Result of the create identifier operation.
 		"""
-		if not name or not isinstance( name, str ):
-			raise ValueError( 'Invalid Identifier.' )
+		throw_if( 'name', name )
+		if not isinstance( name, str ):
+			raise TypeError( 'name must be a string.' )
 		safe = re.sub( r'[^0-9a-zA-Z_]', '_', name.strip( ) )
 		if not re.match( r'^[A-Za-z_]', safe ):
 			safe = f'_{safe}'
@@ -1617,9 +1648,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'get_indexes( self, **args )'
+			exception.method = "get_indexes( self, table: str ) -> List[ Tuple ]:"
 			Logger( ).write( exception )
 			raise exception from e
 	def add_column( self, table: str, column: str, col_type: str ) -> None:
@@ -1651,9 +1682,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'add_column( self, **args )'
+			exception.method = "add_column( self, table: str, column: str, col_type: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
@@ -1741,9 +1772,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'rename_column( self, **args )'
+			exception.method = "rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_profile_table( self, table: str ) -> pd.DataFrame:
@@ -1787,9 +1818,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'create_profile_table( self, **args )'
+			exception.method = "create_profile_table( self, table: str ) -> pd.DataFrame:"
 			Logger( ).write( exception )
 			raise exception from e
 	def drop_column( self, table: str, column: str ) -> None:
@@ -1868,9 +1899,9 @@ class SQLiteDatabase( ):
 	
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'drop_column( self, **args )'
+			exception.method = "drop_column( self, table: str, column: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_table( self, old_name: str, new_name: str ) -> None:
@@ -1934,9 +1965,9 @@ class SQLiteDatabase( ):
 
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'rename_table( self, **args )'
+			exception.method = "rename_table( self, old_name: str, new_name: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 class ChromaStore( ):
@@ -2011,7 +2042,7 @@ class ChromaStore( ):
 			return self.vector_store
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'ChromaStore'
 			exception.method = 'create( self, documents, embedder, collection_name, persist_directory ) -> Chroma'
 			Logger( ).write( exception )
@@ -2079,6 +2110,8 @@ class PineconeStore( ):
 				raise TypeError( 'embedder must implement LangChain Embeddings.' )
 			if not isinstance( index_name, str ) or not isinstance( api_key, str ):
 				raise TypeError( 'index_name and api_key must be strings.' )
+			if namespace is None:
+				throw_if( 'namespace', namespace )
 			if not isinstance( namespace, str ):
 				raise TypeError( 'namespace must be a string; empty is allowed.' )
 			self.documents = documents
@@ -2106,7 +2139,7 @@ class PineconeStore( ):
 			return self.vector_store
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'storage'
 			exception.cause = 'PineconeStore'
 			exception.method = 'create( self, documents, embedder, index_name, namespace, api_key ) -> Any'
 			Logger( ).write( exception )

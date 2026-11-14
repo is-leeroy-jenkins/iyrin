@@ -50,7 +50,7 @@
 '''
 from __future__ import annotations
 
-from anthropic import Anthropic as Claude
+from anthropic import Anthropic as AnthropicClient
 import base64
 from boogr import Error, Logger
 from core import Result
@@ -476,7 +476,10 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'build_instructions( self, **kwargs ) -> str | None'
+			exception.method = (
+				"build_instructions( self, system: str=None, response_format: str=None ) -> str | "
+				"None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -515,7 +518,10 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'build_tools( self, **kwargs) -> List[ Dict[ str, Any ] ]'
+			exception.method = (
+				"build_tools( self, web_search: bool=False, search_domains: Any=None ) -> List[ Dict[ "
+				"str, Any ] ]:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -551,7 +557,9 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'build_response_format( self, **args ) -> Dict[ str, Any ]'
+			exception.method = (
+				"build_response_format( self, response_format: str=None ) -> Dict[ str, Any ] | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -856,7 +864,13 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'fetch( self, **args ) -> str | None'
+			exception.method = (
+				"fetch( self, query: str, model: str='grok-4-fast-reasoning', temperature: float=0.7, "
+				"max_tokens: int=2048, top_p: float=1.0, seed: int | None=None, system: str=None, "
+				"response_format: str=None, reasoning_effort: str=None, web_search: bool=False, "
+				"search_domains: Any=None, stop: List[ str ]=None, stream: bool=False, store: "
+				"bool=True, parallel_tool_calls: bool=True, tool_choice: str='auto' ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1271,7 +1285,10 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'build_system_instruction( self, **args ) -> str | None'
+			exception.method = (
+				"build_system_instruction( self, system: str=None, response_format: str=None, "
+				"grounding: bool=False, search_domains: Any=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1334,7 +1351,10 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'build_thinking_config( self, **args ) -> Any'
+			exception.method = (
+				"build_thinking_config( self, model: str, reasoning: bool=False, thinking_level: "
+				"str=None, thinking_budget: int | None=None, include_thoughts: bool=False ) -> Any:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1468,7 +1488,14 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'build_config( self, **args ) -> Any'
+			exception.method = (
+				"build_config( self, model: str, temperature: float=0.7, max_tokens: int=2048, top_p: "
+				"float=1.0, top_k: int | None=None, candidate_count: int=1, seed: int | None=None, "
+				"system: str=None, response_format: str=None, stop_sequences: Any=None, grounding: "
+				"bool=False, search_domains: Any=None, reasoning: bool=False, thinking_level: "
+				"str=None, thinking_budget: int | None=None, include_thoughts: bool=False, "
+				"response_json_schema: Dict[ str, Any ] = None ) -> Any:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1625,7 +1652,15 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'fetch( self, *args ) -> str | None'
+			exception.method = (
+				"fetch( self, prompt: str, model: str='gemini-2.5-flash', temperature: float=0.7, "
+				"max_tokens: int=2048, top_p: float=1.0, top_k: int | None=None, candidate_count: "
+				"int=1, seed: int | None=None, system: str=None, response_format: str=None, "
+				"stop_sequences: Any=None, grounding: bool=False, search_domains: Any=None, "
+				"reasoning: bool=False, thinking_level: str=None, thinking_budget: int | None=None, "
+				"include_thoughts: bool=False, response_json_schema: Dict[ str, Any ] = None ) -> str "
+				"| None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1749,7 +1784,7 @@ class Claude( Generator ):
 	    Wraps Anthropic Claude message generation and optional web-search tooling behind a consistent Foo interface.
 
 	Attributes:
-	    client (Optional[Claude]): Initialized provider SDK client used to execute API requests.
+	    client (Optional[AnthropicClient]): Initialized provider SDK client used to execute API requests.
 	    model (Optional[str]): Provider model identifier used for generation requests.
 	    response (Optional[Any]): Most recent raw response returned by the provider client.
 	    api_key (Optional[str]): Provider credential loaded from application configuration.
@@ -1770,7 +1805,7 @@ class Claude( Generator ):
 	    content (Any): Current content retained by the Claude workflow between related operations.
 	    agents (Any): Configured user-agent string sent with web requests.
 	"""
-	client: Optional[ Claude ]
+	client: Optional[ AnthropicClient ]
 	model: Optional[ str ]
 	response: Optional[ Any ]
 	api_key: Optional[ str ]
@@ -1884,9 +1919,9 @@ class Claude( Generator ):
 			return _values
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = '_normalize_domains( self, domains: Any ) -> List[ str ]'
+			exception.method = 'normalize_domains( self, domains: Any ) -> List[ str ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1965,9 +2000,9 @@ class Claude( Generator ):
 			return str( response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = '_extract_text( self, response: Any ) -> str'
+			exception.method = 'extract_text( self, response: Any ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2014,7 +2049,7 @@ class Claude( Generator ):
 			self.top_k = int( top_k ) if top_k is not None else None
 			self.system_instructions = system if system and str( system ).strip( ) else None
 			self.web_search = bool( web_search )
-			self.client = Claude( api_key=self.api_key )
+			self.client = AnthropicClient( api_key=self.api_key )
 			self.search_domains = self.normalize_domains( search_domains )
 			self.blocked_domains = self.normalize_domains( blocked_domains )
 			self.thinking_budget = int( thinking_budget ) if thinking_budget is not None else None
@@ -2075,9 +2110,15 @@ class Claude( Generator ):
 			return self.extract_text( self.response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = 'fetch( self, **args ) -> str | None'
+			exception.method = (
+				"fetch( self, query: str, model: str='claude-sonnet-4-6', temperature: float=0.7, "
+				"max_tokens: int=2048, top_p: float=1.0, top_k: int | None=None, system: str=None, "
+				"stop_sequences: List[ str ]=None, thinking: bool=False, thinking_budget: int | "
+				"None=None, web_search: bool=False, search_domains: Any=None, blocked_domains: "
+				"Any=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2121,7 +2162,7 @@ class Claude( Generator ):
 				blocked_domains=blocked_domains, )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = 'generate_text( self, query: str, ... ) -> str | None'
 			Logger( ).write( exception )
@@ -2165,7 +2206,7 @@ class Claude( Generator ):
 				web_search=True, search_domains=search_domains, blocked_domains=blocked_domains, )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
 			exception.method = 'search_web( self, query: str, ... ) -> str | None'
 			Logger( ).write( exception )
@@ -2253,9 +2294,9 @@ class Mistral( Generator ):
 		"""
 		return [ 'content', 'client', 'timeout', 'headers', 'fetch', 'api_key', 'response',
 			'params', 'agents', 'model', 'temperature', 'max_tokens', 'top_p', 'messages',
-			'system_instructions', 'seed', 'safe_prompt', '_extract_text', 'create_schema', ]
+			'system_instructions', 'seed', 'safe_prompt', 'extract_text', 'create_schema', ]
 	
-	def _extract_text( self, response: Any ) -> str:
+	def extract_text( self, response: Any ) -> str:
 		"""Extract text.
 
 		Purpose:
@@ -2316,9 +2357,9 @@ class Mistral( Generator ):
 			return str( response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Mistral'
-			exception.method = '_extract_text( self, response: Any ) -> str'
+			exception.method = 'extract_text( self, response: Any ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2373,17 +2414,21 @@ class Mistral( Generator ):
 				self.params[ 'random_seed' ] = self.seed
 			
 			self.response = self.client.chat.complete( **self.params )
-			return self._extract_text( self.response )
+			return self.extract_text( self.response )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Mistral'
-			exception.method = 'fetch( self, *args ) -> str | None'
+			exception.method = (
+				"fetch( self, query: str, model: str='mistral-large-latest', temperature: float=0.7, "
+				"max_tokens: int=1024, top_p: float=1.0, seed: int | None=None, safe_mode: "
+				"bool=False, system: str=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
+			description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Create schema.
 
 		Purpose:
@@ -2394,7 +2439,7 @@ class Mistral( Generator ):
 		    tool (str): Service or tool name referenced by the generated schema.
 		    description (str): Human-readable explanation embedded in the generated schema.
 		    parameters (dict): JSON Schema property definitions for the tool arguments.
-		    required (list[str]): Argument names that callers must supply to the generated tool.
+		    required (list[str] | None): Required argument names; None includes all schema properties.
 
 		Returns:
 		    Dict[str, str] | None: Dictionary containing normalized provider data, configuration, metadata, or generated schema content.
@@ -2429,9 +2474,9 @@ class Mistral( Generator ):
 			return _schema
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Mistral'
-			exception.method = ('create_schema( self, **kwargs ) -> Dict[ str, str ]')
+			exception.method = 'create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None'
 			Logger( ).write( exception )
 			raise exception
 
@@ -2723,7 +2768,10 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'build_instructions( self, **args ) -> str | None'
+			exception.method = (
+				"build_instructions( self, system: str=None, response_format: str=None, web_search: "
+				"bool=False, search_domains: Any=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2777,7 +2825,11 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'build_text_format( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = (
+				"build_text_format( self, response_format: str | Dict[ str, Any ]=None, json_schema: "
+				"Dict[ str, Any ]=None, schema_name: str='structured_response', schema_description: "
+				"str='Structured JSON response.' ) -> Dict[ str, Any ] | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2824,7 +2876,11 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'build_tools( self, **args ) -> List[ Dict[ str, Any ] ]'
+			exception.method = (
+				"build_tools( self, web_search: bool=False, search_domains: Any=None, file_search: "
+				"bool=False, vector_store_ids: List[ str ]=None, max_file_results: int=20 ) -> List[ "
+				"Dict[ str, Any ] ]:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3034,7 +3090,15 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'fetch( self, **args ) -> str'
+			exception.method = (
+				"fetch( self, prompt: str, model: str='gpt-5-mini', temperature: float=0.7, "
+				"max_tokens: int=1024, top_p: float=1.0, seed: int | None=None, system: str=None, "
+				"response_format: str | Dict[ str, Any ] = None, reasoning_effort: str=None, "
+				"web_search: bool=False, search_domains: Any=None, store: bool=True, stream: "
+				"bool=False, parallel_tool_calls: bool=True, tool_choice: str='auto', json_schema: "
+				"Dict[ str, Any ] = None, schema_name: str='structured_response', schema_description: "
+				"str='Structured JSON response.' ) -> str:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	

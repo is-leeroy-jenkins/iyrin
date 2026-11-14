@@ -50,7 +50,6 @@ import datetime as dt
 import json
 import math
 import os
-from dataclasses import asdict, dataclass
 from typing import Any, Callable, Dict, List
 import pandas as pd
 import pydeck as pdk
@@ -126,7 +125,6 @@ AI_ADVANCED_TOOLS: Dict[ str, str ] = { 'cross_layer_analysis': '🧭 Cross-Laye
 		'agent_tools': '🤖 Agent Tools', }
 
 
-@dataclass
 class GeoEntity:
 	"""Normalized geospatial entity used by Live World layers.
 
@@ -157,6 +155,43 @@ class GeoEntity:
 	timestamp: str
 	source: str
 	metadata: Dict[ str, Any ]
+
+	def __init__( self, entity_id: str, entity_type: str, name: str, latitude: float,
+		longitude: float, altitude: float, heading: float, speed: float, timestamp: str,
+		source: str, metadata: Dict[ str, Any ] ) -> None:
+		"""Initialize the normalized entity without dataclass-generated methods.
+
+		Purpose:
+			Preserve the existing positional and keyword constructor contract while
+			assigning every Live World field to its corresponding instance member.
+
+		Args:
+			entity_id (str): Stable source identifier.
+			entity_type (str): Entity category.
+			name (str): Human-readable entity name.
+			latitude (float): Latitude in decimal degrees.
+			longitude (float): Longitude in decimal degrees.
+			altitude (float): Altitude or depth.
+			heading (float): Heading in degrees.
+			speed (float): Source-reported speed.
+			timestamp (str): Source timestamp.
+			source (str): Source system.
+			metadata (Dict[str, Any]): Source-specific attributes.
+
+		Returns:
+			None: Initializes the entity members.
+		"""
+		self.entity_id = entity_id
+		self.entity_type = entity_type
+		self.name = name
+		self.latitude = latitude
+		self.longitude = longitude
+		self.altitude = altitude
+		self.heading = heading
+		self.speed = speed
+		self.timestamp = timestamp
+		self.source = source
+		self.metadata = metadata
 
 
 def throw_if( name: str, value: object ) -> None:
@@ -1519,19 +1554,18 @@ def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 
 	rows: List[ Dict[ str, object ] ] = [ ]
 	for entity in entities:
-		row = asdict( entity )
 		rows.append( {
-			'EntityId': row[ 'entity_id' ],
-			'EntityType': row[ 'entity_type' ],
-			'Name': row[ 'name' ],
-			'Latitude': row[ 'latitude' ],
-			'Longitude': row[ 'longitude' ],
-			'Altitude': row[ 'altitude' ],
-			'Heading': row[ 'heading' ],
-			'Speed': row[ 'speed' ],
-			'Timestamp': row[ 'timestamp' ],
-			'Source': row[ 'source' ],
-			'Metadata': row[ 'metadata' ],
+			'EntityId': entity.entity_id,
+			'EntityType': entity.entity_type,
+			'Name': entity.name,
+			'Latitude': entity.latitude,
+			'Longitude': entity.longitude,
+			'Altitude': entity.altitude,
+			'Heading': entity.heading,
+			'Speed': entity.speed,
+			'Timestamp': entity.timestamp,
+			'Source': entity.source,
+			'Metadata': entity.metadata,
 		} )
 	return pd.DataFrame( rows, columns=columns )
 

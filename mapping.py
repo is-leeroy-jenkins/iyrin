@@ -102,6 +102,9 @@ def flatten_geocode( result: Dict[ str, Any ] ) -> Dict[ str, Any ]:
 	def comp( kind: str, want_long: bool = False ) -> Optional[ str ]:
 		"""Find an address component by Google component type.
 
+		Purpose:
+			Retrieve a matching Google address component using its documented type.
+
 		Args:
 			kind (str): Google address component type.
 			want_long (bool): Return the long component name when True.
@@ -321,7 +324,7 @@ class Map( ):
 					backoff = min( backoff * 2, self.max )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Maps'
 			exception.method = 'request( self, endpoint: str, params: Dict[ str, str ] )'
 			Logger( ).write( exception )
@@ -402,7 +405,7 @@ class Geocoder( ):
 		self.latitude = None
 		self.longitude = None
 	
-	def key_for( self, prefix: str, *parts: str ) -> str | None:
+	def key_for( self, prefix: str, parts: List[ str ] ) -> str | None:
 		"""
 
 			Purpose:
@@ -412,7 +415,7 @@ class Geocoder( ):
 			Args:
 				prefix (str):
 					Cache namespace or operation prefix.
-				*parts (str):
+				parts (List[str]):
 					Values that uniquely identify the request.
 
 			Returns:
@@ -423,15 +426,18 @@ class Geocoder( ):
 		try:
 			throw_if( 'prefix', prefix )
 			throw_if( 'parts', parts )
+			if not isinstance( prefix, str ) or not isinstance( parts, list ) or any(
+					not isinstance( part, str ) for part in parts ):
+				raise TypeError( 'prefix must be a string and parts a list of strings.' )
 			self.prefix = prefix
 			self.parts = parts
 			joined = ' '.join( str( p ).strip( ) for p in parts if p and str( p ).strip( ) )
 			return f'{self.prefix}::{joined}'
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = 'key_for( self, *kwargs )'
+			exception.method = 'key_for( self, prefix: str, parts: List[ str ] ) -> str | None'
 			raise exception
 	
 	def validate_coordinates( self, latitude: float, longitude: float ) -> Tuple[ float, float ]:
@@ -467,7 +473,7 @@ class Geocoder( ):
 			return lat, lng
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'validate_coordinates( self, latitude: float, longitude: float )'
 			raise exception
@@ -498,7 +504,7 @@ class Geocoder( ):
 			throw_if( 'address', address )
 			self.address = address.strip( )
 			self.country = str( country or '' ).strip( )
-			self.key = self.key_for( 'geocode', self.address, self.country )
+			self.key = self.key_for( 'geocode', [ self.address, self.country ] )
 			if self._cache:
 				hit = self._cache.get( self.key )
 				if hit:
@@ -516,7 +522,7 @@ class Geocoder( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'freeform( self, address: str, country: str=US )'
 			raise exception
@@ -543,9 +549,11 @@ class Geocoder( ):
 
 		"""
 		try:
+			throw_if( 'latitude', latitude )
+			throw_if( 'longitude', longitude )
 			self.latitude, self.longitude = self.validate_coordinates( latitude, longitude )
-			self.key = self.key_for( 'reverse_geocode', str( self.latitude ),
-				str( self.longitude ) )
+			self.key = self.key_for( 'reverse_geocode', [ str( self.latitude ),
+				str( self.longitude ) ] )
 			if self._cache:
 				hit = self._cache.get( self.key )
 				if hit:
@@ -562,7 +570,7 @@ class Geocoder( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'reverse( self, latitude: float, longitude: float )'
 			raise exception
@@ -592,6 +600,10 @@ class Geocoder( ):
 		"""
 		try:
 			throw_if( 'city', city )
+			if state is None:
+				throw_if( 'state', state )
+			if not isinstance( state, str ):
+				raise TypeError( 'state must be a string; an empty string is allowed.' )
 			throw_if( 'country', country )
 			self.city = city
 			self.state = state
@@ -603,7 +615,7 @@ class Geocoder( ):
 			return self.freeform( self.query, hint )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'city_state_country( self, city: str, state: str, country: str )'
 			raise exception
@@ -655,9 +667,12 @@ class Geocoder( ):
 			return results
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = 'batch_freeform( self, *kwargs )'
+			exception.method = (
+				"batch_freeform( self, addresses: List[ str ], country: str='US' ) -> List[ Dict[ str, "
+				"Any ] ]:"
+			)
 			raise exception
 
 class DistanceMatrix( ):
@@ -733,7 +748,7 @@ class DistanceMatrix( ):
 			return value
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'normalize_mode( self, mode: str )'
 			Logger( ).write( exception )
@@ -770,7 +785,7 @@ class DistanceMatrix( ):
 			return locations
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'normalize_inputs( self, values: object )'
 			Logger( ).write( exception )
@@ -798,7 +813,7 @@ class DistanceMatrix( ):
 			         'distance_miles': round( meters / 1609.344, 3 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'convert_distance( self, meters: int | float | None )'
 			Logger( ).write( exception )
@@ -826,7 +841,7 @@ class DistanceMatrix( ):
 			         'duration_hours': round( seconds / 3600.0, 3 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'convert_duration( self, seconds: int | float | None )'
 			Logger( ).write( exception )
@@ -850,6 +865,7 @@ class DistanceMatrix( ):
 
 		"""
 		try:
+			throw_if( 'element', element )
 			throw_if( 'origin', origin )
 			throw_if( 'destination', destination )
 			throw_if( 'mode', mode )
@@ -879,9 +895,12 @@ class DistanceMatrix( ):
 			return row
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = 'flatten_element( self, **args )'
+			exception.method = (
+				"flatten_element( self, origin: str, destination: str, mode: str, element: Dict[ str, "
+				"Any ] ) -> Dict[ str, Any ]:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -961,9 +980,14 @@ class DistanceMatrix( ):
 			return output_rows
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "matrix( self, **args )"
+			exception.method = (
+				"matrix( self, origins: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | "
+				"AddressOrCoord, destinations: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | "
+				"AddressOrCoord, mode: str='driving', departure_time: str='' ) -> List[ Dict[ str, Any "
+				"] ]:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -1007,7 +1031,7 @@ class DistanceMatrix( ):
 			         'mode': row.get( 'mode' ), 'status': row.get( 'status' ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = "summary( self, origin, destination, mode: str='driving' ) -> Dict"
 			Logger( ).write( exception )
@@ -1050,7 +1074,7 @@ class DistanceMatrix( ):
 			return results
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = "compare_modes( self, origin, destination, modes=None, departure_time: str='' )"
 			Logger( ).write( exception )
@@ -1079,7 +1103,7 @@ class DistanceMatrix( ):
 			return pd.DataFrame( active_rows )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'to_dataframe( self, rows=None ) -> pd.DataFrame'
 			Logger( ).write( exception )
@@ -1158,7 +1182,7 @@ class Place( ):
 		self.parts = None
 		self.place_id = None
 	
-	def key_for( self, prefix: str, *parts: str ) -> str | None:
+	def key_for( self, prefix: str, parts: List[ str ] ) -> str | None:
 		"""
 
 			Purpose:
@@ -1168,7 +1192,7 @@ class Place( ):
 			Args:
 				prefix (str):
 					Cache namespace or operation prefix.
-				*parts (str):
+				parts (List[str]):
 					Values that uniquely identify the request.
 
 			Returns:
@@ -1179,15 +1203,18 @@ class Place( ):
 		try:
 			throw_if( 'prefix', prefix )
 			throw_if( 'parts', parts )
+			if not isinstance( prefix, str ) or not isinstance( parts, list ) or any(
+					not isinstance( part, str ) for part in parts ):
+				raise TypeError( 'prefix must be a string and parts a list of strings.' )
 			self.prefix = prefix
 			self.parts = parts
 			joined = ' '.join( str( p ).strip( ) for p in parts if p and str( p ).strip( ) )
 			return f'{self.prefix}::{joined}'
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'key_for( self, *args )'
+			exception.method = 'key_for( self, prefix: str, parts: List[ str ] ) -> str | None'
 			raise exception
 	
 	def component_value( self, components: List[ Dict[ str, Any ] ], kind: str,
@@ -1222,9 +1249,12 @@ class Place( ):
 			return None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'component_value( self, *args )'
+			exception.method = (
+				"component_value( self, components: List[ Dict[ str, Any ] ], kind: str, want_long: "
+				"bool = False ) -> Optional[ str ]:"
+			)
 			raise exception
 	
 	def flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[
@@ -1274,9 +1304,13 @@ class Place( ):
 			         'source': 'places', 'query': query }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'flatten_place_details( self, *args )'
+			exception.method = (
+				"flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[ "
+				"str, Any ]: \"\"\" Purpose: Convert a Place Details result into the same flattened "
+				"output shape used by Geocoder.flatten_geocode(...). Args: details (Dict[str, Any]):"
+			)
 			raise exception
 	
 	def place_details( self, place_id: str ) -> Dict[ str, Any ] | None:
@@ -1297,7 +1331,7 @@ class Place( ):
 		try:
 			throw_if( 'place_id', place_id )
 			self.place_id = place_id
-			self.key = self.key_for( 'place_details', self.place_id )
+			self.key = self.key_for( 'place_details', [ self.place_id ] )
 			if self.cache:
 				self.hit = self.cache.get( self.key )
 				if self.hit:
@@ -1315,9 +1349,9 @@ class Place( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'place_details( self, *args )'
+			exception.method = "place_details( self, place_id: str ) -> Dict[ str, Any ] | None:"
 			raise exception
 	
 	def text_to_location( self, query: str, country: str = 'US' ) -> Dict[ str, Any ] | None:
@@ -1346,7 +1380,7 @@ class Place( ):
 			throw_if( 'query', query )
 			self.query = query.strip( )
 			self.country = str( country or '' ).strip( )
-			self.key = self.key_for( 'places', self.query, self.country.upper( ) )
+			self.key = self.key_for( 'places', [ self.query, self.country.upper( ) ] )
 			if self.cache:
 				self.hit = self.cache.get( self.key )
 				if self.hit:
@@ -1376,9 +1410,9 @@ class Place( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'text_to_location( self, *args )'
+			exception.method = "text_to_location( self, query: str, country: str = 'US' ) -> Dict[ str, Any ] | None:"
 			raise exception
 	
 	def search_candidates( self, query: str, country: str = 'US', lmt: int = 5 ) -> List[
@@ -1416,9 +1450,14 @@ class Place( ):
 			return self.results[ :max( 1, int( lmt ) ) ]
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'search_candidates( self, *args )'
+			exception.method = (
+				"search_candidates( self, query: str, country: str = 'US', lmt: int = 5 ) -> List[ "
+				"Dict[ str, Any ] ]: \"\"\" Purpose: Return multiple Places Text Search candidates for a "
+				"query. This is intended for future UI candidate-selection workflows. Args: query "
+				"(str):"
+			)
 			raise exception
 
 class Timezone:
@@ -1513,7 +1552,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'validate_coordinates( self, lat: float, lng: float )'
 			raise exception
@@ -1538,6 +1577,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			latitude, longitude = self.validate_coordinates( lat, lng )
 			timestamp_value = int( time.time( ) )
 			self.latitude = latitude
@@ -1549,7 +1590,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'lookup( self, lat: float, lng: float )'
 			raise exception
@@ -1573,6 +1614,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			self.data = self.lookup( lat, lng )
 			if not isinstance( self.data, dict ):
 				return None
@@ -1580,7 +1623,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'get_id( self, lat: float, lng: float )'
 			raise exception
@@ -1605,6 +1648,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			self.data = self.lookup( lat, lng )
 			if not isinstance( self.data, dict ):
 				return None
@@ -1616,7 +1661,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'offset_hours( self, lat: float, lng: float )'
 			raise exception
@@ -1646,6 +1691,8 @@ class Timezone:
 
 		"""
 		try:
+			throw_if( 'lat', lat )
+			throw_if( 'lng', lng )
 			self.data = self.lookup( lat, lng )
 			if not isinstance( self.data, dict ):
 				return None
@@ -1674,7 +1721,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'local_time( self, lat: float, lng: float, utc_datetime: Optional[ dt.datetime ]=None )'
 			raise exception
@@ -1752,7 +1799,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'batch_lookup( self, rows: list, lat_field: str=lat, lng_field: str=lng )'
 			raise exception
@@ -1858,9 +1905,9 @@ class StaticMap( ):
 			return self.latitude, self.longitude
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = 'validate_coordinate( self, *args )'
+			exception.method = "validate_coordinate( self, lat: float, lng: float ) -> tuple:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1904,7 +1951,7 @@ class StaticMap( ):
 			return self.points		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'normalize_points( self, points: list )'
 			Logger( ).write( exception )
@@ -1933,7 +1980,7 @@ class StaticMap( ):
 			return f'{self.base_url}?{urlencode( self.params, doseq=True )}'		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'build_url( self, params: Dict ) -> str'
 			Logger( ).write( exception )
@@ -1980,9 +2027,9 @@ class StaticMap( ):
 			return self.build_url( self.params )		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = 'pin( self, *args )'
+			exception.method = "pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2044,9 +2091,12 @@ class StaticMap( ):
 			return self.build_url( self.params )		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMapUrl'
-			exception.method = 'pins( self, *args )'
+			exception.method = (
+				"pins( self, points: list, zoom: int=0, size: int='600x400', maptype: int='roadmap', "
+				"color: int='red' ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2108,7 +2158,7 @@ class StaticMap( ):
 			return self.build_url( self.params )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'path( self, points: list, size: str=600x400 )'
 			Logger( ).write( exception )
@@ -2173,7 +2223,7 @@ class StaticMap( ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
 			Logger( ).write( exception )

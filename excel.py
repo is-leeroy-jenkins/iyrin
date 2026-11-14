@@ -183,7 +183,7 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'read( self, path: str, sheet: Optional[ str ] )'
 			Logger( ).write( exception )
@@ -224,7 +224,7 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'write( self, df: pd.DataFrame, path: str, sheet: Optional[ str ] )'
 			Logger( ).write( exception )
@@ -247,7 +247,7 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'create_outputs( self )'
 			Logger( ).write( exception )
@@ -286,14 +286,14 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'append_empty( self, outputs: Dict[ str, List ], status: str=skipped_empty )'
 			Logger( ).write( exception )
 			raise exception
 	
-	def append_result( self, outputs: Dict[ str, List ], result: Dict,
-			status: str, error: Optional[ str ] = None ) -> None:
+	def append_result( self, outputs: Dict[ str, List ], result: Dict | None,
+			status: str | None, error: Optional[ str ] = None ) -> None:
 		"""Append a normalized geocode or Places record.
 
 		Purpose:
@@ -310,6 +310,10 @@ class Excel:
 		"""
 		try:
 			throw_if( 'outputs', outputs )
+			if result is not None and not isinstance( result, dict ):
+				raise TypeError( 'result must be a dictionary or None.' )
+			if status is not None and not isinstance( status, str ):
+				raise TypeError( 'status must be a string or None.' )
 			result_value = result or { }
 			status_value = status or 'not_found'
 			outputs[ 'formatted_address' ].append( result_value.get( 'formatted_address' ) )
@@ -328,9 +332,9 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'append_result( self, **args )'
+			exception.method = 'append_result( self, outputs: Dict[ str, List ], result: Dict | None, status: str | None, error: Optional[ str ]=None ) -> None'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -364,7 +368,7 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'summarize( self, df: pd.DataFrame )'
 			Logger( ).write( exception )
@@ -412,7 +416,7 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'detect_columns( self, df: pd.DataFrame )'
 			Logger( ).write( exception )
@@ -460,14 +464,14 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
 			exception.method = 'resolve_address( self, address: str, country: Optional[ str ]=None )'
 			Logger( ).write( exception )
 			raise exception
 	
-	def resolve_city_state_country( self, city: str, state: Optional[ str ],
-			country: str ) -> Dict:
+	def resolve_city_state_country( self, city: str | None, state: Optional[ str ],
+			country: str | None ) -> Dict:
 		"""Resolve a city, state, and country combination.
 
 		Purpose:
@@ -482,9 +486,15 @@ class Excel:
 			Dict: Result, resolution status, and any error message.
 		"""
 		try:
-			city_value = str( city or '' ).strip( )
-			state_value = str( state or '' ).strip( )
-			country_value = str( country or '' ).strip( )
+			if city is not None and not isinstance( city, str ):
+				raise TypeError( 'city must be a string or None.' )
+			if state is not None and not isinstance( state, str ):
+				raise TypeError( 'state must be a string or None.' )
+			if country is not None and not isinstance( country, str ):
+				raise TypeError( 'country must be a string or None.' )
+			city_value = (city or '').strip( )
+			state_value = (state or '').strip( )
+			country_value = (country or '').strip( )
 			if not any( [ city_value, state_value, country_value ] ):
 				return { 'result': { }, 'status': 'skipped_empty', 'error': None }
 			
@@ -512,9 +522,9 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'resolve_city_state_country( self, **args )'
+			exception.method = 'resolve_city_state_country( self, city: str | None, state: Optional[ str ], country: str | None ) -> Dict'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -576,9 +586,9 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'enrich_from_address( self, **kwargs )'
+			exception.method = 'enrich_from_address( self, inpath: str, outpath: str, address: str, sheet: Optional[ str ], cntry: Optional[ str ] ) -> pd.DataFrame'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -651,8 +661,11 @@ class Excel:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'enrich( self, **kwargs)'
+			exception.method = (
+				"enrich( self, inpath: str, outpath: str, city: str, state: Optional[ str ], cntry: "
+				"str, sheet: Optional[ str ] = None, ) -> pd.DataFrame:"
+			)
 			Logger( ).write( exception )
 			raise exception
