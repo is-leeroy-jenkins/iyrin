@@ -207,6 +207,13 @@ class WebFetcher( Fetcher ):
 		Attributes:
 			soup (Optional[ BeautifulSoup ]): Parsed Beautiful Soup HTML document.
 			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+			designation (str): Selected near-Earth object designation.
+			dv (float | int): Maximum mission delta-V constraint.
+			dur (int): Maximum mission duration.
+			stay (int): Minimum mission stay.
+			launch (str): Mission launch year range.
+			date_min (str): Optional earliest fireball observation date.
+			timeout (int): HTTP request timeout for the active API operation.
 			url (Optional[ str ]): Current resource or endpoint URL.
 			html (Optional[ str ]): HTML response body returned by the current request.
 			re_tag (Optional[ Pattern ]): Regular expression used to match HTML tags.
@@ -3993,15 +4000,33 @@ class NearbyObjects( Fetcher ):
 		"""
 		try:
 			throw_if( 'designation', designation )
+			if not isinstance( designation, str ):
+				raise TypeError( 'designation must be a string.' )
+			if type( dv ) not in (int, float) or dv <= 0:
+				raise ValueError( 'dv must be a positive number.' )
+			if type( dur ) is not int or dur <= 0:
+				raise ValueError( 'dur must be a positive integer.' )
+			if type( stay ) is not int or stay < 0:
+				raise ValueError( 'stay must be a nonnegative integer.' )
+			throw_if( 'launch', launch )
+			if not isinstance( launch, str ):
+				raise TypeError( 'launch must be a string.' )
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
 			self.designation = designation
+			self.dv = dv
+			self.dur = dur
+			self.stay = stay
+			self.launch = launch
+			self.timeout = time
 			self.mode = 'nhats_object'
 			self.query = self.designation.strip( )
 			self.url = f'{self.base_url}/nhats.api'
-			self.params = { 'des': self.query, 'dv': dv, 'dur': dur, 'stay': stay,
-					'launch': launch.strip( ) }
+			self.params = { 'des': self.query, 'dv': self.dv, 'dur': self.dur,
+					'stay': self.stay, 'launch': self.launch.strip( ) }
 
 			self.response = requests.get( url=self.url, params=self.params,
-				headers=self.headers, timeout=time )
+				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
 			return { 'mode': self.mode, 'url': self.url, 'params': self.params, 'data': payload }
@@ -4036,15 +4061,24 @@ class NearbyObjects( Fetcher ):
 			Error: Raised when the HTTP request or response processing fails.
 		"""
 		try:
+			if not isinstance( date_min, str ):
+				raise TypeError( 'date_min must be a string.' )
+			if type( limit ) is not int or limit <= 0:
+				raise ValueError( 'limit must be a positive integer.' )
+			if type( time ) is not int or time <= 0:
+				raise ValueError( 'time must be a positive integer.' )
+			self.date_min = date_min
+			self.limit = limit
+			self.timeout = time
 			self.mode = 'fireballs'
 			self.url = f'{self.base_url}/fireball.api'
-			self.params = { 'limit': limit }
+			self.params = { 'limit': self.limit }
 
-			if (date_min or '').strip( ):
-				self.params[ 'date-min' ] = date_min.strip( )
+			if self.date_min.strip( ):
+				self.params[ 'date-min' ] = self.date_min.strip( )
 
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
-				timeout=time )
+				timeout=self.timeout )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
 			return { 'mode': self.mode, 'url': self.url, 'params': self.params,
