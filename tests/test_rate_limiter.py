@@ -17,7 +17,7 @@ class RateLimiterTests( unittest.TestCase ):
     def test_consecutive_waits_update_request_timestamp( self ) -> None:
         """Verify each interval is measured from the previous request."""
         limiter = RateLimiter( 1.0 )
-        with patch( 'rates.time.time', side_effect=[ 10.0, 10.25, 11.0, 11.1, 12.0 ] ):
+        with patch( 'rates.time.time', side_effect=[ 10.0, 10.0, 10.25, 11.0, 11.1, 12.0 ] ):
             with patch( 'rates.time.sleep' ) as sleep:
                 limiter.wait( )
                 limiter.wait( )
