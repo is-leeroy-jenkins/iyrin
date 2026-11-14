@@ -2980,7 +2980,9 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'fetch_locations( self, *params ) -> Dict[ str, Any ]'
+			exception.method = ('fetch_locations( self, observatories: str, start_time: str, '
+				'end_time: str, coordinate_systems: str="gse", resolution_factor: int=1, '
+				'time: int=20 ) -> Dict[ str, Any ] | None')
 			Logger( ).write( exception )
 			raise exception
 	
