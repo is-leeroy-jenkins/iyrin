@@ -118,9 +118,29 @@ except LookupError:
 	nltk.download( 'omw-1.4' )
 	nltk.download( 'words' )
 
-def throw_if( name: str, value: object ):
+def throw_if( name: str, value: object ) -> None:
+	"""Reject a missing required public argument.
+
+	Purpose:
+		Validates mandatory inputs at the processing interface boundary without
+		coercing or modifying accepted values.
+
+	Args:
+		name (str): Required argument name used in validation messages.
+		value (object): Candidate argument supplied by the caller.
+
+	Returns:
+		None: Completes validation without changing the argument.
+
+	Raises:
+		ValueError: Raised when a required argument is absent or empty.
+	"""
 	if value is None:
-		raise Exception( f'Argument "{name}" cannot be empty!' )
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+	if isinstance( value, str ) and not value.strip( ):
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
+	if isinstance( value, (list, tuple, dict, set) ) and not value:
+		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 class Processor( ):
 	"""Processor processing component.
@@ -186,7 +206,16 @@ class Processor( ):
 	removed: Optional[ List[ str ] ]
 	frequency_distribution: Optional[ DataFrame ]
 	
-	def __init__( self ):
+	def __init__( self ) -> None:
+		"""Initialize shared text-processing state.
+
+		Purpose:
+			Creates reusable NLP helpers, text buffers, document collections,
+			and output state for the processing subclasses.
+
+		Returns:
+			None: Initializes parser and processing attributes.
+		"""
 		self.lemmatizer = WordNetLemmatizer( )
 		self.stemmer = PorterStemmer( )
 		self.files = [ ]
@@ -1910,9 +1939,9 @@ class NltkParser( Processor ):
 					nltk.download( resource_name )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'NltkParser._ensure_nltk_resources( self ) -> None'
+			exception.method = 'NltkParser.initialize_resources( self ) -> None'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1941,7 +1970,7 @@ class NltkParser( Processor ):
 			return words
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
 			exception.method = 'word_tokenizer( self, text: str ) -> List[ str ]'
 			Logger( ).write( exception )
@@ -1971,7 +2000,7 @@ class NltkParser( Processor ):
 			return self.sentence_tokens
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
 			exception.method = 'tokenize_sentences( self, text: str ) -> str'
 			Logger( ).write( exception )
@@ -2004,7 +2033,7 @@ class NltkParser( Processor ):
 			return self.stemmed_tokens
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
 			exception.method = 'stemmer( self, text: str ) -> str'
 			Logger( ).write( exception )
@@ -2037,7 +2066,7 @@ class NltkParser( Processor ):
 			return self.lemmatized_tokens
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
 			exception.method = 'lemmatizer( self, text: str ) -> str'
 			Logger( ).write( exception )
@@ -2068,7 +2097,7 @@ class NltkParser( Processor ):
 			return self.tagged_tokens
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
 			exception.method = 'pos_tagger( self, text: str ) -> str'
 			Logger( ).write( exception )
@@ -2110,7 +2139,7 @@ class NltkParser( Processor ):
 			return self.named_entities
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'processing'
+			exception.module = 'processors'
 			exception.cause = 'NltkParser'
 			exception.method = 'named_entity_recogniztion( self, text: str ) -> str'
 			Logger( ).write( exception )
@@ -2638,6 +2667,17 @@ class PdfParser( Processor ):
 			throw_if( 'pages', pages )
 			
 			def normalize_candidate( value: str ) -> str:
+				"""Normalize a header or footer block before repetition comparison.
+
+				Purpose:
+					Removes unstable numbers, dates, and spacing while preserving the block's recognizable text.
+
+				Args:
+					value (str): Source text to analyze.
+
+				Returns:
+					str: Normalized text or unchanged source text.
+				"""
 				candidate = value.strip( ).lower( )
 				candidate = re.sub( r'\s+', ' ', candidate )
 				candidate = re.sub( r'\b\d{1,5}\b', '#', candidate )
@@ -2646,6 +2686,17 @@ class PdfParser( Processor ):
 				return candidate
 			
 			def is_page_label( value: str ) -> bool:
+				"""Identify numeric, Roman-numeral, and labeled page numbers.
+
+				Purpose:
+					Tests a header or footer against common page-number conventions.
+
+				Args:
+					value (str): Source text to analyze.
+
+				Returns:
+					bool: True when the candidate satisfies the test; otherwise False.
+				"""
 				candidate = value.strip( )
 				
 				if re.fullmatch( r'\d{1,5}', candidate ):
@@ -2789,6 +2840,17 @@ class PdfParser( Processor ):
 			throw_if( 'text', text )
 			cleaned = text
 			def repair_bracketed( match: re.Match ) -> str:
+				"""Reassemble a bracketed sequence of separated capital letters.
+
+				Purpose:
+					Replaces spacing artifacts inside uppercase bracketed text.
+
+				Args:
+					match (re.Match): Regular expression match containing the text to repair.
+
+				Returns:
+					str: Normalized text or unchanged source text.
+				"""
 				value = match.group( 1 )
 				
 				if re.fullmatch( r'[A-Z\s\-\n\r]{3,}', value ):
@@ -2798,6 +2860,17 @@ class PdfParser( Processor ):
 				return match.group( 0 )
 			
 			def repair_letter_spaced_line( match: re.Match ) -> str:
+				"""Repair uppercase text separated into individual characters.
+
+				Purpose:
+					Rejoins a line containing predominantly separated capital letters.
+
+				Args:
+					match (re.Match): Regular expression match containing the text to repair.
+
+				Returns:
+					str: Normalized text or unchanged source text.
+				"""
 				line = match.group( 0 )
 				tokens = line.split( )
 				single_letters = [ token for token in tokens if re.fullmatch( r'[A-Z]', token ) ]
@@ -2864,6 +2937,17 @@ class PdfParser( Processor ):
 				nltk_wordnet = None
 			
 			def is_known_word( value: str ) -> bool:
+				"""Determine whether a word exists in the active vocabulary.
+
+				Purpose:
+					Checks known vocabulary and optional WordNet morphological variants.
+
+				Args:
+					value (str): Source text to analyze.
+
+				Returns:
+					bool: True when the candidate satisfies the test; otherwise False.
+				"""
 				token = value.lower( )
 				
 				if token in vocabulary:
@@ -2882,6 +2966,17 @@ class PdfParser( Processor ):
 				return False
 			
 			def repair_line_break( match: re.Match ) -> str:
+				"""Rejoin a word divided at a line break.
+
+				Purpose:
+					Reconstructs the split token while retaining intended hyphens.
+
+				Args:
+					match (re.Match): Regular expression match containing the text to repair.
+
+				Returns:
+					str: Normalized text or unchanged source text.
+				"""
 				left = match.group( 1 )
 				right = match.group( 2 )
 				
@@ -2891,6 +2986,17 @@ class PdfParser( Processor ):
 				return f'{left}{right}'
 			
 			def repair_embedded_split( match: re.Match ) -> str:
+				"""Reassemble a split word when its combined form is valid.
+
+				Purpose:
+					Checks the active vocabulary and common English suffixes before merging.
+
+				Args:
+					match (re.Match): Regular expression match containing the text to repair.
+
+				Returns:
+					str: Normalized text or unchanged source text.
+				"""
 				left = match.group( 1 )
 				right = match.group( 2 )
 				combined = f'{left}{right}'
