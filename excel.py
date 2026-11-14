@@ -52,18 +52,18 @@ def throw_if( name: str, value: object ) -> None:
 	"""Throw if.
 
 	Purpose:
-	    Validates that a required argument contains a usable value so failures occur
-	    before provider, filesystem, or parsing work begins.
+		Validates that a required argument contains a usable value so failures occur
+		before provider, filesystem, or parsing work begins.
 
 	Args:
-	    name (str): Argument name included in validation error messages.
-	    value (object): Candidate value to validate or normalize.
+		name (str): Argument name included in validation error messages.
+		value (object): Candidate value to validate or normalize.
 
 	Returns:
-	    None: This method updates instance state or validates input and does not return a value.
+		None: This method updates instance state or validates input and does not return a value.
 
 	Raises:
-	    ValueError: Raised when the method cannot satisfy its documented value requirement.
+		ValueError: Raised when the method cannot satisfy its documented value requirement.
 	"""
 	if value is None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
