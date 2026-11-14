@@ -53,6 +53,10 @@ class LoaderArgumentContractTests(unittest.TestCase):
         exec(compile(module, str(ROOT / 'loaders.py'), 'exec'), namespace)
         cls.functions = namespace
 
+    def setUp(self) -> None:
+        """Reset provider mocks before each independent regression test."""
+        self.loader_factory.reset_mock()
+
     def test_pdf_options_keep_supported_aliases(self) -> None:
         """Recognize documented aliases and reject unsupported settings."""
         pdf = SimpleNamespace(
