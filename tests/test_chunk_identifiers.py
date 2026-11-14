@@ -4,10 +4,29 @@ from pathlib import Path
 from types import SimpleNamespace
 import unittest
 
-from embedders import chunk_identifier, vector_document_ids
+from hashlib import sha256
 
 
 ROOT = Path( __file__ ).resolve( ).parents[ 1 ]
+
+
+def load_identifier_functions( ):
+    """Load production identifier helpers without importing optional model providers."""
+    source = (ROOT / 'embedders.py').read_text( encoding='utf-8' )
+    tree = ast.parse( source )
+    names = { 'chunk_identifier', 'vector_document_ids' }
+    functions = [ node for node in tree.body
+        if isinstance( node, ast.FunctionDef ) and node.name in names ]
+    if { node.name for node in functions } != names:
+        raise RuntimeError( 'The consolidated identifier functions are missing.' )
+    environment = { 'sha256': sha256 }
+    isolated = ast.Module( body=functions, type_ignores=[ ] )
+    exec( compile( ast.fix_missing_locations( isolated ), '<embedders>', 'exec' ),
+        environment )
+    return environment[ 'chunk_identifier' ], environment[ 'vector_document_ids' ]
+
+
+chunk_identifier, vector_document_ids = load_identifier_functions( )
 
 
 class ChunkIdentifierTests( unittest.TestCase ):
