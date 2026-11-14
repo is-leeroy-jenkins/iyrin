@@ -18,31 +18,34 @@ class BootstrapTests( unittest.TestCase ):
         self.source = APP_PATH.read_text( encoding='utf-8' )
         self.module = ast.parse( self.source )
 
-    def test_initialize_database_creates_expected_tables( self ) -> None:
-        function = next( node for node in self.module.body
-            if isinstance( node, ast.FunctionDef ) and node.name == 'initialize_database' )
-        namespace = {
-            'Path': Path,
-            'sqlite3': sqlite3,
-            'cfg': SimpleNamespace( DB_PATH='stores/sqlite/data.db' ),
-        }
-        isolated = ast.Module( body=[ function ], type_ignores=[ ] )
-        exec( compile( ast.fix_missing_locations( isolated ), str( APP_PATH ), 'exec' ),
+    def test_sqlite_cache_creates_persistent_schema( self ) -> None:
+        """Verify the consolidated SQLite cache initializes a new on-disk database."""
+        from typing import Any, Dict, Optional
+
+        path = Path( __file__ ).resolve( ).parents[ 1 ] / 'storage.py'
+        source = path.read_text( encoding='utf-8' )
+        tree = ast.parse( source )
+        cache_class = next( node for node in tree.body
+            if isinstance( node, ast.ClassDef ) and node.name == 'SQLiteCache' )
+        isolated = ast.Module( body=[ cache_class ], type_ignores=[ ] )
+        namespace = { 'BaseCache': object, 'sqlite3': sqlite3, 'os': os,
+            'Any': Any, 'Dict': Dict, 'Optional': Optional }
+        exec( compile( ast.fix_missing_locations( isolated ), str( path ), 'exec' ),
             namespace )
         with TemporaryDirectory( ) as directory:
-            original = Path.cwd( )
+            database = Path( directory ) / 'cache' / 'data.db'
+            cache = namespace[ 'SQLiteCache' ]( str( database ) )
             try:
-                os.chdir( directory )
-                namespace[ 'initialize_database' ]( )
-                database = Path( 'stores/sqlite/data.db' )
                 self.assertTrue( database.is_file( ) )
                 with sqlite3.connect( database ) as connection:
                     tables = { row[ 0 ] for row in connection.execute(
                         "SELECT name FROM sqlite_master WHERE type='table'" ) }
-                self.assertTrue( { 'chat_history', 'embeddings', 'Prompts' } <= tables )
-                namespace[ 'initialize_database' ]( )
+                    columns = { row[ 1 ] for row in connection.execute(
+                        'PRAGMA table_info(kv)' ) }
+                self.assertIn( 'kv', tables )
+                self.assertTrue( { 'k', 'v', 'expires_at', 'hit_count' } <= columns )
             finally:
-                os.chdir( original )
+                cache.close( )
 
     def test_external_selector_has_a_matching_branch( self ) -> None:
         self.assertIn( "'Default', 'Database', 'External'", self.source )
