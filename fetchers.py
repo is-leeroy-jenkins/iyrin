@@ -4410,64 +4410,27 @@ class NearbyObjects( Fetcher ):
 			exception.method = 'NearbyObjects.fetch_nhats_summary'
 			raise exception
 	
-	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8,
-			launch: st	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
-		'''Fetch atmospheric fireball records from the JPL Fireball API.
-
-			Args:
-				date_min (str):
-				Optional lower date bound in YYYY-MM-DD or
-				YYYY-MM-DDThh:mm:ss format.
-
-				limit (int):
-				Maximum number of rows to return.
-
-				time (int):
-				Request timeout in seconds.
-
-			Returns:
-				Dict[str, Any] | None
-		
+	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360,
+			stay: int=8, launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:
+		"""Fetch NHATS details for a near-Earth object designation.
 
 		Purpose:
-			Fetch atmospheric fireball records from the JPL Fireball API. Args:
+			Queries the JPL NHATS API for one object using mission constraints.
+
+		Args:
+			designation (str): Required near-Earth object designation.
+			dv (float): Maximum mission delta-V in kilometers per second; defaults to 6.0.
+			dur (int): Maximum mission duration in days; defaults to 360.
+			stay (int): Minimum stay in days; defaults to 8.
+			launch (str): Launch year range; defaults to 2020-2045.
+			time (int): HTTP request timeout in seconds; defaults to 20.
+
+		Returns:
+			Dict[str, Any] | None: NHATS query metadata and parsed API response.
 
 		Raises:
-			Error: Wraps and propagates the underlying provider or request exception.
-		'''r='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:
-		'''Fetch NHATS details for a single object designation.
-
-			Args:
-				designation (str):
-				Designation of the NEO. Examples:
-				- 99942
-				- 2000 SG344
-
-				dv (float):
-				Maximum total delta-V in km/s.
-
-				dur (int):
-				Maximum mission duration in days.
-
-				stay (int):
-				Minimum stay duration in days.
-
-				launch (str):
-				Launch window year range.
-
-				time (int):
-				Request timeout in seconds.
-
-			Returns:
-				Dict[str, Any] | None
-		
-
-		Purpose:
-			Fetch NHATS details for a single object designation. Args:
-
-		Raises:
-			Error: Wraps and propagates the underlying provider or request exception.
-		'''
+			Error: Raised when argument validation or the HTTP operation fails.
+		"""
 		try:
 			throw_if( 'designation', designation )
 			self.designation = designation
@@ -4476,29 +4439,49 @@ class NearbyObjects( Fetcher ):
 			self.url = f'{self.base_url}/nhats.api'
 			self.params = { 'des': self.query, 'dv': dv, 'dur': dur, 'stay': stay,
 					'launch': launch.strip( ) }
-			
+
 			self.response = requests.get( url=self.url, params=self.params,
 				headers=self.headers, timeout=time )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
 			return { 'mode': self.mode, 'url': self.url, 'params': self.params, 'data': payload }
-		
+
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_nhats_object'
-			raise exception
-	
-	
+			exception.method = 'fetch_nhats_object( self, **args ) -> Dict[ str, Any ] | None'
+			raise exception from e
+
+	def fetch_fireballs( self, date_min: str='', limit: int=20,
+			time: int=20 ) -> Dict[ str, Any ] | None:
+		"""Fetch atmospheric fireball observations from the JPL Fireball API.
+
+		Purpose:
+			Requests fireball observations with an optional earliest observation date
+			and configurable maximum record count.
+
+		Args:
+			date_min (str): Optional minimum observation date in YYYY-MM-DD or
+				YYYY-MM-DDThh:mm:ss format; defaults to an empty string.
+			limit (int): Maximum number of records; defaults to 20.
+			time (int): HTTP request timeout in seconds; defaults to 20.
+
+		Returns:
+			Dict[str, Any] | None: Fireball observation count, fields, data, API
+				signature, and request metadata.
+
+		Raises:
+			Error: Raised when the HTTP request or response processing fails.
+		"""
 		try:
 			self.mode = 'fireballs'
 			self.url = f'{self.base_url}/fireball.api'
 			self.params = { 'limit': limit }
-			
+
 			if (date_min or '').strip( ):
 				self.params[ 'date-min' ] = date_min.strip( )
-			
+
 			self.response = requests.get( url=self.url, params=self.params, headers=self.headers,
 				timeout=time )
 			self.response.raise_for_status( )
@@ -4507,14 +4490,14 @@ class NearbyObjects( Fetcher ):
 					'count': payload.get( 'count', 0 ), 'fields': payload.get( 'fields', [ ] ),
 					'data': payload.get( 'data', [ ] ),
 					'signature': payload.get( 'signature', { } ) }
-		
+
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'NearbyObjects.fetch_fireballs'
-			raise exception
-	
+			exception.method = 'fetch_fireballs( self, **args ) -> Dict[ str, Any ] | None'
+			raise exception from e
+
 	def fetch( self, mode: str='close_approaches', start_date: str='',
 			end_date: str='', query: str='', query_type: str='sstr',
 			dist_max: str='10LD', body: str='Earth', sort: str='date',
