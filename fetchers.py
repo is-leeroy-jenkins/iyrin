@@ -5967,11 +5967,12 @@ class AstroQuery( Fetcher ):
 				for col in self.table.colnames:
 					try:
 						value = row[ col ]
-						if hasattr( value, 'item' ):
-							try:
-								value = value.item( )
-							except Exception:
-								pass
+						try:
+							value = value.item( )
+						except AttributeError:
+							pass
+						except Exception:
+							pass
 						record[ str( col ) ] = str( value )
 					except Exception:
 						record[ str( col ) ] = ''
