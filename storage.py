@@ -81,7 +81,19 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
-def normalize( obj ):
+def normalize( obj: Any ) -> Any:
+	"""Convert an external payload into JSON-compatible Python values.
+
+	Purpose:
+		Preserves scalar values and recursively converts collections, while supporting
+		objects exposing a model_dump method at the external data boundary.
+
+	Args:
+		obj (Any): Object returned by a loader, API, or provider.
+
+	Returns:
+		Any: Scalar, collection, or text representation suitable for serialization.
+	"""
 	if obj is None or isinstance( obj, (str, int, float, bool) ):
 		return obj
 	if isinstance( obj, dict ):
@@ -96,6 +108,14 @@ def normalize( obj ):
 	return str( obj )
 
 def blue_divider( ) -> None:
+	"""Render the configured Streamlit divider.
+
+	Purpose:
+		Displays the application divider without altering any persisted data.
+
+	Returns:
+		None: Renders a divider in the active Streamlit container.
+	"""
 	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 class BaseCache( ):
@@ -946,7 +966,7 @@ class SQLiteDatabase( ):
 		with self.create_connection( ) as conn:
 			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
 	
-	def read_table( self, table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
+	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
 
 			Purpose:
@@ -987,6 +1007,17 @@ class SQLiteDatabase( ):
 				columns.append( f'{name}_{seen[ name ]}' )
 		
 		def _scalarize( value: Any ) -> Any:
+			"""Prepare SQLite result values for tabular presentation.
+
+			Purpose:
+				Decodes binary values and converts unsupported payloads at the display boundary.
+
+			Args:
+				value (Any): Value returned from SQLite.
+
+			Returns:
+				Any: Scalar or serialized representation of the database value.
+			"""
 			if value is None or isinstance( value, (str, int, float, bool) ):
 				return value
 			if isinstance( value, bytes ):
