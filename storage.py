@@ -65,13 +65,13 @@ def throw_if( name: str, value: object ) -> None:
 		Validate that a required value is not empty.
 		
 		Args:
-		name (str): Name of the argument being validated.
-		value (object): Value to validate.
+			name (str): Name of the argument being validated.
+			value (object): Value to validate.
 		
 		Returns:
-		None
+			None:
 		
-	"""
+		"""
 	if value is None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 	
@@ -973,18 +973,18 @@ class SQLiteDatabase( ):
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
 			Args:
-			table : str
-				Table name.
-			limit : int = None
-				Optional row limit.
-			offset : int = 0
-				Optional row offset.
+				table (str):
+					Table name.
+				limit : int = None
+					Optional row limit.
+				offset : int = 0
+					Optional row offset.
 
 			Returns:
-			pd.DataFrame
-				DataFrame of plain Python scalar values.
+				pd.DataFrame:
+					DataFrame of plain Python scalar values.
 
-		"""
+			"""
 		if not table:
 			return pd.DataFrame( )
 		query = f'SELECT * FROM "{table}"'
@@ -1053,13 +1053,13 @@ class SQLiteDatabase( ):
 			first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
 
 			Args:
-			df : pd.DataFrame
-				The DataFrame to render.
+				df (pd.DataFrame):
+					The DataFrame to render.
 
 			Returns:
-			None
+				None:
 
-		"""
+			"""
 		if df is None:
 			st.info( 'No data available.' )
 			return
@@ -1098,8 +1098,8 @@ class SQLiteDatabase( ):
 			Safely drop a table if it exists.
 
 			Args:
-			table : str
-				Table name.
+				table (str):
+					Table name.
 		
 
 		Returns:
@@ -1124,10 +1124,10 @@ class SQLiteDatabase( ):
 				- Validation against actual table schema
 
 			Args:
-			table : str
-				Table name.
-			column : str
-				Column name to index.
+				table (str):
+					Table name.
+				column (str):
+					Column name to index.
 		
 
 		Returns:
@@ -1236,13 +1236,13 @@ class SQLiteDatabase( ):
 			Plotly/Narwhals.
 
 			Args:
-			df : pd.DataFrame
-				The input DataFrame.
+				df (pd.DataFrame):
+					The input DataFrame.
 
 			Returns:
-			None
+				None:
 
-		"""
+			"""
 		blue_divider( )
 		st.markdown( '##### Visualization Engine' )
 		if df is None or df.empty:
@@ -1392,13 +1392,13 @@ class SQLiteDatabase( ):
 			Map a pandas dtype to an appropriate SQLite column type.
 
 			Args:
-			dtype : pandas dtype
-				The dtype of a pandas Series.
+				dtype (pandas dtype):
+					The dtype of a pandas Series.
 
 			Returns:
-			str
-				SQLite column type.
-		"""
+				str:
+					SQLite column type.
+			"""
 		dtype_str = str( dtype ).lower( )
 		# ------------------------------------------------------------------
 		# Integer Types (including nullable Int64)
@@ -1436,19 +1436,19 @@ class SQLiteDatabase( ):
 			Create a custom SQLite table from column definitions.
 
 			Args:
-			table_name : str
-				Name of table.
+				table_name (str):
+					Name of table.
 
-			columns : list of dict
-				[
-					{
-						"name": str,
-						"type": str,
-						"not_null": bool,
-						"primary_key": bool,
-						"auto_increment": bool
-					}
-				]
+				columns (list of dict):
+					[
+						{
+							"name": str,
+							"type": str,
+							"not_null": bool,
+							"primary_key": bool,
+							"auto_increment": bool
+						}
+					]
 		
 
 		Returns:
@@ -1604,19 +1604,19 @@ class SQLiteDatabase( ):
 			and indexes.
 
 			Args:
-			table_name : str
-				Table containing the column.
+				table_name (str):
+					Table containing the column.
 
-			old_name : str
-				Existing column name.
+				old_name (str):
+					Existing column name.
 
-			new_name : str
-				New column name.
+				new_name (str):
+					New column name.
 
 			Returns:
-			None
+				None:
 
-		"""
+			"""
 		if not table_name or not old_name or not new_name:
 			return
 		with self.create_connection( ) as conn:
@@ -1796,16 +1796,16 @@ class SQLiteDatabase( ):
 			preserves indexes.
 
 			Args:
-			old_name : str
-				Existing table name.
+				old_name (str):
+					Existing table name.
 
-			new_name : str
-				New table name.
+				new_name (str):
+					New table name.
 
 			Returns:
-			None
+				None:
 
-		"""
+			"""
 		if not old_name or not new_name:
 			return
 		with self.create_connection( ) as conn:
