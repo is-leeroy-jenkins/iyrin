@@ -107,6 +107,36 @@ jobs:
               print(filename,'public method guard gaps:',len(findings))
               print('\n'.join(f'{ln} {name} {args}' for ln,name,args in findings[:60]))
           PY
+      - name: Validate prohibited constructs and restored provider methods
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          files = ('loaders.py','fetchers.py','generators.py','processors.py')
+          for name in files:
+              tree = ast.parse(Path(name).read_text(encoding='utf-8'), filename=name)
+              for node in ast.walk(tree):
+                  if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
+                      if node.args.vararg is not None or node.args.kwarg is not None:
+                          raise AssertionError(f'{name}:{node.lineno}: variadic method definition')
+                  if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id in ('hasattr','getattr'):
+                      raise AssertionError(f'{name}:{node.lineno}: prohibited dynamic access')
+          tree=ast.parse(Path('fetchers.py').read_text(encoding='utf-8'))
+          nearby=next(node for node in tree.body if isinstance(node,ast.ClassDef) and node.name=='NearbyObjects')
+          methods={node.name:node for node in nearby.body if isinstance(node,ast.FunctionDef)}
+          assert 'fetch_nhats_object' in methods and 'fetch_fireballs' in methods
+          assert [arg.arg for arg in methods['fetch_nhats_object'].args.args]==['self','designation','dv','dur','stay','launch','time']
+          assert [arg.arg for arg in methods['fetch_fireballs'].args.args]==['self','date_min','limit','time']
+          for name in ('fetch_nhats_object','fetch_fireballs'):
+              method=methods[name]
+              assert any(isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute)
+                  and node.func.attr=='get' and isinstance(node.func.value,ast.Name)
+                  and node.func.value.id=='requests' for node in ast.walk(method)),name
+              assert any(isinstance(node,ast.Attribute) and isinstance(node.value,ast.Name)
+                  and node.value.id=='self' and node.attr=='timeout' for node in ast.walk(method)),name
+          print('Four reviewed modules contain no forbidden dynamic attributes or variadic signatures.')
+          print('NHATS and fireball methods are independently defined and use stored request timeout.')
+          PY
       - name: Strict documentation build
         run: |
           python -m pip install mkdocs-material 'mkdocstrings[python]'
