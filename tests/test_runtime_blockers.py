@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path( __file__ ).resolve( ).parents[ 1 ]
 APP_SOURCE = (ROOT / 'app.py').read_text( encoding='utf-8' )
-MAPS_SOURCE = (ROOT / 'maps.py').read_text( encoding='utf-8' )
+MAPS_SOURCE = (ROOT / 'mapping.py').read_text( encoding='utf-8' )
 EXCEL_SOURCE = (ROOT / 'excel.py').read_text( encoding='utf-8' )
 
 
@@ -28,12 +28,12 @@ class RuntimeBlockerTests( unittest.TestCase ):
     def test_maps_constructor_accepts_explicit_api_key( self ) -> None:
         tree = ast.parse( MAPS_SOURCE )
         cls = next( node for node in tree.body
-            if isinstance( node, ast.ClassDef ) and node.name == 'Maps' )
+            if isinstance( node, ast.ClassDef ) and node.name == 'Map' )
         constructor = next( node for node in cls.body
             if isinstance( node, ast.FunctionDef ) and node.name == '__init__' )
         parameters = [ parameter.arg for parameter in constructor.args.args ]
         self.assertIn( 'api_key', parameters )
-        self.assertIn( 'self.maps = Maps( api_key=self.api_key )', EXCEL_SOURCE )
+        self.assertIn( 'self.maps = Map( api_key=self.api_key )', EXCEL_SOURCE )
 
     def test_aggregate_result_guarded_by_numeric_columns( self ) -> None:
         tree = ast.parse( APP_SOURCE )
