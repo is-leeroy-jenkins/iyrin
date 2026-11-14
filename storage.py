@@ -1006,10 +1006,8 @@ class SQLiteDatabase( ):
 
 			Args:
 				table (str): Table name.
-				limit : int = None
-					Optional row limit.
-				offset : int = 0
-					Optional row offset.
+				limit (Optional[int]): Maximum rows to retrieve; None selects all rows.
+				offset (int): Number of rows to skip, starting at zero.
 
 			Returns:
 				pd.DataFrame: DataFrame of plain Python scalar values.
