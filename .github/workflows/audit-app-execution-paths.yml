@@ -82,6 +82,50 @@ jobs:
           if errors:
               raise SystemExit(1)
           PY
+      - name: Enforce reviewed Python file coding invariants
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          files = [
+              'fetchers.py', 'generators.py', 'loaders.py', 'processors.py',
+              'history.py', 'realtime.py', 'sources.py', 'tools.py',
+              'embedders.py', 'mapping.py', 'storage.py', 'excel.py', 'rates.py',
+          ]
+          errors = []
+          checked_functions = 0
+          for name in files:
+              tree = ast.parse(Path(name).read_text(encoding='utf-8'), filename=name)
+              for node in ast.walk(tree):
+                  if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                      if node.func.id in ('hasattr', 'getattr'):
+                          errors.append(f'{name}:{node.lineno}: prohibited reflection {node.func.id}')
+                  if isinstance(node, ast.ClassDef):
+                      class_doc = ast.get_docstring(node) or ''
+                      if 'Purpose:' not in class_doc or 'Attributes:' not in class_doc:
+                          errors.append(f'{name}:{node.lineno}: missing class documentation')
+                      for decorator in node.decorator_list:
+                          if isinstance(decorator, ast.Name) and decorator.id == 'dataclass':
+                              errors.append(f'{name}:{node.lineno}: prohibited dataclass')
+                  if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      continue
+                  checked_functions += 1
+                  if node.args.vararg is not None or node.args.kwarg is not None:
+                      errors.append(f'{name}:{node.lineno}: variadic function definition {node.name}')
+                  if node.returns is None:
+                      errors.append(f'{name}:{node.lineno}: missing return annotation {node.name}')
+                  for arg in node.args.posonlyargs + node.args.args + node.args.kwonlyargs:
+                      if arg.arg not in ('self', 'cls') and arg.annotation is None:
+                          errors.append(f'{name}:{node.lineno}: missing argument annotation {node.name}.{arg.arg}')
+                  if not ast.get_docstring(node):
+                      errors.append(f'{name}:{node.lineno}: missing function documentation {node.name}')
+          print(f'Checked {len(files)} production files and {checked_functions} functions.')
+          for error in errors:
+              print(error)
+          if errors:
+              raise SystemExit(f'{len(errors)} coding violations remain.')
+          PY
       - name: Audit configured mode dispatch
         run: |
           python - <<'PY'
