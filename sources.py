@@ -159,9 +159,15 @@ class OpenSkyLive( ):
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
 			throw_if( 'radius_degrees', radius_degrees )
-			self.latitude = float( latitude )
-			self.longitude = float( longitude )
-			self.radius_degrees = float( radius_degrees )
+			if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
+				raise ValueError( 'latitude must be between -90 and 90 degrees.' )
+			if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
+				raise ValueError( 'longitude must be between -180 and 180 degrees.' )
+			if type( radius_degrees ) not in (int, float) or not 0 < radius_degrees <= 180:
+				raise ValueError( 'radius_degrees must be positive and no greater than 180.' )
+			self.latitude = latitude
+			self.longitude = longitude
+			self.radius_degrees = radius_degrees
 			self.lamin = max( -90.0, self.latitude - self.radius_degrees )
 			self.lamax = min( 90.0, self.latitude + self.radius_degrees )
 			self.lomin = max( -180.0, self.longitude - self.radius_degrees )
@@ -185,7 +191,7 @@ class OpenSkyLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OpenSkyLive'
-			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
+			exception.method = 'OpenSkyLive.fetch_states'
 			Logger( ).write( exception )
 			raise exception
 
@@ -261,7 +267,7 @@ class AdsbLolMilitary( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'AdsbLolMilitary'
-			exception.method = 'fetch_militar( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'AdsbLolMilitary.fetch_military'
 			Logger( ).write( exception )
 			raise exception
 
@@ -304,9 +310,15 @@ class AisStreamLive( ):
 
 		'''
 		self.api_key = api_key
-		self.timeout = int( timeout )
-		self.max_retries = int( max_retries )
-		self.retry_delay = float( retry_delay )
+		if type( timeout ) is not int or timeout < 1:
+			raise ValueError( 'timeout must be a positive integer.' )
+		if type( max_retries ) is not int or max_retries < 0:
+			raise ValueError( 'max_retries must be a nonnegative integer.' )
+		if type( retry_delay ) not in (int, float) or retry_delay < 0:
+			raise ValueError( 'retry_delay must be nonnegative and numeric.' )
+		self.timeout = timeout
+		self.max_retries = max_retries
+		self.retry_delay = retry_delay
 		if self.timeout < 1:
 			raise ValueError( 'Argument "timeout" must be greater than zero.' )
 		if self.max_retries < 0:
@@ -342,9 +354,15 @@ class AisStreamLive( ):
 			throw_if( 'radius_degrees', radius_degrees )
 			throw_if( 'max_messages', max_messages )
 			throw_if( 'duration_seconds', duration_seconds )
-			self.latitude = float( latitude )
-			self.longitude = float( longitude )
-			self.radius_degrees = float( radius_degrees )
+			if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
+				raise ValueError( 'latitude must be between -90 and 90 degrees.' )
+			if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
+				raise ValueError( 'longitude must be between -180 and 180 degrees.' )
+			if type( radius_degrees ) not in (int, float) or not 0 < radius_degrees <= 180:
+				raise ValueError( 'radius_degrees must be positive and no greater than 180.' )
+			self.latitude = latitude
+			self.longitude = longitude
+			self.radius_degrees = radius_degrees
 			self.max_messages = int( max_messages )
 			self.duration_seconds = float( duration_seconds )
 			self.north = min( 90.0, self.latitude + self.radius_degrees )
@@ -429,7 +447,7 @@ class AisStreamLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'AisStreamLive'
-			exception.method = 'fetch_positions( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'AisStreamLive.fetch_positions'
 			Logger( ).write( exception )
 			raise exception
 
@@ -485,7 +503,9 @@ class CelesTrakLive( ):
 		try:
 			throw_if( 'group', group )
 			self.group = group
-			self.limit = int( limit )
+			if type( limit ) is not int or limit < 1:
+				raise ValueError( 'limit must be a positive integer.' )
+			self.limit = limit
 			self.params = { 'GROUP': self.group, 'FORMAT': 'JSON' }
 			self.response = requests.get( self.url, params=self.params, timeout=self.timeout )
 			self.response.raise_for_status( )
@@ -497,7 +517,7 @@ class CelesTrakLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
-			exception.method = 'fetch_group( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'CelesTrakLive.fetch_group'
 			Logger( ).write( exception )
 			raise exception
 
@@ -549,7 +569,7 @@ class CelesTrakLive( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
-			exception.method = 'propagate( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'CelesTrakLive.propagate'
 			Logger( ).write( exception )
 			raise exception
 
@@ -592,9 +612,15 @@ class OverpassClient( ):
 			None
 
 		'''
-		self.timeout = int( timeout )
-		self.retries = int( retries )
-		self.retry_delay = float( retry_delay )
+		if type( timeout ) is not int or timeout < 1:
+			raise ValueError( 'timeout must be a positive integer.' )
+		if type( retries ) is not int or retries < 0:
+			raise ValueError( 'retries must be a nonnegative integer.' )
+		if type( retry_delay ) not in (int, float) or retry_delay < 0:
+			raise ValueError( 'retry_delay must be nonnegative and numeric.' )
+		self.timeout = timeout
+		self.retries = retries
+		self.retry_delay = retry_delay
 		if self.timeout < 1:
 			raise ValueError( 'Argument "timeout" must be greater than zero.' )
 		if self.retries < 0:
@@ -661,7 +687,7 @@ class OverpassClient( ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassClient'
-			exception.method = 'execute( self, **args ) -> None'
+			exception.method = 'OverpassClient.execute'
 			Logger( ).write( exception )
 			raise exception
 
@@ -783,7 +809,7 @@ class OverpassInfrastructure( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
-			exception.method = 'fetch_infrastructure( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OverpassInfrastructure.fetch_infrastructure'
 			Logger( ).write( exception )
 			raise exception
 
@@ -819,7 +845,7 @@ class OverpassInfrastructure( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
-			exception.method = 'classify_infrastructure( self, **args ) -> str'
+			exception.method = 'OverpassInfrastructure.classify_infrastructure'
 			Logger( ).write( exception )
 			raise exception
 
@@ -939,7 +965,7 @@ class OverpassCameras( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassCameras'
-			exception.method = 'fetch_cameras( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OverpassCameras.fetch_cameras'
 			Logger( ).write( exception )
 			raise exception
 
@@ -967,7 +993,7 @@ class OverpassCameras( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassCameras'
-			exception.method = 'classify_camera( self, **args ) -> str'
+			exception.method = 'OverpassCameras.classify_camera'
 			Logger( ).write( exception )
 			raise exception
 
@@ -1094,7 +1120,7 @@ class OverpassMapLayers( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
-			exception.method = 'fetch_features( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OverpassMapLayers.fetch_features'
 			Logger( ).write( exception )
 			raise exception
 
@@ -1133,7 +1159,7 @@ class OverpassMapLayers( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
-			exception.method = 'classify_feature( self, **args ) -> str'
+			exception.method = 'OverpassMapLayers.classify_feature'
 			Logger( ).write( exception )
 			raise exception
 
