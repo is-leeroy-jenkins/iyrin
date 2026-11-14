@@ -2258,25 +2258,12 @@ class Mistral( Generator ):
 			self.client = MistralAI( api_key=self.api_key )
 			self.messages = [ ]
 			if self.system_instructions:
-				self.messages.append( {
-						'role': 'system',
-						'content': self.system_instructions,
-				} )
-			
-			self.messages.append( {
-					'role': 'user',
-					'content': self.query,
-			} )
-			self.params = {
-					'model': self.model,
-					'messages': self.messages,
-					'temperature': self.temperature,
-					'max_tokens': self.max_tokens,
-					'top_p': self.top_p,
-					'stream': False,
-					'response_format': { 'type': 'text' },
-					'safe_prompt': self.safe_prompt,
-			}
+				self.messages.append( { 'role': 'system', 'content': self.system_instructions, } )
+			self.messages.append( { 'role': 'user', 'content': self.query, } )
+			self.params = { 'model': self.model, 'messages': self.messages,
+					'temperature': self.temperature, 'max_tokens': self.max_tokens,
+					'top_p': self.top_p, 'stream': False, 'response_format': { 'type': 'text' },
+					'safe_prompt': self.safe_prompt, }
 			
 			if self.seed is not None and self.seed > 0:
 				self.params[ 'random_seed' ] = self.seed
