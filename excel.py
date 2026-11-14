@@ -663,6 +663,9 @@ class Excel:
 			exception = Error( e )
 			exception.module = 'excel'
 			exception.cause = 'Excel'
-			exception.method = 'enrich( self, **kwargs)'
+			exception.method = (
+				"enrich( self, inpath: str, outpath: str, city: str, state: Optional[ str ], cntry: "
+				"str, sheet: Optional[ str ] = None, ) -> pd.DataFrame:"
+			)
 			Logger( ).write( exception )
 			raise exception
