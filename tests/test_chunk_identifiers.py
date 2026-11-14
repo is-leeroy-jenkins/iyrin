@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import unittest
 
-from chunk_ids import chunk_identifier, vector_document_ids
+from embedders import chunk_identifier, vector_document_ids
 
 
 ROOT = Path( __file__ ).resolve( ).parents[ 1 ]
@@ -54,8 +54,8 @@ class ChunkIdentifierTests( unittest.TestCase ):
             vector_document_ids( docs )
 
     def test_pipeline_and_both_backends_use_shared_identifiers( self ) -> None:
-        pipeline = (ROOT / 'pipelines.py').read_text( encoding='utf-8' )
-        storage = (ROOT / 'stores' / 'vector.py').read_text( encoding='utf-8' )
+        pipeline = (ROOT / 'app.py').read_text( encoding='utf-8' )
+        storage = (ROOT / 'storage.py').read_text( encoding='utf-8' )
         self.assertIn( "document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )",
             pipeline )
         self.assertEqual( 2, storage.count( 'ids = vector_document_ids( self.documents )' ) )
