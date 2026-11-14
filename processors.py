@@ -151,7 +151,7 @@ class Processor( ):
 		and cleaned-text fields used across the processing workflow.
 		
 	Attributes:
-		Latest cleaned text retained for downstream processing.
+		cleaned_text (str | None): Latest cleaned text retained for downstream processing.
 		lowercase (str | None): Text converted to lowercase for normalization workflows.
 		chunks (list | None): List of document chunks generated during processing.
 		lemmatizer (Optional[ WordNetLemmatizer ]): WordNet lemmatizer used to reduce tokens to their canonical lexical forms.
@@ -255,7 +255,7 @@ class TextParser( Processor ):
 		Analysis, and Tokenization tabs.
 	
 	Attributes:
-		TF-IDF vectorizer fitted to the latest token collection.
+		vectorizer (object | None): TF-IDF vectorizer fitted to the latest token collection.
 		tokenizer (object | None): Tokenizer used by the active text parsing workflow.
 		translator (object | None): Character translation mapping for text normalization.
 		lowercase (Optional[ str ]): Runtime state used by ``TextParser`` during processing operations.
@@ -2243,7 +2243,7 @@ class WordParser( Processor ):
 		metadata, and cleaned text for downstream processing and analysis.
 	
 	Attributes:
-		Current document page text used for Word processing.
+		page_text (str | None): Current document page text used for Word processing.
 		sentences (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing operations.
 		cleaned_sentences (Optional[ List[ str ] ]): Runtime state used by ``WordParser`` during processing
 			operations.
@@ -2472,7 +2472,7 @@ class PdfParser( Processor ):
 		and rebuild PDF text for downstream processing.
 	
 	Attributes:
-		Current page text or identifier.
+		page (str | None): Current page text or identifier.
 		file_path (str | None): Current PDF file path.
 		tables (list | None): Tables extracted from the current PDF.
 		clean_lines (list | None): Lines retained after PDF cleanup.
