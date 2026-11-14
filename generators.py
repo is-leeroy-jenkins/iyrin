@@ -92,19 +92,27 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 def encode_image( path: str ) -> str:
-	"""Encode image.
+	"""Encode image bytes for APIs that accept inline base64 content.
 
 	Purpose:
-	    Reads an image from disk and returns its bytes as a Base64-encoded UTF-8 string for APIs that accept inline image data.
+		Reads a local image file and encodes its original bytes for provider requests.
 
 	Args:
-	    path (str): Filesystem or resource path identifying the input or output.
+		path (str): Required path to the image file.
 
 	Returns:
-	    str: Normalized text produced by the operation.
+		str: Base64-encoded UTF-8 text representing the image bytes.
+
+	Raises:
+		ValueError: Raised when path is empty.
+		TypeError: Raised when path is not a string.
+		OSError: Raised when the source file cannot be read.
 	"""
+	throw_if( 'path', path )
+	if not isinstance( path, str ):
+		raise TypeError( 'path must be a string.' )
 	data = Path( path ).read_bytes( )
-	return base64.b64encode( data ).decode( "utf-8" )
+	return base64.b64encode( data ).decode( 'utf-8' )
 
 class Generator( ):
 	"""Generator component.
@@ -350,7 +358,10 @@ class Grok( Generator ):
 		"""
 		try:
 			throw_if( 'model', model )
-			name = str( model ).strip( ).lower( )
+			if not isinstance( model, str ):
+				raise TypeError( 'model must be a string.' )
+			self.model = model
+			name = self.model.strip( ).lower( )
 			return name == 'grok-4.3'
 		
 		except Exception as exc:
@@ -379,7 +390,10 @@ class Grok( Generator ):
 		"""
 		try:
 			throw_if( 'model', model )
-			name = str( model ).strip( ).lower( )
+			if not isinstance( model, str ):
+				raise TypeError( 'model must be a string.' )
+			self.model = model
+			name = self.model.strip( ).lower( )
 			return name == 'grok-4.20-multi-agent'
 		
 		except Exception as exc:
@@ -407,7 +421,10 @@ class Grok( Generator ):
 		"""
 		try:
 			throw_if( 'model', model )
-			name = str( model ).strip( ).lower( )
+			if not isinstance( model, str ):
+				raise TypeError( 'model must be a string.' )
+			self.model = model
+			name = self.model.strip( ).lower( )
 			return ('reasoning' in name or name.startswith( 'grok-4' ) or name.startswith(
 				'grok-4.3' ) or name.startswith( 'grok-4.20' ))
 		
@@ -1124,7 +1141,10 @@ class Gemini( Generator ):
 		"""
 		try:
 			throw_if( 'model', model )
-			return str( model ).strip( ).lower( ).startswith( 'gemini-3' )
+			if not isinstance( model, str ):
+				raise TypeError( 'model must be a string.' )
+			self.model = model
+			return self.model.strip( ).lower( ).startswith( 'gemini-3' )
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -1151,7 +1171,10 @@ class Gemini( Generator ):
 		"""
 		try:
 			throw_if( 'model', model )
-			return str( model ).strip( ).lower( ).startswith( 'gemini-2.5' )
+			if not isinstance( model, str ):
+				raise TypeError( 'model must be a string.' )
+			self.model = model
+			return self.model.strip( ).lower( ).startswith( 'gemini-2.5' )
 		
 		except Exception as exc:
 			exception = Error( exc )
@@ -1806,13 +1829,16 @@ class Claude( Generator ):
 		"""
 		try:
 			throw_if( 'model', model )
-			_name = str( model ).strip( ).lower( )
+			if not isinstance( model, str ):
+				raise TypeError( 'model must be a string.' )
+			self.model = model
+			_name = self.model.strip( ).lower( )
 			return _name.startswith( 'claude-' )
 		except Exception as exc:
 			exception = Error( exc )
-			exception.module = 'fetchers'
+			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = '_supports_thinking( self, model: str ) -> bool'
+			exception.method = 'supports_thinking( self, model: str ) -> bool'
 			Logger( ).write( exception )
 			raise exception
 	
