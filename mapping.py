@@ -454,8 +454,12 @@ class Geocoder( ):
 		try:
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
-			lat = float( latitude )
-			lng = float( longitude )
+			if (type( latitude ) not in (int, float) or
+					type( longitude ) not in (int, float) or
+					not math.isfinite( latitude ) or not math.isfinite( longitude )):
+				raise ValueError( 'Coordinates must be finite numeric values.' )
+			lat = latitude
+			lng = longitude
 			if lat < -90.0 or lat > 90.0:
 				raise ValueError( 'Latitude must be between -90 and 90.' )
 			if lng < -180.0 or lng > 180.0:
@@ -1494,8 +1498,11 @@ class Timezone:
 		try:
 			throw_if( 'lat', lat )
 			throw_if( 'lng', lng )
-			latitude = float( lat )
-			longitude = float( lng )
+			if (type( lat ) not in (int, float) or type( lng ) not in (int, float) or
+					not math.isfinite( lat ) or not math.isfinite( lng )):
+				raise ValueError( 'Coordinates must be finite numeric values.' )
+			latitude = lat
+			longitude = lng
 			if latitude < -90.0 or latitude > 90.0:
 				raise ValueError( 'Latitude must be between -90 and 90.' )
 			if longitude < -180.0 or longitude > 180.0:
