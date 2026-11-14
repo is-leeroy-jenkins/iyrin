@@ -1848,7 +1848,7 @@ class TextParser( Processor ):
 		try:
 			throw_if( 'query', query )
 			throw_if( 'tokens', tokens )
-			throw_if( 'embedding', embeddings )
+			throw_if( 'embeddings', embeddings )
 			throw_if( 'model', model )
 			query_vec = model.encode( [ query ] )
 			sims = cosine_similarity( query_vec, embeddings )[ 0 ]
@@ -1860,7 +1860,7 @@ class TextParser( Processor ):
 			exception.cause = 'TextParser'
 			exception.method = ('semantic_search( self, query: str, tokens: List[ str ], '
 			                    'embeddings: np.ndarray, model: SentenceTransformer,  '
-			                    'top_k: int=5 ) -> List[ tuple[ str, float ] ]')
+			                    'top: int=5 ) -> List[ tuple[ str, float ] ]')
 			Logger( ).write( exception )
 			raise exception
 
