@@ -42,15 +42,40 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
-def chunk_identifier( document, position: int ) -> str:
-    """Return a stable ID for a chunk's source, content, and ordinal position."""
+def chunk_identifier( document: object, position: int ) -> str:
+    """Generate a deterministic identifier for a document chunk.
+
+    Purpose:
+        Combines the source, ordinal position, and content of a chunk into a stable SHA-256 ID.
+
+    Args:
+        document (object): Document-like value containing the source metadata and chunk text.
+        position (int): One-based position of the chunk within the source sequence.
+
+    Returns:
+        str: Source-scoped, reproducible chunk identifier.
+    """
     metadata = document.metadata or { }
     source = str( metadata.get( 'source', '' ) )
     payload = f'{source}\x00{position}\x00{document.page_content}'
     return f'chunk-{sha256( payload.encode( "utf-8" ) ).hexdigest( )}'
 
-def vector_document_ids( documents: list ) -> list[ str ]:
-    """Preserve explicit IDs and derive stable IDs when none are provided."""
+def vector_document_ids( documents: list[ object ] ) -> list[ str ]:
+    """Resolve unique identifiers for a collection of document chunks.
+
+    Purpose:
+        Preserves explicit chunk IDs and generates deterministic IDs for missing entries.
+        Duplicate identifiers are rejected before a vector store receives the documents.
+
+    Args:
+        documents (list[object]): Documents to identify for vector storage.
+
+    Returns:
+        list[str]: Identifiers in the same order as the supplied documents.
+
+    Raises:
+        ValueError: Raised when two documents resolve to the same identifier.
+    """
     ids = [ ]
     for position, document in enumerate( documents, start=1 ):
         metadata = document.metadata or { }
@@ -62,23 +87,59 @@ def vector_document_ids( documents: list ) -> list[ str ]:
     return ids
 
 class LocalEmbeddings( Embeddings ):
-	"""LangChain-compatible local GGUF embedding implementation."""
+	"""Local GGUF embedding adapter for LangChain.
+
+	Purpose:
+		Loads a local GGUF model using llama-cpp-python and generates text embeddings.
+		The model client is initialized lazily and reused across requests.
+
+	Attributes:
+		model_path (str): File path to the configured GGUF model.
+		client (Any): Loaded llama-cpp-python model client, or None before loading.
+		response (object | None): Most recent raw embedding response.
+		texts (List[str]): Most recently supplied document texts.
+		text (str): Most recently supplied query text.
+	"""
 
 	model_path: str
 	client: Any
 	response: object | None
+	texts: List[ str ]
+	text: str
 
 	def __init__( self, model_path: str ) -> None:
-		"""Initialize the local GGUF embedding implementation."""
+		"""Initialize the local GGUF embedding adapter.
+
+		Purpose:
+			Stores the validated model path and initializes empty runtime state.
+
+		Args:
+			model_path (str): Required path to a GGUF model file.
+
+		Returns:
+			None: Initializes instance members.
+		"""
 		throw_if( 'model_path', model_path )
 		if not isinstance( model_path, str ):
 			raise TypeError( 'model_path must be a string.' )
 		self.model_path = model_path
 		self.client = None
 		self.response = None
+		self.texts = [ ]
+		self.text = ''
 
 	def load( self ) -> None:
-		"""Load the configured local GGUF model once."""
+		"""Initialize the configured GGUF model client if necessary.
+
+		Purpose:
+			Reuses an existing client or loads the model at the configured path.
+
+		Returns:
+			None: Updates the client attribute when necessary.
+
+		Raises:
+			FileNotFoundError: Raised when the configured GGUF model does not exist.
+		"""
 		try:
 			if self.client is not None:
 				return
@@ -98,11 +159,26 @@ class LocalEmbeddings( Embeddings ):
 			raise exception from e
 
 	def embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]:
-		"""Create embeddings for document text."""
+		"""Generate vector embeddings for document content.
+
+		Purpose:
+			Calls the loaded GGUF embedding client and verifies the output count.
+
+		Args:
+			texts (List[str]): Nonempty document texts to embed.
+
+		Returns:
+			List[List[float]]: Embedding vectors corresponding to the input texts.
+
+		Raises:
+			TypeError: Raised when texts is not a list of strings.
+			RuntimeError: Raised when the returned embedding count is inconsistent.
+		"""
 		try:
 			throw_if( 'texts', texts )
 			if not isinstance( texts, list ):
 				raise TypeError( 'texts must be a list of strings.' )
+			self.texts = texts
 			values: List[ str ] = [ ]
 			for text in texts:
 				throw_if( 'text', text )
@@ -130,12 +206,23 @@ class LocalEmbeddings( Embeddings ):
 			raise exception from e
 
 	def embed_query( self, text: str ) -> List[ float ]:
-		"""Create an embedding for query text."""
+		"""Generate a single query embedding.
+
+		Purpose:
+			Uses the document embedding implementation for a single query.
+
+		Args:
+			text (str): Nonempty query to embed.
+
+		Returns:
+			List[float]: The embedding for the supplied query.
+		"""
 		try:
 			throw_if( 'text', text )
 			if not isinstance( text, str ):
 				raise TypeError( 'Argument "text" must be a string.' )
-			return self.embed_documents( [ text ] )[ 0 ]
+			self.text = text
+			return self.embed_documents( [ self.text ] )[ 0 ]
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'Iyrin'
@@ -145,19 +232,50 @@ class LocalEmbeddings( Embeddings ):
 			raise exception from e
 
 class EmbeddingFactory( ):
-	"""Factory for Iyr's supported LangChain embedding implementations."""
+	"""Factory for supported LangChain embedding providers.
+
+	Purpose:
+		Creates OpenAI, Google, Mistral, Hugging Face, or local GGUF embedding adapters.
+
+	Attributes:
+		provider (str): Selected embedding provider.
+		model (str): Selected provider model identifier.
+		model_path (str): Local GGUF model path, if applicable.
+	"""
 	provider: str
 	model: str
 	model_path: str
 
 	def __init__( self ) -> None:
-		"""Initialize embedding provider state."""
+		"""Initialize embedding provider selection state.
+
+		Purpose:
+			Sets empty provider, model, and local-model configuration attributes.
+
+		Returns:
+			None: Initializes instance members.
+		"""
 		self.provider = ''
 		self.model = ''
 		self.model_path = ''
 
 	def create( self, provider: str, model: str, model_path: str = '' ) -> Embeddings:
-		"""Create the selected LangChain embedding implementation."""
+		"""Construct a configured embedding provider wrapper.
+
+		Purpose:
+			Dispatches to the requested provider without loading unrelated provider SDKs.
+
+		Args:
+			provider (str): Provider name used to choose the implementation.
+			model (str): Model identifier for the selected provider.
+			model_path (str): Optional GGUF model file path for the local provider.
+
+		Returns:
+			Embeddings: LangChain-compatible embedding implementation.
+
+		Raises:
+			ValueError: Raised for unsupported providers or missing local-model paths.
+		"""
 		try:
 			throw_if( 'provider', provider )
 			throw_if( 'model', model )

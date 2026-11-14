@@ -62,19 +62,16 @@ def throw_if( name: str, value: object ) -> None:
 	"""
 	
 		Purpose:
-		--------
 		Validate that a required value is not empty.
 		
-		Parameters:
-		-----------
-		name (str): Name of the argument being validated.
-		value (object): Value to validate.
+		Args:
+			name (str): Name of the argument being validated.
+			value (object): Value to validate.
 		
 		Returns:
-		--------
-		None
+			None:
 		
-	"""
+		"""
 	if value is None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 	
@@ -84,7 +81,19 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, ( list, tuple, dict, set ) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
-def normalize( obj ):
+def normalize( obj: Any ) -> Any:
+	"""Convert an external payload into JSON-compatible Python values.
+
+	Purpose:
+		Preserves scalar values and recursively converts collections, while supporting
+		objects exposing a model_dump method at the external data boundary.
+
+	Args:
+		obj (Any): Object returned by a loader, API, or provider.
+
+	Returns:
+		Any: Scalar, collection, or text representation suitable for serialization.
+	"""
 	if obj is None or isinstance( obj, (str, int, float, bool) ):
 		return obj
 	if isinstance( obj, dict ):
@@ -99,37 +108,96 @@ def normalize( obj ):
 	return str( obj )
 
 def blue_divider( ) -> None:
+	"""Render the configured Streamlit divider.
+
+	Purpose:
+		Displays the application divider without altering any persisted data.
+
+	Returns:
+		None: Renders a divider in the active Streamlit container.
+	"""
 	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 class BaseCache( ):
-	"""
-	
-		Purpose:
-			Minimal cache interface for mapping string keys to JSON-serializable
-			dictionary values, with optional TTL and diagnostics support.
+	"""BaseCache persistence interface.
 
-		Parameters:
-			None.
+	Purpose:
+		Defines the cache interface for dictionaries, expiration, and namespace keys.
 
-		Returns:
-			Subclasses implement get/set and may optionally implement delete,
-			clear, contains, stats, and namespace_key.
-			
+	Attributes:
+		None: The abstract interface has no declared instance attributes.
 	"""
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
+		"""Retrieve an entry by its cache key.
+
+		Purpose:
+			Retrieve an entry by its cache key.
+
+		Args:
+			key (str): Cache key identifying the record.
+
+		Returns:
+			Optional[ Dict[ str, Any ] ]: Result of the get operation.
+		"""
 		raise NotImplementedError
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
+		"""Store a key/value pair with an optional time-to-live.
+
+		Purpose:
+			Store a key/value pair with an optional time-to-live.
+
+		Args:
+			key (str): Cache key identifying the record.
+			value (Dict[ str, Any ]): Value or user-entered filter value.
+			ttl (Optional[ int ]): Optional time-to-live in seconds.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		raise NotImplementedError
 	
 	def delete( self, key: str ) -> None:
+		"""Remove a cache entry.
+
+		Purpose:
+			Remove a cache entry.
+
+		Args:
+			key (str): Cache key identifying the record.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		raise NotImplementedError
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
+		"""Clear entries matching an optional namespace.
+
+		Purpose:
+			Clear entries matching an optional namespace.
+
+		Args:
+			namespace (Optional[ str ]): Optional cache namespace.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		raise NotImplementedError
 	
 	def contains( self, key: str ) -> bool:
+		"""Determine whether a cache entry exists.
+
+		Purpose:
+			Determine whether a cache entry exists.
+
+		Args:
+			key (str): Cache key identifying the record.
+
+		Returns:
+			bool: Result of the contains operation.
+		"""
 		try:
 			throw_if( 'key', key )
 			return self.get( key ) is not None
@@ -146,7 +214,7 @@ class BaseCache( ):
 			Purpose:
 				Create a cache key prefixed by a namespace.
 
-			Parameters:
+			Args:
 				namespace (str):
 					Logical cache namespace, such as geocode, places, weather,
 					distance, or fetcher.
@@ -171,21 +239,28 @@ class BaseCache( ):
 			raise exception
 			
 	def stats( self ) -> Dict[ str, Any ]:
+		"""Return cache usage and diagnostic statistics.
+
+		Purpose:
+			Return cache usage and diagnostic statistics.
+
+		Returns:
+			Dict[ str, Any ]: Result of the stats operation.
+		"""
 		raise NotImplementedError
 
 class InMemoryCache( BaseCache ):
-	"""
+	"""InMemoryCache persistence interface.
 
-		Purpose:
-			Provide a fast, process-local dictionary cache with optional TTL,
-			hit/miss counters, deletion, clearing, and basic diagnostics.
+	Purpose:
+		Caches records in memory and tracks cache use, writes, and deletions.
 
-		Parameters:
-			None.
-
-		Returns:
-			O(1) get/set operations for this process lifetime.
-
+	Attributes:
+		store (Dict[str, Dict[str, Any]]): Internal cache record dictionary.
+		hits (int): Successful cache reads.
+		misses (int): Unsuccessful cache reads.
+		sets (int): Cache writes.
+		deletes (int): Deleted cache entries.
 	"""
 	store: Dict[ str, Dict[ str, Any ] ]
 	hits: int
@@ -194,6 +269,14 @@ class InMemoryCache( BaseCache ):
 	deletes: int
 	
 	def __init__( self ) -> None:
+		"""Initialize empty cache records and operation counters.
+
+		Purpose:
+			Initialize empty cache records and operation counters.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		self.store = { }
 		self.hits = 0
 		self.misses = 0
@@ -206,7 +289,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return the current Unix timestamp.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -229,7 +312,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Create a cache metadata record for the supplied key and value.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -266,7 +349,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Determine whether an in-memory cache record has expired.
 
-			Parameters:
+			Args:
 				record (Dict[str, Any]): Cache metadata record.
 
 			Returns:
@@ -294,7 +377,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return a cached value by key when present and not expired.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 
 			Returns:
@@ -330,7 +413,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Set a cache value by key.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -362,7 +445,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Delete a cache entry by key.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -388,7 +471,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Clear all cache entries or only entries under a namespace prefix.
 
-			Parameters:
+			Args:
 				namespace (Optional[str]):
 					Optional namespace prefix.
 
@@ -419,7 +502,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Determine whether a cache key exists and is not expired.
 
-			Parameters:
+			Args:
 				key (str):
 					Cache key.
 
@@ -443,7 +526,7 @@ class InMemoryCache( BaseCache ):
 			Purpose:
 				Return cache diagnostics.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -467,24 +550,30 @@ class InMemoryCache( BaseCache ):
 			raise exception
 
 class SQLiteCache( BaseCache ):
-	"""
+	"""SQLiteCache persistence interface.
 
-		Purpose:
-			Persist a small cache on disk via sqlite3. Keys are text; values are
-			stored as JSON strings with optional TTL and metadata.
+	Purpose:
+		Persists cache records and time-to-live metadata in an on-disk SQLite database.
 
-		Parameters:
-			path (str):
-				File path for the SQLite database. Directory is created if needed.
-
-		Returns:
-			Durable cache across runs with upsert semantics and diagnostics.
-
+	Attributes:
+		path (Optional[str]): SQLite cache file path.
+		connection (sqlite3.Connection): Active SQLite cache connection.
 	"""
 	path: Optional[ str ]
 	connection: sqlite3.Connection
 	
 	def __init__( self, path: str = 'mappy_cache.sqlite' ) -> None:
+		"""Open the SQLite cache file and initialize its schema.
+
+		Purpose:
+			Open the SQLite cache file and initialize its schema.
+
+		Args:
+			path (str): SQLite database filename.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		self.path = path
 		d = os.path.dirname( self.path )
 		if d:
@@ -498,7 +587,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Create the SQLite cache table when it does not already exist.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -530,7 +619,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Add metadata columns to older kv tables that only contain k and v.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -563,7 +652,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return the current Unix timestamp.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -585,9 +674,13 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return a cached value by key when present and not expired.
 
-			Parameters:
+			Args:
 				key (str): Cached value or None.
 
+		
+
+		Returns:
+			Optional[ Dict[ str, Any ] ]: Result of the get operation.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -621,7 +714,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Set a cache value by key.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 				value (Dict[str, Any]): JSON-serializable cache value.
 				ttl (Optional[int]): Optional time-to-live in seconds.
@@ -659,7 +752,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Delete a cache entry by key.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 
 			Returns:
@@ -683,7 +776,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Clear all cache entries or only entries under a namespace prefix.
 
-			Parameters:
+			Args:
 				namespace (Optional[str]): Optional namespace prefix.
 
 			Returns:
@@ -711,7 +804,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Determine whether a cache key exists and is not expired.
 
-			Parameters:
+			Args:
 				key (str): Cache key.
 
 			Returns:
@@ -734,7 +827,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Delete expired cache entries.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -765,7 +858,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Return SQLite cache diagnostics.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -794,7 +887,7 @@ class SQLiteCache( BaseCache ):
 			Purpose:
 				Close the SQLite connection.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
@@ -811,50 +904,118 @@ class SQLiteCache( BaseCache ):
 			raise exception
 
 class SQLiteDatabase( ):
+	"""SQLite database management and DataFrame persistence.
+
+	Purpose:
+		Provides Data Management table operations, DataFrame transformations,
+		interactive visualizations, and SQLite persistence.
+
+	Attributes:
+		db_path (str): Current SQLite database file path from configuration.
+		table (str): Current table used by a database utility operation.
+		table_name (str): Current table name for DataFrame persistence.
+		column (str): Current column for database schema operations.
+		col_type (str): Column type for schema updates.
+		limit (Optional[int]): Maximum number of rows in the latest table read.
+		offset (int): Starting row offset in the latest table read.
+		df_input (Optional[pd.DataFrame]): Input DataFrame for persistence operations.
+	"""
 	
-	def __init__( self ):
-		pass
-	
+	def __init__( self ) -> None:
+		"""Initialize the configured SQLite database path.
+
+		Purpose:
+			Initialize the configured SQLite database path.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
+		self.db_path = cfg.DB_PATH
+		self.table = ''
+		self.table_name = ''
+		self.column = ''
+		self.col_type = ''
+		self.limit = None
+		self.offset = 0
+		self.df_input: Optional[ pd.DataFrame ] = None
+
 	def create_connection( self ) -> sqlite3.Connection:
-		return sqlite3.connect( cfg.DB_PATH )
+		"""Open a connection to the configured SQLite database.
+
+		Purpose:
+			Open a connection to the configured SQLite database.
+
+		Returns:
+			sqlite3.Connection: Result of the create connection operation.
+		"""
+		self.db_path = cfg.DB_PATH
+		return sqlite3.connect( self.db_path )
 	
 	def list_tables( self ) -> List[ str ]:
+		"""List the tables present in the configured SQLite database.
+
+		Purpose:
+			List the tables present in the configured SQLite database.
+
+		Returns:
+			List[ str ]: Result of the list tables operation.
+		"""
 		with self.create_connection( ) as conn:
 			_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
 			rows = conn.execute( _query ).fetchall( )
 			return [ r[ 0 ] for r in rows ]
 	
 	def create_schema( self, table: str ) -> List[ Tuple ]:
+		"""Read the column metadata of a SQLite table.
+
+		Purpose:
+			Read the column metadata of a SQLite table.
+
+		Args:
+			table (str): SQLite table name.
+
+		Returns:
+			List[ Tuple ]: Result of the create schema operation.
+		"""
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
 		with self.create_connection( ) as conn:
-			return conn.execute( f'PRAGMA table_info("{table}");' ).fetchall( )
+			return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
 	
-	def read_table( self, table: str, limit: int = None, offset: int = 0 ) -> pd.DataFrame:
+	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
 
 			Purpose:
-			--------
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
-			Parameters:
-			-----------
-			table : str
-				Table name.
-			limit : int = None
-				Optional row limit.
-			offset : int = 0
-				Optional row offset.
+			Args:
+				table (str):
+					Table name.
+				limit : int = None
+					Optional row limit.
+				offset : int = 0
+					Optional row offset.
 
 			Returns:
-			--------
-			pd.DataFrame
-				DataFrame of plain Python scalar values.
+				pd.DataFrame:
+					DataFrame of plain Python scalar values.
 
-		"""
-		if not table:
-			return pd.DataFrame( )
-		query = f'SELECT * FROM "{table}"'
-		if limit:
-			query += f' LIMIT {int( limit )} OFFSET {int( offset )}'
+			"""
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		if limit is not None and (type( limit ) is not int or limit <= 0):
+			raise ValueError( 'limit must be a positive integer when provided.' )
+		if type( offset ) is not int or offset < 0:
+			raise ValueError( 'offset must be a nonnegative integer.' )
+		self.table = table
+		self.limit = limit
+		self.offset = offset
+		query = f'SELECT * FROM "{self.table}"'
+		if self.limit is not None:
+			query += f' LIMIT {self.limit} OFFSET {self.offset}'
 		with self.create_connection( ) as conn:
 			cur = conn.cursor( )
 			cur.execute( query )
@@ -872,6 +1033,17 @@ class SQLiteDatabase( ):
 				columns.append( f'{name}_{seen[ name ]}' )
 		
 		def _scalarize( value: Any ) -> Any:
+			"""Prepare SQLite result values for tabular presentation.
+
+			Purpose:
+				Decodes binary values and converts unsupported payloads at the display boundary.
+
+			Args:
+				value (Any): Value returned from SQLite.
+
+			Returns:
+				Any: Scalar or serialized representation of the database value.
+			"""
 			if value is None or isinstance( value, (str, int, float, bool) ):
 				return value
 			if isinstance( value, bytes ):
@@ -903,20 +1075,17 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
 			first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
 
-			Parameters:
-			-----------
-			df : pd.DataFrame
-				The DataFrame to render.
+			Args:
+				df (pd.DataFrame):
+					The DataFrame to render.
 
 			Returns:
-			--------
-			None
+				None:
 
-		"""
+			"""
 		if df is None:
 			st.info( 'No data available.' )
 			return
@@ -933,6 +1102,17 @@ class SQLiteDatabase( ):
 		st.markdown( fallback_df.to_html( index=False, escape=True ), unsafe_allow_html=True )
 	
 	def make_display_safe( self, df: pd.DataFrame ) -> pd.DataFrame:
+		"""Return a DataFrame with values suitable for Streamlit rendering.
+
+		Purpose:
+			Return a DataFrame with values suitable for Streamlit rendering.
+
+		Args:
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			pd.DataFrame: Result of the make display safe operation.
+		"""
 		display_df = df.copy( )
 		for col in display_df.columns:
 			display_df[ col ] = display_df[ col ].map( lambda x: '' if x is None else str( x ) )
@@ -941,24 +1121,27 @@ class SQLiteDatabase( ):
 	def drop_table( self, table: str ) -> None:
 		"""
 			Purpose:
-			--------
 			Safely drop a table if it exists.
 
-			Parameters:
-			-----------
-			table : str
-				Table name.
+			Args:
+				table (str):
+					Table name.
+		
+
+		Returns:
+			None: Completes the operation through side effects.
 		"""
-		if not table:
-			return
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
 		with self.create_connection( ) as conn:
-			conn.execute( f'DROP TABLE IF EXISTS "{table}";' )
+			conn.execute( f'DROP TABLE IF EXISTS "{self.table}";' )
 			conn.commit( )
 	
 	def create_index( self, table: str, column: str ) -> None:
 		"""
 			Purpose:
-			--------
 			Create a safe SQLite index on a specified table column.
 
 			Handles:
@@ -968,41 +1151,59 @@ class SQLiteDatabase( ):
 				- Duplicate index names
 				- Validation against actual table schema
 
-			Parameters:
-			-----------
-			table : str
-				Table name.
-			column : str
-				Column name to index.
+			Args:
+				table (str):
+					Table name.
+				column (str):
+					Column name to index.
+		
+
+		Returns:
+			None: Completes the operation through side effects.
 		"""
-		if not table or not column:
-			return
+		throw_if( 'table', table )
+		throw_if( 'column', column )
+		if not isinstance( table, str ) or not isinstance( column, str ):
+			raise TypeError( 'table and column must be strings.' )
+		self.table = table
+		self.column = column
 		# ------------------------------------------------------------------
 		# Validate table exists
 		# ------------------------------------------------------------------
 		tables = self.list_tables( )
-		if table not in tables:
+		if self.table not in tables:
 			raise ValueError( 'Invalid table name.' )
 		# ------------------------------------------------------------------
 		# Validate column exists
 		# ------------------------------------------------------------------
-		schema = self.create_schema( table )
+		schema = self.create_schema( self.table )
 		valid_columns = [ col[ 1 ] for col in schema ]
-		if column not in valid_columns:
+		if self.column not in valid_columns:
 			raise ValueError( 'Invalid column name.' )
 		# ------------------------------------------------------------------
 		# Sanitize index name (identifier only)
 		# ------------------------------------------------------------------
-		safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{table}_{column}" )
+		safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{self.table}_{self.column}" )
 		# ------------------------------------------------------------------
 		# Create index safely (quote identifiers)
 		# ------------------------------------------------------------------
-		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{table}"("{column}");'
+		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{self.table}"("{self.column}");'
 		with self.create_connection( ) as conn:
 			conn.execute( sql )
 			conn.commit( )
 	
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
+		"""Render advanced DataFrame filters and return the filtered rows.
+
+		Purpose:
+			Render advanced DataFrame filters and return the filtered rows.
+
+		Args:
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			pd.DataFrame: Result of the apply filters operation.
+		"""
 		st.subheader( 'Advanced Filters' )
 		conditions = [ ]
 		col1, col2, col3 = st.columns( 3 )
@@ -1027,6 +1228,17 @@ class SQLiteDatabase( ):
 		return df
 	
 	def create_aggregation( self, df: pd.DataFrame ):
+		"""Calculate and display a selected numeric aggregation.
+
+		Purpose:
+			Calculate and display a selected numeric aggregation.
+
+		Args:
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			Any: Result of the create aggregation operation.
+		"""
 		st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
 		if not numeric_cols:
@@ -1052,20 +1264,17 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Render data visualizations without passing pandas objects directly into
 			Plotly/Narwhals.
 
-			Parameters:
-			-----------
-			df : pd.DataFrame
-				The input DataFrame.
+			Args:
+				df (pd.DataFrame):
+					The input DataFrame.
 
 			Returns:
-			--------
-			None
+				None:
 
-		"""
+			"""
 		blue_divider( )
 		st.markdown( '##### Visualization Engine' )
 		if df is None or df.empty:
@@ -1166,21 +1375,57 @@ class SQLiteDatabase( ):
 			st.plotly_chart( fig, use_container_width=True )
 	
 	def convert_dataframe( self, table_name: str, df: pd.DataFrame ):
+		"""Create a SQLite table from the DataFrame's column types.
+
+		Purpose:
+			Create a SQLite table from the DataFrame's column types.
+
+		Args:
+			table_name (str): SQLite table name.
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			Any: Result of the convert dataframe operation.
+		"""
+		throw_if( 'table_name', table_name )
+		throw_if( 'df', df )
+		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+		self.table_name = table_name
+		self.df_input = df
 		columns = [ ]
-		for col in df.columns:
-			sql_type = self.get_sqlite_type( df[ col ].dtype )
+		for col in self.df_input.columns:
+			sql_type = self.get_sqlite_type( self.df_input[ col ].dtype )
 			safe_col = col.replace( ' ', '_' )
 			columns.append( f'{safe_col} {sql_type}' )
-		create_stmt = f'CREATE TABLE IF NOT EXISTS {table_name} ({", ".join( columns )});'
+		create_stmt = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({", ".join( columns )});'
 		with self.create_connection( ) as conn:
 			conn.execute( create_stmt )
 			conn.commit( )
 	
 	def insert_data( self, table_name: str, df: pd.DataFrame ):
-		df = df.copy( )
+		"""Insert a DataFrame's rows into a SQLite table.
+
+		Purpose:
+			Insert a DataFrame's rows into a SQLite table.
+
+		Args:
+			table_name (str): SQLite table name.
+			df (pd.DataFrame): Input pandas DataFrame.
+
+		Returns:
+			Any: Result of the insert data operation.
+		"""
+		throw_if( 'table_name', table_name )
+		throw_if( 'df', df )
+		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+		self.table_name = table_name
+		self.df_input = df
+		df = self.df_input.copy( )
 		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
 		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
-		stmt = f'INSERT INTO {table_name} VALUES ({placeholders});'
+		stmt = f'INSERT INTO {self.table_name} VALUES ({placeholders});'
 		with self.create_connection( ) as conn:
 			conn.executemany( stmt, df.values.tolist( ) )
 			conn.commit( )
@@ -1188,19 +1433,16 @@ class SQLiteDatabase( ):
 	def get_sqlite_type( self, dtype ) -> str:
 		"""
 			Purpose:
-			--------
 			Map a pandas dtype to an appropriate SQLite column type.
 
-			Parameters:
-			-----------
-			dtype : pandas dtype
-				The dtype of a pandas Series.
+			Args:
+				dtype (pandas dtype):
+					The dtype of a pandas Series.
 
 			Returns:
-			--------
-			str
-				SQLite column type.
-		"""
+				str:
+					SQLite column type.
+			"""
 		dtype_str = str( dtype ).lower( )
 		# ------------------------------------------------------------------
 		# Integer Types (including nullable Int64)
@@ -1235,24 +1477,26 @@ class SQLiteDatabase( ):
 	def create_custom_table( self, table_name: str, columns: list ) -> None:
 		"""
 			Purpose:
-			--------
 			Create a custom SQLite table from column definitions.
 
-			Parameters:
-			-----------
-			table_name : str
-				Name of table.
+			Args:
+				table_name (str):
+					Name of table.
 
-			columns : list of dict
-				[
-					{
-						"name": str,
-						"type": str,
-						"not_null": bool,
-						"primary_key": bool,
-						"auto_increment": bool
-					}
-				]
+				columns (list of dict):
+					[
+						{
+							"name": str,
+							"type": str,
+							"not_null": bool,
+							"primary_key": bool,
+							"auto_increment": bool
+						}
+					]
+		
+
+		Returns:
+			None: Completes the operation through side effects.
 		"""
 		if not table_name:
 			raise ValueError( 'Table name required.' )
@@ -1282,7 +1526,6 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Determine whether a SQL query is read-only and safe to execute.
 
 			Allows:
@@ -1295,6 +1538,13 @@ class SQLiteDatabase( ):
 				INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
 				DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
 
+		
+
+		Args:
+			query (str): SQL query or identifier to inspect.
+
+		Returns:
+			bool: Result of the is safe query operation.
 		"""
 		if not query or not isinstance( query, str ):
 			return False
@@ -1330,13 +1580,19 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Sanitize a string into a safe SQLite identifier.
 
 			- Replaces invalid characters with underscores
 			- Ensures it starts with a letter or underscore
 			- Prevents empty names
 
+		
+
+		Args:
+			name (str): Original identifier to sanitize.
+
+		Returns:
+			str: Result of the create identifier operation.
 		"""
 		if not name or not isinstance( name, str ):
 			raise ValueError( 'Invalid Identifier.' )
@@ -1348,42 +1604,73 @@ class SQLiteDatabase( ):
 		return safe
 	
 	def get_indexes( self, table: str ):
+		"""Return index metadata for a SQLite table.
+
+		Purpose:
+			Return index metadata for a SQLite table.
+
+		Args:
+			table (str): SQLite table name.
+
+		Returns:
+			Any: Result of the get indexes operation.
+		"""
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
 		with self.create_connection( ) as conn:
-			rows = conn.execute( f'PRAGMA index_list("{table}");' ).fetchall( )
+			rows = conn.execute( f'PRAGMA index_list("{self.table}");' ).fetchall( )
 			return rows
 	
 	def add_column( self, table: str, column: str, col_type: str ):
-		column = self.create_identifier( column )
-		col_type = col_type.upper( )
+		"""Add a typed column to an existing SQLite table.
+
+		Purpose:
+			Add a typed column to an existing SQLite table.
+
+		Args:
+			table (str): SQLite table name.
+			column (str): SQLite column name.
+			col_type (str): SQLite column type.
+
+		Returns:
+			Any: Result of the add column operation.
+		"""
+		throw_if( 'table', table )
+		throw_if( 'column', column )
+		throw_if( 'col_type', col_type )
+		if not all( isinstance( item, str ) for item in (table, column, col_type) ):
+			raise TypeError( 'table, column, and col_type must be strings.' )
+		self.table = table
+		self.column = self.create_identifier( column )
+		self.col_type = col_type.upper( )
 		with self.create_connection( ) as conn:
-			conn.execute( f'ALTER TABLE "{table}" ADD COLUMN "{column}" {col_type};' )
+			conn.execute( f'ALTER TABLE "{self.table}" ADD COLUMN "{self.column}" {self.col_type};' )
 			conn.commit( )
 	
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
 		"""
 
 			Purpose:
-			--------
 			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
 			first; if it fails, falls back to a schema-safe rebuild preserving column order, data,
 			and indexes.
 
-			Parameters:
-			-----------
-			table_name : str
-				Table containing the column.
+			Args:
+				table_name (str):
+					Table containing the column.
 
-			old_name : str
-				Existing column name.
+				old_name (str):
+					Existing column name.
 
-			new_name : str
-				New column name.
+				new_name (str):
+					New column name.
 
 			Returns:
-			--------
-			None
+				None:
 
-		"""
+			"""
 		if not table_name or not old_name or not new_name:
 			return
 		with self.create_connection( ) as conn:
@@ -1448,7 +1735,22 @@ class SQLiteDatabase( ):
 			conn.commit( )
 	
 	def create_profile_table( self, table: str ):
-		df = self.read_table( table )
+		"""Build column-level descriptive statistics for a table.
+
+		Purpose:
+			Build column-level descriptive statistics for a table.
+
+		Args:
+			table (str): SQLite table name.
+
+		Returns:
+			Any: Result of the create profile table operation.
+		"""
+		throw_if( 'table', table )
+		if not isinstance( table, str ):
+			raise TypeError( 'table must be a string.' )
+		self.table = table
+		df = self.read_table( self.table )
 		profile_rows = [ ]
 		total_rows = len( df )
 		for col in df.columns:
@@ -1471,6 +1773,18 @@ class SQLiteDatabase( ):
 		return pd.DataFrame( profile_rows )
 	
 	def drop_column( self, table: str, column: str ):
+		"""Remove a column while rebuilding the table and restoring indexes.
+
+		Purpose:
+			Remove a column while rebuilding the table and restoring indexes.
+
+		Args:
+			table (str): SQLite table name.
+			column (str): SQLite column name.
+
+		Returns:
+			Any: Result of the drop column operation.
+		"""
 		if not table or not column:
 			raise ValueError( 'Table and column required.' )
 		with self.create_connection( ) as conn:
@@ -1535,24 +1849,21 @@ class SQLiteDatabase( ):
 		"""
 
 			Purpose:
-			--------
 			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
 			falls back to a schema-safe rebuild using the original CREATE TABLE statement and
 			preserves indexes.
 
-			Parameters:
-			-----------
-			old_name : str
-				Existing table name.
+			Args:
+				old_name (str):
+					Existing table name.
 
-			new_name : str
-				New table name.
+				new_name (str):
+					New table name.
 
 			Returns:
-			--------
-			None
+				None:
 
-		"""
+			"""
 		if not old_name or not new_name:
 			return
 		with self.create_connection( ) as conn:
@@ -1596,10 +1907,28 @@ class SQLiteDatabase( ):
 			conn.commit( )
 
 class ChromaStore( ):
-	"""Persistent local Chroma vector-store wrapper."""
+	"""ChromaStore persistence interface.
+
+	Purpose:
+		Adds LangChain documents to a persistent Chroma vector collection.
+
+	Attributes:
+		documents (List[Document]): Documents for the current write.
+		embedder (Embeddings | None): Embedding adapter.
+		collection_name (str): Chroma collection name.
+		persist_directory (str): Persistent collection directory.
+		vector_store (Chroma | None): Active Chroma vector-store instance.
+	"""
 
 	def __init__( self ) -> None:
-		"""Initialize Chroma storage state."""
+		"""Initialize Chroma vector storage state without connecting to a provider.
+
+		Purpose:
+			Initialize Chroma vector storage state without connecting to a provider.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		self.documents: List[ Document ] = [ ]
 		self.embedder: Embeddings | None = None
 		self.collection_name = ''
@@ -1608,7 +1937,20 @@ class ChromaStore( ):
 
 	def create( self, documents: List[ Document ], embedder: Embeddings,
 		collection_name: str, persist_directory: str ) -> Chroma:
-		"""Add documents to a persistent Chroma collection without deleting existing records."""
+		"""Store LangChain document chunks in a persistent Chroma collection.
+
+		Purpose:
+			Store LangChain document chunks in a persistent Chroma collection.
+
+		Args:
+			documents (List[ Document ]): LangChain documents for vector storage.
+			embedder (Embeddings): LangChain embedding implementation.
+			collection_name (str): Chroma collection name.
+			persist_directory (str): Chroma persistence directory.
+
+		Returns:
+			Chroma: Result of the create operation.
+		"""
 		try:
 			throw_if( 'documents', documents )
 			throw_if( 'embedder', embedder )
@@ -1643,10 +1985,30 @@ class ChromaStore( ):
 			raise exception from e
 
 class PineconeStore( ):
-	"""Managed Pinecone vector-store wrapper."""
+	"""PineconeStore persistence interface.
+
+	Purpose:
+		Adds LangChain documents to an existing managed Pinecone index.
+
+	Attributes:
+		documents (List[Document]): Documents for the current write.
+		embedder (Embeddings | None): Embedding adapter.
+		index_name (str): Pinecone index name.
+		namespace (str): Pinecone namespace.
+		api_key (str): Pinecone credential.
+		client (Any): Pinecone client.
+		vector_store (Any): Active Pinecone vector-store adapter.
+	"""
 
 	def __init__( self ) -> None:
-		"""Initialize Pinecone storage state without importing Pinecone."""
+		"""Initialize Pinecone vector storage state without connecting to a provider.
+
+		Purpose:
+			Initialize Pinecone vector storage state without connecting to a provider.
+
+		Returns:
+			None: Completes the operation through side effects.
+		"""
 		self.documents: List[ Document ] = [ ]
 		self.embedder: Embeddings | None = None
 		self.index_name = ''
@@ -1657,7 +2019,21 @@ class PineconeStore( ):
 
 	def create( self, documents: List[ Document ], embedder: Embeddings, index_name: str,
 		namespace: str, api_key: str ) -> Any:
-		"""Populate an existing Pinecone index."""
+		"""Store LangChain document chunks in an existing Pinecone index.
+
+		Purpose:
+			Store LangChain document chunks in an existing Pinecone index.
+
+		Args:
+			documents (List[ Document ]): LangChain documents for vector storage.
+			embedder (Embeddings): LangChain embedding implementation.
+			index_name (str): Existing Pinecone index name.
+			namespace (str): Optional cache namespace.
+			api_key (str): Pinecone API credential.
+
+		Returns:
+			Any: Result of the create operation.
+		"""
 		try:
 			throw_if( 'documents', documents )
 			throw_if( 'embedder', embedder )
