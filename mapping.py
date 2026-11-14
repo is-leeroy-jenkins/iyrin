@@ -211,6 +211,14 @@ class Map( ):
 		Purpose:
 			Initialize the Google Maps session, rate limiter, credentials, and request state.
 
+		Args:
+			qps (float): Requested Google Maps queries per second.
+			retries (int): Maximum retry attempts for transient failures.
+			min (float): Initial retry backoff in seconds.
+			max (float): Maximum retry backoff in seconds.
+			timeout (float): HTTP request timeout in seconds.
+			api_key (Optional[str]): Explicit credential or None to use configuration.
+
 		Returns:
 			None: Initializes instance state.
 		"""
@@ -364,6 +372,10 @@ class Geocoder( ):
 
 		Purpose:
 			Initialize geocoding with a Google Maps gateway and optional cache.
+
+		Args:
+			maps (Map): Initialized Google Maps API gateway.
+			cache (Optional[BaseCache]): Optional geocoding cache.
 
 		Returns:
 			None: Initializes instance state.
@@ -663,6 +675,9 @@ class DistanceMatrix( ):
 
 		Purpose:
 			Initialize supported travel modes and response state.
+
+		Args:
+			maps (Map): Initialized Google Maps API gateway.
 
 		Returns:
 			None: Initializes instance state.
@@ -1403,6 +1418,9 @@ class Timezone:
 
 		Purpose:
 			Initialize timezone lookup state for the supplied Maps gateway.
+
+		Args:
+			maps (Map): Initialized Google Maps API gateway.
 
 		Returns:
 			None: Initializes instance state.
