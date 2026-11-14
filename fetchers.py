@@ -16106,7 +16106,6 @@ class USGSWaterData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'collection', collection )
 			self.collection = collection
 			
@@ -16965,7 +16964,6 @@ class USGSTheNationalMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -17590,7 +17588,6 @@ class USGSScienceBase( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -18261,7 +18258,6 @@ class AirNow( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -18949,7 +18945,6 @@ class ClimateData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'url', url )
 			self.url = url
 			
@@ -19538,7 +19533,6 @@ class EoNet( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -20646,7 +20640,6 @@ class TidesAndCurrents( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'url', url )
 			self.url = url
 			
@@ -21984,7 +21977,6 @@ class PurpleAir( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
@@ -22636,7 +22628,6 @@ class OpenAQ( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
-			throw_if( 'params', params )
 			throw_if( 'endpoint', endpoint )
 			self.endpoint = endpoint
 			
