@@ -1257,7 +1257,7 @@ class SQLiteDatabase( ):
 				df = df[ df[ column ].astype( str ).str.contains( value ) ]
 		return df
 	
-	def create_aggregation( self, df: pd.DataFrame ):
+	def create_aggregation( self, df: pd.DataFrame ) -> None:
 		"""Calculate and display a selected numeric aggregation.
 
 		Purpose:
@@ -1267,7 +1267,7 @@ class SQLiteDatabase( ):
 			df (pd.DataFrame): Input pandas DataFrame.
 
 		Returns:
-			Any: Result of the create aggregation operation.
+			None: Displays the selected aggregation result in Streamlit, or an informational message when no numeric column exists.
 		"""
 		st.subheader( 'Aggregation Engine' )
 		numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
@@ -1403,7 +1403,7 @@ class SQLiteDatabase( ):
 				y=corr.index.tolist( ) ) ] )
 			st.plotly_chart( fig, use_container_width=True )
 	
-	def convert_dataframe( self, table_name: str, df: pd.DataFrame ):
+	def convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None:
 		"""Create a SQLite table from the DataFrame's column types.
 
 		Purpose:
@@ -1414,7 +1414,7 @@ class SQLiteDatabase( ):
 			df (pd.DataFrame): Input pandas DataFrame.
 
 		Returns:
-			Any: Result of the convert dataframe operation.
+			None: Creates a SQLite table using the input DataFrame's inferred column types.
 		"""
 		try:
 			throw_if( 'table_name', table_name )
@@ -1440,7 +1440,7 @@ class SQLiteDatabase( ):
 			exception.method = 'convert_dataframe( self, **args )'
 			Logger( ).write( exception )
 			raise exception from e
-	def insert_data( self, table_name: str, df: pd.DataFrame ):
+	def insert_data( self, table_name: str, df: pd.DataFrame ) -> None:
 		"""Insert a DataFrame's rows into a SQLite table.
 
 		Purpose:
@@ -1451,7 +1451,7 @@ class SQLiteDatabase( ):
 			df (pd.DataFrame): Input pandas DataFrame.
 
 		Returns:
-			Any: Result of the insert data operation.
+			None: Inserts the DataFrame rows into the selected SQLite table.
 		"""
 		try:
 			throw_if( 'table_name', table_name )
@@ -1475,7 +1475,7 @@ class SQLiteDatabase( ):
 			exception.method = 'insert_data( self, **args )'
 			Logger( ).write( exception )
 			raise exception from e
-	def get_sqlite_type( self, dtype ) -> str:
+	def get_sqlite_type( self, dtype: Any ) -> str:
 		"""
 			Purpose:
 			Map a pandas dtype to an appropriate SQLite column type.
@@ -1644,7 +1644,7 @@ class SQLiteDatabase( ):
 			raise ValueError( 'Invalid identifier after sanitization.' )
 		return safe
 	
-	def get_indexes( self, table: str ):
+	def get_indexes( self, table: str ) -> List[ Tuple ]:
 		"""Return index metadata for a SQLite table.
 
 		Purpose:
@@ -1654,7 +1654,7 @@ class SQLiteDatabase( ):
 			table (str): SQLite table name.
 
 		Returns:
-			Any: Result of the get indexes operation.
+			List[Tuple]: SQLite index metadata rows returned by PRAGMA index_list.
 		"""
 		try:
 			throw_if( 'table', table )
@@ -1672,7 +1672,7 @@ class SQLiteDatabase( ):
 			exception.method = 'get_indexes( self, **args )'
 			Logger( ).write( exception )
 			raise exception from e
-	def add_column( self, table: str, column: str, col_type: str ):
+	def add_column( self, table: str, column: str, col_type: str ) -> None:
 		"""Add a typed column to an existing SQLite table.
 
 		Purpose:
@@ -1684,7 +1684,7 @@ class SQLiteDatabase( ):
 			col_type (str): SQLite column type.
 
 		Returns:
-			Any: Result of the add column operation.
+			None: Adds the specified column to the existing SQLite table.
 		"""
 		try:
 			throw_if( 'table', table )
@@ -1788,7 +1788,7 @@ class SQLiteDatabase( ):
 					conn.execute( idx_sql )
 			conn.commit( )
 	
-	def create_profile_table( self, table: str ):
+	def create_profile_table( self, table: str ) -> pd.DataFrame:
 		"""Build column-level descriptive statistics for a table.
 
 		Purpose:
@@ -1798,7 +1798,7 @@ class SQLiteDatabase( ):
 			table (str): SQLite table name.
 
 		Returns:
-			Any: Result of the create profile table operation.
+			pd.DataFrame: Per-column statistics including null counts, distinct counts, and numeric summaries.
 		"""
 		try:
 			throw_if( 'table', table )
@@ -1834,7 +1834,7 @@ class SQLiteDatabase( ):
 			exception.method = 'create_profile_table( self, **args )'
 			Logger( ).write( exception )
 			raise exception from e
-	def drop_column( self, table: str, column: str ):
+	def drop_column( self, table: str, column: str ) -> None:
 		"""Remove a column while rebuilding the table and restoring indexes.
 
 		Purpose:
@@ -1845,7 +1845,7 @@ class SQLiteDatabase( ):
 			column (str): SQLite column name.
 
 		Returns:
-			Any: Result of the drop column operation.
+			None: Rebuilds the table without the selected column and restores indexes.
 		"""
 		if not table or not column:
 			raise ValueError( 'Table and column required.' )
