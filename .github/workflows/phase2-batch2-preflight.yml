@@ -51,6 +51,31 @@ jobs:
                       raise AssertionError(f'{path}:{node.lineno}: Args unparseable')
           print('Documented functions parse as Google-style documentation.')
           PY
+      - name: Report method-boundary contract gaps
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          for filename in ('loaders.py','fetchers.py','generators.py','processors.py'):
+              tree = ast.parse(Path(filename).read_text(encoding='utf-8'))
+              deficits = []
+              for node in ast.walk(tree):
+                  if not isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)) or node.name in ('__init__','throw_if'):
+                      continue
+                  arglist = node.args.posonlyargs + node.args.args
+                  mandatory = arglist[:len(arglist) - len(node.args.defaults)] if node.args.defaults else arglist
+                  mandatory = [arg.arg for arg in mandatory if arg.arg not in ('self','cls')]
+                  if not mandatory:
+                      continue
+                  guards = {call.args[0].value for call in ast.walk(node) if isinstance(call,ast.Call)
+                      and isinstance(call.func,ast.Name) and call.func.id=='throw_if'
+                      and call.args and isinstance(call.args[0],ast.Constant) and isinstance(call.args[0].value,str)}
+                  missing = [name for name in mandatory if name not in guards]
+                  if missing:
+                      deficits.append((node.lineno,node.name,','.join(missing)))
+              print(f'{filename}: {len(deficits)} functions missing mandatory guards')
+              print('\n'.join(f'  {line}: {name}: {args}' for line,name,args in deficits[:35]))
+          PY
       - name: Strict documentation build
         run: |
           python -m pip install mkdocs-material 'mkdocstrings[python]'
