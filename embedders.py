@@ -184,7 +184,7 @@ class LocalEmbeddings( Embeddings ):
 				throw_if( 'text', text )
 				if not isinstance( text, str ):
 					raise TypeError( 'Argument "texts" must contain only strings.' )
-				values.append( text.strip( ) )
+				values.append( text )
 	
 			self.load( )
 			self.response = self.client.create_embedding( values )
