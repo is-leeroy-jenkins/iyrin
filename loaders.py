@@ -204,7 +204,7 @@ class Loader( ):
 			return self.file_path
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'Loader'
 			exception.method = '_ensure_existing_file( self, path: str ) -> str'
 			Logger( ).write( exception )
@@ -241,7 +241,7 @@ class Loader( ):
 			return sorted( set( self.resolved ) )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'Loader'
 			exception.method = 'resolve_paths( self, pattern: str ) -> List[ str ]'
 			Logger( ).write( exception )
@@ -277,7 +277,7 @@ class Loader( ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'CSV'
 			exception.method = 'loader( )'
 			Logger( ).write( exception )
@@ -311,9 +311,9 @@ class Loader( ):
 			return self.splitter.split_documents( documents=self.documents )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'Loader'
-			exception.method = ('split_documents( self, **kwargs ) -> List[ Document ]')
+			exception.method = ('Loader.split_documents')
 			Logger( ).write( exception )
 			raise exception
 
@@ -404,7 +404,7 @@ class TextLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'TextLoader'
 			exception.method = 'load( self, filepath: str ) -> List[ Document ] | None'
 			Logger( ).write( exception )
@@ -450,7 +450,7 @@ class TextLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'TextLoader'
 			exception.method = ('split_tokens( self, size: int=1000, amount: int=200 ) -> List[ '
 			                    'Document ] | None')
@@ -498,9 +498,9 @@ class TextLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'TextLoader'
-			exception.method = 'split_chars( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'TextLoader.split_chars'
 			Logger( ).write( exception )
 			raise exception
 
@@ -601,7 +601,7 @@ class CsvLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'CsvLoader'
 			exception.method = ('load( self, filepath: str, columns: Optional[ List[ str ] '
 			                    ']=None, '
@@ -639,9 +639,9 @@ class CsvLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'CsvLoader'
-			exception.method = ('split( self, **args ) ->  List[ Document ] | None')
+			exception.method = ('CsvLoader.split')
 			Logger( ).write( exception )
 			raise exception
 
@@ -729,7 +729,7 @@ class XmlLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'XmlLoader'
 			exception.method = 'load(self, filepath: str)'
 			Logger( ).write( exception )
@@ -762,7 +762,7 @@ class XmlLoader( Loader ):
 			return split_docs
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'XmlLoader'
 			exception.method = 'split(self, size: int=1000, amount: int=200)'
 			Logger( ).write( exception )
@@ -795,7 +795,7 @@ class XmlLoader( Loader ):
 			return self.xml_tree
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'XmlLoader'
 			exception.method = 'load_tree(self, filepath: str)'
 			Logger( ).write( exception )
@@ -823,7 +823,7 @@ class XmlLoader( Loader ):
 			return list( elements )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'XmlLoader'
 			exception.method = 'get_elements(self, xpath: str)'
 			Logger( ).write( exception )
@@ -939,9 +939,9 @@ class WebLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebLoader'
-			exception.method = 'load( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'WebLoader.load'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -979,9 +979,9 @@ class WebLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebLoader'
-			exception.method = 'load_pages( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'WebLoader.load_pages'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1021,9 +1021,9 @@ class WebLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebLoader'
-			exception.method = 'load_recursive( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'WebLoader.load_recursive'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1054,9 +1054,9 @@ class WebLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebLoader'
-			exception.method = 'split( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'WebLoader.split'
 			Logger( ).write( exception )
 			raise exception
 
@@ -1279,7 +1279,7 @@ class PdfLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'PdfLoader'
 			exception.method = 'load( self, **kwars ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -1313,9 +1313,9 @@ class PdfLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'PdfLoader'
-			exception.method = ('split( self, **kwargs ) -> List[ Document ] | None')
+			exception.method = ('PdfLoader.split')
 			Logger( ).write( exception )
 			raise exception
 
@@ -1432,7 +1432,7 @@ class ExcelLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'ExcelLoader'
 			exception.method = 'load( self, , **kwars  ) -> List[ Document ] | None'
 			Logger( ).write( exception )
@@ -1467,7 +1467,7 @@ class ExcelLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'ExcelLoader'
 			exception.method = 'split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -1544,7 +1544,7 @@ class WordLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WordLoader'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -1576,7 +1576,7 @@ class WordLoader( Loader ):
 			return _splits
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WordLoader'
 			exception.method = 'split( self, **kwars  ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -1693,7 +1693,7 @@ class MarkdownLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'MarkdownLoader'
 			exception.method = ('load( self, path: str, mode: str="single" ) -> '
 			                    'List[ Document ] | None')
@@ -1728,7 +1728,7 @@ class MarkdownLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'MarkdownLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> '
 			                    'List[ Document ] | None')
@@ -1806,7 +1806,7 @@ class HtmlLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'HTML'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -1838,7 +1838,7 @@ class HtmlLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'HtmlLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -1947,9 +1947,9 @@ class JsonLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'JsonLoader'
-			exception.method = 'load( self, **args ) -> List[ Document ] | None'
+			exception.method = 'JsonLoader.load'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1981,7 +1981,7 @@ class JsonLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'JsonLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> '
 			                    'List[ Document ] | None')
@@ -2073,7 +2073,7 @@ class ArXivLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'ArxivLoader'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -2105,7 +2105,7 @@ class ArXivLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'ArxivLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -2207,7 +2207,7 @@ class WikiLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WikiLoader'
 			exception.method = ('load( self, query: str, max_docs: int=25, max_chars: int=4000, '
 			                    'include_all: bool=False ) -> List[ Document ] | None')
@@ -2243,7 +2243,7 @@ class WikiLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WikiLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> '
 			                    'List[ Document ] | None')
@@ -2361,7 +2361,7 @@ class GithubLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'GithubLoader'
 			exception.method = ('load( self, url: str, repo: str, branch: str, '
 			                    'filetype: str=".md", access_token: Optional[ str ]=None ) '
@@ -2397,7 +2397,7 @@ class GithubLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'GithubLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> '
 			                    'List[ Document ] | None')
@@ -2505,7 +2505,7 @@ class PowerPointLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'PowerPointLoader'
 			exception.method = ('load( self, path: str, mode: str="single" ) -> '
 			                    'List[ Document ] | None')
@@ -2532,7 +2532,7 @@ class PowerPointLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'PowerPointLoader'
 			exception.method = 'load_multiple( self, path: str ) -> List[ Document ] | None'
 			Logger( ).write( exception )
@@ -2566,7 +2566,7 @@ class PowerPointLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'PowerPointLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> '
 			                    'List[ Document ] | None')
@@ -2653,7 +2653,7 @@ class OutlookLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'OutlookLoader'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -2684,7 +2684,7 @@ class OutlookLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'OutlookLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -2806,9 +2806,9 @@ class WebCrawler( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebCrawler'
-			exception.method = 'load( self, **args ) -> List[ Document ] | None'
+			exception.method = 'WebCrawler.load'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2848,7 +2848,7 @@ class WebCrawler( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebCrawler'
 			exception.method = ('load_pages( self, urls: str | List[ str ], timeout: int=10, '
 			                    'ignore: bool=True, progress: bool=True ) -> '
@@ -2894,9 +2894,9 @@ class WebCrawler( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebCrawler'
-			exception.method = 'load_recursive( self, **args ) -> List[ Document ] | None'
+			exception.method = 'WebCrawler.load_recursive'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2927,7 +2927,7 @@ class WebCrawler( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WebCrawler'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> '
 			                    'List[ Document ] | None')
@@ -3027,7 +3027,7 @@ class SpfxLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'SpfxLoader'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -3060,7 +3060,7 @@ class SpfxLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'SpfxLoader'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -3091,7 +3091,7 @@ class SpfxLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'SpfxLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -3203,7 +3203,7 @@ class OneDriveDocLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'OneDriveDocLoader'
 			exception.method = 'load( self, drive_id: str, folder_path: Optional[ str ], object_ids: Optional[ List[ str ] ], auth_with_token: bool )'
 			Logger( ).write( exception )
@@ -3235,7 +3235,7 @@ class OneDriveDocLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WikiLoader'
 			exception.method = 'load( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -3266,7 +3266,7 @@ class OneDriveDocLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'WikiLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -3372,7 +3372,7 @@ class GoogleLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleDriveLoader'
 			exception.method = 'load_File( self, file_id: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -3404,7 +3404,7 @@ class GoogleLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleDriveLoader'
 			exception.method = 'load_folder( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
@@ -3435,7 +3435,7 @@ class GoogleLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleDriveLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -3524,7 +3524,7 @@ class EmailLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'EmailLoader'
 			exception.method = ('load( self, path: str, mode: str=elements, '
 			                    'include_headers: bool=True ) -> List[ Document ]')
@@ -3555,7 +3555,7 @@ class EmailLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'chonky'
+			exception.module = 'Iyrin'
 			exception.cause = 'EmailLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) -> List[ '
 			                    'Document ]')
@@ -3632,7 +3632,7 @@ class PubMedSearchLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'PubMedSearchLoader'
 			exception.method = (
 				'load( self, query: str, max_docs: int=5 ) -> List[ Document ] | None')
@@ -3664,7 +3664,7 @@ class PubMedSearchLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'PubMedSearchLoader'
 			exception.method = (
 				'split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None')
@@ -3747,7 +3747,7 @@ class OpenCityLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'OpenCityLoader'
 			exception.method = ('load( self, city_id: str, dataset_id: str, limit: int=100 ) '
 			                    '-> List[ Document ] | None')
@@ -3779,7 +3779,7 @@ class OpenCityLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'OpenCityLoader'
 			exception.method = (
 				'split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None')
@@ -3876,9 +3876,9 @@ class JupyterNotebookLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'JupyterNotebookLoader'
-			exception.method = 'load( self, **args ) -> List[ Document ] | None'
+			exception.method = 'JupyterNotebookLoader.load'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3907,7 +3907,7 @@ class JupyterNotebookLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'JupyterNotebookLoader'
 			exception.method = (
 				'split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None')
@@ -3991,7 +3991,7 @@ class GoogleCloudFileLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleCloudStorageFileLoader'
 			exception.method = ('load( self, project_name: str, bucket: str, blob: str ) '
 			                    '-> List[ Document ] | None')
@@ -4024,9 +4024,9 @@ class GoogleCloudFileLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleCloudStorageFileLoader'
-			exception.method = 'split( self, **args ) -> List[ Document ] | None'
+			exception.method = 'GoogleCloudFileLoader.split'
 			Logger( ).write( exception )
 			raise exception
 
@@ -4144,7 +4144,7 @@ class AwsFileLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'AwsFileLoader'
 			exception.method = 'load( self, bucket: str, key: str, ... )'
 			Logger( ).write( exception )
@@ -4176,7 +4176,7 @@ class AwsFileLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'AwsFileLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) '
 			                    '-> List[ Document ] | None')
@@ -4268,7 +4268,7 @@ class GoogleSpeechToTextLoader( Loader ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleSpeechToTextAudioLoader'
 			exception.method = ('load( self, project_id: str, file_path: str, '
 			                    'config: Optional[ Dict[ str, Any ] ]=None ) -> List[ Document ] | '
@@ -4301,7 +4301,7 @@ class GoogleSpeechToTextLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleSpeechToTextAudioLoader'
 			exception.method = ('split( self, chunk: int=1000, overlap: int=200 ) '
 			                    '-> List[ Document ] | None')
@@ -4395,9 +4395,9 @@ class GoogleBucketLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleBucketLoader'
-			exception.method = 'load( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'GoogleBucketLoader.load'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4426,9 +4426,9 @@ class GoogleBucketLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'GoogleBucketLoader'
-			exception.method = 'split( self, **kwargs0 ) -> List[ Document ] | None'
+			exception.method = 'GoogleBucketLoader.split'
 			Logger( ).write( exception )
 			raise exception
 
@@ -4545,7 +4545,7 @@ class AwsBucketLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'AwsBucketLoader'
 			exception.method = 'load( self, bucket: str, prefix: Optional[ str ], ... )'
 			Logger( ).write( exception )
@@ -4577,8 +4577,8 @@ class AwsBucketLoader( Loader ):
 			return self.documents
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'loaders'
+			exception.module = 'Iyrin'
 			exception.cause = 'AmazonBucketLoader'
-			exception.method = 'split( self, **kwargs ) -> List[ Document ] | None'
+			exception.method = 'AwsBucketLoader.split'
 			Logger( ).write( exception )
 			raise exception

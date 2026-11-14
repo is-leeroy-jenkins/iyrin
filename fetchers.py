@@ -110,36 +110,34 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 def encode_image( path: str ) -> str:
-	'''
-		
-		Purpose:
-		-----------
-		Simple guard which raises ValueError when `path` is falsy (None, empty).
-		
-		Parameters:
-		-----------
-		path (str): the path to an image file.
-		
-		Returns:
-		-----------
-		str: string representing the bytes of the image
-		
-	'''
-	if path is None:
-		raise ValueError( f"Argument '{path}' cannot be empty!" )
-	else:
-		data = Path( path ).read_bytes( )
-		return base64.b64encode( data ).decode( "utf-8" )
+	"""Encode a local image file as base64 text.
+
+	Purpose:
+		Reads image bytes and encodes them for providers that accept base64 image content.
+
+	Args:
+		path (str): Required path to an existing image file.
+
+	Returns:
+		str: Base64-encoded image content.
+
+	Raises:
+		ValueError: Raised when the path is missing or blank.
+		TypeError: Raised when the path is not a string.
+	"""
+	throw_if( 'path', path )
+	if not isinstance( path, str ):
+		raise TypeError( 'path must be a string.' )
+	data = Path( path ).read_bytes( )
+	return base64.b64encode( data ).decode( 'utf-8' )
 
 class Fetcher:
 	'''
 
 		Purpose:
-		--------
-		Base class for fetchers.
+			Base class for fetchers.
 
-		Attribues:
-		-----------
+		Legacy member listing:
 		timeout - int
 		headers - Dict[ str, Any ]
 		response - requests.Response
@@ -151,7 +149,13 @@ class Fetcher:
 		-----------
 		fetch( ) -> Dict[ str, Any ]
 
-
+		Attributes:
+			timeout (Optional[ int ]): Request timeout in seconds.
+			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
+			response (Optional[ Response ]): Most recent HTTP response.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			result (Optional[ Result ]): Normalized result of the latest request.
+			query (Optional[ str ]): Current query or search expression.
 	'''
 	timeout: Optional[ int ]
 	headers: Optional[ Dict[ str, Any ] ]
@@ -164,9 +168,12 @@ class Fetcher:
 		'''
 
 			Purpose:
-			-----------
-			Base initializer. Subclasses should set defaults they require.
+				Base initializer. Subclasses should set defaults they require.
 
+		
+
+		Returns:
+			None: Completes the operation through provider or instance state.
 		'''
 		self.timeout = None
 		self.headers = None
@@ -179,17 +186,13 @@ class Fetcher:
 		'''
 
 			Purpose:
-			-----------
-			Control ordering for introspection.
+				Control ordering for introspection.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			list[str]: Ordered attribute/method names.
-
+				list[str]: Ordered attribute/method names.
 		'''
 		return [ 'timeout', 'headers', 'response', 'url', 'result', 'query', 'fetch' ]
 	
@@ -197,19 +200,15 @@ class Fetcher:
 		'''
 
 			Purpose:
-			--------
-			Abstract fetch method to be implemented by subclasses.
+				Abstract fetch method to be implemented by subclasses.
 
-			Parameters:
-			-----------
-			url (str): Resource URL to fetch.
-			time (int): Timeout in seconds.
-			query (str):  Text provided to Agent
+			Args:
+				url (str): Resource URL to fetch.
+				time (int): Timeout in seconds.
+				query (str):  Text provided to Agent
 
 			Returns:
-			---------
-			Optional[Result]: Should return Result on success or None on failure.
-
+				Optional[Result]: Should return Result on success or None on failure.
 		'''
 		raise NotImplementedError( 'Must be implemented by a subclass.' )
 
@@ -218,11 +217,9 @@ class WebFetcher( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches web pages with requests and extracts common HTML content structures.
+			Fetches web pages with requests and extracts common HTML content structures.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		soup,
 		agents,
 		url,
@@ -249,6 +246,21 @@ class WebFetcher( Fetcher ):
 		scrape_images(...): Performs the scrape_images operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			soup (Optional[ BeautifulSoup ]): Parsed Beautiful Soup HTML document.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			html (Optional[ str ]): HTML response body returned by the current request.
+			re_tag (Optional[ Pattern ]): Regular expression used to match HTML tags.
+			re_ws (Optional[ Pattern ]): Regular expression used to normalize whitespace.
+			response (Optional[ Response ]): Most recent HTTP response.
+	
+			uri (Any): Resource URI resolved by the provider.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	soup: Optional[ BeautifulSoup ]
 	agents: Optional[ str ]
@@ -261,9 +273,12 @@ class WebFetcher( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize WebFetcher with optional headers and sane defaults.
+				Initialize WebFetcher with optional headers and sane defaults.
 			
+		
+
+		Returns:
+			None: Completes the operation through provider or instance state.
 		'''
 		super( ).__init__( )
 		self.timeout = 10
@@ -281,17 +296,13 @@ class WebFetcher( Fetcher ):
 		'''
 			
 			Purpose:
-			-----------
-			Control visible ordering for WebFetcher.
+				Control visible ordering for WebFetcher.
 			
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 			
 			Returns:
-			-----------
-			list[str]: Ordered attribute/method names.
-			
+				list[str]: Ordered attribute/method names.
 		'''
 		return [ 'agents', 'url', 'html', 'timeout', 'headers', 'fetch', 'html_to_text',
 		         'scrape_images', 'scrape_hyperlinks', 'scrape_images', 'scrape_hyperlinks',
@@ -311,6 +322,9 @@ class WebFetcher( Fetcher ):
 
 		Returns:
 			List[Document]: LangChain documents produced from the requested URL.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'url', url )
@@ -342,18 +356,17 @@ class WebFetcher( Fetcher ):
 		'''
 			
 			Purpose:
-			--------
-			Convert HTML to compact plain text with minimal heuristics (scripts and
-			styles removed, tags replaced with whitespace, whitespace normalized).
+				Convert HTML to compact plain text with minimal heuristics (scripts and
+				styles removed, tags replaced with whitespace, whitespace normalized).
 			
-			Parameters:
-			---------
-			html (str): Raw HTML string.
+			Args:
+				html (str): Raw HTML string.
 			
 			Returns:
-			--------
-			str: Plain text extracted from HTML.
-			
+				str: Plain text extracted from HTML.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'html', html )
@@ -376,19 +389,18 @@ class WebFetcher( Fetcher ):
 		
 	
 			Purpose:
-			--------
-			Extract readable text from all <p> elements on a page.
+				Extract readable text from all <p> elements on a page.
 	
-			Parameters:
-			-----------
-			uri (str):
-			Fully-qualified URI of the target HTML document.
+			Args:
+				uri (str):
+				Fully-qualified URI of the target HTML document.
 	
 			Returns:
-			--------
-			List[str]:
-			Cleaned paragraph text entries.
-			
+				List[str]:
+				Cleaned paragraph text entries.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -409,19 +421,18 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract text from <li> elements found in ordered and unordered lists.
+				Extract text from <li> elements found in ordered and unordered lists.
 	
-			Parameters:
-			-----------
-			uri (str):
-			Fully-qualified URI of the HTML page.
+			Args:
+				uri (str):
+				Fully-qualified URI of the HTML page.
 	
 			Returns:
-			--------
-			List[str]:
-			Clean list item text segments.
-			
+				List[str]:
+				Clean list item text segments.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -442,20 +453,19 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract flattened table cell contents from all <table> structures on the
-			page.
+				Extract flattened table cell contents from all <table> structures on the
+				page.
 		
-			Parameters:
-			-----------
-			uri (str):
-			URI of the HTML document.
+			Args:
+				uri (str):
+				URI of the HTML document.
 		
 			Returns:
-			--------
-			List[str]:
-			Table cell values (one entry per <td> or <th>).
-			
+				List[str]:
+				Table cell values (one entry per <td> or <th>).
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -483,20 +493,19 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract consolidated text from <article> elements. Each article is
-			returned as a single cleaned string.
+				Extract consolidated text from <article> elements. Each article is
+				returned as a single cleaned string.
 		
-			Parameters:
-			-----------
-			uri (str):
-			URI of the HTML page.
+			Args:
+				uri (str):
+				URI of the HTML page.
 		
 			Returns:
-			--------
-			List[str]:
-			Article-level text blocks.
-			
+				List[str]:
+				Article-level text blocks.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -517,19 +526,18 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract text from heading tags (h1–h6).
+				Extract text from heading tags (h1–h6).
 		
-			Parameters:
-			-----------
-			uri (str):
-			Fully-qualified document URI.
+			Args:
+				uri (str):
+				Fully-qualified document URI.
 		
 			Returns:
-			--------
-			List[str]:
-			Clean heading strings.
-			
+				List[str]:
+				Clean heading strings.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( "uri", uri )
@@ -551,19 +559,18 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract cleaned text from <div> elements on the page.
+				Extract cleaned text from <div> elements on the page.
 		
-			Parameters:
-			-----------
-			uri (str):
-			URI of the HTML document.
+			Args:
+				uri (str):
+				URI of the HTML document.
 		
 			Returns:
-			--------
-			List[str]:
-			Clean division text blocks.
-			
+				List[str]:
+				Clean division text blocks.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -584,19 +591,18 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract readable text from <section> elements.
+				Extract readable text from <section> elements.
 		
-			Parameters:
-			-----------
-			uri (str):
-			Fully-qualified document URI.
+			Args:
+				uri (str):
+				Fully-qualified document URI.
 		
 			Returns:
-			--------
-			List[str]:
-			Clean section text blocks.
-			
+				List[str]:
+				Clean section text blocks.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -617,20 +623,18 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract text from <blockquote> elements.
+				Extract text from <blockquote> elements.
 	
-			Parameters:
-			-----------
-			uri (str):
-			Document URI.
+			Args:
+				uri (str):
+				Document URI.
 	
 			Returns:
-			--------
-			List[str]:
-			Cleaned blockquote text entries.
-			
-			
+				List[str]:
+				Cleaned blockquote text entries.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -651,19 +655,18 @@ class WebFetcher( Fetcher ):
 		"""
 		
 			Purpose:
-			--------
-			Extract hyperlink values (href attributes) from <a> tags.
+				Extract hyperlink values (href attributes) from <a> tags.
 		
-			Parameters:
-			-----------
-			uri (str):
-			URI of the web page.
+			Args:
+				uri (str):
+				URI of the web page.
 		
 			Returns:
-			--------
-			List[str]:
-			List of hyperlink paths.
-		
+				List[str]:
+				List of hyperlink paths.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -684,19 +687,18 @@ class WebFetcher( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Extract image references (<img src="...">) from the target document.
+				Extract image references (<img src="...">) from the target document.
 		
-			Parameters:
-			-----------
-			uri (str):
-			Fully-qualified HTML page URI.
+			Args:
+				uri (str):
+				Fully-qualified HTML page URI.
 		
 			Returns:
-			--------
-			List[str]:
-			Image source values extracted from <img> elements.
-		
+				List[str]:
+				Image source values extracted from <img> elements.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'uri', uri )
@@ -718,25 +720,23 @@ class WebFetcher( Fetcher ):
 		"""
 
 			Purpose:
-			________
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
-			Supports arbitrary parameters, types, nested objects, and required fields.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Supports arbitrary parameters, types, nested objects, and required fields.
 
-			Parameters:
-			___________
-			function (str):
-			The function name exposed to the LLM.
+			Args:
+				function (str):
+				The function name exposed to the LLM.
 
-			tool (str):
-			The underlying system or service the function wraps
-			(e.g., “Google Maps”, “SQLite”, “Weather API”).
+				tool (str):
+				The underlying system or service the function wraps
+				(e.g., “Google Maps”, “SQLite”, “Weather API”).
 
-			description (str):
-			Precise explanation of what the function does.
+				description (str):
+				Precise explanation of what the function does.
 
-			parameters (dict):
-			A dictionary defining parameter names and JSON schema descriptors.
-			Each value must itself be a valid JSON-schema fragment.
+				parameters (dict):
+				A dictionary defining parameter names and JSON schema descriptors.
+				Each value must itself be a valid JSON-schema fragment.
 
 				Example:
 					{
@@ -760,10 +760,11 @@ class WebFetcher( Fetcher ):
 			If None, required = list(parameters.keys()).
 
 			Returns:
-			________
-			dict:
-			A JSON-compatible dictionary defining the tool schema.
+				dict:
+				A JSON-compatible dictionary defining the tool schema.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -814,11 +815,9 @@ class WebCrawler( WebFetcher ):
 	'''
 
 		Purpose:
-		--------
-		Extends web fetching with optional Playwright-backed page rendering.
+			Extends web fetching with optional Playwright-backed page rendering.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		use_playwright,
 		browser_context,
 
@@ -829,6 +828,12 @@ class WebCrawler( WebFetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		render_with_playwright(...): Performs the render_with_playwright operation for this fetcher.
 
+		Attributes:
+			use_playwright (Optional[ bool ]): Whether browser-backed retrieval is enabled.
+			browser_context (Optional[ Any ]): Configured browser session for page retrieval.
+	
+			raw_url (Any): Original URL before provider normalization.
+			raw_html (Any): HTML content retrieved from the original URL.
 	'''
 	use_playwright: Optional[ bool ]
 	browser_context: Optional[ Any ]
@@ -837,18 +842,14 @@ class WebCrawler( WebFetcher ):
 		'''
 		
 			Purpose:
-			-------
-			Initialize crawler. By default prefer `crawl4ai` when available and
-			only enable Playwright when `use_playwright=True`.
+				Initialize crawler. By default prefer `crawl4ai` when available and
+				only enable Playwright when `use_playwright=True`.
 				
-			Parameters:
-			-----------
-			headers (Optional[Dict[str, str]]): Optional headers.
+			Args:
+				headers (Optional[Dict[str, str]]): Optional headers.
 				
 			Returns:
-			--------
-			None
-			
+				None
 		'''
 		super( ).__init__( )
 		self.browser_context = None
@@ -861,17 +862,13 @@ class WebCrawler( WebFetcher ):
 		'''
 		
 			Purpose:
-			-----------
-			Ordering for WebCrawler introspection.
+				Ordering for WebCrawler introspection.
 			
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 			
 			Returns:
-			-----------
-			list[str]: Ordered attribute/method names.
-			
+				list[str]: Ordered attribute/method names.
 		'''
 		return [ 'use_playwright', 'browser_context', 'fetch',
 		         'html_to_text', 'render_with_playwright' ]
@@ -880,20 +877,19 @@ class WebCrawler( WebFetcher ):
 		'''
 			
 			Purpose:
-			-------
-			Try `crawl4ai` (if installed) to fetch JS-rendered content. If not
-			available or it returns empty, fall back to the synchronous fetch or
-			(optionally) to Playwright rendering.
+				Try `crawl4ai` (if installed) to fetch JS-rendered content. If not
+				available or it returns empty, fall back to the synchronous fetch or
+				(optionally) to Playwright rendering.
 				
-			Parameters:
-			-------
-			url (str): Absolute URL to fetch.
-			time (int): Timeout seconds.
+			Args:
+				url (str): Absolute URL to fetch.
+				time (int): Timeout seconds.
 				
 			Returns:
-			-------
-			Optional[Result]: Result with url, status, text, html, headers on success.
-				
+				Optional[Result]: Result with url, status, text, html, headers on success.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -939,19 +935,18 @@ class WebCrawler( WebFetcher ):
 		'''
 		
 			Purpose:
-			-----------
-			Render the page with Playwright (synchronous API) and return the page HTML.
-			This method imports Playwright lazily so the package is optional.
+				Render the page with Playwright (synchronous API) and return the page HTML.
+				This method imports Playwright lazily so the package is optional.
 			
-			Parameters:
-			-----------
-			url (str): URL to render.
-			timeout (int): Timeout seconds for render.
+			Args:
+				url (str): URL to render.
+				timeout (int): Timeout seconds for render.
 			
 			Returns:
-			-----------
-			str: Rendered HTML of the page.
-			
+				str: Rendered HTML of the page.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -975,11 +970,9 @@ class ArXiv( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches ArXiv documents through the LangChain ArxivRetriever.
+			Fetches ArXiv documents through the LangChain ArxivRetriever.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		fetcher,
 		documents,
 		max_documents,
@@ -992,6 +985,15 @@ class ArXiv( Fetcher ):
 		__init__(...): Performs the __init__ operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 
+		Attributes:
+			fetcher (Optional[ ArxivRetriever ]): Provider-specific retrieval client.
+			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
+			max_documents (Optional[ int ]): Maximum number of documents requested from the retriever.
+			full_documents (Optional[ bool ]): Whether full papers rather than abstracts are returned.
+			include_metadata (Optional[ bool ]): Whether supplementary result metadata is included.
+			query (Optional[ str ]): Current query or search expression.
+	
+			question (Any): Active text query used for retrieval.
 	'''
 	fetcher: Optional[ ArxivRetriever ]
 	documents: Optional[ List[ Document ] ]
@@ -1002,6 +1004,19 @@ class ArXiv( Fetcher ):
 	
 	def __init__( self, max_documents: int=5, full_documents: bool=False,
 			include_metadata: bool=False ) -> None:
+		"""Initialize ArXiv provider state.
+
+		Purpose:
+			Initialize ArXiv provider state.
+
+		Args:
+			max_documents (int): max documents value for the ArXiv operation.
+			full_documents (bool): full documents value for the ArXiv operation.
+			include_metadata (bool): include metadata value for the ArXiv operation.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.fetcher = None
 		self.documents = None
@@ -1010,34 +1025,29 @@ class ArXiv( Fetcher ):
 		self.full_documents = full_documents
 		self.include_metadata = include_metadata
 	
-	def fetch( self, question: str, max_documents: int=None,
-			full_documents: bool=None, include_metadata: bool=None ) -> List[ Document ] | None:
+	def fetch( self, question: str, max_documents: Optional[ int ]=None,
+			full_documents: Optional[ bool ]=None, include_metadata: Optional[ bool ]=None ) -> List[ Document ] | None:
 		'''
 
 			Purpose:
-			--------
-			Query ArXiv through LangChain's ArxivRetriever and return LangChain
-			Document objects.
+				Query ArXiv through LangChain's ArxivRetriever and return LangChain
+				Document objects.
 
-			Parameters:
-			-----------
-			question: str
-			Free-text search query or arXiv identifier.
+			Args:
+				question (str): Free-text search query or arXiv identifier.
 			
-			max_documents: int
-			Optional override for maximum number of returned documents.
+				max_documents (int): Optional override for maximum number of returned documents.
 			
-			full_documents:  bool
-			Optional override indicating whether full document text should  be fetched instead of
-			summary-oriented retrieval.
+				full_documents (bool): Optional override indicating whether full document text should  be fetched instead of
+				summary-oriented retrieval.
 			
-			include_metadata: bool
-			Optional override indicating whether all available metadata should be included.
+				include_metadata (bool): Optional override indicating whether all available metadata should be included.
 
 			Returns:
-			--------
-			List[Document] | None
+				List[Document] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'question', question )
@@ -1062,18 +1072,16 @@ class ArXiv( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ArXiv'
-			exception.method =  'fetch( self, *kwargs ) -> List[ Document ]'
+			exception.method =  'ArXiv.fetch'
 			raise exception
 
 class GoogleDrive( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Google Drive documents through the LangChain GoogleDriveRetriever.
+			Fetches Google Drive documents through the LangChain GoogleDriveRetriever.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		fetcher,
 		documents,
 		num_results,
@@ -1091,6 +1099,17 @@ class GoogleDrive( Fetcher ):
 		mode_options(...): Performs the mode_options operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 
+		Attributes:
+			fetcher (Optional[ GoogleDriveRetriever ]): Provider-specific retrieval client.
+			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
+			num_results (Optional[ int ]): Maximum number of matches requested.
+			folder_id (Optional[ str ]): Identifier of the selected remote folder.
+			template (Optional[ str ]): Document or query template used for extraction.
+			query (Optional[ str ]): Current query or search expression.
+			mime_type (Optional[ str ]): MIME type used to identify the resource.
+			mode (Optional[ str ]): Selected request or operation mode.
+	
+			question (Any): Active text query used for retrieval.
 	'''
 	fetcher: Optional[ GoogleDriveRetriever ]
 	documents: Optional[ List[ Document ] ]
@@ -1102,6 +1121,14 @@ class GoogleDrive( Fetcher ):
 	mode: Optional[ str ]
 	
 	def __init__( self ) -> None:
+		"""Initialize GoogleDrive provider state.
+
+		Purpose:
+			Initialize GoogleDrive provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.fetcher = None
 		self.documents = None
@@ -1117,13 +1144,10 @@ class GoogleDrive( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Return supported MIME types aligned to the Google Drive retriever docs.
+				Return supported MIME types aligned to the Google Drive retriever docs.
 		
 			Returns:
-			--------
-			List[str]
-		
+				List[str]
 		'''
 		return [ '', 'text/text', 'text/plain', 'text/html', 'text/csv', 'text/markdown',
 				'image/png', 'image/jpeg', 'application/epub+zip', 'application/pdf',
@@ -1138,13 +1162,10 @@ class GoogleDrive( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Return predefined template options supported by GoogleDriveRetriever.
+				Return predefined template options supported by GoogleDriveRetriever.
 		
 			Returns:
-			--------
-			List[str]
-		
+				List[str]
 		'''
 		return [ 'gdrive-all-in-folder', 'gdrive-query', 'gdrive-by-name', 'gdrive-query-in-folder',
 				'gdrive-mime-type', 'gdrive-mime-type-in-folder', 'gdrive-query-with-mime-type',
@@ -1155,13 +1176,10 @@ class GoogleDrive( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Return supported retrieval display modes.
+				Return supported retrieval display modes.
 		
 			Returns:
-			--------
-			List[str]
-		
+				List[str]
 		'''
 		return [ 'documents', 'snippets' ]
 	
@@ -1169,31 +1187,31 @@ class GoogleDrive( Fetcher ):
 			mime_type: Optional[ str ]=None, mode: str='documents' ) -> List[ Document ] | None:
 		'''Query Google Drive through LangChain's GoogleDriveRetriever and return LangChain Document objects.
 		
-			Parameters:
-			-----------
-			question: str
-				Free-text query used by the retriever. For templates that do not
+			Args:
+				question (str): Free-text query used by the retriever. For templates that do not
 				require a query, a placeholder value may still be passed.
 				
-			folder_id: str
-				Google Drive folder id. Use 'root' for the user's root Drive.
+				folder_id (str): Google Drive folder id. Use 'root' for the user's root Drive.
 				
-			results: int
-				Maximum number of returned documents.
+				results (int): Maximum number of returned documents.
 				
-			template: str
-				Predefined GoogleDriveRetriever selection template.
+				template (str): Predefined GoogleDriveRetriever selection template.
 				
 			mime_type:
 				Optional MIME type filter.
 				
-			mode: str
-				Retrieval mode, typically 'documents' or 'snippets'.
+			mode (str): Retrieval mode, typically 'documents' or 'snippets'.
 		
 			Returns:
-			--------
-			List[Document] | None
+				List[Document] | None
 		
+		
+
+		Purpose:
+			Query Google Drive through LangChain's GoogleDriveRetriever and return LangChain Document objects. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			if not isinstance( question, str ):
@@ -1252,18 +1270,16 @@ class GoogleDrive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleDrive'
-			exception.method = 'fetch( self, *kwargs ) -> List[ Document ]'
+			exception.method = 'GoogleDrive.fetch'
 			raise exception
 
 class Wikipedia( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Wikipedia documents through the LangChain WikipediaRetriever.
+			Fetches Wikipedia documents through the LangChain WikipediaRetriever.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		fetcher,
 		documents,
 		max_documents,
@@ -1276,6 +1292,15 @@ class Wikipedia( Fetcher ):
 		__init__(...): Performs the __init__ operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 
+		Attributes:
+			fetcher (Optional[ WikipediaRetriever ]): Provider-specific retrieval client.
+			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
+			max_documents (Optional[ int ]): Maximum number of documents requested from the retriever.
+			include_metadata (Optional[ bool ]): Whether supplementary result metadata is included.
+			language (Optional[ str ]): Language code used for retrieval.
+			query (Optional[ str ]): Current query or search expression.
+	
+			question (Any): Active text query used for retrieval.
 	'''
 	fetcher: Optional[ WikipediaRetriever ]
 	documents: Optional[ List[ Document ] ]
@@ -1286,6 +1311,19 @@ class Wikipedia( Fetcher ):
 	
 	def __init__( self, language: str='en', max_documents: int=5,
 			include_metadata: bool=False ) -> None:
+		"""Initialize Wikipedia provider state.
+
+		Purpose:
+			Initialize Wikipedia provider state.
+
+		Args:
+			language (str): language value for the Wikipedia operation.
+			max_documents (int): max documents value for the Wikipedia operation.
+			include_metadata (bool): include metadata value for the Wikipedia operation.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.fetcher = None
 		self.documents = None
@@ -1307,9 +1345,8 @@ class Wikipedia( Fetcher ):
 			Query Wikipedia through LangChain's WikipediaRetriever and return
 			LangChain Document objects.
 
-			Parameters:
-			-----------
-			question:
+			Args:
+				question:
 				Free-text Wikipedia query.
 				
 			language:
@@ -1324,9 +1361,15 @@ class Wikipedia( Fetcher ):
 				should be included.
 
 			Returns:
-			--------
-			List[Document] | None
+				List[Document] | None
 
+		
+
+		Purpose:
+			Query Wikipedia through LangChain's WikipediaRetriever and return LangChain Document objects.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'question', question )
@@ -1357,16 +1400,24 @@ class Wikipedia( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'Wikipedia'
-			exception.method = 'fetch( self, question: str, **kwargs ) -> List[ Document ]'
+			exception.method = 'Wikipedia.fetch'
 			raise exception
 
 class TheNews( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides a structured wrapper around The News API endpoints.
+			Provides a structured wrapper around The News API endpoints.
 
+		Attributes:
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			response (Optional[ Response ]): Most recent HTTP response.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			endpoint (Optional[ str ]): Selected provider API resource path.
+			limit (Optional[ int ]): Maximum records requested.
+			page (Optional[ int ]): Requested results page.
 	'''
 	agents: Optional[ str ]
 	url: Optional[ str ]
@@ -1380,9 +1431,12 @@ class TheNews( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize The News API wrapper with sane defaults and environment-
-			based authentication.
+				Initialize The News API wrapper with sane defaults and environment-
+				based authentication.
+		
+
+		Returns:
+			None: Completes the operation through provider or instance state.
 		'''
 		super( ).__init__( )
 		self.timeout = 10
@@ -1406,6 +1460,13 @@ class TheNews( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Return visible member ordering.
+		
+
+		Purpose:
+			Return visible member ordering.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
 		'''
 		return [ 'api_key', 'url', 'timeout', 'headers', 'endpoint',
 		         'limit', 'page', 'params', 'fetch', ]
@@ -1415,12 +1476,11 @@ class TheNews( Fetcher ):
 			source_ids: str='', exclude_source_ids: str='', published_after: str='',
 			published_before: str='', published_on: str='', sort: str='published_at',
 			limit: int=10, page: int=1, include_similar: bool=True, headlines_per_category: int=6,
-			time: int=10, api_key: str=None ) -> Dict[ str, Any ] | None:
+			time: int=10, api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''Send a request to The News API using one of the documented endpoints and return the parsed JSON response.
 
-			Parameters:
-			-----------
-			endpoint:
+			Args:
+				endpoint:
 				One of: all, top, headlines, sources
 				
 			query:
@@ -1481,8 +1541,14 @@ class TheNews( Fetcher ):
 				Optional runtime override. Falls back to cfg.THENEWS_API_KEY.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Send a request to The News API using one of the documented endpoints and return the parsed JSON response. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.endpoint = (endpoint or 'all').strip( ).lower( )
@@ -1591,18 +1657,16 @@ class TheNews( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'TheNews'
-			exception.method =  'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method =  'TheNews.fetch'
 			raise exception
 
 class GoogleSearch( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Google Custom Search results.
+			Fetches Google Custom Search results.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		keywords,
 		url,
 		re_tag,
@@ -1619,7 +1683,20 @@ class GoogleSearch( Fetcher ):
 		__init__(...): Performs the __init__ operation for this fetcher.
 		__dir__(...): Performs the __dir__ operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
+
+		Attributes:
+			keywords (Optional[ str ]): Keywords supplied for text retrieval.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			re_tag (Optional[ Pattern ]): Regular expression used to match HTML tags.
+			re_ws (Optional[ Pattern ]): Regular expression used to normalize whitespace.
+			response (Optional[ Response ]): Most recent HTTP response.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			cse_id (Optional[ str ]): Google Custom Search Engine identifier.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			results (Optional[ int ]): Collection of provider results.
+			start (Optional[ int ]): Starting offset or date for the provider request.
 	
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
 	'''
 	keywords: Optional[ str ]
 	url: Optional[ str ]
@@ -1635,12 +1712,10 @@ class GoogleSearch( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize GoogleSearch with environment-based credentials and sane defaults.
+				Initialize GoogleSearch with environment-based credentials and sane defaults.
 
 			Returns:
-			-----------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.GOOGLE_API_KEY
@@ -1666,8 +1741,11 @@ class GoogleSearch( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Control visible ordering for GoogleSearch.
+				Control visible ordering for GoogleSearch.
+		
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
 		'''
 		return [ 'keywords', 'url', 'timeout', 'headers', 'fetch', 'api_key',
 		         'response', 'cse_id', 'params', 'agents', 'results', 'start', ]
@@ -1677,18 +1755,16 @@ class GoogleSearch( Fetcher ):
 			file_type: str='', date_restrict: str='', gl: str='', lr: str='',
 			safe: str='off', search_type: str='', site_search: str='', site_search_filter: str='',
 			sort: str='', img_size: str='', img_type: str='', img_color_type: str='',
-			img_dominant_color: str='', time: int=10, api_key: str=None,
-			cse_id: str=None ) -> Dict[ str, Any ] | None:
+			img_dominant_color: str='', time: int=10, api_key: Optional[ str ]=None,
+			cse_id: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''
 
 			Purpose:
-			--------
-			Send a request to the Google Custom Search JSON API and return the
-			parsed JSON response.
+				Send a request to the Google Custom Search JSON API and return the
+				parsed JSON response.
 
-			Parameters:
-			-----------
-			keywords:
+			Args:
+				keywords:
 				Search query string.
 			results:
 				Number of results per request. Google supports up to 10 per request.
@@ -1733,9 +1809,10 @@ class GoogleSearch( Fetcher ):
 				Optional runtime override. Falls back to cfg.GOOGLE_CSE_ID.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'keywords', keywords )
@@ -1821,11 +1898,9 @@ class GoogleMaps( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides Google Maps geocoding, validation, and directions requests.
+			Provides Google Maps geocoding, validation, and directions requests.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		file_path,
 		headers,
 		num_results,
@@ -1847,6 +1922,33 @@ class GoogleMaps( Fetcher ):
 		request_directions(...): Performs the request_directions operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			file_path (Optional[ str ]): Path of the current source or output file.
+			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
+			num_results (Optional[ int ]): Maximum number of matches requested.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			coordinates (Optional[ Tuple[ float, float ] ]): Geographic or celestial coordinates of the requested location.
+			address (Optional[ str ]): Address text supplied for geocoding.
+			directions (Optional[ str ]): Most recent routing directions response.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			fetcher (Any): Configured provider-specific retrieval client.
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
+			payload (Any): Parsed provider payload from the latest request.
+			status (Any): Status returned by the latest provider operation.
+			results (Any): Most recent collection of provider results.
+			message (Any): Provider status or error message.
+			origin (Any): Starting point of a routing request.
+			destination (Any): Ending point of a routing request.
+			routes (Any): Routes returned by the directions service.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	file_path: Optional[ str ]
 	headers: Optional[ Dict[ str, Any ] ]
@@ -1861,6 +1963,14 @@ class GoogleMaps( Fetcher ):
 	params: Optional[ Dict[ str, Any ] ]
 	
 	def __init__( self ) -> None:
+		"""Initialize GoogleMaps provider state.
+
+		Purpose:
+			Initialize GoogleMaps provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.api_key = cfg.GOOGLEMAPS_API_KEY
 		self.headers = { }
@@ -1881,16 +1991,16 @@ class GoogleMaps( Fetcher ):
 	def geocode_location( self, address: str ) -> Tuple[ float, float ]:
 		'''
 			Purpose:
-			--------
-			Resolve an address to latitude and longitude using Google Geocoding.
+				Resolve an address to latitude and longitude using Google Geocoding.
 
-			Parameters:
-			-----------
-			address (str): Location or address to geocode.
+			Args:
+				address (str): Location or address to geocode.
 
 			Returns:
-			--------
-			Tuple[float, float]: Latitude and longitude.
+				Tuple[float, float]: Latitude and longitude.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -1925,15 +2035,20 @@ class GoogleMaps( Fetcher ):
 	def geocode_coordinates( self, lat: float, long: float ) -> str | None:
 		'''Uses the Google Maps API to get address from coordinates.
 
-			Parameters:
-			-----------
-			lat (float): The geographic latitude of a given location
-			long (floa): The geographic longitude of a given location
+			Args:
+				lat (float): The geographic latitude of a given location
+				long (floa): The geographic longitude of a given location
 
 			Returns:
-			--------
-			List[ Document ]: List of Document objects parsed from HTML content.
+				List[ Document ]: List of Document objects parsed from HTML content.
 
+		
+
+		Purpose:
+			Uses the Google Maps API to get address from coordinates. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -1974,17 +2089,16 @@ class GoogleMaps( Fetcher ):
 		"""
 			
 			Purpose:
-			--------
-			Validate an address using Google's Address Validation API.
+				Validate an address using Google's Address Validation API.
 	
-			Parameters:
-			-----------
-			address (list): List of address lines (e.g. ["1600 Amphitheatre Parkway"]).
+			Args:
+				address (list): List of address lines (e.g. ["1600 Amphitheatre Parkway"]).
 	
 			Returns:
-			--------
-			dict: Parsed JSON response from Google.
-			
+				dict: Parsed JSON response from Google.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'address', address )
@@ -2018,20 +2132,19 @@ class GoogleMaps( Fetcher ):
 		"""
 		
 			Purpose:
-			----------
-			Request route directions from Google Maps Directions API.
+				Request route directions from Google Maps Directions API.
 		
-			Parameters:
-			-----------
-			api_key     (str): Google Maps Platform API key.
-			origin      (str): Starting location (address or lat,lng).
-			destination (str): Ending location (address or lat,lng).
-			mode        (str): travel mode: 'driving', 'walking', bicycling', or 'transit'.
+			Args:
+				api_key     (str): Google Maps Platform API key.
+				origin      (str): Starting location (address or lat,lng).
+				destination (str): Ending location (address or lat,lng).
+				mode        (str): travel mode: 'driving', 'walking', bicycling', or 'transit'.
 		
 			Returns:
-			---------
-			dict: Parsed JSON response from Google Directions API.
-			
+				dict: Parsed JSON response from Google Directions API.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'origin', origin )
@@ -2078,25 +2191,23 @@ class GoogleMaps( Fetcher ):
 		"""
 
 			Purpose:
-			________
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
-			Supports arbitrary parameters, types, nested objects, and required fields.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Supports arbitrary parameters, types, nested objects, and required fields.
 
-			Parameters:
-			___________
-			function (str):
-			The function name exposed to the LLM.
+			Args:
+				function (str):
+				The function name exposed to the LLM.
 
-			tool (str):
-			The underlying system or service the function wraps
-			(e.g., “Google Maps”, “SQLite”, “Weather API”).
+				tool (str):
+				The underlying system or service the function wraps
+				(e.g., “Google Maps”, “SQLite”, “Weather API”).
 
-			description (str):
-			Precise explanation of what the function does.
+				description (str):
+				Precise explanation of what the function does.
 
-			parameters (dict):
-			A dictionary defining parameter names and JSON schema descriptors.
-			Each value must itself be a valid JSON-schema fragment.
+				parameters (dict):
+				A dictionary defining parameter names and JSON schema descriptors.
+				Each value must itself be a valid JSON-schema fragment.
 
 				Example:
 					{
@@ -2120,10 +2231,11 @@ class GoogleMaps( Fetcher ):
 			If None, required = list(parameters.keys()).
 
 			Returns:
-			________
-			dict:
-			A JSON-compatible dictionary defining the tool schema.
+				dict:
+				A JSON-compatible dictionary defining the tool schema.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -2173,11 +2285,9 @@ class GoogleWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides Google Weather current, forecast, and alert requests.
+			Provides Google Weather current, forecast, and alert requests.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		gmaps,
 		headers,
 		api_key,
@@ -2201,6 +2311,22 @@ class GoogleWeather( Fetcher ):
 		fetch_daily_forecast(...): Performs the fetch_daily_forecast operation for this fetcher.
 		fetch_alerts(...): Performs the fetch_alerts operation for this fetcher.
 
+		Attributes:
+			gmaps (Optional[ GoogleMaps ]): Google Maps SDK or service client.
+			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			coordinates (Optional[ Tuple[ float, float ] ]): Geographic or celestial coordinates of the requested location.
+			address (Optional[ str ]): Address text supplied for geocoding.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			response (Optional[ Response ]): Most recent HTTP response.
+			result (Optional[ Dict[ str, Any ] ]): Normalized result of the latest request.
+	
+			fetcher (Any): Configured provider-specific retrieval client.
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
+			path (Any): Resource path used for the current request.
 	'''
 	gmaps: Optional[ GoogleMaps ]
 	headers: Optional[ Dict[ str, Any ] ]
@@ -2215,6 +2341,14 @@ class GoogleWeather( Fetcher ):
 	result: Optional[ Dict[ str, Any ] ]
 	
 	def __init__( self ) -> None:
+		"""Initialize GoogleWeather provider state.
+
+		Purpose:
+			Initialize GoogleWeather provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.api_key = cfg.GOOGLE_WEATHER_API_KEY
 		self.headers = { }
@@ -2239,6 +2373,14 @@ class GoogleWeather( Fetcher ):
 			self.headers[ 'Accept' ] = 'application/json'
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available GoogleWeather members.
+
+		Purpose:
+			List available GoogleWeather members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [ 'api_key', 'url', 'timeout', 'headers', 'fetch_current',
 				'fetch_hourly_forecast', 'fetch_daily_forecast', 'fetch_alerts', ]
 	
@@ -2246,19 +2388,18 @@ class GoogleWeather( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Resolve a user-supplied address into latitude and longitude by using
-			the existing GoogleMaps helper.
+				Resolve a user-supplied address into latitude and longitude by using
+				the existing GoogleMaps helper.
 			
 			
-			Parameters:
-			-----------
-			str: address
+			Args:
+				str: address
 		
 			Returns:
-			--------
-			Tuple[float, float]
-		
+				Tuple[float, float]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2280,21 +2421,20 @@ class GoogleWeather( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Send a GET request to a Google Weather API endpoint and return JSON.
+				Send a GET request to a Google Weather API endpoint and return JSON.
 			
 			
-			Parameters:
-			-----------
-			path (str): the uri
-			params (dict): the parameters of the request
-			time (int):  the requests timeout
+			Args:
+				path (str): the uri
+				params (dict): the parameters of the request
+				time (int):  the requests timeout
 			
 		
 			Returns:
-			--------
-			Dict[str, Any] | None
-		
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'path', path )
@@ -2333,12 +2473,10 @@ class GoogleWeather( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Retrieve current weather conditions for an address.
+				Retrieve current weather conditions for an address.
 			
 			
-			Parameters:
-			-----------
+			Args:
 				address (str) - The physical address of a location.
 				units_system (str) - The metric system used in a forecast.
 				language_code (str) - The language used in the results.
@@ -2346,9 +2484,10 @@ class GoogleWeather( Fetcher ):
 			
 		
 			Returns:
-			--------
-			Dict[str, Any] | None
-		
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2369,12 +2508,10 @@ class GoogleWeather( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Retrieve hourly weather forecast for an address.
+				Retrieve hourly weather forecast for an address.
 			
 			
-			Parameters:
-			-----------
+			Args:
 				address (str) - The physical address of a location.
 				hours (int) - The metric system used in a forecast.
 				units_system (str) - The system of metrics used.
@@ -2383,9 +2520,10 @@ class GoogleWeather( Fetcher ):
 		
 			
 			Returns:
-			--------
-			Dict[str, Any] | None
-		
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2407,12 +2545,10 @@ class GoogleWeather( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Retrieve daily weather forecast for an address.
+				Retrieve daily weather forecast for an address.
 			
 			
-			Parameters:
-			-----------
+			Args:
 				address (str) - The physical address of a location.
 				days (int) - The number of days for the forecase
 				units_system (str) - The system of metrics used.
@@ -2422,9 +2558,10 @@ class GoogleWeather( Fetcher ):
 			
 		
 			Returns:
-			--------
-			Dict[str, Any] | None
-		
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2446,17 +2583,22 @@ class GoogleWeather( Fetcher ):
 		'''Retrieve public weather alerts for an address.
 			
 			
-			Parameters:
-			-----------
+			Args:
 				address (str) - The physical address of a location.
 				language_code (str) - The language used in the results.
 				time (int) - The amount of time given for returning a forecast.
 		
 		
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 		
+		
+
+		Purpose:
+			Retrieve public weather alerts for an address. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'address', address )
@@ -2475,8 +2617,7 @@ class GoogleWeather( Fetcher ):
 class NavalObservatory( Fetcher ):
 	'''Fetches celestial-navigation data from the U.S. Naval Observatory API.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url,
 		url,
 		params,
@@ -2498,6 +2639,27 @@ class NavalObservatory( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+	
+
+		Purpose:
+			Provides the NavalObservatory provider interface and request handling.
+
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			date_value (Optional[ str ]): Normalized date value used in the query.
+			time_value (Optional[ str ]): Normalized time value used in the query.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			location_label (Optional[ str ]): Display label associated with the geographic location.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
@@ -2512,16 +2674,13 @@ class NavalObservatory( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the Naval Observatory fetcher with current API defaults.
+				Initialize the Naval Observatory fetcher with current API defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -2541,16 +2700,13 @@ class NavalObservatory( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [ 'base_url', 'url', 'params', 'date_value', 'time_value', 'latitude', 'longitude', 
 		         'location_label', 'fetch_celnav', 'fetch', 'create_schema' ]
@@ -2558,14 +2714,19 @@ class NavalObservatory( Fetcher ):
 	def validate_date( self, date_value: str ) -> str:
 		'''Validate and normalize a USNO date string.
 
-			Parameters:
-			-----------
-			date_value (str):
+			Args:
+				date_value (str):
 				Date in YYYY-MM-DD format.
 
 			Returns:
-			--------
-			str
+				str
+		
+
+		Purpose:
+			Validate and normalize a USNO date string. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'date_value', date_value )
@@ -2584,14 +2745,19 @@ class NavalObservatory( Fetcher ):
 	def validate_time( self, time_value: str ) -> str:
 		'''Validate and normalize a USNO time string.
 
-			Parameters:
-			-----------
-			time_value (str):
+			Args:
+				time_value (str):
 				Time in HH:MM, HH:MM:SS, or HH:MM:SS.S format.
 
 			Returns:
-			--------
-			str
+				str
+		
+
+		Purpose:
+			Validate and normalize a USNO time string. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'time_value', time_value )
@@ -2618,17 +2784,22 @@ class NavalObservatory( Fetcher ):
 	def validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]:
 		'''Validate latitude and longitude against documented decimal-degree ranges.
 
-			Parameters:
-			-----------
-			latitude (float):
+			Args:
+				latitude (float):
 				Latitude in decimal degrees.
 
-			longitude (float):
+				longitude (float):
 				Longitude in decimal degrees.
 
 			Returns:
-			--------
-			tuple[float, float]
+				tuple[float, float]
+		
+
+		Purpose:
+			Validate latitude and longitude against documented decimal-degree ranges. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -2656,30 +2827,35 @@ class NavalObservatory( Fetcher ):
 			longitude: float, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch celestial navigation data for an assumed position and time.
 
-			Parameters:
-			-----------
-			date_value (str):
+			Args:
+				date_value (str):
 				Date in YYYY-MM-DD format.
 
-			time_value (str):
+				time_value (str):
 				Time in HH:MM, HH:MM:SS, or HH:MM:SS.S format.
 
-			latitude (float):
+				latitude (float):
 				Latitude in decimal degrees. North positive.
 
-			longitude (float):
+				longitude (float):
 				Longitude in decimal degrees. East positive.
 
-			location_label (str):
+				location_label (str):
 				Optional client-side label preserved in the result payload.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 			
+		
+
+		Purpose:
+			Fetch celestial navigation data for an assumed position and time. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'longitude', longitude )
@@ -2719,9 +2895,8 @@ class NavalObservatory( Fetcher ):
 			location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Unified dispatcher for Naval Observatory requests.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Currently supported:
 				- celnav
 
@@ -2744,8 +2919,14 @@ class NavalObservatory( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Unified dispatcher for Naval Observatory requests. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'celnav').strip( ).lower( )
@@ -2759,33 +2940,38 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NavalObservatory.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+		
+
+		Purpose:
+			Construct and return a fully dynamic OpenAI Tool API schema definition. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -2830,8 +3016,7 @@ class NavalObservatory( Fetcher ):
 class SatelliteCenter( Fetcher ):
 	'''Fetches satellite observatory, ground-station, and location data from SSC Web Services.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		ssc,
 		url,
 		params,
@@ -2848,6 +3033,22 @@ class SatelliteCenter( Fetcher ):
 		fetch_locations(...): Performs the fetch_locations operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 	
+	
+
+		Purpose:
+			Provides the SatelliteCenter provider interface and request handling.
+
+		Attributes:
+			ssc (Optional[ SscWs ]): Satellite Situation Center web-service client.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			observatories (Optional[ List[ Dict[ str, Any ] ] ]): Observatory records returned by the provider.
+			ground_stations (Optional[ List[ Dict[ str, Any ] ] ]): Ground station records returned by the provider.
+			timeout (Optional[ int ]): Request timeout in seconds.
+	
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
+			start_time (Any): Beginning of the requested observation interval.
+			end_time (Any): End of the requested observation interval.
 	'''
 	ssc: Optional[ SscWs ]
 	url: Optional[ str ]
@@ -2857,6 +3058,14 @@ class SatelliteCenter( Fetcher ):
 	timeout: Optional[ int ]
 	
 	def __init__( self ) -> None:
+		"""Initialize SatelliteCenter provider state.
+
+		Purpose:
+			Initialize SatelliteCenter provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.ssc = None
 		self.url = 'https://sscweb.gsfc.nasa.gov/WS/sscr/2'
@@ -2874,6 +3083,14 @@ class SatelliteCenter( Fetcher ):
 			self.headers[ 'Accept' ] = 'application/json'
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available SatelliteCenter members.
+
+		Purpose:
+			List available SatelliteCenter members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [ 'url', 'timeout', 'headers', 'fetch_observatories', 'fetch_ground_stations',
 				'fetch_locations', 'fetch', ]
 	
@@ -2881,9 +3098,15 @@ class SatelliteCenter( Fetcher ):
 		"""Get descriptions of the observatories available from SSC.
 			
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+		
+
+		Purpose:
+			Get descriptions of the observatories available from SSC. Returns:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.ssc = SscWs( user_agent=self.agents, timeout=self.timeout )
@@ -2900,9 +3123,15 @@ class SatelliteCenter( Fetcher ):
 		"""Get descriptions of the ground stations available from SSC.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+		
+
+		Purpose:
+			Get descriptions of the ground stations available from SSC. Returns:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.ssc = SscWs( user_agent=self.agents, timeout=self.timeout )
@@ -2921,9 +3150,8 @@ class SatelliteCenter( Fetcher ):
 		"""Get location data for one or more observatories over a time range using the documented
 		SSC REST GET endpoint.
 
-			Parameters:
-			-----------
-			observatories:
+			Args:
+				observatories:
 				Comma-separated observatory identifiers such as "iss" or "mms1,mms2".
 				
 			start_time:
@@ -2942,9 +3170,15 @@ class SatelliteCenter( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+		
+
+		Purpose:
+			Get location data for one or more observatories over a time range using the documented SSC REST GET endpoint.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'observatories', observatories )
@@ -2980,9 +3214,24 @@ class SatelliteCenter( Fetcher ):
 		"""Unified dispatch method for Satellite Center requests.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+		
+
+		Purpose:
+			Unified dispatch method for Satellite Center requests. Returns:
+
+		Args:
+			mode (str): mode value for the SatelliteCenter operation.
+			query (str): query value for the SatelliteCenter operation.
+			start_time (str): start time value for the SatelliteCenter operation.
+			end_time (str): end time value for the SatelliteCenter operation.
+			coordinate_systems (str): coordinate systems value for the SatelliteCenter operation.
+			resolution_factor (int): resolution factor value for the SatelliteCenter operation.
+			time (int): time value for the SatelliteCenter operation.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			active_mode = (mode or 'observatories').strip( ).lower( )
@@ -3002,25 +3251,24 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'fetch( self, *kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'SatelliteCenter.fetch'
 			raise exception
 
 class EarthObservatory( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		NASA Earth Observatory's Natural Event Tracker (EONET) allows users to access imagery,
-		often in near real-time (NRT), of natural events such as dust storms, forest fires, and
-		tropical cyclones—empowering people all across the planet to locate, track, and potentially
-		prepare for and manage events that affect communities in their paths.
-		Version 3 API for events, categories, sources, and layers.
+			NASA Earth Observatory's Natural Event Tracker (EONET) allows users to access imagery,
+			often in near real-time (NRT), of natural events such as dust storms, forest fires, and
+			tropical cyclones—empowering people all across the planet to locate, track, and potentially
+			prepare for and manage events that affect communities in their paths.
+			Version 3 API for events, categories, sources, and layers.
 
-		This class is aligned to the current documented EONET v3 API and supports:
-		- events
-		- categories
-		- sources
-		- layers
+			This class is aligned to the current documented EONET v3 API and supports:
+			- events
+			- categories
+			- sources
+			- layers
 
 		Referenced API Requirements:
 		----------------------------
@@ -3049,8 +3297,7 @@ class EarthObservatory( Fetcher ):
 			Optional category-specific path:
 				https://eonet.gsfc.nasa.gov/api/v3/layers/{category}
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url: Optional[str]
 			Base EONET API URL.
 
@@ -3116,6 +3363,25 @@ class EarthObservatory( Fetcher ):
 		create_schema(...) -> Dict[str, str] | None
 			Construct a dynamic tool schema.
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			status (Optional[ str ]): Status returned by the latest provider operation.
+			category (Optional[ str ]): Classification used to select the provider data.
+			source (Optional[ str ]): Provider or source identifier.
+			days (Optional[ int ]): Number of days included in the query.
+			limit (Optional[ int ]): Maximum records requested.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
@@ -3133,16 +3399,13 @@ class EarthObservatory( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the EONET fetcher with current API defaults.
+				Initialize the EONET fetcher with current API defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -3165,16 +3428,13 @@ class EarthObservatory( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -3200,35 +3460,40 @@ class EarthObservatory( Fetcher ):
 			days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]:
 		'''Fetch EONET events using documented v3 filters.
 
-			Parameters:
-			-----------
-			status (str):
+			Args:
+				status (str):
 				Event status filter. Typical values: open, closed, all.
 
-			category (str):
+				category (str):
 				Optional category slug or comma-separated category list.
 
-			source (str):
+				source (str):
 				Optional source id or comma-separated source ids.
 
-			limit (int):
+				limit (int):
 				Maximum number of events to return.
 
-			days (int):
+				days (int):
 				Number of prior days, including today, from which to return events.
 
-			start_date (str):
+				start_date (str):
 				Optional inclusive start date in YYYY-MM-DD format.
 
-			end_date (str):
+				end_date (str):
 				Optional inclusive end date in YYYY-MM-DD format.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch EONET events using documented v3 filters. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'events'
@@ -3278,20 +3543,25 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_events( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'EarthObservatory.fetch_events'
 			raise exception
 	
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch EONET category metadata.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch EONET category metadata. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'categories'
@@ -3319,14 +3589,19 @@ class EarthObservatory( Fetcher ):
 	def fetch_sources( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch EONET source metadata.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch EONET source metadata. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'sources'
@@ -3354,17 +3629,22 @@ class EarthObservatory( Fetcher ):
 	def fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch EONET layer metadata, optionally scoped to a category.
 
-			Parameters:
-			-----------
-			category (str):
+			Args:
+				category (str):
 				Optional category slug.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch EONET layer metadata, optionally scoped to a category. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'layers'
@@ -3392,45 +3672,50 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_layers( self, c**kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'EarthObservatory.fetch_layers'
 			raise exception
 	
 	def fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20,
 			days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]:
 		'''Unified dispatcher for EONET v3 operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of: events, categories, sources, layers
 
-			status (str):
+				status (str):
 				Event status filter for events mode.
 
-			category (str):
+				category (str):
 				Category filter for events mode or category path for layers mode.
 
-			source (str):
+				source (str):
 				Source filter for events mode.
 
-			limit (int):
+				limit (int):
 				Event record limit for events mode.
 
-			days (int):
+				days (int):
 				Prior-day window for events mode.
 
-			start_date (str):
+				start_date (str):
 				Optional start date in YYYY-MM-DD format.
 
-			end_date (str):
+				end_date (str):
 				Optional end date in YYYY-MM-DD format.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Unified dispatcher for EONET v3 operations. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'events').strip( ).lower( )
@@ -3452,7 +3737,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'EarthObservatory.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -3460,29 +3745,29 @@ class EarthObservatory( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -3519,14 +3804,13 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'create_schema( self, **args ) -> Dict[ str, str ]'
+			exception.method = 'EarthObservatory.create_schema'
 			raise exception
 			
 class GlobalImagery( Fetcher ):
 	'''Fetches and renders global imagery and WMS map service data.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		file_path,
 		api_key,
 		url,
@@ -3551,6 +3835,32 @@ class GlobalImagery( Fetcher ):
 		fetch_mercator_map(...): Performs the fetch_mercator_map operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 	
+	
+
+		Purpose:
+			Provides the GlobalImagery provider interface and request handling.
+
+		Attributes:
+			file_path (Optional[ str ]): Path of the current source or output file.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			coordinates (Optional[ Tuple[ float, float ] ]): Geographic or celestial coordinates of the requested location.
+			calendar_date (Optional[ dt.datetime ]): Calendar date for an astronomical calculation.
+			julian_date (Optional[ float ]): Julian date corresponding to an observation.
+			sidereal_time (Optional[ str ]): Sidereal time corresponding to the current observer.
+			utc_time (Optional[ dt.time ]): UTC timestamp of the observation.
+			local_time (Optional[ dt.time ]): Local time for the selected observation.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			era (Optional[ str ]): Historical era or date notation.
+			year (Optional[ str ]): Year used by the current request.
+			month (Optional[ str ]): Calendar month used in the query.
+			day (Optional[ str ]): Calendar day used in the query.
+	
+			mode (Any): Requested endpoint or output mode.
+			fetcher (Any): Configured provider-specific retrieval client.
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
 	'''
 	file_path: Optional[ str ]
 	api_key: Optional[ str ]
@@ -3570,6 +3880,14 @@ class GlobalImagery( Fetcher ):
 	day: Optional[ str ]
 	
 	def __init__( self ) -> None:
+		"""Initialize GlobalImagery provider state.
+
+		Purpose:
+			Initialize GlobalImagery provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.api_key = cfg.NASA_API_KEY
 		self.mode = None
@@ -3593,14 +3911,19 @@ class GlobalImagery( Fetcher ):
 		'''Fetch a representative NASA GIBS Web Map Service image using the configured
 			global imagery endpoint and default corrected reflectance layer.
 		
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 		
 			Returns:
-			--------
-			Any | None: The fetched map image object or None when the request fails.
+				Any | None: The fetched map image object or None when the request fails.
 		
+		
+
+		Purpose:
+			Fetch a representative NASA GIBS Web Map Service image using the configured global imagery endpoint and default corrected reflectance layer.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			wms = WebMapService( 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?',
@@ -3627,15 +3950,20 @@ class GlobalImagery( Fetcher ):
 		'''Fetch a NASA GIBS Mercator map image and render it through the provided
 			Cartopy coordinate reference system module.
 		
-			Parameters:
-			-----------
-			ccrs (Any | None): Optional Cartopy coordinate reference system module used
-			to project and render the returned map image.
+			Args:
+				ccrs (Any | None): Optional Cartopy coordinate reference system module used
+				to project and render the returned map image.
 		
 			Returns:
-			--------
-			Any | None: The rendered map result or None when the request fails.
+				Any | None: The rendered map result or None when the request fails.
 		
+		
+
+		Purpose:
+			Fetch a NASA GIBS Mercator map image and render it through the provided Cartopy coordinate reference system module.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			proj3857 = 'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?\
@@ -3722,8 +4050,7 @@ class NearbyObjects( Fetcher ):
 				- date-min
 				- limit
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url: Optional[str]
 			Base SSD API URL.
 
@@ -3789,6 +4116,31 @@ class NearbyObjects( Fetcher ):
 		create_schema(...) -> Dict[str, str] | None
 			Construct a dynamic tool schema.
 
+	
+
+		Purpose:
+			Provides the NearbyObjects provider interface and request handling.
+
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			query (Optional[ str ]): Current query or search expression.
+			dist_max (Optional[ str ]): Maximum acceptable distance to a celestial target.
+			body (Optional[ str ]): Name of the celestial object or solar-system body.
+			sort (Optional[ str ]): Sorting expression applied to returned records.
+			limit (Optional[ int ]): Maximum records requested.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			designation (Any): Catalog designation of the selected object.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
@@ -3806,16 +4158,13 @@ class NearbyObjects( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the NearbyObjects fetcher with current JPL SSD defaults.
+				Initialize the NearbyObjects fetcher with current JPL SSD defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -3837,16 +4186,13 @@ class NearbyObjects( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [ 'base_url', 'url', 'params', 'mode', 'start_date', 'end_date', 'query',
 		         'dist_max', 'body', 'sort', 'limit', 'fetch_close_approaches',
@@ -3857,8 +4203,7 @@ class NearbyObjects( Fetcher ):
 			body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch close-approach data from the JPL SB Close Approach Data API.
 
-			Parameters:
-			-----------
+			Args:
 				start_date (str): Inclusive lower date bound in YYYY-MM-DD format.
 	
 				end_date (str): Inclusive upper date bound in YYYY-MM-DD format.
@@ -3874,8 +4219,14 @@ class NearbyObjects( Fetcher ):
 				time (int): Request timeout in seconds.
 
 			Returns:
-			--------
 				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch close-approach data from the JPL SB Close Approach Data API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'start_date', start_date )
@@ -3906,7 +4257,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_close_approaches( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_close_approaches'
 			raise exception
 	
 	def fetch_object_lookup( self, query: str, query_type: str='sstr',
@@ -3915,16 +4266,15 @@ class NearbyObjects( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch a single-object record from the JPL SBDB API.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Object identifier or name. Examples:
 				- Apophis
 				- Eros
 				- 2000 SG344
 				- 99942
 
-			query_type (str):
+				query_type (str):
 				Exactly one of:
 				- sstr
 				- spk
@@ -3946,8 +4296,14 @@ class NearbyObjects( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch a single-object record from the JPL SBDB API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -3984,39 +4340,44 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_object_lookup( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_object_lookup'
 			raise exception
 	
 	def fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045',
 			h: float=26.0, occ: int=7, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch NHATS summary data using standard screening constraints.
 
-			Parameters:
-			-----------
-			dv (float):
+			Args:
+				dv (float):
 				Maximum total delta-V in km/s.
 
-			dur (int):
+				dur (int):
 				Maximum mission duration in days.
 
-			stay (int):
+				stay (int):
 				Minimum stay duration in days.
 
-			launch (str):
+				launch (str):
 				Launch window year range. Example: 2020-2045.
 
-			h (float):
+				h (float):
 				Maximum H magnitude.
 
-			occ (int):
+				occ (int):
 				Maximum Orbit Condition Code.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch NHATS summary data using standard screening constraints. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'nhats_summary'
@@ -4046,38 +4407,43 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_summary( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_nhats_summary'
 			raise exception
 	
 	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8,
 			launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch NHATS details for a single object designation.
 
-			Parameters:
-			-----------
-			designation (str):
+			Args:
+				designation (str):
 				Designation of the NEO. Examples:
 				- 99942
 				- 2000 SG344
 
-			dv (float):
+				dv (float):
 				Maximum total delta-V in km/s.
 
-			dur (int):
+				dur (int):
 				Maximum mission duration in days.
 
-			stay (int):
+				stay (int):
 				Minimum stay duration in days.
 
-			launch (str):
+				launch (str):
 				Launch window year range.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch NHATS details for a single object designation. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'designation', designation )
@@ -4098,27 +4464,32 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_nhats_object( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_nhats_object'
 			raise exception
 	
 	def fetch_fireballs( self, date_min: str='', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Fetch atmospheric fireball records from the JPL Fireball API.
 
-			Parameters:
-			-----------
-			date_min (str):
+			Args:
+				date_min (str):
 				Optional lower date bound in YYYY-MM-DD or
 				YYYY-MM-DDThh:mm:ss format.
 
-			limit (int):
+				limit (int):
 				Maximum number of rows to return.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Fetch atmospheric fireball records from the JPL Fireball API. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'fireballs'
@@ -4141,7 +4512,7 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch_fireballs( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch_fireballs'
 			raise exception
 	
 	def fetch( self, mode: str='close_approaches', start_date: str='',
@@ -4154,9 +4525,8 @@ class NearbyObjects( Fetcher ):
 			include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''Unified dispatcher for JPL SSD / CNEOS NEO-related endpoints.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of:
 				- close_approaches
 				- object_lookup
@@ -4222,8 +4592,14 @@ class NearbyObjects( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+		
+
+		Purpose:
+			Unified dispatcher for JPL SSD / CNEOS NEO-related endpoints. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'close_approaches').strip( ).lower( )
@@ -4256,36 +4632,36 @@ class NearbyObjects( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'fetch( self, **kwargs) -> Dict[ str, Any ]'
+			exception.method = 'NearbyObjects.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'function', function )
@@ -4318,18 +4694,16 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = 'create_schema( self, **args) -> Dict[ str, str ]'
+			exception.method = 'NearbyObjects.create_schema'
 			raise exception
 
 class OpenScience( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches open-science dataset, metadata, assay, and data resources.
+			Fetches open-science dataset, metadata, assay, and data resources.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url,
 		url,
 		params,
@@ -4352,6 +4726,22 @@ class OpenScience( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			query_text (Optional[ str ]): Text of the active provider search.
+			format_value (Optional[ str ]): Requested response serialization format.
+			size (Optional[ int ]): Requested result size.
+			endpoint (Optional[ str ]): Selected provider API resource path.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			accession (Any): Scientific data accession identifier.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
@@ -4365,16 +4755,13 @@ class OpenScience( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the OpenScience fetcher with current OSDR defaults.
+				Initialize the OpenScience fetcher with current OSDR defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -4393,16 +4780,13 @@ class OpenScience( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [ 'base_url', 'url', 'params', 'query_text', 'format_value', 'size', 'endpoint',
 				'fetch_dataset', 'fetch_metadata', 'fetch_assays', 'fetch_data', 'fetch',
@@ -4411,17 +4795,17 @@ class OpenScience( Fetcher ):
 	def _validate_format( self, format_value: str ) -> str:
 		'''
 			Purpose:
-			--------
-			Validate output format for OSDR query endpoints.
+				Validate output format for OSDR query endpoints.
 
-			Parameters:
-			-----------
-			format_value (str):
+			Args:
+				format_value (str):
 				Desired format.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.format_value = format_value
@@ -4442,14 +4826,19 @@ class OpenScience( Fetcher ):
 	def _coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str:
 		'''Convert an HTTP response into JSON when possible, otherwise text.
 
-			Parameters:
-			-----------
-			response (requests.Response):
+			Args:
+				response (requests.Response):
 				HTTP response object.
 
 			Returns:
-			--------
-			Dict[str, Any] | str
+				Dict[str, Any] | str
+		
+
+		Purpose:
+			Convert an HTTP response into JSON when possible, otherwise text. Args:
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'response', response )
@@ -4467,26 +4856,26 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = '_coerce_response( self, **args ) -> Dict[ str, Any ] | str'
+			exception.method = 'OpenScience._coerce_response'
 			raise exception
 	
 	def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch dataset-level metadata by OSDR accession.
+				Fetch dataset-level metadata by OSDR accession.
 
-			Parameters:
-			-----------
-			accession (str):
+			Args:
+				accession (str):
 				OSDR accession such as OSD-48.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'accession', accession )
@@ -4504,30 +4893,30 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_dataset( self, **kwargs ) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch_dataset'
 			raise exception
 	
 	def fetch_metadata( self, query: str, format_value: str='json',
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Query OSDR sample-level metadata using the current metadata query endpoint.
+				Query OSDR sample-level metadata using the current metadata query endpoint.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Query string to pass through to the endpoint.
 
-			format_value (str):
+				format_value (str):
 				Output format. Supports json, csv, tsv, browser.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4546,30 +4935,30 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_metadata( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch_metadata'
 			raise exception
 	
 	def fetch_assays( self, query: str, format_value: str='json',
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Query OSDR assay-grouped metadata using the current assays query endpoint.
+				Query OSDR assay-grouped metadata using the current assays query endpoint.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Query string to pass through to the endpoint.
 
-			format_value (str):
+				format_value (str):
 				Output format. Supports json, csv, tsv, browser.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4589,30 +4978,30 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch_assays( self, **args ) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch_assays'
 			raise exception
 	
 	def fetch_data( self, query: str, format_value: str='json',
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Query OSDR data using the current data query endpoint.
+				Query OSDR data using the current data query endpoint.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Query string to pass through to the endpoint.
 
-			format_value (str):
+				format_value (str):
 				Output format. Supports json, csv, tsv, browser.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -4657,12 +5046,10 @@ class OpenScience( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for Open Science requests.
+				Unified dispatcher for Open Science requests.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- dataset
 				- metadata
@@ -4682,8 +5069,10 @@ class OpenScience( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'dataset').strip( ).lower( )
@@ -4702,7 +5091,7 @@ class OpenScience( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'fetch( self, **args) -> Dict[ str, Any ]'
+			exception.method = 'OpenScience.fetch'
 			raise exception
 	
 	def create_schema( self, function: str, tool: str,
@@ -4710,29 +5099,29 @@ class OpenScience( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'function', function )
@@ -4762,18 +5151,17 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'create_schema( self, **args ) -> Dict[ str, str ]'
+			exception.method = 'OpenScience.create_schema'
 			raise exception
 
 class SpaceWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides access to NASA DONKI space weather endpoints through the
-		NASA Open APIs gateway.
+			Provides access to NASA DONKI space weather endpoints through the
+			NASA Open APIs gateway.
 
-		This class is aligned to the currently documented DONKI endpoints and
+			This class is aligned to the currently documented DONKI endpoints and
 		supports the following modes:
 
 		- cme
@@ -4808,8 +5196,7 @@ class SpaceWeather( Fetcher ):
 			- halfAngle
 			- keyword
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url: Optional[str]
 			Base DONKI API URL.
 
@@ -4863,6 +5250,26 @@ class SpaceWeather( Fetcher ):
 		create_schema(...) -> Dict[str, str] | None
 			Construct a dynamic tool schema.
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			location (Optional[ str ]): Current geographic location query or selected place.
+			catalog (Optional[ str ]): Selected catalog or collection name.
+			notification_type (Optional[ str ]): Space weather notification category.
+			limit_note (Optional[ str ]): Maximum number of notifications requested.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
@@ -4880,16 +5287,13 @@ class SpaceWeather( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the DONKI fetcher with current endpoint defaults.
+				Initialize the DONKI fetcher with current endpoint defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -4912,16 +5316,13 @@ class SpaceWeather( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -4944,56 +5345,56 @@ class SpaceWeather( Fetcher ):
 			notification_type: str='', most_accurate_only: bool=True,
 			complete_entry_only: bool=True, speed: int=0,
 			half_angle: int=0, keyword: str='',
-			api_key: str=None ) -> Dict[ str, Any ] | None:
+			api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Send a request to a specific DONKI endpoint and return normalized JSON.
+				Send a request to a specific DONKI endpoint and return normalized JSON.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				DONKI endpoint path fragment.
 
-			start_date (str):
+				start_date (str):
 				Inclusive start date in YYYY-MM-DD format.
 
-			end_date (str):
+				end_date (str):
 				Inclusive end date in YYYY-MM-DD format.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
-			location (str):
+				location (str):
 				IPS location filter.
 
-			catalog (str):
+				catalog (str):
 				CMEAnalysis or IPS catalog filter.
 
-			notification_type (str):
+				notification_type (str):
 				Notifications type filter.
 
-			most_accurate_only (bool):
+				most_accurate_only (bool):
 				CMEAnalysis filter.
 
-			complete_entry_only (bool):
+				complete_entry_only (bool):
 				CMEAnalysis filter.
 
-			speed (int):
+				speed (int):
 				CMEAnalysis lower-bound speed filter.
 
-			half_angle (int):
+				half_angle (int):
 				CMEAnalysis lower-bound half-angle filter.
 
-			keyword (str):
+				keyword (str):
 				CMEAnalysis keyword filter.
 
-			api_key (str | None):
+				api_key (str | None):
 				Optional runtime override for NASA API key.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -5071,15 +5472,13 @@ class SpaceWeather( Fetcher ):
 			notification_type: str='all', most_accurate_only: bool=True,
 			complete_entry_only: bool=True, speed: int=0,
 			half_angle: int=0, keyword: str='',
-			api_key: str=None ) -> Dict[ str, Any ] | None:
+			api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for NASA DONKI endpoints.
+				Unified dispatcher for NASA DONKI endpoints.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of:
 				- cme
 				- cme_analysis
@@ -5130,8 +5529,10 @@ class SpaceWeather( Fetcher ):
 				Optional runtime override for NASA API key.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'cme').strip( ).lower( )
@@ -5191,29 +5592,29 @@ class SpaceWeather( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -5260,9 +5661,22 @@ class AstroCatalog( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides structured access to the Open Astronomy Catalog API (OACAPI).
+			Provides structured access to the Open Astronomy Catalog API (OACAPI).
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			format (Optional[ str ]): Requested response representation.
+			name (Optional[ str ]): Name used to identify the selected resource.
+			declination (Optional[ str ]): Declination of the celestial target in angular units.
+			right_ascension (Optional[ str ]): Right ascension of the celestial target.
+			radius (Optional[ int ]): Maximum geographic or astronomical search radius.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
+			argument_string (Any): Serialized arguments supplied to the provider.
+			route (Any): Selected route or API resource.
+			ra (Any): Right ascension supplied to the astronomical query.
+			dec (Any): Declination supplied to the astronomical query.
 	'''
 	base_url: Optional[ str ]
 	format: Optional[ str ]
@@ -5273,6 +5687,14 @@ class AstroCatalog( Fetcher ):
 	params: Optional[ Dict[ str, Any ] ]
 	
 	def __init__( self ):
+		"""Initialize AstroCatalog provider state.
+
+		Purpose:
+			Initialize AstroCatalog provider state.
+
+		Returns:
+			Any: Provider response or normalized result.
+		"""
 		super( ).__init__( )
 		self.base_url = 'https://api.astrocats.space'
 		self.format = 'json'
@@ -5292,6 +5714,14 @@ class AstroCatalog( Fetcher ):
 			self.headers[ 'Accept' ] = 'application/json'
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available AstroCatalog members.
+
+		Purpose:
+			List available AstroCatalog members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [
 				'base_url',
 				'timeout',
@@ -5304,12 +5734,15 @@ class AstroCatalog( Fetcher ):
 	def _normalize_attribute_path( self, quantity: str='', attributes: str='' ) -> str:
 		"""
 			Purpose:
-			--------
-			Build the OAC route path segment from quantity and attribute inputs.
+				Build the OAC route path segment from quantity and attribute inputs.
 
 			Returns:
-			--------
-			str
+				str
+		
+
+		Args:
+			quantity (str): quantity value for the AstroCatalog operation.
+			attributes (str): attributes value for the AstroCatalog operation.
 		"""
 		parts: list[ str ] = [ ]
 		if quantity and quantity.strip( ):
@@ -5324,13 +5757,19 @@ class AstroCatalog( Fetcher ):
 	def _parse_argument_string( self, argument_string: str ) -> Dict[ str, Any ]:
 		"""
 			Purpose:
-			--------
-			Parse a comma-separated or newline-separated list of OAC query
-			arguments into a dictionary.
+				Parse a comma-separated or newline-separated list of OAC query
+				arguments into a dictionary.
 
 			Examples:
-			---------
+
 			band=R,time,e_magnitude,complete
+		
+
+		Args:
+			argument_string (str): argument string value for the AstroCatalog operation.
+
+		Returns:
+			Dict[ str, Any ]: Provider response or normalized result.
 		"""
 		self.argument_string = argument_string
 		params: Dict[ str, Any ] = { }
@@ -5354,12 +5793,19 @@ class AstroCatalog( Fetcher ):
 			time: int=20 ) -> Any:
 		"""
 			Purpose:
-			--------
-			Send an HTTP request to the OAC API and return parsed JSON when possible.
+				Send an HTTP request to the OAC API and return parsed JSON when possible.
 
 			Returns:
-			--------
-			Any
+				Any
+		
+
+		Args:
+			route (str): route value for the AstroCatalog operation.
+			params (Dict[ str, Any ] | None): params value for the AstroCatalog operation.
+			time (int): time value for the AstroCatalog operation.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'route', route )
@@ -5393,12 +5839,22 @@ class AstroCatalog( Fetcher ):
 			arguments: str='', data_format: str='json', time: int=20 ) -> Any:
 		"""
 			Purpose:
-			--------
-			Query OAC by object/event name using the documented route pattern.
+				Query OAC by object/event name using the documented route pattern.
 
 			Returns:
-			--------
-			Any
+				Any
+		
+
+		Args:
+			name (str): name value for the AstroCatalog operation.
+			quantity (str): quantity value for the AstroCatalog operation.
+			attributes (str): attributes value for the AstroCatalog operation.
+			arguments (str): arguments value for the AstroCatalog operation.
+			data_format (str): data format value for the AstroCatalog operation.
+			time (int): time value for the AstroCatalog operation.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'name', name )
@@ -5433,12 +5889,24 @@ class AstroCatalog( Fetcher ):
 			attributes: str='', arguments: str='', data_format: str='json', time: int=20 ) -> Any:
 		"""
 			Purpose:
-			--------
-			Query OAC using a coordinate cone search via special arguments.
+				Query OAC using a coordinate cone search via special arguments.
 
 			Returns:
-			--------
-			Any
+				Any
+		
+
+		Args:
+			ra (str): ra value for the AstroCatalog operation.
+			dec (str): dec value for the AstroCatalog operation.
+			radius (int): radius value for the AstroCatalog operation.
+			quantity (str): quantity value for the AstroCatalog operation.
+			attributes (str): attributes value for the AstroCatalog operation.
+			arguments (str): arguments value for the AstroCatalog operation.
+			data_format (str): data format value for the AstroCatalog operation.
+			time (int): time value for the AstroCatalog operation.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'ra', ra )
@@ -5482,12 +5950,26 @@ class AstroCatalog( Fetcher ):
 			radius: int=2, data_format: str='json', time: int=20 ) -> Any:
 		"""
 			Purpose:
-			--------
-			Unified dispatch for Astronomy Catalog operations.
+				Unified dispatch for Astronomy Catalog operations.
 
 			Returns:
-			--------
-			Any
+				Any
+		
+
+		Args:
+			mode (str): mode value for the AstroCatalog operation.
+			query (str): query value for the AstroCatalog operation.
+			quantity (str): quantity value for the AstroCatalog operation.
+			attributes (str): attributes value for the AstroCatalog operation.
+			arguments (str): arguments value for the AstroCatalog operation.
+			ra (str): ra value for the AstroCatalog operation.
+			dec (str): dec value for the AstroCatalog operation.
+			radius (int): radius value for the AstroCatalog operation.
+			data_format (str): data format value for the AstroCatalog operation.
+			time (int): time value for the AstroCatalog operation.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			active_mode = (mode or 'object_query').strip( ).lower( )
@@ -5529,11 +6011,9 @@ class AstroQuery( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
-		Fetches astronomical object and region data with astroquery SIMBAD operations.
+			Fetches astronomical object and region data with astroquery SIMBAD operations.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		url,
 		radius,
 		name,
@@ -5551,7 +6031,20 @@ class AstroQuery( Fetcher ):
 		object_ids(...): Performs the object_ids operation for this fetcher.
 		region_search(...): Performs the region_search operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
+
+		Attributes:
+			url (Optional[ str ]): Current resource or endpoint URL.
+			radius (Optional[ float ]): Maximum geographic or astronomical search radius.
+			name (Optional[ str ]): Name used to identify the selected resource.
+			declination (Optional[ str ]): Declination of the celestial target in angular units.
+			right_ascension (Optional[ str ]): Right ascension of the celestial target.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			row_limit (Optional[ int ]): Maximum rows returned by a catalog query.
 	
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
+			table (Any): Selected data table.
+			ra (Any): Right ascension supplied to the astronomical query.
+			dec (Any): Declination supplied to the astronomical query.
 	'''
 	url: Optional[ str ]
 	radius: Optional[ float ]
@@ -5562,6 +6055,14 @@ class AstroQuery( Fetcher ):
 	row_limit: Optional[ int ]
 	
 	def __init__( self ) -> None:
+		"""Initialize AstroQuery provider state.
+
+		Purpose:
+			Initialize AstroQuery provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.url = None
 		self.radius = None
@@ -5576,6 +6077,14 @@ class AstroQuery( Fetcher ):
 			self.headers[ 'User-Agent' ] = self.agents
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available AstroQuery members.
+
+		Purpose:
+			List available AstroQuery members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [
 				'headers',
 				'row_limit',
@@ -5589,19 +6098,18 @@ class AstroQuery( Fetcher ):
 		"""
 
 			Purpose:
-			--------
-			Convert an Astropy Table into a list of row dictionaries that can be
-			rendered easily in Streamlit.
+				Convert an Astropy Table into a list of row dictionaries that can be
+				rendered easily in Streamlit.
 
-			Parameters:
-			-----------
-			table:
+			Args:
+				table:
 				An astropy.table.Table returned by astroquery.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.table = table
@@ -5637,21 +6145,20 @@ class AstroQuery( Fetcher ):
 		"""
 
 			Purpose:
-			--------
-			Query SIMBAD for a named astronomical object.
+				Query SIMBAD for a named astronomical object.
 
-			Parameters:
-			-----------
-			name:
+			Args:
+				name:
 				Object identifier or common name such as "M81", "Sirius", or
 				"NGC 1300".
 			row_limit:
 				Maximum number of rows to return.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'name', name )
@@ -5682,20 +6189,19 @@ class AstroQuery( Fetcher ):
 		"""
 
 			Purpose:
-			--------
-			Query SIMBAD for alternate identifiers of a named astronomical object.
+				Query SIMBAD for alternate identifiers of a named astronomical object.
 
-			Parameters:
-			-----------
-			name:
+			Args:
+				name:
 				Object identifier or common name such as "M81" or "Sirius".
 			row_limit:
 				Maximum number of rows to return.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'name', name )
@@ -5727,12 +6233,10 @@ class AstroQuery( Fetcher ):
 		"""
 
 			Purpose:
-			--------
-			Query SIMBAD in a cone around a sky position.
+				Query SIMBAD in a cone around a sky position.
 
-			Parameters:
-			-----------
-			ra:
+			Args:
+				ra:
 				Right Ascension of the search center. This is the east-west sky
 				coordinate. Example values:
 				- "13:09:48.09"
@@ -5755,9 +6259,10 @@ class AstroQuery( Fetcher ):
 				Maximum number of rows to return.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			throw_if( 'ra', ra )
@@ -5816,12 +6321,10 @@ class AstroQuery( Fetcher ):
 		"""
 
 			Purpose:
-			--------
-			Unified dispatch for AstroQuery / SIMBAD operations.
+				Unified dispatch for AstroQuery / SIMBAD operations.
 
-			Parameters:
-			-----------
-			mode:
+			Args:
+				mode:
 				One of:
 				- "object_search"
 				- "object_ids"
@@ -5846,9 +6349,10 @@ class AstroQuery( Fetcher ):
 				Maximum number of rows to return.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			active_mode = (mode or 'object_search').strip( ).lower( )
@@ -5890,11 +6394,9 @@ class StarMap( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Builds star-map links and image snapshots for objects or coordinates.
+			Builds star-map links and image snapshots for objects or coordinates.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url,
 		snapshot_url,
 		image_source,
@@ -5921,6 +6423,26 @@ class StarMap( Fetcher ):
 		fetch_snapshot(...): Performs the fetch_snapshot operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			snapshot_url (Optional[ str ]): URL of the selected sky-chart snapshot.
+			image_source (Optional[ str ]): Source URL or filename for the selected image.
+			object (Optional[ str ]): Selected celestial object or resource.
+			right_ascension (Optional[ float ]): Right ascension of the celestial target.
+			declination (Optional[ float ]): Declination of the celestial target in angular units.
+			box_color (Optional[ str ]): Color used for the chart's outline or bounding box.
+			show_box (Optional[ bool ]): Whether a bounding box is drawn.
+			show_grid (Optional[ bool ]): Whether coordinate grid lines are displayed.
+			show_lines (Optional[ bool ]): Whether reference lines are displayed.
+			show_boundaries (Optional[ bool ]): Whether constellation or region boundaries are shown.
+			show_const_names (Optional[ bool ]): Whether constellation names are shown.
+			zoom (Optional[ int ]): Zoom level for the selected map or chart.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			agents (Any): HTTP User-Agent identity or agent metadata supplied by the application.
+			value (Any): Current input or extracted response value.
+			html (Any): HTML response body returned by the current request.
+			name (Any): Name used to identify the selected resource.
 	'''
 	base_url: Optional[ str ]
 	snapshot_url: Optional[ str ]
@@ -5941,13 +6463,10 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Initialize the StarMap
+				Initialize the StarMap
 
 			Returns:
-			--------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://www.sky-map.org/'
@@ -5976,6 +6495,14 @@ class StarMap( Fetcher ):
 				'Accept' ] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available StarMap members.
+
+		Purpose:
+			List available StarMap members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [
 				'base_url',
 				'snapshot_url',
@@ -6001,19 +6528,15 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Convert a Python bool into the integer-style string form frequently
-			used by Sky-Map query parameters.
+				Convert a Python bool into the integer-style string form frequently
+				used by Sky-Map query parameters.
 
-			Parameters:
-			-----------
-			value:
+			Args:
+				value:
 				Boolean value to convert.
 
 			Returns:
-			--------
-			str
-
+				str
 		'''
 		throw_if( 'value', value )
 		self.value = value
@@ -6023,21 +6546,20 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Parse the snapshot HTML page and extract save-as image links for
-			formats like jpeg, png, gif, bmp, and tiff.
+				Parse the snapshot HTML page and extract save-as image links for
+				formats like jpeg, png, gif, bmp, and tiff.
 
-			Parameters:
-			-----------
-			html:
+			Args:
+				html:
 				Raw HTML returned by the snapshot endpoint.
 			base_url:
 				Base URL used to resolve relative hyperlinks.
 
 			Returns:
-			--------
-			Dict[str, str]
+				Dict[str, str]
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.html = html
@@ -6075,12 +6597,10 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Construct an interactive Sky-Map link centered on a named object.
+				Construct an interactive Sky-Map link centered on a named object.
 
-			Parameters:
-			-----------
-			name:
+			Args:
+				name:
 				Object name or identifier such as "Polaris", "M31", or
 				"NGC 1300".
 			zoom:
@@ -6094,9 +6614,10 @@ class StarMap( Fetcher ):
 				Request timeout in seconds used for validation.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'name', name )
@@ -6160,12 +6681,10 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Construct an interactive Sky-Map link centered on sky coordinates.
+				Construct an interactive Sky-Map link centered on sky coordinates.
 
-			Parameters:
-			-----------
-			ra:
+			Args:
+				ra:
 				Right Ascension of the map center in hours.
 				Example values:
 				- 15.2976
@@ -6193,9 +6712,10 @@ class StarMap( Fetcher ):
 				Request timeout in seconds used for validation.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -6268,13 +6788,11 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Request the Sky-Map snapshot generator page and extract the available
-			static image links.
+				Request the Sky-Map snapshot generator page and extract the available
+				static image links.
 
-			Parameters:
-			-----------
-			ra:
+			Args:
+				ra:
 				Right Ascension of the image center in hours.
 				Example values:
 				- 15.2976
@@ -6302,9 +6820,10 @@ class StarMap( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -6388,13 +6907,11 @@ class StarMap( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Unified dispatch for StarMap object links, coordinate links, and
-			static snapshot generation.
+				Unified dispatch for StarMap object links, coordinate links, and
+				static snapshot generation.
 
-			Parameters:
-			-----------
-			mode:
+			Args:
+				mode:
 				One of:
 				- "object_link"
 				- "coordinate_link"
@@ -6437,9 +6954,10 @@ class StarMap( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'object_link').strip( ).lower( )
@@ -6497,11 +7015,9 @@ class GovData( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Data.gov package search, package summary, and collection records.
+			Fetches Data.gov package search, package summary, and collection records.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		base_url,
 		url,
@@ -6531,6 +7047,27 @@ class GovData( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			query (Optional[ str ]): Current query or search expression.
+			page_size (Optional[ int ]): Maximum records in one page.
+			offset_mark (Optional[ str ]): Opaque token identifying the next results page.
+			sort_field (Optional[ str ]): Field used to sort provider records.
+			sort_order (Optional[ str ]): Ascending or descending sort direction.
+			package_id (Optional[ str ]): Identifier of a downloadable data package.
+			collection (Optional[ str ]): Selected collection or dataset identifier.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
@@ -6550,16 +7087,13 @@ class GovData( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the GovInfo fetcher with current API defaults.
+				Initialize the GovInfo fetcher with current API defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.GOVINFO_API_KEY
@@ -6585,16 +7119,13 @@ class GovData( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -6620,16 +7151,16 @@ class GovData( Fetcher ):
 	def _resolve_api_key( self ) -> str:
 		'''
 			Purpose:
-			--------
-			Resolve the GovInfo API key, falling back to DEMO_KEY if none is set.
+				Resolve the GovInfo API key, falling back to DEMO_KEY if none is set.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			value = str( self.api_key or '' ).strip( )
@@ -6645,17 +7176,17 @@ class GovData( Fetcher ):
 	def _validate_page_size( self, page_size: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate GovInfo page size.
+				Validate GovInfo page size.
 
-			Parameters:
-			-----------
-			page_size (int):
+			Args:
+				page_size (int):
 				Requested page size.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'page_size', page_size )
@@ -6676,17 +7207,17 @@ class GovData( Fetcher ):
 	def _validate_sort_field( self, sort_field: str ) -> str:
 		'''
 			Purpose:
-			--------
-			Validate supported sort field values for the search expander.
+				Validate supported sort field values for the search expander.
 
-			Parameters:
-			-----------
-			sort_field (str):
+			Args:
+				sort_field (str):
 				Sort field.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.sort_field = sort_field
@@ -6710,17 +7241,17 @@ class GovData( Fetcher ):
 	def _validate_sort_order( self, sort_order: str ) -> str:
 		'''
 			Purpose:
-			--------
-			Validate supported sort order values.
+				Validate supported sort order values.
 
-			Parameters:
-			-----------
-			sort_order (str):
+			Args:
+				sort_order (str):
 				Sort order.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.sort_order = sort_order
@@ -6745,23 +7276,21 @@ class GovData( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Execute a GovInfo Search Service query.
+				Execute a GovInfo Search Service query.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				GovInfo search expression. May include field operators such as
 				collection, congress, publishdate, and lastModified.
 
-			page_size (int):
+				page_size (int):
 				Number of records to return. GovInfo allows up to 1000.
 
-			offset_mark (str):
+				offset_mark (str):
 				Use '*' for the first page; for subsequent pages use the offsetMark
 				returned by the prior response.
 
-			sort_field (str):
+				sort_field (str):
 				Supported here:
 				- score
 				- lastModified
@@ -6773,8 +7302,10 @@ class GovData( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -6834,20 +7365,20 @@ class GovData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a GovInfo package summary by package ID.
+				Fetch a GovInfo package summary by package ID.
 
-			Parameters:
-			-----------
-			package_id (str):
+			Args:
+				package_id (str):
 				GovInfo package identifier, such as CREC-2018-10-10.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'package_id', package_id )
@@ -6880,29 +7411,29 @@ class GovData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch packages from a GovInfo collection since a given ISO timestamp.
+				Fetch packages from a GovInfo collection since a given ISO timestamp.
 
-			Parameters:
-			-----------
-			collection (str):
+			Args:
+				collection (str):
 				Collection code, such as CREC, FR, or BILLS.
 
-			start_date (str):
+				start_date (str):
 				ISO timestamp such as 2018-10-01T00:00:00Z.
 
-			page_size (int):
+				page_size (int):
 				Number of records to return.
 
-			offset_mark (str):
+				offset_mark (str):
 				Use '*' for the first page.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'collection', collection )
@@ -6956,12 +7487,10 @@ class GovData( Fetcher ):
 			start_date: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for GovInfo requests.
+				Unified dispatcher for GovInfo requests.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- search
 				- package_summary
@@ -6995,8 +7524,10 @@ class GovData( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'search').strip( ).lower( )
@@ -7047,29 +7578,29 @@ class GovData( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -7119,11 +7650,10 @@ class StarChart( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides static and link-based star chart generation using the SKY-MAP.ORG
-		XML API, Site Linker, and Image Generator interfaces.
+			Provides static and link-based star chart generation using the SKY-MAP.ORG
+			XML API, Site Linker, and Image Generator interfaces.
 
-		This class is intentionally chart-focused and kept separate from StarMap.
+			This class is intentionally chart-focused and kept separate from StarMap.
 
 		Referenced API Requirements:
 		----------------------------
@@ -7161,8 +7691,7 @@ class StarChart( Fetcher ):
 				- h
 				- mag
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		search_url: Optional[str]
 			SKY-MAP XML search endpoint.
 
@@ -7252,6 +7781,36 @@ class StarChart( Fetcher ):
 		create_schema(...) -> Dict[str, str] | None
 			Construct a dynamic tool schema.
 
+		Attributes:
+			search_url (Optional[ str ]): URL used to execute the provider's search request.
+			link_url (Optional[ str ]): Hyperlink identifying a provider resource.
+			image_url (Optional[ str ]): URL of the selected image.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query (Optional[ str ]): Current query or search expression.
+			ra (Optional[ float ]): Right ascension supplied to the astronomical query.
+			dec (Optional[ float ]): Declination supplied to the astronomical query.
+			zoom (Optional[ int ]): Zoom level for the selected map or chart.
+			image_source (Optional[ str ]): Source URL or filename for the selected image.
+			box_color (Optional[ str ]): Color used for the chart's outline or bounding box.
+			show_box (Optional[ bool ]): Whether a bounding box is drawn.
+			show_grid (Optional[ bool ]): Whether coordinate grid lines are displayed.
+			show_lines (Optional[ bool ]): Whether reference lines are displayed.
+			show_boundaries (Optional[ bool ]): Whether constellation or region boundaries are shown.
+			show_const_names (Optional[ bool ]): Whether constellation names are shown.
+			width (Optional[ int ]): Instance state retained for width operations.
+			height (Optional[ int ]): Instance state retained for height operations.
+			magnitude (Optional[ float ]): Instance state retained for magnitude operations.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			value (Any): Current input or extracted response value.
+			name (Any): Name used to identify the selected resource.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	search_url: Optional[ str ]
 	link_url: Optional[ str ]
@@ -7278,16 +7837,13 @@ class StarChart( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the StarChart fetcher with current SKY-MAP defaults.
+				Initialize the StarChart fetcher with current SKY-MAP defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -7319,17 +7875,13 @@ class StarChart( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
-			
+				List[str]
 		'''
 		return [
 				'search_url',
@@ -7363,20 +7915,17 @@ class StarChart( Fetcher ):
 	def _flag( self, value: bool, invert: bool=False ) -> int:
 		'''
 			Purpose:
-			--------
-			Convert boolean UI flags into SKY-MAP numeric flags.
+				Convert boolean UI flags into SKY-MAP numeric flags.
 
-			Parameters:
-			-----------
-			value (bool):
+			Args:
+				value (bool):
 				Input boolean value.
 
-			invert (bool):
+				invert (bool):
 				If True, invert the SKY-MAP convention.
 
 			Returns:
-			--------
-			int
+				int
 		'''
 		throw_if( 'value', value )
 		self.value = value
@@ -7388,23 +7937,23 @@ class StarChart( Fetcher ):
 	def search_object( self, name: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Resolve an object name into SKY-MAP coordinates using the XML API.
+				Resolve an object name into SKY-MAP coordinates using the XML API.
 
-			Parameters:
-			-----------
-			name (str):
+			Args:
+				name (str):
 				Object name or catalog id. Examples:
 				- Polaris
 				- M31
 				- NGC 1300
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'name', name )
@@ -7472,32 +8021,32 @@ class StarChart( Fetcher ):
 			image_source: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Build an object-based SKY-MAP chart link.
+				Build an object-based SKY-MAP chart link.
 
-			Parameters:
-			-----------
-			name (str):
+			Args:
+				name (str):
 				Object name or catalog id.
 
-			zoom (int):
+				zoom (int):
 				Chart zoom level.
 
-			box_color (str):
+				box_color (str):
 				Pointer box color.
 
-			show_box (bool):
+				show_box (bool):
 				Show pointer box.
 
-			image_source (str):
+				image_source (str):
 				Optional image source such as SDSS.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'name', name )
@@ -7549,41 +8098,41 @@ class StarChart( Fetcher ):
 			show_boundaries: bool=True, image_source: str='' ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Build a coordinate-based SKY-MAP chart link.
+				Build a coordinate-based SKY-MAP chart link.
 
-			Parameters:
-			-----------
-			ra (float):
+			Args:
+				ra (float):
 				Right Ascension in decimal hours.
 
-			dec (float):
+				dec (float):
 				Declination in decimal degrees.
 
-			zoom (int):
+				zoom (int):
 				Chart zoom level.
 
-			box_color (str):
+				box_color (str):
 				Pointer box color.
 
-			show_box (bool):
+				show_box (bool):
 				Show pointer box.
 
-			show_grid (bool):
+				show_grid (bool):
 				Show coordinate grid.
 
-			show_lines (bool):
+				show_lines (bool):
 				Show constellation lines.
 
-			show_boundaries (bool):
+				show_boundaries (bool):
 				Show constellation boundaries.
 
-			image_source (str):
+				image_source (str):
 				Optional image source such as SDSS.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -7644,47 +8193,47 @@ class StarChart( Fetcher ):
 			height: int=450, magnitude: float=7.5 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Build a static SKY-MAP chart image URL.
+				Build a static SKY-MAP chart image URL.
 
-			Parameters:
-			-----------
-			ra (float):
+			Args:
+				ra (float):
 				Right Ascension in decimal hours.
 
-			dec (float):
+				dec (float):
 				Declination in decimal degrees.
 
-			zoom (int):
+				zoom (int):
 				Chart zoom level.
 
-			image_source (str):
+				image_source (str):
 				Image survey source.
 
-			show_grid (bool):
+				show_grid (bool):
 				Show grid.
 
-			show_lines (bool):
+				show_lines (bool):
 				Show constellation lines.
 
-			show_boundaries (bool):
+				show_boundaries (bool):
 				Show constellation boundaries.
 
-			show_const_names (bool):
+				show_const_names (bool):
 				Show constellation names.
 
-			width (int):
+				width (int):
 				Image width in pixels.
 
-			height (int):
+				height (int):
 				Image height in pixels.
 
-			magnitude (float):
+				magnitude (float):
 				Limiting magnitude.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'ra', ra )
@@ -7754,12 +8303,10 @@ class StarChart( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for SKY-MAP chart generation.
+				Unified dispatcher for SKY-MAP chart generation.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of:
 				- object_search
 				- object_chart
@@ -7812,8 +8359,10 @@ class StarChart( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'object_chart').strip( ).lower( )
@@ -7874,29 +8423,29 @@ class StarChart( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -7942,11 +8491,9 @@ class Congress( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Congress.gov congress, bill, law, and report resources.
+			Fetches Congress.gov congress, bill, law, and report resources.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		base_url,
 		url,
@@ -7988,6 +8535,32 @@ class Congress( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			congress_number (Optional[ int ]): Instance state retained for congress number operations.
+			bill_type (Optional[ str ]): Instance state retained for bill type operations.
+			bill_number (Optional[ int ]): Instance state retained for bill number operations.
+			law_type (Optional[ str ]): Instance state retained for law type operations.
+			law_number (Optional[ int ]): Instance state retained for law number operations.
+			report_type (Optional[ str ]): Instance state retained for report type operations.
+			report_number (Optional[ int ]): Instance state retained for report number operations.
+			offset (Optional[ int ]): Offset used for pagination or time calculations.
+			limit (Optional[ int ]): Maximum records requested.
+			sort (Optional[ str ]): Sorting expression applied to returned records.
+			from_date_time (Optional[ str ]): Instance state retained for from date time operations.
+			to_date_time (Optional[ str ]): Instance state retained for to date time operations.
+			conference (Optional[ bool ]): Instance state retained for conference operations.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
@@ -8012,16 +8585,13 @@ class Congress( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the Congress fetcher with current API defaults.
+				Initialize the Congress fetcher with current API defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.CONGRESS_API_KEY
@@ -8051,16 +8621,13 @@ class Congress( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -8095,16 +8662,16 @@ class Congress( Fetcher ):
 	def _resolve_api_key( self ) -> str:
 		'''
 			Purpose:
-			--------
-			Resolve the Congress.gov API key.
+				Resolve the Congress.gov API key.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			value = str( self.api_key or '' ).strip( )
@@ -8121,17 +8688,17 @@ class Congress( Fetcher ):
 	def _validate_limit( self, limit: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate list request page size.
+				Validate list request page size.
 
-			Parameters:
-			-----------
-			limit (int):
+			Args:
+				limit (int):
 				Page size.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'limit', limit )
@@ -8152,17 +8719,17 @@ class Congress( Fetcher ):
 	def _validate_offset( self, offset: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate list request offset.
+				Validate list request offset.
 
-			Parameters:
-			-----------
-			offset (int):
+			Args:
+				offset (int):
 				Offset value.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'offset', offset )
@@ -8183,17 +8750,17 @@ class Congress( Fetcher ):
 	def _normalize_bill_type( self, bill_type: str ) -> str:
 		'''
 			Purpose:
-			--------
-			Normalize bill type codes.
+				Normalize bill type codes.
 
-			Parameters:
-			-----------
-			bill_type (str):
+			Args:
+				bill_type (str):
 				Bill type code.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'bill_type', bill_type )
@@ -8224,17 +8791,17 @@ class Congress( Fetcher ):
 	def _normalize_law_type( self, law_type: str ) -> str:
 		'''
 			Purpose:
-			--------
-			Normalize law type codes.
+				Normalize law type codes.
 
-			Parameters:
-			-----------
-			law_type (str):
+			Args:
+				law_type (str):
 				Law type code.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'law_type', law_type )
@@ -8259,17 +8826,17 @@ class Congress( Fetcher ):
 	def _normalize_report_type( self, report_type: str ) -> str:
 		'''
 			Purpose:
-			--------
-			Normalize committee report type codes.
+				Normalize committee report type codes.
 
-			Parameters:
-			-----------
-			report_type (str):
+			Args:
+				report_type (str):
 				Committee report type code.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'report_type', report_type )
@@ -8297,23 +8864,23 @@ class Congress( Fetcher ):
 			sort: str='updateDate+desc' ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Construct shared list-query parameters.
+				Construct shared list-query parameters.
 
-			Parameters:
-			-----------
-			limit (int):
+			Args:
+				limit (int):
 				Page size.
 
-			offset (int):
+				offset (int):
 				Result offset.
 
-			sort (str):
+				sort (str):
 				Sort directive.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			return {
@@ -8338,23 +8905,23 @@ class Congress( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the list of congresses and sessions.
+				Fetch the list of congresses and sessions.
 
-			Parameters:
-			-----------
-			limit (int):
+			Args:
+				limit (int):
 				Page size.
 
-			offset (int):
+				offset (int):
 				Result offset.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.url = f'{self.base_url}/congress'
@@ -8395,38 +8962,38 @@ class Congress( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch bills for a congress, optionally filtered by bill type.
+				Fetch bills for a congress, optionally filtered by bill type.
 
-			Parameters:
-			-----------
-			congress (int):
+			Args:
+				congress (int):
 				Congress number.
 
-			bill_type (str):
+				bill_type (str):
 				Optional bill type code.
 
-			offset (int):
+				offset (int):
 				Result offset.
 
-			limit (int):
+				limit (int):
 				Page size.
 
-			from_date_time (str):
+				from_date_time (str):
 				Optional ISO timestamp filter.
 
-			to_date_time (str):
+				to_date_time (str):
 				Optional ISO timestamp filter.
 
-			sort (str):
+				sort (str):
 				Sort directive.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8483,26 +9050,26 @@ class Congress( Fetcher ):
 			bill_number: int, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a specific bill by congress, bill type, and bill number.
+				Fetch a specific bill by congress, bill type, and bill number.
 
-			Parameters:
-			-----------
-			congress (int):
+			Args:
+				congress (int):
 				Congress number.
 
-			bill_type (str):
+				bill_type (str):
 				Bill type code.
 
-			bill_number (int):
+				bill_number (int):
 				Bill number.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8553,29 +9120,29 @@ class Congress( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch laws for a congress, optionally filtered by law type.
+				Fetch laws for a congress, optionally filtered by law type.
 
-			Parameters:
-			-----------
-			congress (int):
+			Args:
+				congress (int):
 				Congress number.
 
-			law_type (str):
+				law_type (str):
 				Optional law type code: pub or priv.
 
-			offset (int):
+				offset (int):
 				Result offset.
 
-			limit (int):
+				limit (int):
 				Page size.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8625,26 +9192,26 @@ class Congress( Fetcher ):
 			law_number: int, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a specific law by congress, law type, and law number.
+				Fetch a specific law by congress, law type, and law number.
 
-			Parameters:
-			-----------
-			congress (int):
+			Args:
+				congress (int):
 				Congress number.
 
-			law_type (str):
+				law_type (str):
 				Law type code: pub or priv.
 
-			law_number (int):
+				law_number (int):
 				Law number.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8695,33 +9262,33 @@ class Congress( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch committee reports for a congress, optionally filtered by
-			report type.
+				Fetch committee reports for a congress, optionally filtered by
+				report type.
 
-			Parameters:
-			-----------
-			congress (int):
+			Args:
+				congress (int):
 				Congress number.
 
-			report_type (str):
+				report_type (str):
 				Optional report type code: hrpt, srpt, or erpt.
 
-			offset (int):
+				offset (int):
 				Result offset.
 
-			limit (int):
+				limit (int):
 				Page size.
 
-			conference (bool):
+				conference (bool):
 				Whether to request conference reports where supported.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8776,26 +9343,26 @@ class Congress( Fetcher ):
 			report_number: int, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a specific committee report.
+				Fetch a specific committee report.
 
-			Parameters:
-			-----------
-			congress (int):
+			Args:
+				congress (int):
 				Congress number.
 
-			report_type (str):
+				report_type (str):
 				Report type code.
 
-			report_number (int):
+				report_number (int):
 				Report number.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'congress', congress )
@@ -8850,12 +9417,10 @@ class Congress( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for Congress.gov requests.
+				Unified dispatcher for Congress.gov requests.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- congresses
 				- bills
@@ -8908,8 +9473,10 @@ class Congress( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'congresses').strip( ).lower( )
@@ -9000,29 +9567,29 @@ class Congress( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -9072,11 +9639,9 @@ class InternetArchive( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
-		Fetches Internet Archive search records.
+			Fetches Internet Archive search records.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		keywords,
 		url,
 		response,
@@ -9098,7 +9663,25 @@ class InternetArchive( Fetcher ):
 		_build_query(...): Performs the _build_query operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
+
+		Attributes:
+			keywords (Optional[ str ]): Keywords supplied for text retrieval.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			response (Optional[ Response ]): Most recent HTTP response.
+			fields (Optional[ List[ str ] ]): Selected response fields or API variable names.
+			rows (Optional[ int ]): Rows returned by the most recent query.
+			page (Optional[ int ]): Requested results page.
+			sort (Optional[ str ]): Sorting expression applied to returned records.
+			media_type (Optional[ str ]): Instance state retained for media type operations.
+			collection (Optional[ str ]): Selected collection or dataset identifier.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
 	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	keywords: Optional[ str ]
 	url: Optional[ str ]
@@ -9115,16 +9698,13 @@ class InternetArchive( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the Internet Archive wrapper with sane defaults.
+				Initialize the Internet Archive wrapper with sane defaults.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.url = 'https://archive.org/advancedsearch.php'
@@ -9158,16 +9738,13 @@ class InternetArchive( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'keywords',
@@ -9189,17 +9766,17 @@ class InternetArchive( Fetcher ):
 	def _validate_rows( self, rows: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate requested page size.
+				Validate requested page size.
 
-			Parameters:
-			-----------
-			rows (int):
+			Args:
+				rows (int):
 				Requested number of results.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'rows', rows )
@@ -9220,17 +9797,17 @@ class InternetArchive( Fetcher ):
 	def _validate_page( self, page: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate requested page number.
+				Validate requested page number.
 
-			Parameters:
-			-----------
-			page (int):
+			Args:
+				page (int):
 				Requested page number.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'page', page )
@@ -9252,23 +9829,23 @@ class InternetArchive( Fetcher ):
 			collection: str='' ) -> str:
 		'''
 			Purpose:
-			--------
-			Build an Internet Archive advanced search query expression.
+				Build an Internet Archive advanced search query expression.
 
-			Parameters:
-			-----------
-			keywords (str):
+			Args:
+				keywords (str):
 				Base free-text query.
 
-			media_type (str):
+				media_type (str):
 				Optional mediatype filter.
 
-			collection (str):
+				collection (str):
 				Optional collection filter.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'keywords', keywords )
@@ -9300,38 +9877,38 @@ class InternetArchive( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Execute an Internet Archive advanced search request.
+				Execute an Internet Archive advanced search request.
 
-			Parameters:
-			-----------
-			keywords (str):
+			Args:
+				keywords (str):
 				Free-text Internet Archive query.
 
-			fields (List[str] | None):
+				fields (List[str] | None):
 				Optional list of result fields to request.
 
-			rows (int):
+				rows (int):
 				Number of results per page.
 
-			page (int):
+				page (int):
 				Page number.
 
-			sort (str):
+				sort (str):
 				Archive sort directive such as downloads desc or publicdate desc.
 
-			media_type (str):
+				media_type (str):
 				Optional media type filter.
 
-			collection (str):
+				collection (str):
 				Optional collection filter.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'keywords', keywords )
@@ -9399,29 +9976,29 @@ class InternetArchive( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -9471,13 +10048,12 @@ class OpenWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides forecast weather retrieval by location name using the Open-Meteo
-		Geocoding API and Open-Meteo Forecast API.
+			Provides forecast weather retrieval by location name using the Open-Meteo
+			Geocoding API and Open-Meteo Forecast API.
 
-		This class is forecast-only by design and intentionally excludes archive /
-		historical date-based retrieval so it does not overlap with the separate
-		HistoricalWeather class.
+			This class is forecast-only by design and intentionally excludes archive /
+			historical date-based retrieval so it does not overlap with the separate
+			HistoricalWeather class.
 
 		Referenced API Requirements:
 		----------------------------
@@ -9500,8 +10076,7 @@ class OpenWeather( Fetcher ):
 				- wind_speed_unit
 				- precipitation_unit
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		geocode_url: Optional[str]
 			The Open-Meteo geocoding endpoint.
 
@@ -9576,6 +10151,30 @@ class OpenWeather( Fetcher ):
 		create_schema(...) -> Dict[str, str] | None
 			Generate a dynamic tool schema definition.
 
+		Attributes:
+			geocode_url (Optional[ str ]): Geocoding service endpoint URL.
+			forecast_url (Optional[ str ]): Instance state retained for forecast url operations.
+			location (Optional[ str ]): Current geographic location query or selected place.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			timezone (Optional[ str ]): Time zone identifier or setting.
+			mode (Optional[ str ]): Selected request or operation mode.
+			current_metrics (Optional[ List[ str ] ]): Instance state retained for current metrics operations.
+			hourly_metrics (Optional[ List[ str ] ]): Hourly weather metrics requested.
+			daily_metrics (Optional[ List[ str ] ]): Daily weather metrics requested.
+			windspeed_unit (Optional[ str ]): Preferred wind-speed measurement unit.
+			temperature_unit (Optional[ str ]): Preferred temperature measurement unit.
+			precipitation_unit (Optional[ str ]): Preferred precipitation measurement unit.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			geocode_params (Optional[ Dict[ str, Any ] ]): Query parameters passed to the geocoding endpoint.
+			result_limit (Optional[ int ]): Maximum number of provider results.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	geocode_url: Optional[ str ]
 	forecast_url: Optional[ str ]
@@ -9599,18 +10198,14 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Initialize the OpenWeather forecast fetcher with forecast-only defaults,
-			endpoints, headers, unit selections, and metric collections.
+				Initialize the OpenWeather forecast fetcher with forecast-only defaults,
+				endpoints, headers, unit selections, and metric collections.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -9694,18 +10289,14 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Provide ordered member visibility for introspection and editor discovery.
+				Provide ordered member visibility for introspection and editor discovery.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]:
+				List[str]:
 				Ordered attribute and method names.
-
 		'''
 		return [
 				'geocode_url',
@@ -9736,23 +10327,22 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Resolve a user-supplied location string into a geocoding result from
-			the Open-Meteo Geocoding API.
+				Resolve a user-supplied location string into a geocoding result from
+				the Open-Meteo Geocoding API.
 
-			Parameters:
-			-----------
-			location (str):
+			Args:
+				location (str):
 				The place name or postal code to search for.
 
-			count (int):
+				count (int):
 				The maximum number of geocoding matches to request.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				The selected geocoding record, typically the first result.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -9803,29 +10393,28 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Retrieve current forecast conditions for a coordinate pair.
+				Retrieve current forecast conditions for a coordinate pair.
 
-			Parameters:
-			-----------
-			lat (float):
+			Args:
+				lat (float):
 				The latitude of the resolved location.
 
-			long (float):
+				long (float):
 				The longitude of the resolved location.
 
-			zone (str):
+				zone (str):
 				The timezone for the response. Supports 'auto'.
 
-			past_days (int):
+				past_days (int):
 				Optional number of previous days to include when supported by
 				the forecast API.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				Normalized forecast response containing current conditions.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -9885,31 +10474,30 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Retrieve hourly forecast data for a coordinate pair.
+				Retrieve hourly forecast data for a coordinate pair.
 
-			Parameters:
-			-----------
-			lat (float):
+			Args:
+				lat (float):
 				The latitude of the resolved location.
 
-			long (float):
+				long (float):
 				The longitude of the resolved location.
 
-			zone (str):
+				zone (str):
 				The timezone for the response. Supports 'auto'.
 
-			forecast_days (int):
+				forecast_days (int):
 				Number of forecast days to request.
 
-			past_days (int):
+				past_days (int):
 				Optional number of previous days to include.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				Normalized forecast response containing hourly data.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -9970,31 +10558,30 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Retrieve daily forecast data for a coordinate pair.
+				Retrieve daily forecast data for a coordinate pair.
 
-			Parameters:
-			-----------
-			lat (float):
+			Args:
+				lat (float):
 				The latitude of the resolved location.
 
-			long (float):
+				long (float):
 				The longitude of the resolved location.
 
-			zone (str):
+				zone (str):
 				The timezone for the response. Supports 'auto'.
 
-			forecast_days (int):
+				forecast_days (int):
 				Number of forecast days to request.
 
-			past_days (int):
+				past_days (int):
 				Optional number of previous days to include.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				Normalized forecast response containing daily data.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -10056,37 +10643,36 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Resolve a location string to coordinates, then retrieve forecast weather
-			using the selected non-historical mode.
+				Resolve a location string to coordinates, then retrieve forecast weather
+				using the selected non-historical mode.
 
-			Parameters:
-			-----------
-			location (str):
+			Args:
+				location (str):
 				The place name entered by the user.
 
-			mode (str):
+				mode (str):
 				Forecast mode. Supported values are current, hourly, and daily.
 
-			zone (str):
+				zone (str):
 				The timezone requested for the forecast response. If 'auto', the API
 				will resolve the local timezone for the coordinates.
 
-			forecast_days (int):
+				forecast_days (int):
 				Number of forecast days to request for hourly and daily modes.
 
-			past_days (int):
+				past_days (int):
 				Optional number of previous days to include.
 
-			count (int):
+				count (int):
 				Maximum number of geocoding matches to request before selecting the
 				first result.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				Combined geocoding and forecast result.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10168,31 +10754,30 @@ class OpenWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None:
+				Dict[str, str] | None:
 				A JSON-compatible dictionary defining the tool schema.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -10239,13 +10824,12 @@ class HistoricalWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides historical weather retrieval by location name and date using the
-		Open-Meteo Geocoding API and Open-Meteo Historical Weather API.
+			Provides historical weather retrieval by location name and date using the
+			Open-Meteo Geocoding API and Open-Meteo Historical Weather API.
 
-		This class is intentionally designed around the actual user-facing need in
-		the Foo fetcher expander: enter a location and a date, resolve that location
-		to coordinates, then retrieve historical weather for that date.
+			This class is intentionally designed around the actual user-facing need in
+			the Foo fetcher expander: enter a location and a date, resolve that location
+			to coordinates, then retrieve historical weather for that date.
 
 		Referenced API Requirements:
 		----------------------------
@@ -10265,8 +10849,7 @@ class HistoricalWeather( Fetcher ):
 				- wind_speed_unit
 				- precipitation_unit
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		geocode_url: Optional[str]
 			The Open-Meteo geocoding endpoint.
 
@@ -10332,6 +10915,30 @@ class HistoricalWeather( Fetcher ):
 		create_schema(...) -> Dict[str, str] | None
 			Generate a dynamic tool schema definition.
 
+		Attributes:
+			geocode_url (Optional[ str ]): Geocoding service endpoint URL.
+			archive_url (Optional[ str ]): Instance state retained for archive url operations.
+			location (Optional[ str ]): Current geographic location query or selected place.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			timezone (Optional[ str ]): Time zone identifier or setting.
+			target_date (Optional[ dt.date ]): Instance state retained for target date operations.
+			daily_metrics (Optional[ List[ str ] ]): Daily weather metrics requested.
+			hourly_metrics (Optional[ List[ str ] ]): Hourly weather metrics requested.
+			windspeed_unit (Optional[ str ]): Preferred wind-speed measurement unit.
+			temperature_unit (Optional[ str ]): Preferred temperature measurement unit.
+			precipitation_unit (Optional[ str ]): Preferred precipitation measurement unit.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			geocode_params (Optional[ Dict[ str, Any ] ]): Query parameters passed to the geocoding endpoint.
+			result_limit (Optional[ int ]): Maximum number of provider results.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			date (Any): Requested observation or reporting date.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	geocode_url: Optional[ str ]
 	archive_url: Optional[ str ]
@@ -10354,18 +10961,14 @@ class HistoricalWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Initialize the HistoricalWeather fetcher with default endpoints,
-			request headers, metric collections, and unit selections.
+				Initialize the HistoricalWeather fetcher with default endpoints,
+				request headers, metric collections, and unit selections.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.headers = { }
@@ -10428,18 +11031,14 @@ class HistoricalWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Provide ordered member visibility for introspection and editor discovery.
+				Provide ordered member visibility for introspection and editor discovery.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]:
+				List[str]:
 				Ordered attribute and method names.
-
 		'''
 		return [
 				'geocode_url',
@@ -10467,23 +11066,22 @@ class HistoricalWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Resolve a user-supplied location string into a geocoding result from
-			the Open-Meteo Geocoding API.
+				Resolve a user-supplied location string into a geocoding result from
+				the Open-Meteo Geocoding API.
 
-			Parameters:
-			-----------
-			location (str):
+			Args:
+				location (str):
 				The place name or postal code to search for.
 
-			count (int):
+				count (int):
 				The maximum number of geocoding matches to request.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				The selected geocoding record, typically the first result.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10534,31 +11132,30 @@ class HistoricalWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Retrieve historical weather for a single date using the Open-Meteo
-			Historical Weather API.
+				Retrieve historical weather for a single date using the Open-Meteo
+				Historical Weather API.
 
-			Parameters:
-			-----------
-			lat (float):
+			Args:
+				lat (float):
 				The latitude of the resolved location.
 
-			long (float):
+				long (float):
 				The longitude of the resolved location.
 
-			date (dt.date):
+				date (dt.date):
 				The requested historical date. This is used for both start_date
 				and end_date so the response is limited to that day.
 
-			zone (str):
+				zone (str):
 				The timezone to use in the response. Supports 'auto'.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				Normalized response payload including request metadata, selected
 				location metadata, and archive data.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'lat', lat )
@@ -10621,31 +11218,30 @@ class HistoricalWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Resolve a location string to coordinates, then retrieve historical
-			weather for the requested date.
+				Resolve a location string to coordinates, then retrieve historical
+				weather for the requested date.
 
-			Parameters:
-			-----------
-			location (str):
+			Args:
+				location (str):
 				The place name entered by the user.
 
-			date (dt.date):
+				date (dt.date):
 				The requested historical date.
 
-			zone (str):
+				zone (str):
 				The timezone requested for the archive response. If 'auto', the API
 				will resolve the local timezone for the coordinates.
 
-			count (int):
+				count (int):
 				Maximum number of geocoding matches to request before selecting the
 				first result.
 
 			Returns:
-			--------
-			Dict[str, Any] | None:
+				Dict[str, Any] | None:
 				Combined geocoding and historical weather result.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location', location )
@@ -10702,31 +11298,30 @@ class HistoricalWeather( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None:
+				Dict[str, str] | None:
 				A JSON-compatible dictionary defining the tool schema.
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -10773,11 +11368,9 @@ class Grokipedia( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Grokipedia search results and page content.
+			Fetches Grokipedia search results and page content.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		client,
 		query,
@@ -10800,6 +11393,22 @@ class Grokipedia( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			client (Optional[ GrokipediaClient ]): Provider SDK or HTTP client.
+			query (Optional[ str ]): Current query or search expression.
+			page (Optional[ str ]): Requested results page.
+			limit (Optional[ int ]): Maximum records requested.
+			offset (Optional[ int ]): Offset used for pagination or time calculations.
+			include_content (Optional[ bool ]): Instance state retained for include content operations.
+			response (Optional[ Dict[ str, Any ] ]): Most recent HTTP response.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	client: Optional[ GrokipediaClient ]
@@ -10814,16 +11423,13 @@ class Grokipedia( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the Grokipedia wrapper.
+				Initialize the Grokipedia wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.XAI_API_KEY
@@ -10842,16 +11448,13 @@ class Grokipedia( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -10872,17 +11475,17 @@ class Grokipedia( Fetcher ):
 	def _validate_limit( self, limit: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate result limit.
+				Validate result limit.
 
-			Parameters:
-			-----------
-			limit (int):
+			Args:
+				limit (int):
 				Requested maximum number of results.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'limit', limit )
@@ -10903,17 +11506,17 @@ class Grokipedia( Fetcher ):
 	def _validate_offset( self, offset: int ) -> int:
 		'''
 			Purpose:
-			--------
-			Validate pagination offset.
+				Validate pagination offset.
 
-			Parameters:
-			-----------
-			offset (int):
+			Args:
+				offset (int):
 				Requested result offset.
 
 			Returns:
-			--------
-			int
+				int
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'offset', offset )
@@ -10934,16 +11537,16 @@ class Grokipedia( Fetcher ):
 	def _get_client( self ) -> GrokipediaClient:
 		'''
 			Purpose:
-			--------
-			Create a Grokipedia client instance.
+				Create a Grokipedia client instance.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			GrokipediaClient
+				GrokipediaClient
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			return GrokipediaClient( )
@@ -10959,23 +11562,23 @@ class Grokipedia( Fetcher ):
 			offset: int=0 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Search Grokipedia for matching articles.
+				Search Grokipedia for matching articles.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Free-text search query.
 
-			limit (int):
+				limit (int):
 				Maximum number of results to request.
 
-			offset (int):
+				offset (int):
 				Result offset for pagination.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -11019,20 +11622,20 @@ class Grokipedia( Fetcher ):
 			include_content: bool=True ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a specific Grokipedia page by slug or page identifier.
+				Fetch a specific Grokipedia page by slug or page identifier.
 
-			Parameters:
-			-----------
-			page (str):
+			Args:
+				page (str):
 				Page slug or page identifier.
 
-			include_content (bool):
+				include_content (bool):
 				If True, request full page content.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'page', page )
@@ -11074,12 +11677,10 @@ class Grokipedia( Fetcher ):
 			include_content: bool=True ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for Grokipedia operations.
+				Unified dispatcher for Grokipedia operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- search
 				- page
@@ -11100,8 +11701,10 @@ class Grokipedia( Fetcher ):
 				Whether to request full page content for page mode.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'search').strip( ).lower( )
@@ -11137,29 +11740,29 @@ class Grokipedia( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -11214,11 +11817,9 @@ class GoogleGeocoding( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Google Geocoding forward, reverse, and place lookup records.
+			Fetches Google Geocoding forward, reverse, and place lookup records.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		url,
 		params,
@@ -11246,6 +11847,27 @@ class GoogleGeocoding( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query (Optional[ str ]): Current query or search expression.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			place_id (Optional[ str ]): Instance state retained for place id operations.
+			language (Optional[ str ]): Language code used for retrieval.
+			region (Optional[ str ]): Instance state retained for region operations.
+			result_type (Optional[ str ]): Instance state retained for result type operations.
+			location_type (Optional[ str ]): Instance state retained for location type operations.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	url: Optional[ str ]
@@ -11265,16 +11887,13 @@ class GoogleGeocoding( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the Google Geocoding fetcher.
+				Initialize the Google Geocoding fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.GOOGLE_API_KEY
@@ -11299,16 +11918,13 @@ class GoogleGeocoding( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -11334,17 +11950,17 @@ class GoogleGeocoding( Fetcher ):
 	def _resolve_api_key( self, api_key: Optional[ str ] = None ) -> str:
 		'''
 			Purpose:
-			--------
-			Resolve the Google API key.
+				Resolve the Google API key.
 
-			Parameters:
-			-----------
-			api_key (Optional[str]):
+			Args:
+				api_key (Optional[str]):
 				Optional explicit API key override.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			value = str( api_key or self.api_key or '' ).strip( )
@@ -11362,23 +11978,23 @@ class GoogleGeocoding( Fetcher ):
 			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Submit a request to the Google Geocoding API.
+				Submit a request to the Google Geocoding API.
 
-			Parameters:
-			-----------
-			params (Dict[str, Any]):
+			Args:
+				params (Dict[str, Any]):
 				Request parameters excluding the key.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
-			api_key (Optional[str]):
+				api_key (Optional[str]):
 				Optional explicit API key override.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			if not isinstance( params, dict ):
@@ -11425,29 +12041,29 @@ class GoogleGeocoding( Fetcher ):
 			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Forward geocode an address or place string.
+				Forward geocode an address or place string.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Human-readable address or place query.
 
-			language (str):
+				language (str):
 				Preferred response language.
 
-			region (str):
+				region (str):
 				Optional region bias, such as 'us'.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
-			api_key (Optional[str]):
+				api_key (Optional[str]):
 				Optional explicit API key override.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query', query )
@@ -11489,35 +12105,35 @@ class GoogleGeocoding( Fetcher ):
 			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Reverse geocode a latitude / longitude coordinate pair.
+				Reverse geocode a latitude / longitude coordinate pair.
 
-			Parameters:
-			-----------
-			latitude (float):
+			Args:
+				latitude (float):
 				Latitude.
 
-			longitude (float):
+				longitude (float):
 				Longitude.
 
-			language (str):
+				language (str):
 				Preferred response language.
 
-			result_type (str):
+				result_type (str):
 				Optional pipe-delimited result type filter.
 
-			location_type (str):
+				location_type (str):
 				Optional pipe-delimited location type filter.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
-			api_key (Optional[str]):
+				api_key (Optional[str]):
 				Optional explicit API key override.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -11564,29 +12180,29 @@ class GoogleGeocoding( Fetcher ):
 			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Geocode a Google place_id into address details.
+				Geocode a Google place_id into address details.
 
-			Parameters:
-			-----------
-			place_id (str):
+			Args:
+				place_id (str):
 				Google place ID.
 
-			language (str):
+				language (str):
 				Preferred response language.
 
-			region (str):
+				region (str):
 				Optional region bias.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
-			api_key (Optional[str]):
+				api_key (Optional[str]):
 				Optional explicit API key override.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'place_id', place_id )
@@ -11628,12 +12244,10 @@ class GoogleGeocoding( Fetcher ):
 			api_key: Optional[ str ] = None ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for Google Geocoding requests.
+				Unified dispatcher for Google Geocoding requests.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- forward
 				- reverse
@@ -11670,8 +12284,10 @@ class GoogleGeocoding( Fetcher ):
 				Optional explicit API key override.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'forward').strip( ).lower( )
@@ -11725,29 +12341,29 @@ class GoogleGeocoding( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -11797,11 +12413,9 @@ class CensusData( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches Census API variables and tabular data.
+			Fetches Census API variables and tabular data.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		base_url,
 		year,
@@ -11827,6 +12441,25 @@ class CensusData( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			year (Optional[ str ]): Year used by the current request.
+			dataset (Optional[ str ]): Selected dataset name or path.
+			mode (Optional[ str ]): Selected request or operation mode.
+			fields (Optional[ List[ str ] ]): Selected response fields or API variable names.
+			geography_for (Optional[ str ]): Instance state retained for geography for operations.
+			geography_in (Optional[ str ]): Instance state retained for geography in operations.
+			predicates (Optional[ Dict[ str, Any ] ]): Instance state retained for predicates operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+	
+			rows (Any): Tabular records produced by the most recent query.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
@@ -11843,17 +12476,13 @@ class CensusData( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the U.S. Census Bureau API wrapper.
+				Initialize the U.S. Census Bureau API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.CENSUS_API_KEY
@@ -11876,17 +12505,13 @@ class CensusData( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Return ordered CensusData members.
+				Return ordered CensusData members.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			List[str]
-
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -11913,17 +12538,13 @@ class CensusData( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			-----------
-			Resolve the configured Census API key.
+				Resolve the configured Census API key.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			Optional[str]
-
+				Optional[str]
 		'''
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -11931,17 +12552,16 @@ class CensusData( Fetcher ):
 	def _normalize_fields( self, fields: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the comma-delimited Census get-field string.
+				Normalize the comma-delimited Census get-field string.
 
-			Parameters:
-			-----------
-			fields (str): Comma-delimited field list.
+			Args:
+				fields (str): Comma-delimited field list.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'fields', fields )
@@ -11961,18 +12581,17 @@ class CensusData( Fetcher ):
 	def _parse_predicates( self, predicates: str ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			-----------
-			Parse optional Census predicate text into a parameter dictionary.
+				Parse optional Census predicate text into a parameter dictionary.
 
-			Parameters:
-			-----------
-			predicates (str):
+			Args:
+				predicates (str):
 				Newline-delimited key=value pairs.
 
 			Returns:
-			-----------
-			Dict[str, Any]
+				Dict[str, Any]
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.predicates = predicates
@@ -12013,18 +12632,17 @@ class CensusData( Fetcher ):
 	def _shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			-----------
-			Transform Census array-style responses into header/row dictionaries.
+				Transform Census array-style responses into header/row dictionaries.
 
-			Parameters:
-			-----------
-			rows (List[Any]):
+			Args:
+				rows (List[Any]):
 				Raw Census API response payload.
 
 			Returns:
-			-----------
-			Dict[str, Any]
+				Dict[str, Any]
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -12063,24 +12681,23 @@ class CensusData( Fetcher ):
 	def fetch_variables( self, year: str, dataset: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the variables metadata for a Census dataset.
+				Fetch the variables metadata for a Census dataset.
 
-			Parameters:
-			-----------
-			year (str):
+			Args:
+				year (str):
 				Dataset year such as 2022.
 
-			dataset (str):
+				dataset (str):
 				Dataset path such as acs/acs5 or 2020/dec/dhc.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'year', year )
@@ -12125,36 +12742,35 @@ class CensusData( Fetcher ):
 			predicates: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch tabular Census dataset values.
+				Fetch tabular Census dataset values.
 
-			Parameters:
-			-----------
-			year (str):
+			Args:
+				year (str):
 				Dataset year such as 2022.
 
-			dataset (str):
+				dataset (str):
 				Dataset path such as acs/acs5.
 
-			fields (str):
+				fields (str):
 				Comma-delimited get variables such as NAME,B01001_001E.
 
-			geography_for (str):
+				geography_for (str):
 				Census `for` geography clause, e.g. state:*.
 
-			geography_in (str):
+				geography_in (str):
 				Optional Census `in` geography clause.
 
-			predicates (str):
+				predicates (str):
 				Optional newline-delimited key=value predicates.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'year', year )
@@ -12221,39 +12837,38 @@ class CensusData( Fetcher ):
 			predicates: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Dispatch Census API operations.
+				Dispatch Census API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of variables or data.
 
-			year (str):
+				year (str):
 				Dataset year.
 
-			dataset (str):
+				dataset (str):
 				Dataset path.
 
-			fields (str):
+				fields (str):
 				Comma-delimited data fields for data mode.
 
-			geography_for (str):
+				geography_for (str):
 				Census `for` clause for data mode.
 
-			geography_in (str):
+				geography_in (str):
 				Optional Census `in` clause for data mode.
 
-			predicates (str):
+				predicates (str):
 				Optional newline-delimited key=value predicates.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = (mode or 'variables').strip( ).lower( )
@@ -12294,21 +12909,20 @@ class CensusData( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		"""
 			Purpose:
-			________
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			___________
-			function (str): Tool function name.
-			tool (str): Service name.
-			description (str): What the function does.
-			parameters (dict): JSON-schema properties.
-			required (list[str]): Required parameter names.
+			Args:
+				function (str): Tool function name.
+				tool (str): Service name.
+				description (str): What the function does.
+				parameters (dict): JSON-schema properties.
+				required (list[str]): Required parameter names.
 
 			Returns:
-			________
-			dict
+				dict
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -12365,11 +12979,9 @@ class Socrata( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches metadata and rows from Socrata-backed open-data portals.
+			Fetches metadata and rows from Socrata-backed open-data portals.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		base_url,
 		domain,
@@ -12396,6 +13008,26 @@ class Socrata( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			domain (Optional[ str ]): Host or domain used for a provider request.
+			dataset_id (Optional[ str ]): Identifier of the selected provider dataset.
+			mode (Optional[ str ]): Selected request or operation mode.
+			select_clause (Optional[ str ]): SQL-like projection clause for the provider's query.
+			where_clause (Optional[ str ]): Filter clause for the provider's query.
+			order_clause (Optional[ str ]): Ordering clause for the provider's query.
+			group_clause (Optional[ str ]): Grouping clause for the provider's query.
+			limit_value (Optional[ int ]): Maximum number of returned rows.
+			offset_value (Optional[ int ]): Number of records skipped before returning results.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
@@ -12414,17 +13046,13 @@ class Socrata( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the Socrata API wrapper.
+				Initialize the Socrata API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.SOCRATA_API_KEY
@@ -12449,17 +13077,13 @@ class Socrata( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Return ordered Socrata members.
+				Return ordered Socrata members.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			List[str]
-
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -12487,17 +13111,13 @@ class Socrata( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			-----------
-			Resolve the configured Socrata application token.
+				Resolve the configured Socrata application token.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			Optional[str]
-
+				Optional[str]
 		'''
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -12505,17 +13125,16 @@ class Socrata( Fetcher ):
 	def _normalize_domain( self, domain: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the Socrata domain.
+				Normalize the Socrata domain.
 
-			Parameters:
-			-----------
-			domain (str): Domain such as data.cdc.gov.
+			Args:
+				domain (str): Domain such as data.cdc.gov.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -12535,17 +13154,16 @@ class Socrata( Fetcher ):
 	def _normalize_dataset_id( self, dataset_id: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the Socrata dataset identifier.
+				Normalize the Socrata dataset identifier.
 
-			Parameters:
-			-----------
-			dataset_id (str): 4x4 dataset identifier.
+			Args:
+				dataset_id (str): 4x4 dataset identifier.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -12566,24 +13184,23 @@ class Socrata( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch Socrata dataset metadata.
+				Fetch Socrata dataset metadata.
 
-			Parameters:
-			-----------
-			domain (str):
+			Args:
+				domain (str):
 				Portal domain such as data.cdc.gov.
 
-			dataset_id (str):
+				dataset_id (str):
 				Dataset identifier such as q8xq-ygsk.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -12629,42 +13246,41 @@ class Socrata( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch Socrata dataset rows using standard SoQL query options.
+				Fetch Socrata dataset rows using standard SoQL query options.
 
-			Parameters:
-			-----------
-			domain (str):
+			Args:
+				domain (str):
 				Portal domain such as data.cdc.gov.
 
-			dataset_id (str):
+				dataset_id (str):
 				Dataset identifier such as q8xq-ygsk.
 
-			select (str):
+				select (str):
 				Optional $select clause.
 
-			where (str):
+				where (str):
 				Optional $where clause.
 
-			order (str):
+				order (str):
 				Optional $order clause.
 
-			group (str):
+				group (str):
 				Optional $group clause.
 
-			limit (int):
+				limit (int):
 				Optional row limit.
 
-			offset (int):
+				offset (int):
 				Optional offset for pagination.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -12739,45 +13355,44 @@ class Socrata( Fetcher ):
 			offset: int=0, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Dispatch Socrata API operations.
+				Dispatch Socrata API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of metadata or rows.
 
-			domain (str):
+				domain (str):
 				Portal domain.
 
-			dataset_id (str):
+				dataset_id (str):
 				Dataset identifier.
 
-			select (str):
+				select (str):
 				Optional $select clause.
 
-			where (str):
+				where (str):
 				Optional $where clause.
 
-			order (str):
+				order (str):
 				Optional $order clause.
 
-			group (str):
+				group (str):
 				Optional $group clause.
 
-			limit (int):
+				limit (int):
 				Optional row limit.
 
-			offset (int):
+				offset (int):
 				Optional row offset.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'rows').strip( ).lower( )
@@ -12818,21 +13433,20 @@ class Socrata( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		"""
 			Purpose:
-			________
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			___________
-			function (str): Tool function name.
-			tool (str): Service name.
-			description (str): What the function does.
-			parameters (dict): JSON-schema properties.
-			required (list[str]): Required parameter names.
+			Args:
+				function (str): Tool function name.
+				tool (str): Service name.
+				description (str): What the function does.
+				parameters (dict): JSON-schema properties.
+				required (list[str]): Required parameter names.
 
 			Returns:
-			________
-			dict
+				dict
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
 			self.required = required
@@ -12889,11 +13503,9 @@ class HealthData( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches metadata and rows from HealthData.gov Socrata datasets.
+			Fetches metadata and rows from HealthData.gov Socrata datasets.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		api_key,
 		base_url,
 		domain,
@@ -12920,6 +13532,26 @@ class HealthData( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			domain (Optional[ str ]): Host or domain used for a provider request.
+			dataset_id (Optional[ str ]): Identifier of the selected provider dataset.
+			mode (Optional[ str ]): Selected request or operation mode.
+			select_clause (Optional[ str ]): SQL-like projection clause for the provider's query.
+			where_clause (Optional[ str ]): Filter clause for the provider's query.
+			order_clause (Optional[ str ]): Ordering clause for the provider's query.
+			group_clause (Optional[ str ]): Grouping clause for the provider's query.
+			limit_value (Optional[ int ]): Maximum number of returned rows.
+			offset_value (Optional[ int ]): Number of records skipped before returning results.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
@@ -12938,17 +13570,13 @@ class HealthData( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the HealthData.gov API wrapper.
+				Initialize the HealthData.gov API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = cfg.HEALTHDATA_API_KEY
@@ -12973,17 +13601,13 @@ class HealthData( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Return ordered HealthData members.
+				Return ordered HealthData members.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			List[str]
-
+				List[str]
 		'''
 		return [
 				'api_key',
@@ -13011,17 +13635,13 @@ class HealthData( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			-----------
-			Resolve the configured HealthData.gov application token.
+				Resolve the configured HealthData.gov application token.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			Optional[str]
-
+				Optional[str]
 		'''
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -13029,18 +13649,17 @@ class HealthData( Fetcher ):
 	def _normalize_domain( self, domain: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the HealthData.gov domain.
+				Normalize the HealthData.gov domain.
 
-			Parameters:
-			-----------
-			domain (str):
+			Args:
+				domain (str):
 				Domain such as healthdata.gov.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -13060,18 +13679,17 @@ class HealthData( Fetcher ):
 	def _normalize_dataset_id( self, dataset_id: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the HealthData.gov dataset identifier.
+				Normalize the HealthData.gov dataset identifier.
 
-			Parameters:
-			-----------
-			dataset_id (str):
+			Args:
+				dataset_id (str):
 				Dataset identifier.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -13092,24 +13710,23 @@ class HealthData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch HealthData.gov dataset metadata.
+				Fetch HealthData.gov dataset metadata.
 
-			Parameters:
-			-----------
-			domain (str):
+			Args:
+				domain (str):
 				Portal domain such as healthdata.gov.
 
-			dataset_id (str):
+				dataset_id (str):
 				Dataset identifier.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -13155,42 +13772,41 @@ class HealthData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch HealthData.gov dataset rows using standard SoQL query options.
+				Fetch HealthData.gov dataset rows using standard SoQL query options.
 
-			Parameters:
-			-----------
-			domain (str):
+			Args:
+				domain (str):
 				Portal domain such as healthdata.gov.
 
-			dataset_id (str):
+				dataset_id (str):
 				Dataset identifier.
 
-			select (str):
+				select (str):
 				Optional $select clause.
 
-			where (str):
+				where (str):
 				Optional $where clause.
 
-			order (str):
+				order (str):
 				Optional $order clause.
 
-			group (str):
+				group (str):
 				Optional $group clause.
 
-			limit (int):
+				limit (int):
 				Optional row limit.
 
-			offset (int):
+				offset (int):
 				Optional offset for pagination.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'domain', domain )
@@ -13265,45 +13881,44 @@ class HealthData( Fetcher ):
 			offset: int=0, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Dispatch HealthData.gov API operations.
+				Dispatch HealthData.gov API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of metadata or rows.
 
-			domain (str):
+				domain (str):
 				Portal domain.
 
-			dataset_id (str):
+				dataset_id (str):
 				Dataset identifier.
 
-			select (str):
+				select (str):
 				Optional $select clause.
 
-			where (str):
+				where (str):
 				Optional $where clause.
 
-			order (str):
+				order (str):
 				Optional $order clause.
 
-			group (str):
+				group (str):
 				Optional $group clause.
 
-			limit (int):
+				limit (int):
 				Optional row limit.
 
-			offset (int):
+				offset (int):
 				Optional row offset.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'rows').strip( ).lower( )
@@ -13344,30 +13959,29 @@ class HealthData( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			-----------
-			Construct and return a dynamic OpenAI Tool API schema definition.
+				Construct and return a dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				Tool function name.
 
-			tool (str):
+				tool (str):
 				Service name.
 
-			description (str):
+				description (str):
 				Description of what the tool does.
 
-			parameters (dict):
+				parameters (dict):
 				JSON-schema properties.
 
-			required (list[str]):
+				required (list[str]):
 				Required parameter names.
 
 			Returns:
-			-----------
-			Dict[str, str] | None
+				Dict[str, str] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -13424,11 +14038,9 @@ class GlobalHealthData( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
-		Fetches United Nations SDMX catalog and query data.
+			Fetches United Nations SDMX catalog and query data.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url,
 		catalog_url,
 		mode,
@@ -13445,7 +14057,21 @@ class GlobalHealthData( Fetcher ):
 		fetch_sdmx_query(...): Performs the fetch_sdmx_query operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
+
+		Attributes:
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			athena_base_url (Optional[ str ]): Instance state retained for athena base url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query_path (Optional[ str ]): Path portion of the provider API request.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
 	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
@@ -13458,17 +14084,13 @@ class GlobalHealthData( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the WHO Global Health Observatory API wrapper.
+				Initialize the WHO Global Health Observatory API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.api_key = os.getenv( 'WHO_API_KEY' )
@@ -13485,6 +14107,14 @@ class GlobalHealthData( Fetcher ):
 		self.timeout = 20
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available GlobalHealthData members.
+
+		Purpose:
+			List available GlobalHealthData members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [
 				'api_key',
 				'base_url',
@@ -13505,19 +14135,15 @@ class GlobalHealthData( Fetcher ):
 		'''
 
 			Purpose:
-			--------
-			Fetch a NASA GIBS Mercator map image and render it through the provided
-			Cartopy coordinate reference system module.
+				Fetch a NASA GIBS Mercator map image and render it through the provided
+				Cartopy coordinate reference system module.
 		
-			Parameters:
-			-----------
-			ccrs (Any | None): Optional Cartopy coordinate reference system module used
-			to project and render the returned map image.
+			Args:
+				ccrs (Any | None): Optional Cartopy coordinate reference system module used
+				to project and render the returned map image.
 		
 			Returns:
-			--------
-			Any | None: The rendered map result or None when the request fails.
-		
+				Any | None: The rendered map result or None when the request fails.
 		'''
 		key = str( self.api_key or '' ).strip( )
 		return key if key else None
@@ -13526,18 +14152,17 @@ class GlobalHealthData( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Normalize a Global Health query path by trimming whitespace and removing
-			leading path separators before composing a request URL.
+				Normalize a Global Health query path by trimming whitespace and removing
+				leading path separators before composing a request URL.
 		
-			Parameters:
-			-----------
-			query_path (str): Raw Global Health query path supplied by the caller.
+			Args:
+				query_path (str): Raw Global Health query path supplied by the caller.
 		
 			Returns:
-			--------
-			str: Normalized query path suitable for request URL composition.
-		
+				str: Normalized query path suitable for request URL composition.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -13557,18 +14182,17 @@ class GlobalHealthData( Fetcher ):
 	def fetch_indicator_registry( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the WHO indicator metadata registry landing content.
+				Fetch the WHO indicator metadata registry landing content.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'indicator_registry'
@@ -13615,24 +14239,23 @@ class GlobalHealthData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Execute a WHO GHO Athena/OData-style query path.
+				Execute a WHO GHO Athena/OData-style query path.
 
-			Parameters:
-			-----------
-			query_path (str):
+			Args:
+				query_path (str):
 				The path segment to append after the base WHO API endpoint.
 
-			fmt (str):
+				fmt (str):
 				Response format hint, typically json or xml.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -13685,27 +14308,26 @@ class GlobalHealthData( Fetcher ):
 			fmt: str='json', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Dispatch WHO Global Health Observatory API operations.
+				Dispatch WHO Global Health Observatory API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of indicator_registry or athena.
 
-			query_path (str):
+				query_path (str):
 				Query path for athena mode.
 
-			fmt (str):
+				fmt (str):
 				Response format hint.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'indicator_registry').strip( ).lower( )
@@ -13736,6 +14358,24 @@ class GlobalHealthData( Fetcher ):
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
 			required: list[ str ] ) -> Dict[ str, str ] | None:
+		"""Describe the GlobalHealthData tool arguments as a function schema.
+
+		Purpose:
+			Describe the GlobalHealthData tool arguments as a function schema.
+
+		Args:
+			function (str): function value for the GlobalHealthData operation.
+			tool (str): tool value for the GlobalHealthData operation.
+			description (str): description value for the GlobalHealthData operation.
+			parameters (dict): parameters value for the GlobalHealthData operation.
+			required (list[ str ]): required value for the GlobalHealthData operation.
+
+		Returns:
+			Dict[ str, str ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
+		"""
 		try:
 			self.required = required
 			throw_if( 'function', function )
@@ -13790,11 +14430,9 @@ class GlobalHealthData( Fetcher ):
 class UnitedNations( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Fetch catalog and SDMX query results from the United Nations UNdata API.
+			Fetch catalog and SDMX query results from the United Nations UNdata API.
 
-		Attribues:
-		-----------
+		Legacy member listing:
 		base_url - Optional[ str ]
 		catalog_url - Optional[ str ]
 		mode - Optional[ str ]
@@ -13812,6 +14450,19 @@ class UnitedNations( Fetcher ):
 		create_schema( self, function: str, tool: str, description: str,
 			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			catalog_url (Optional[ str ]): Instance state retained for catalog url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query_path (Optional[ str ]): Path portion of the provider API request.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	catalog_url: Optional[ str ]
@@ -13823,17 +14474,13 @@ class UnitedNations( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the United Nations UNdata API wrapper.
+				Initialize the United Nations UNdata API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://data.un.org/WS/rest'
@@ -13851,17 +14498,13 @@ class UnitedNations( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Return ordered UnitedNations members.
+				Return ordered UnitedNations members.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			List[str]
-
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -13880,18 +14523,17 @@ class UnitedNations( Fetcher ):
 	def _normalize_query_path( self, query_path: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the SDMX query path appended to the UNdata REST endpoint.
+				Normalize the SDMX query path appended to the UNdata REST endpoint.
 
-			Parameters:
-			-----------
-			query_path (str):
+			Args:
+				query_path (str):
 				Path appended after the UNdata REST base endpoint.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -13911,18 +14553,17 @@ class UnitedNations( Fetcher ):
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the UNdata dataset catalog landing page.
+				Fetch the UNdata dataset catalog landing page.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'datasets'
@@ -13964,21 +14605,20 @@ class UnitedNations( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Execute a REST SDMX query against the UNdata API.
+				Execute a REST SDMX query against the UNdata API.
 
-			Parameters:
-			-----------
-			query_path (str):
+			Args:
+				query_path (str):
 				Path appended after the UNdata REST base endpoint.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'query_path', query_path )
@@ -14024,24 +14664,23 @@ class UnitedNations( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Dispatch United Nations UNdata API operations.
+				Dispatch United Nations UNdata API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of datasets or sdmx_query.
 
-			query_path (str):
+				query_path (str):
 				Query path for sdmx_query mode.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'datasets').strip( ).lower( )
@@ -14073,30 +14712,29 @@ class UnitedNations( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			-----------
-			Construct and return a dynamic OpenAI Tool API schema definition.
+				Construct and return a dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				Tool function name.
 
-			tool (str):
+				tool (str):
 				Service name.
 
-			description (str):
+				description (str):
 				Description of what the tool does.
 
-			parameters (dict):
+				parameters (dict):
 				JSON-schema properties.
 
-			required (list[str]):
+				required (list[str]):
 				Required parameter names.
 
 			Returns:
-			-----------
-			Dict[str, str] | None
+				Dict[str, str] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -14153,11 +14791,9 @@ class WorldPopulation( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Fetches WorldPop catalog and raster metadata records.
+			Fetches WorldPop catalog and raster metadata records.
 
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url,
 		stac_url,
 		mode,
@@ -14177,6 +14813,20 @@ class WorldPopulation( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			stac_url (Optional[ str ]): Instance state retained for stac url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query_text (Optional[ str ]): Text of the active provider search.
+			asset_path (Optional[ str ]): Instance state retained for asset path operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	stac_url: Optional[ str ]
@@ -14189,17 +14839,13 @@ class WorldPopulation( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the WorldPop API wrapper.
+				Initialize the WorldPop API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://api.worldpop.org/v1'
@@ -14218,17 +14864,13 @@ class WorldPopulation( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Return ordered WorldPopulation members.
+				Return ordered WorldPopulation members.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			List[str]
-
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -14249,18 +14891,17 @@ class WorldPopulation( Fetcher ):
 	def _normalize_asset_path( self, asset_path: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize an asset or metadata path appended to the WorldPop API.
+				Normalize an asset or metadata path appended to the WorldPop API.
 
-			Parameters:
-			-----------
-			asset_path (str):
+			Args:
+				asset_path (str):
 				Path appended after the API base endpoint.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'asset_path', asset_path )
@@ -14280,18 +14921,17 @@ class WorldPopulation( Fetcher ):
 	def fetch_catalog( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the WorldPop API catalog or landing payload.
+				Fetch the WorldPop API catalog or landing payload.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'catalog'
@@ -14333,27 +14973,26 @@ class WorldPopulation( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Execute a simple WorldPop catalog search request.
+				Execute a simple WorldPop catalog search request.
 
-			Parameters:
-			-----------
-			query (str):
+			Args:
+				query (str):
 				Free-text search query.
 
-			page (int):
+				page (int):
 				Page number.
 
-			page_size (int):
+				page_size (int):
 				Requested page size.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'search'
@@ -14403,21 +15042,20 @@ class WorldPopulation( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch metadata or asset information for a WorldPop raster path.
+				Fetch metadata or asset information for a WorldPop raster path.
 
-			Parameters:
-			-----------
-			asset_path (str):
+			Args:
+				asset_path (str):
 				Path appended after the API base endpoint.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'asset_path', asset_path )
@@ -14464,33 +15102,32 @@ class WorldPopulation( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Dispatch WorldPop API operations.
+				Dispatch WorldPop API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of catalog, search, or raster_metadata.
 
-			query (str):
+				query (str):
 				Free-text query for search mode.
 
-			asset_path (str):
+				asset_path (str):
 				Asset or metadata path for raster_metadata mode.
 
-			page (int):
+				page (int):
 				Page number for search mode.
 
-			page_size (int):
+				page_size (int):
 				Page size for search mode.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'catalog').strip( ).lower( )
@@ -14530,30 +15167,29 @@ class WorldPopulation( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			-----------
-			Construct and return a dynamic OpenAI Tool API schema definition.
+				Construct and return a dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				Tool function name.
 
-			tool (str):
+				tool (str):
 				Service name.
 
-			description (str):
+				description (str):
 				Description of what the tool does.
 
-			parameters (dict):
+				parameters (dict):
 				JSON-schema properties.
 
-			required (list[str]):
+				required (list[str]):
 				Required parameter names.
 
 			Returns:
-			-----------
-			Dict[str, str] | None
+				Dict[str, str] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -14610,11 +15246,9 @@ class Wonder( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
-		Builds and submits CDC WONDER query templates.
+			Builds and submits CDC WONDER query templates.
 	
-		Attributes:
-		-----------
+		Legacy member listing:
 		base_url,
 		mode,
 		dataset_id,
@@ -14632,7 +15266,20 @@ class Wonder( Fetcher ):
 		submit_query(...): Performs the submit_query operation for this fetcher.
 		fetch(...): Performs the fetch operation for this fetcher.
 		create_schema(...): Performs the create_schema operation for this fetcher.
+
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			dataset_id (Optional[ str ]): Identifier of the selected provider dataset.
+			request_xml (Optional[ str ]): Instance state retained for request xml operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
 	
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -14644,17 +15291,13 @@ class Wonder( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			-----------
-			Initialize the CDC WONDER API wrapper.
+				Initialize the CDC WONDER API wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			None
-
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://wonder.cdc.gov/controller/datarequest'
@@ -14673,17 +15316,13 @@ class Wonder( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			-----------
-			Return ordered Wonder members.
+				Return ordered Wonder members.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			-----------
-			List[str]
-
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -14703,18 +15342,17 @@ class Wonder( Fetcher ):
 	def _normalize_dataset_id( self, dataset_id: str ) -> str:
 		'''
 			Purpose:
-			-----------
-			Normalize the CDC WONDER database identifier.
+				Normalize the CDC WONDER database identifier.
 
-			Parameters:
-			-----------
-			dataset_id (str):
+			Args:
+				dataset_id (str):
 				Database identifier such as D76.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -14733,18 +15371,17 @@ class Wonder( Fetcher ):
 	def build_template( self, dataset_id: str='D76' ) -> str:
 		'''
 			Purpose:
-			-----------
-			Build a starter XML request document for a CDC WONDER query.
+				Build a starter XML request document for a CDC WONDER query.
 
-			Parameters:
-			-----------
-			dataset_id (str):
+			Args:
+				dataset_id (str):
 				Database identifier such as D76.
 
 			Returns:
-			-----------
-			str
+				str
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.dataset_id = self._normalize_dataset_id( dataset_id )
@@ -14781,18 +15418,17 @@ class Wonder( Fetcher ):
 	def fetch_template( self, dataset_id: str='D76' ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			-----------
-			Return a local CDC WONDER XML request template.
+				Return a local CDC WONDER XML request template.
 
-			Parameters:
-			-----------
-			dataset_id (str):
+			Args:
+				dataset_id (str):
 				Database identifier such as D76.
 
 			Returns:
-			-----------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'metadata_template'
@@ -14827,24 +15463,23 @@ class Wonder( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			-----------
-			Submit a CDC WONDER XML query request.
+				Submit a CDC WONDER XML query request.
 
-			Parameters:
-			-----------
-			dataset_id (str):
+			Args:
+				dataset_id (str):
 				Database identifier such as D76.
 
-			request_xml (str):
+				request_xml (str):
 				Full XML query document to POST as request_xml.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			-----------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset_id', dataset_id )
@@ -14896,27 +15531,26 @@ class Wonder( Fetcher ):
 			request_xml: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			-----------
-			Dispatch CDC WONDER API operations.
+				Dispatch CDC WONDER API operations.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				One of metadata_template or query_xml.
 
-			dataset_id (str):
+				dataset_id (str):
 				Database identifier such as D76.
 
-			request_xml (str):
+				request_xml (str):
 				Full XML request document for query_xml mode.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			-----------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'metadata_template').strip( ).lower( )
@@ -14949,30 +15583,29 @@ class Wonder( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			-----------
-			Construct and return a dynamic OpenAI Tool API schema definition.
+				Construct and return a dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				Tool function name.
 
-			tool (str):
+				tool (str):
 				Service name.
 
-			description (str):
+				description (str):
 				Description of what the tool does.
 
-			parameters (dict):
+				parameters (dict):
 				JSON-schema properties.
 
-			required (list[str]):
+				required (list[str]):
 				Required parameter names.
 
 			Returns:
-			-----------
-			Dict[str, str] | None
+				Dict[str, str] | None
 
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -15028,9 +15661,8 @@ class Wonder( Fetcher ):
 class USGSEarthquakes( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the U.S. Geological Survey (USGS) earthquake feeds and
-		event search API for human-readable geospatial earthquake retrieval.
+			Provides access to the U.S. Geological Survey (USGS) earthquake feeds and
+			event search API for human-readable geospatial earthquake retrieval.
 
 		Referenced API Requirements:
 		----------------------------
@@ -15061,6 +15693,33 @@ class USGSEarthquakes( Fetcher ):
 			  - longitude
 			  - maxradiuskm
 
+		Attributes:
+			feed_url (Optional[ str ]): Instance state retained for feed url operations.
+			search_url (Optional[ str ]): URL used to execute the provider's search request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			feed (Optional[ str ]): Instance state retained for feed operations.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			min_magnitude (Optional[ float ]): Instance state retained for min magnitude operations.
+			max_magnitude (Optional[ float ]): Instance state retained for max magnitude operations.
+			limit (Optional[ int ]): Maximum records requested.
+			order_by (Optional[ str ]): Instance state retained for order by operations.
+			event_type (Optional[ str ]): Instance state retained for event type operations.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			max_radius_km (Optional[ float ]): Instance state retained for max radius km operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			features (Any): Runtime state for features in the USGSEarthquakes provider.
+			rows (Any): Tabular records produced by the most recent query.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	feed_url: Optional[ str ]
 	search_url: Optional[ str ]
@@ -15084,16 +15743,13 @@ class USGSEarthquakes( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the USGS earthquake fetcher with feed and catalog endpoints.
+				Initialize the USGS earthquake fetcher with feed and catalog endpoints.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.feed_url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary'
@@ -15122,16 +15778,13 @@ class USGSEarthquakes( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'feed_url',
@@ -15162,17 +15815,17 @@ class USGSEarthquakes( Fetcher ):
 	def _shape_feature_rows( self, features: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize USGS GeoJSON feature records into human-readable tabular rows.
+				Normalize USGS GeoJSON feature records into human-readable tabular rows.
 
-			Parameters:
-			-----------
-			features (List[Dict[str, Any]]):
+			Args:
+				features (List[Dict[str, Any]]):
 				Feature collection returned by the USGS feed or search API.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.features = features
@@ -15243,17 +15896,17 @@ class USGSEarthquakes( Fetcher ):
 	def _summarize_features( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Build a compact summary block from normalized earthquake rows.
+				Build a compact summary block from normalized earthquake rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized earthquake rows.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -15297,12 +15950,10 @@ class USGSEarthquakes( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Retrieve one of the USGS real-time GeoJSON summary feeds.
+				Retrieve one of the USGS real-time GeoJSON summary feeds.
 
-			Parameters:
-			-----------
-			feed (str):
+			Args:
+				feed (str):
 				Feed filename such as:
 				- all_hour.geojson
 				- all_day.geojson
@@ -15314,8 +15965,10 @@ class USGSEarthquakes( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'feed', feed )
@@ -15367,27 +16020,25 @@ class USGSEarthquakes( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Retrieve earthquake events from the USGS catalog search endpoint.
+				Retrieve earthquake events from the USGS catalog search endpoint.
 
-			Parameters:
-			-----------
-			start_date (str):
+			Args:
+				start_date (str):
 				Inclusive start date in YYYY-MM-DD format.
 
-			end_date (str):
+				end_date (str):
 				Inclusive end date in YYYY-MM-DD format.
 
-			min_magnitude (float):
+				min_magnitude (float):
 				Minimum magnitude filter.
 
-			max_magnitude (float):
+				max_magnitude (float):
 				Maximum magnitude filter.
 
-			limit (int):
+				limit (int):
 				Maximum number of returned events.
 
-			order_by (str):
+				order_by (str):
 				Catalog sort order such as:
 				- time
 				- time-asc
@@ -15411,8 +16062,10 @@ class USGSEarthquakes( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'start_date', start_date )
@@ -15498,12 +16151,10 @@ class USGSEarthquakes( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for USGS earthquake feed and search retrieval.
+				Unified dispatcher for USGS earthquake feed and search retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- feed
 				- search
@@ -15545,8 +16196,10 @@ class USGSEarthquakes( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'feed').strip( ).lower( )
@@ -15593,29 +16246,29 @@ class USGSEarthquakes( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -15664,10 +16317,9 @@ class USGSEarthquakes( Fetcher ):
 class USGSWaterData( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the modern USGS Water Data APIs for monitoring
-		locations, time-series metadata, latest continuous values, and latest
-		daily values.
+			Provides access to the modern USGS Water Data APIs for monitoring
+			locations, time-series metadata, latest continuous values, and latest
+			daily values.
 
 		Referenced API Requirements:
 		----------------------------
@@ -15684,6 +16336,23 @@ class USGSWaterData( Fetcher ):
 			- X-Api-Key header
 			- API keys increase rate limits but are not required for basic use
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			collection (Any): Selected collection or dataset identifier.
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -15696,16 +16365,13 @@ class USGSWaterData( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the USGS Water Data wrapper.
+				Initialize the USGS Water Data wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://api.waterdata.usgs.gov/ogcapi/v0'
@@ -15726,16 +16392,13 @@ class USGSWaterData( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -15762,16 +16425,16 @@ class USGSWaterData( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			--------
-			Resolve an API key for the USGS Water Data APIs.
+				Resolve an API key for the USGS Water Data APIs.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			Optional[str]
+				Optional[str]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -15796,18 +16459,18 @@ class USGSWaterData( Fetcher ):
 	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize several possible USGS Water Data response layouts into a list
-			of record dictionaries.
+				Normalize several possible USGS Water Data response layouts into a list
+				of record dictionaries.
 
-			Parameters:
-			-----------
-			payload (Any):
+			Args:
+				payload (Any):
 				Decoded JSON payload returned by the API.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -15836,23 +16499,23 @@ class USGSWaterData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a USGS Water Data collection endpoint.
+				Issue a GET request to a USGS Water Data collection endpoint.
 
-			Parameters:
-			-----------
-			collection (str):
+			Args:
+				collection (str):
 				Collection name under the OGC API base path.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'collection', collection )
@@ -15899,17 +16562,17 @@ class USGSWaterData( Fetcher ):
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize monitoring-location records into a human-readable table.
+				Normalize monitoring-location records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Monitoring location records.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -15992,17 +16655,17 @@ class USGSWaterData( Fetcher ):
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize time-series metadata records into a human-readable table.
+				Normalize time-series metadata records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Time-series metadata records.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16065,17 +16728,17 @@ class USGSWaterData( Fetcher ):
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize latest continuous or daily value records into a readable table.
+				Normalize latest continuous or daily value records into a readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Value records.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16144,17 +16807,17 @@ class USGSWaterData( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized rows.
+				Create a compact summary block from normalized rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -16193,32 +16856,32 @@ class USGSWaterData( Fetcher ):
 			limit: int=25, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch monitoring locations.
+				Fetch monitoring locations.
 
-			Parameters:
-			-----------
-			monitoring_location_id (str):
+			Args:
+				monitoring_location_id (str):
 				Optional monitoring location identifier such as USGS-01491000.
 
-			state_code (str):
+				state_code (str):
 				Optional state filter.
 
-			county_code (str):
+				county_code (str):
 				Optional county filter.
 
-			site_type (str):
+				site_type (str):
 				Optional site type filter.
 
-			limit (int):
+				limit (int):
 				Maximum rows requested.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'monitoring-locations'
@@ -16262,27 +16925,27 @@ class USGSWaterData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch time-series metadata for a monitoring location and optional
-			parameter code.
+				Fetch time-series metadata for a monitoring location and optional
+				parameter code.
 
-			Parameters:
-			-----------
-			monitoring_location_id (str):
+			Args:
+				monitoring_location_id (str):
 				Optional monitoring location identifier.
 
-			parameter_code (str):
+				parameter_code (str):
 				Optional USGS parameter code.
 
-			limit (int):
+				limit (int):
 				Maximum rows requested.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'time-series-metadata'
@@ -16324,26 +16987,26 @@ class USGSWaterData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the latest continuous values for a monitoring location.
+				Fetch the latest continuous values for a monitoring location.
 
-			Parameters:
-			-----------
-			monitoring_location_id (str):
+			Args:
+				monitoring_location_id (str):
 				Optional monitoring location identifier.
 
-			parameter_code (str):
+				parameter_code (str):
 				Optional USGS parameter code.
 
-			limit (int):
+				limit (int):
 				Maximum rows requested.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'latest-continuous'
@@ -16385,26 +17048,26 @@ class USGSWaterData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch the latest daily values for a monitoring location.
+				Fetch the latest daily values for a monitoring location.
 
-			Parameters:
-			-----------
-			monitoring_location_id (str):
+			Args:
+				monitoring_location_id (str):
 				Optional monitoring location identifier.
 
-			parameter_code (str):
+				parameter_code (str):
 				Optional USGS parameter code.
 
-			limit (int):
+				limit (int):
 				Maximum rows requested.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'latest-daily'
@@ -16448,12 +17111,10 @@ class USGSWaterData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for USGS Water Data retrieval.
+				Unified dispatcher for USGS Water Data retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- monitoring-locations
 				- time-series-metadata
@@ -16482,8 +17143,10 @@ class USGSWaterData( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'monitoring-locations').strip( ).lower( )
@@ -16544,29 +17207,29 @@ class USGSWaterData( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -16615,9 +17278,8 @@ class USGSWaterData( Fetcher ):
 class USGSTheNationalMap( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the USGS The National Map (TNM) TNMAccess API for
-		dataset discovery and downloadable product search.
+			Provides access to the USGS The National Map (TNM) TNMAccess API for
+			dataset discovery and downloadable product search.
 
 		Referenced API Requirements:
 		----------------------------
@@ -16636,6 +17298,22 @@ class USGSTheNationalMap( Fetcher ):
 			- max
 			- offset
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -16647,16 +17325,13 @@ class USGSTheNationalMap( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the USGS The National Map wrapper.
+				Initialize the USGS The National Map wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://tnmaccess.nationalmap.gov/api/v1'
@@ -16673,16 +17348,13 @@ class USGSTheNationalMap( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -16706,23 +17378,23 @@ class USGSTheNationalMap( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a TNMAccess endpoint.
+				Issue a GET request to a TNMAccess endpoint.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				Endpoint path under the TNMAccess base URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -16768,17 +17440,17 @@ class USGSTheNationalMap( Fetcher ):
 	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize possible TNMAccess response layouts into a list of records.
+				Normalize possible TNMAccess response layouts into a list of records.
 
-			Parameters:
-			-----------
-			payload (Any):
+			Args:
+				payload (Any):
 				Decoded JSON payload returned by the API.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -16806,17 +17478,17 @@ class USGSTheNationalMap( Fetcher ):
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize TNM dataset records into a human-readable table.
+				Normalize TNM dataset records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Dataset records returned by TNMAccess.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16860,17 +17532,17 @@ class USGSTheNationalMap( Fetcher ):
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize TNM product records into a human-readable table.
+				Normalize TNM product records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Product records returned by TNMAccess.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -16939,17 +17611,17 @@ class USGSTheNationalMap( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized rows.
+				Create a compact summary block from normalized rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -16983,17 +17655,17 @@ class USGSTheNationalMap( Fetcher ):
 	def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch dataset metadata from TNMAccess.
+				Fetch dataset metadata from TNMAccess.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'datasets'
@@ -17027,35 +17699,35 @@ class USGSTheNationalMap( Fetcher ):
 			offset: int=0, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch downloadable product records from TNMAccess.
+				Fetch downloadable product records from TNMAccess.
 
-			Parameters:
-			-----------
-			dataset (str):
+			Args:
+				dataset (str):
 				Optional TNM dataset filter.
 
-			q (str):
+				q (str):
 				Optional free-text search string.
 
-			bbox (str):
+				bbox (str):
 				Optional bounding box in minx,miny,maxx,maxy format.
 
-			prod_formats (str):
+				prod_formats (str):
 				Optional product format filter such as GeoTIFF, IMG, LAS, or LAZ.
 
-			max_items (int):
+				max_items (int):
 				Maximum number of returned products.
 
-			offset (int):
+				offset (int):
 				Result offset for paging.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'products'
@@ -17101,12 +17773,10 @@ class USGSTheNationalMap( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for TNMAccess dataset and product retrieval.
+				Unified dispatcher for TNMAccess dataset and product retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- datasets
 				- products
@@ -17133,8 +17803,10 @@ class USGSTheNationalMap( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'products').strip( ).lower( )
@@ -17173,29 +17845,29 @@ class USGSTheNationalMap( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -17244,9 +17916,8 @@ class USGSTheNationalMap( Fetcher ):
 class USGSScienceBase( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides read-only access to the USGS ScienceBase REST/JSON API for
-		item search and item retrieval.
+			Provides read-only access to the USGS ScienceBase REST/JSON API for
+			item search and item retrieval.
 
 		Referenced API Requirements:
 		----------------------------
@@ -17263,6 +17934,24 @@ class USGSScienceBase( Fetcher ):
 			- offset
 			- fields
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			records (Any): Parsed records returned by the provider.
+			item (Any): Runtime state for item in the USGSScienceBase provider.
+			rows (Any): Tabular records produced by the most recent query.
+			item_id (Any): Runtime state for item id in the USGSScienceBase provider.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -17274,16 +17963,13 @@ class USGSScienceBase( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the USGS ScienceBase wrapper.
+				Initialize the USGS ScienceBase wrapper.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://www.sciencebase.gov/catalog'
@@ -17300,16 +17986,13 @@ class USGSScienceBase( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -17333,23 +18016,23 @@ class USGSScienceBase( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a ScienceBase endpoint.
+				Issue a GET request to a ScienceBase endpoint.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				Endpoint path under the ScienceBase base URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -17395,17 +18078,17 @@ class USGSScienceBase( Fetcher ):
 	def _coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize possible ScienceBase response layouts into a list of items.
+				Normalize possible ScienceBase response layouts into a list of items.
 
-			Parameters:
-			-----------
-			payload (Any):
+			Args:
+				payload (Any):
 				Decoded JSON payload returned by the API.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -17436,17 +18119,17 @@ class USGSScienceBase( Fetcher ):
 			records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize ScienceBase item records into a human-readable table.
+				Normalize ScienceBase item records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Item records returned by ScienceBase.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -17517,17 +18200,17 @@ class USGSScienceBase( Fetcher ):
 	def _shape_single_item( self, item: Dict[ str, Any ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Normalize a single ScienceBase item into a readable detail dictionary.
+				Normalize a single ScienceBase item into a readable detail dictionary.
 
-			Parameters:
-			-----------
-			item (Dict[str, Any]):
+			Args:
+				item (Dict[str, Any]):
 				Single item payload returned by ScienceBase.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.item = item
@@ -17572,17 +18255,17 @@ class USGSScienceBase( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized rows.
+				Create a compact summary block from normalized rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -17621,29 +18304,29 @@ class USGSScienceBase( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Search ScienceBase items.
+				Search ScienceBase items.
 
-			Parameters:
-			-----------
-			q (str):
+			Args:
+				q (str):
 				Optional search query string.
 
-			max_items (int):
+				max_items (int):
 				Maximum number of returned items.
 
-			offset (int):
+				offset (int):
 				Result offset for paging.
 
-			fields (str):
+				fields (str):
 				Optional fields selector.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'items'
@@ -17684,20 +18367,20 @@ class USGSScienceBase( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Retrieve a single ScienceBase item by identifier.
+				Retrieve a single ScienceBase item by identifier.
 
-			Parameters:
-			-----------
-			item_id (str):
+			Args:
+				item_id (str):
 				ScienceBase item identifier.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'item_id', item_id )
@@ -17742,12 +18425,10 @@ class USGSScienceBase( Fetcher ):
 			fields: str='', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for ScienceBase item search and item retrieval.
+				Unified dispatcher for ScienceBase item search and item retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- items
 				- item
@@ -17771,8 +18452,10 @@ class USGSScienceBase( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'items').strip( ).lower( )
@@ -17810,29 +18493,29 @@ class USGSScienceBase( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -17881,9 +18564,8 @@ class USGSScienceBase( Fetcher ):
 class AirNow( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the AirNow API for current observations and forecasts by
-		Zip code or latitude/longitude, returning human-readable normalized rows.
+			Provides access to the AirNow API for current observations and forecasts by
+			Zip code or latitude/longitude, returning human-readable normalized rows.
 
 		Referenced API Requirements:
 		----------------------------
@@ -17896,6 +18578,27 @@ class AirNow( Fetcher ):
 		Optional Authentication:
 			- API key required by AirNow web services
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			zip_code (Any): ZIP or postal code used to locate observations.
+			latitude (Any): Runtime state for latitude in the AirNow provider.
+			longitude (Any): Runtime state for longitude in the AirNow provider.
+			date (Any): Requested observation or reporting date.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
@@ -17908,16 +18611,13 @@ class AirNow( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the AirNow fetcher.
+				Initialize the AirNow fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://www.airnowapi.org/aq'
@@ -17935,16 +18635,13 @@ class AirNow( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -17968,16 +18665,16 @@ class AirNow( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			--------
-			Resolve the AirNow API key from environment variables.
+				Resolve the AirNow API key from environment variables.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			Optional[str]
+				Optional[str]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -18002,23 +18699,23 @@ class AirNow( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to an AirNow endpoint.
+				Issue a GET request to an AirNow endpoint.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				Endpoint path under the AirNow base URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -18071,17 +18768,17 @@ class AirNow( Fetcher ):
 	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize AirNow records into a human-readable table.
+				Normalize AirNow records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				AirNow records returned by the API.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -18124,17 +18821,17 @@ class AirNow( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized AirNow rows.
+				Create a compact summary block from normalized AirNow rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized AirNow row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -18180,23 +18877,23 @@ class AirNow( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch current AQI observations by Zip code.
+				Fetch current AQI observations by Zip code.
 
-			Parameters:
-			-----------
-			zip_code (str):
+			Args:
+				zip_code (str):
 				U.S. Zip code.
 
-			distance (int):
+				distance (int):
 				Radius distance in miles.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -18238,26 +18935,26 @@ class AirNow( Fetcher ):
 			distance: int=25, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch current AQI observations by latitude and longitude.
+				Fetch current AQI observations by latitude and longitude.
 
-			Parameters:
-			-----------
-			latitude (float):
+			Args:
+				latitude (float):
 				Latitude of the query point.
 
-			longitude (float):
+				longitude (float):
 				Longitude of the query point.
 
-			distance (int):
+				distance (int):
 				Radius distance in miles.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -18301,26 +18998,26 @@ class AirNow( Fetcher ):
 			distance: int=25, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch AQI forecasts by Zip code.
+				Fetch AQI forecasts by Zip code.
 
-			Parameters:
-			-----------
-			zip_code (str):
+			Args:
+				zip_code (str):
 				U.S. Zip code.
 
-			date (str):
+				date (str):
 				Forecast date in YYYY-MM-DD format.
 
-			distance (int):
+				distance (int):
 				Radius distance in miles.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -18365,29 +19062,29 @@ class AirNow( Fetcher ):
 			date: str, distance: int=25, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch AQI forecasts by latitude and longitude.
+				Fetch AQI forecasts by latitude and longitude.
 
-			Parameters:
-			-----------
-			latitude (float):
+			Args:
+				latitude (float):
 				Latitude of the query point.
 
-			longitude (float):
+				longitude (float):
 				Longitude of the query point.
 
-			date (str):
+				date (str):
 				Forecast date in YYYY-MM-DD format.
 
-			distance (int):
+				distance (int):
 				Radius distance in miles.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'latitude', latitude )
@@ -18437,12 +19134,10 @@ class AirNow( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for AirNow observation and forecast retrieval.
+				Unified dispatcher for AirNow observation and forecast retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- current-zip
 				- current-latlon
@@ -18468,8 +19163,10 @@ class AirNow( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'current-zip').strip( ).lower( )
@@ -18527,29 +19224,29 @@ class AirNow( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -18598,9 +19295,8 @@ class AirNow( Fetcher ):
 class ClimateData( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to NOAA NCEI climate data search and retrieval services for
-		dataset discovery and subsetted climate data extraction.
+			Provides access to NOAA NCEI climate data search and retrieval services for
+			dataset discovery and subsetted climate data extraction.
 
 		Referenced API Requirements:
 		----------------------------
@@ -18625,6 +19321,25 @@ class ClimateData( Fetcher ):
 			  - offset
 			  - limit
 
+		Attributes:
+			data_url (Optional[ str ]): URL identifying the provider's data resource.
+			search_url (Optional[ str ]): URL used to execute the provider's search request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			dataset (Any): Selected dataset name or path.
+			start_date (Any): Runtime state for start date in the ClimateData provider.
+			end_date (Any): End of the requested observation period.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	data_url: Optional[ str ]
 	search_url: Optional[ str ]
@@ -18637,16 +19352,13 @@ class ClimateData( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the NOAA climate data fetcher.
+				Initialize the NOAA climate data fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.data_url = 'https://www.ncei.noaa.gov/access/services/data/v1'
@@ -18664,16 +19376,13 @@ class ClimateData( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'data_url',
@@ -18696,23 +19405,23 @@ class ClimateData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a NOAA NCEI endpoint.
+				Issue a GET request to a NOAA NCEI endpoint.
 
-			Parameters:
-			-----------
-			url (str):
+			Args:
+				url (str):
 				Target endpoint URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -18757,17 +19466,17 @@ class ClimateData( Fetcher ):
 	def _shape_dataset_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize NOAA dataset search records into a human-readable table.
+				Normalize NOAA dataset search records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Dataset discovery records returned by the search service.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -18809,17 +19518,17 @@ class ClimateData( Fetcher ):
 	def _shape_data_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize NOAA climate data records into a human-readable table.
+				Normalize NOAA climate data records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Climate data records returned by the data service.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -18849,17 +19558,17 @@ class ClimateData( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized rows.
+				Create a compact summary block from normalized rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -18899,32 +19608,32 @@ class ClimateData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch discoverable NOAA climate datasets.
+				Fetch discoverable NOAA climate datasets.
 
-			Parameters:
-			-----------
-			keyword (str):
+			Args:
+				keyword (str):
 				Optional dataset keyword search string.
 
-			start_date (str):
+				start_date (str):
 				Optional ISO date lower bound.
 
-			end_date (str):
+				end_date (str):
 				Optional ISO date upper bound.
 
-			limit (int):
+				limit (int):
 				Maximum returned datasets.
 
-			offset (int):
+				offset (int):
 				Result offset.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'datasets'
@@ -18968,35 +19677,35 @@ class ClimateData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch subsetted NOAA climate data records.
+				Fetch subsetted NOAA climate data records.
 
-			Parameters:
-			-----------
-			dataset (str):
+			Args:
+				dataset (str):
 				NCEI dataset identifier, such as daily-summaries.
 
-			start_date (str):
+				start_date (str):
 				ISO start date.
 
-			end_date (str):
+				end_date (str):
 				ISO end date.
 
-			stations (str):
+				stations (str):
 				Optional comma-separated station identifiers.
 
-			data_types (str):
+				data_types (str):
 				Optional comma-separated datatype identifiers.
 
-			limit (int):
+				limit (int):
 				Maximum returned rows.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'dataset', dataset )
@@ -19050,12 +19759,10 @@ class ClimateData( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for NOAA climate dataset discovery and data retrieval.
+				Unified dispatcher for NOAA climate dataset discovery and data retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- datasets
 				- data
@@ -19088,8 +19795,10 @@ class ClimateData( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'datasets').strip( ).lower( )
@@ -19133,29 +19842,29 @@ class ClimateData( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -19204,9 +19913,8 @@ class ClimateData( Fetcher ):
 class EoNet( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to NASA EONET Version 3 for event discovery and category
-		discovery, returning human-readable normalized rows.
+			Provides access to NASA EONET Version 3 for event discovery and category
+			discovery, returning human-readable normalized rows.
 
 		Referenced API Requirements:
 		----------------------------
@@ -19228,6 +19936,22 @@ class EoNet( Fetcher ):
 			- end
 			- bbox
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -19239,16 +19963,13 @@ class EoNet( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the NASA EONET fetcher.
+				Initialize the NASA EONET fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://eonet.gsfc.nasa.gov/api/v3'
@@ -19265,16 +19986,13 @@ class EoNet( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -19297,23 +20015,23 @@ class EoNet( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to an EONET endpoint.
+				Issue a GET request to an EONET endpoint.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				Endpoint path under the EONET base URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -19359,17 +20077,17 @@ class EoNet( Fetcher ):
 	def _shape_event_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize EONET event records into a human-readable table.
+				Normalize EONET event records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Event records returned by EONET.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -19439,17 +20157,17 @@ class EoNet( Fetcher ):
 	def _shape_category_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize EONET category records into a human-readable table.
+				Normalize EONET category records into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Category records returned by EONET.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -19480,17 +20198,17 @@ class EoNet( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized EONET rows.
+				Create a compact summary block from normalized EONET rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -19530,18 +20248,16 @@ class EoNet( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch EONET events.
+				Fetch EONET events.
 
-			Parameters:
-			-----------
-			source (str):
+			Args:
+				source (str):
 				Optional source identifier or comma-separated source identifiers.
 
-			category (str):
+				category (str):
 				Optional category identifier or comma-separated category identifiers.
 
-			status (str):
+				status (str):
 				Event status filter:
 				- open
 				- closed
@@ -19567,8 +20283,10 @@ class EoNet( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'events'
@@ -19614,17 +20332,17 @@ class EoNet( Fetcher ):
 	def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch EONET categories.
+				Fetch EONET categories.
 
-			Parameters:
-			-----------
-			time (int):
+			Args:
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'categories'
@@ -19660,12 +20378,10 @@ class EoNet( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for EONET event and category retrieval.
+				Unified dispatcher for EONET event and category retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- events
 				- categories
@@ -19698,8 +20414,10 @@ class EoNet( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'events').strip( ).lower( )
@@ -19740,29 +20458,29 @@ class EoNet( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -19811,9 +20529,8 @@ class EoNet( Fetcher ):
 class EnviroFacts( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to selected EPA Envirofacts Data Service API tables using
-		a constrained, human-readable wrapper for common environmental queries.
+			Provides access to selected EPA Envirofacts Data Service API tables using
+			a constrained, human-readable wrapper for common environmental queries.
 
 		Referenced API Requirements:
 		----------------------------
@@ -19833,6 +20550,22 @@ class EnviroFacts( Fetcher ):
 			- optional facility-name prefix filtering
 			- JSON output
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			table_name (Any): Runtime state for table name in the EnviroFacts provider.
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -19844,16 +20577,13 @@ class EnviroFacts( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the Envirofacts fetcher.
+				Initialize the Envirofacts fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://enviro.epa.gov/enviro/efservice'
@@ -19870,16 +20600,13 @@ class EnviroFacts( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -19901,26 +20628,26 @@ class EnviroFacts( Fetcher ):
 			limit: int=25 ) -> str:
 		'''
 			Purpose:
-			--------
-			Construct a constrained Envirofacts REST path for a supported table.
+				Construct a constrained Envirofacts REST path for a supported table.
 
-			Parameters:
-			-----------
-			table_name (str):
+			Args:
+				table_name (str):
 				Supported table name.
 
-			state_code (str):
+				state_code (str):
 				Optional state code filter.
 
-			facility_name (str):
+				facility_name (str):
 				Optional facility name prefix filter.
 
-			limit (int):
+				limit (int):
 				Maximum number of returned rows.
 
 			Returns:
-			--------
-			str
+				str
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'table_name', table_name )
@@ -19969,20 +20696,20 @@ class EnviroFacts( Fetcher ):
 	def request( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to an Envirofacts endpoint.
+				Issue a GET request to an Envirofacts endpoint.
 
-			Parameters:
-			-----------
-			url (str):
+			Args:
+				url (str):
 				Fully qualified request URL.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -20019,18 +20746,18 @@ class EnviroFacts( Fetcher ):
 	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize Envirofacts rows into a human-readable table by title-casing
-			column names and preserving the original values.
+				Normalize Envirofacts rows into a human-readable table by title-casing
+				column names and preserving the original values.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				Envirofacts records returned by the service.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -20060,17 +20787,17 @@ class EnviroFacts( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized Envirofacts rows.
+				Create a compact summary block from normalized Envirofacts rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -20111,12 +20838,10 @@ class EnviroFacts( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a constrained set of rows from a supported Envirofacts table.
+				Fetch a constrained set of rows from a supported Envirofacts table.
 
-			Parameters:
-			-----------
-			table_name (str):
+			Args:
+				table_name (str):
 				Supported table name:
 				- TRI_FACILITY
 				- TRI_RELEASE
@@ -20135,8 +20860,10 @@ class EnviroFacts( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'table_name', table_name )
@@ -20203,29 +20930,29 @@ class EnviroFacts( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for the constrained Envirofacts table wrapper.
+				Unified dispatcher for the constrained Envirofacts table wrapper.
 
-			Parameters:
-			-----------
-			table_name (str):
+			Args:
+				table_name (str):
 				Supported table name.
 
-			state_code (str):
+				state_code (str):
 				Optional state filter.
 
-			facility_name (str):
+				facility_name (str):
 				Optional facility-name prefix filter.
 
-			limit (int):
+				limit (int):
 				Maximum returned rows.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			return self.fetch_table(
@@ -20252,29 +20979,29 @@ class EnviroFacts( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -20323,9 +21050,8 @@ class EnviroFacts( Fetcher ):
 class TidesAndCurrents( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to NOAA CO-OPS Tides and Currents APIs for station metadata,
-		water-level observations, and tide predictions.
+			Provides access to NOAA CO-OPS Tides and Currents APIs for station metadata,
+			water-level observations, and tide predictions.
 
 		Referenced API Requirements:
 		----------------------------
@@ -20345,6 +21071,24 @@ class TidesAndCurrents( Fetcher ):
 			- time_zone
 			- format
 
+		Attributes:
+			data_url (Optional[ str ]): URL identifying the provider's data resource.
+			metadata_url (Optional[ str ]): Instance state retained for metadata url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			rows (Any): Tabular records produced by the most recent query.
+			station_id (Any): Runtime state for station id in the TidesAndCurrents provider.
+			begin_date (Any): Runtime state for begin date in the TidesAndCurrents provider.
+			end_date (Any): End of the requested observation period.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	data_url: Optional[ str ]
 	metadata_url: Optional[ str ]
@@ -20357,16 +21101,13 @@ class TidesAndCurrents( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the NOAA Tides and Currents fetcher.
+				Initialize the NOAA Tides and Currents fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.data_url = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
@@ -20384,16 +21125,13 @@ class TidesAndCurrents( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'data_url',
@@ -20417,23 +21155,23 @@ class TidesAndCurrents( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a NOAA CO-OPS endpoint.
+				Issue a GET request to a NOAA CO-OPS endpoint.
 
-			Parameters:
-			-----------
-			url (str):
+			Args:
+				url (str):
 				Target endpoint URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -20478,17 +21216,17 @@ class TidesAndCurrents( Fetcher ):
 	def _shape_station_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize station metadata into a human-readable table.
+				Normalize station metadata into a human-readable table.
 
-			Parameters:
-			-----------
-			payload (Dict[str, Any]):
+			Args:
+				payload (Dict[str, Any]):
 				Station metadata payload.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -20527,17 +21265,17 @@ class TidesAndCurrents( Fetcher ):
 	def _shape_data_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize NOAA CO-OPS data payloads into a human-readable table.
+				Normalize NOAA CO-OPS data payloads into a human-readable table.
 
-			Parameters:
-			-----------
-			payload (Dict[str, Any]):
+			Args:
+				payload (Dict[str, Any]):
 				Data API payload.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -20571,17 +21309,17 @@ class TidesAndCurrents( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized rows.
+				Create a compact summary block from normalized rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -20626,20 +21364,20 @@ class TidesAndCurrents( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch station metadata.
+				Fetch station metadata.
 
-			Parameters:
-			-----------
-			station_id (str):
+			Args:
+				station_id (str):
 				NOAA station identifier.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'station_id', station_id )
@@ -20680,35 +21418,35 @@ class TidesAndCurrents( Fetcher ):
 			time_zone: str='gmt', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch water-level observations.
+				Fetch water-level observations.
 
-			Parameters:
-			-----------
-			station_id (str):
+			Args:
+				station_id (str):
 				NOAA station identifier.
 
-			begin_date (str):
+				begin_date (str):
 				Begin date in YYYYMMDD format.
 
-			end_date (str):
+				end_date (str):
 				End date in YYYYMMDD format.
 
-			datum (str):
+				datum (str):
 				Datum such as MLLW.
 
-			units (str):
+				units (str):
 				english or metric.
 
-			time_zone (str):
+				time_zone (str):
 				gmt, lst, or lst_ldt.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'station_id', station_id )
@@ -20765,38 +21503,38 @@ class TidesAndCurrents( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch tide predictions.
+				Fetch tide predictions.
 
-			Parameters:
-			-----------
-			station_id (str):
+			Args:
+				station_id (str):
 				NOAA station identifier.
 
-			begin_date (str):
+				begin_date (str):
 				Begin date in YYYYMMDD format.
 
-			end_date (str):
+				end_date (str):
 				End date in YYYYMMDD format.
 
-			datum (str):
+				datum (str):
 				Datum such as MLLW.
 
-			units (str):
+				units (str):
 				english or metric.
 
-			time_zone (str):
+				time_zone (str):
 				gmt, lst, or lst_ldt.
 
-			interval (str):
+				interval (str):
 				Prediction interval such as hilo or h.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'station_id', station_id )
@@ -20855,12 +21593,10 @@ class TidesAndCurrents( Fetcher ):
 			interval: str='hilo', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for NOAA Tides and Currents retrieval.
+				Unified dispatcher for NOAA Tides and Currents retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- station
 				- water-level
@@ -20891,8 +21627,10 @@ class TidesAndCurrents( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'water-level').strip( ).lower( )
@@ -20948,29 +21686,29 @@ class TidesAndCurrents( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -21019,9 +21757,8 @@ class TidesAndCurrents( Fetcher ):
 class UvIndex( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the EPA UV Index web services for daily and hourly UV
-		forecast retrieval by ZIP code or by city and state.
+			Provides access to the EPA UV Index web services for daily and hourly UV
+			forecast retrieval by ZIP code or by city and state.
 
 		Referenced API Requirements:
 		----------------------------
@@ -21034,6 +21771,24 @@ class UvIndex( Fetcher ):
 		Base Endpoint:
 			- https://enviro.epa.gov/enviro/efservice
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			records (Any): Parsed records returned by the provider.
+			rows (Any): Tabular records produced by the most recent query.
+			zip_code (Any): ZIP or postal code used to locate observations.
+			city (Any): Runtime state for city in the UvIndex provider.
+			state (Any): Runtime state for state in the UvIndex provider.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -21045,16 +21800,13 @@ class UvIndex( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the EPA UV Index fetcher.
+				Initialize the EPA UV Index fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://enviro.epa.gov/enviro/efservice'
@@ -21071,16 +21823,13 @@ class UvIndex( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -21102,20 +21851,20 @@ class UvIndex( Fetcher ):
 	def request( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a UV Index endpoint.
+				Issue a GET request to a UV Index endpoint.
 
-			Parameters:
-			-----------
-			url (str):
+			Args:
+				url (str):
 				Fully qualified request URL.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -21152,17 +21901,17 @@ class UvIndex( Fetcher ):
 	def _shape_rows( self, records: List[ Dict[ str, Any ] ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize UV Index rows into a human-readable table.
+				Normalize UV Index rows into a human-readable table.
 
-			Parameters:
-			-----------
-			records (List[Dict[str, Any]]):
+			Args:
+				records (List[Dict[str, Any]]):
 				UV Index records returned by the EPA web services.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.records = records
@@ -21192,17 +21941,17 @@ class UvIndex( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized UV Index rows.
+				Create a compact summary block from normalized UV Index rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -21250,20 +21999,20 @@ class UvIndex( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch daily UV forecast and alert by ZIP code.
+				Fetch daily UV forecast and alert by ZIP code.
 
-			Parameters:
-			-----------
-			zip_code (str):
+			Args:
+				zip_code (str):
 				U.S. ZIP code.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -21302,23 +22051,23 @@ class UvIndex( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch daily UV forecast and alert by city and state.
+				Fetch daily UV forecast and alert by city and state.
 
-			Parameters:
-			-----------
-			city (str):
+			Args:
+				city (str):
 				U.S. city name.
 
-			state (str):
+				state (str):
 				U.S. state abbreviation.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'city', city )
@@ -21365,20 +22114,20 @@ class UvIndex( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch hourly UV forecast by ZIP code.
+				Fetch hourly UV forecast by ZIP code.
 
-			Parameters:
-			-----------
-			zip_code (str):
+			Args:
+				zip_code (str):
 				U.S. ZIP code.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'zip_code', zip_code )
@@ -21417,23 +22166,23 @@ class UvIndex( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch hourly UV forecast by city and state.
+				Fetch hourly UV forecast by city and state.
 
-			Parameters:
-			-----------
-			city (str):
+			Args:
+				city (str):
 				U.S. city name.
 
-			state (str):
+				state (str):
 				U.S. state abbreviation.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'city', city )
@@ -21481,12 +22230,10 @@ class UvIndex( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for UV Index forecast retrieval.
+				Unified dispatcher for UV Index forecast retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- daily-zip
 				- daily-city-state
@@ -21506,8 +22253,10 @@ class UvIndex( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'daily-zip').strip( ).lower( )
@@ -21558,29 +22307,29 @@ class UvIndex( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -21629,10 +22378,9 @@ class UvIndex( Fetcher ):
 class PurpleAir( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the PurpleAir API for bounding-box sensor discovery and
-		single-sensor detail retrieval using explicit field selection to reduce
-		point consumption and improve readability.
+			Provides access to the PurpleAir API for bounding-box sensor discovery and
+			single-sensor detail retrieval using explicit field selection to reduce
+			point consumption and improve readability.
 
 		Referenced API Requirements:
 		----------------------------
@@ -21654,6 +22402,27 @@ class PurpleAir( Fetcher ):
 			- max_age
 			- modified_since
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			rows (Any): Tabular records produced by the most recent query.
+			nwlng (Any): Runtime state for nwlng in the PurpleAir provider.
+			nwlat (Any): Runtime state for nwlat in the PurpleAir provider.
+			selng (Any): Runtime state for selng in the PurpleAir provider.
+			selat (Any): Runtime state for selat in the PurpleAir provider.
+			sensor_index (Any): Runtime state for sensor index in the PurpleAir provider.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
@@ -21666,16 +22435,13 @@ class PurpleAir( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the PurpleAir fetcher.
+				Initialize the PurpleAir fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://api.purpleair.com/v1'
@@ -21696,16 +22462,13 @@ class PurpleAir( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -21728,16 +22491,16 @@ class PurpleAir( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			--------
-			Resolve the PurpleAir API key from environment variables.
+				Resolve the PurpleAir API key from environment variables.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			Optional[str]
+				Optional[str]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -21763,23 +22526,23 @@ class PurpleAir( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a PurpleAir endpoint.
+				Issue a GET request to a PurpleAir endpoint.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				Endpoint path under the PurpleAir base URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -21831,17 +22594,17 @@ class PurpleAir( Fetcher ):
 	def _shape_sensor_list_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize PurpleAir sensor-list payloads into a human-readable table.
+				Normalize PurpleAir sensor-list payloads into a human-readable table.
 
-			Parameters:
-			-----------
-			payload (Dict[str, Any]):
+			Args:
+				payload (Dict[str, Any]):
 				Sensor-list payload returned by PurpleAir.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -21888,17 +22651,17 @@ class PurpleAir( Fetcher ):
 	def _shape_sensor_detail_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize PurpleAir single-sensor detail payload into a readable row.
+				Normalize PurpleAir single-sensor detail payload into a readable row.
 
-			Parameters:
-			-----------
-			payload (Dict[str, Any]):
+			Args:
+				payload (Dict[str, Any]):
 				Single-sensor payload returned by PurpleAir.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -21936,17 +22699,17 @@ class PurpleAir( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized PurpleAir rows.
+				Create a compact summary block from normalized PurpleAir rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -21990,38 +22753,38 @@ class PurpleAir( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch PurpleAir sensors within a bounding box.
+				Fetch PurpleAir sensors within a bounding box.
 
-			Parameters:
-			-----------
-			nwlng (float):
+			Args:
+				nwlng (float):
 				Northwest longitude.
 
-			nwlat (float):
+				nwlat (float):
 				Northwest latitude.
 
-			selng (float):
+				selng (float):
 				Southeast longitude.
 
-			selat (float):
+				selat (float):
 				Southeast latitude.
 
-			location_type (int):
+				location_type (int):
 				PurpleAir location type. Public outdoor sensors are commonly 0.
 
-			max_age (int):
+				max_age (int):
 				Maximum sensor age filter in minutes. 0 keeps current behavior broad.
 
-			modified_since (int):
+				modified_since (int):
 				UNIX timestamp filter. 0 disables the filter.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'nwlng', nwlng )
@@ -22075,20 +22838,20 @@ class PurpleAir( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch a single PurpleAir sensor detail record.
+				Fetch a single PurpleAir sensor detail record.
 
-			Parameters:
-			-----------
-			sensor_index (int):
+			Args:
+				sensor_index (int):
 				PurpleAir sensor index.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'sensor_index', sensor_index )
@@ -22131,20 +22894,18 @@ class PurpleAir( Fetcher ):
 			)
 			raise exception
 	
-	def fetch( self, mode: str='sensors', sensor_index: int=None,
+	def fetch( self, mode: str='sensors', sensor_index: Optional[ int ]=None,
 			nwlng: float | None = None, nwlat: float | None = None,
 			selng: float | None = None, selat: float | None = None,
 			location_type: int=0, max_age: int=0, modified_since: int=0,
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for PurpleAir sensor discovery and sensor detail
-			retrieval.
+				Unified dispatcher for PurpleAir sensor discovery and sensor detail
+				retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- sensors
 				- sensor
@@ -22177,8 +22938,10 @@ class PurpleAir( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'sensors').strip( ).lower( )
@@ -22221,29 +22984,29 @@ class PurpleAir( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -22292,10 +23055,9 @@ class PurpleAir( Fetcher ):
 class OpenAQ( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to the OpenAQ v3 API for location discovery and latest
-		measurement retrieval using authenticated requests and human-readable
-		normalized output.
+			Provides access to the OpenAQ v3 API for location discovery and latest
+			measurement retrieval using authenticated requests and human-readable
+			normalized output.
 
 		Referenced API Requirements:
 		----------------------------
@@ -22316,6 +23078,23 @@ class OpenAQ( Fetcher ):
 			- limit
 			- page
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			endpoint (Any): Selected provider API resource path.
+			rows (Any): Tabular records produced by the most recent query.
+			location_id (Any): Runtime state for location id in the OpenAQ provider.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
@@ -22328,16 +23107,13 @@ class OpenAQ( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the OpenAQ fetcher.
+				Initialize the OpenAQ fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://api.openaq.org/v3'
@@ -22358,16 +23134,13 @@ class OpenAQ( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -22390,16 +23163,16 @@ class OpenAQ( Fetcher ):
 	def _resolve_api_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			--------
-			Resolve the OpenAQ API key from environment variables.
+				Resolve the OpenAQ API key from environment variables.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			Optional[str]
+				Optional[str]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -22425,23 +23198,23 @@ class OpenAQ( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to an OpenAQ endpoint.
+				Issue a GET request to an OpenAQ endpoint.
 
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				Endpoint path under the OpenAQ base URL.
 
-			params (Optional[Dict[str, Any]]):
+				params (Optional[Dict[str, Any]]):
 				Query string parameters.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -22492,17 +23265,17 @@ class OpenAQ( Fetcher ):
 	def _shape_location_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize OpenAQ location payloads into a human-readable table.
+				Normalize OpenAQ location payloads into a human-readable table.
 
-			Parameters:
-			-----------
-			payload (Dict[str, Any]):
+			Args:
+				payload (Dict[str, Any]):
 				Location payload returned by OpenAQ.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -22547,17 +23320,17 @@ class OpenAQ( Fetcher ):
 	def _shape_latest_rows( self, payload: Dict[ str, Any ] ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Normalize OpenAQ latest-measurement payloads into a human-readable table.
+				Normalize OpenAQ latest-measurement payloads into a human-readable table.
 
-			Parameters:
-			-----------
-			payload (Dict[str, Any]):
+			Args:
+				payload (Dict[str, Any]):
 				Latest-measurement payload returned by OpenAQ.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -22607,17 +23380,17 @@ class OpenAQ( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized OpenAQ rows.
+				Create a compact summary block from normalized OpenAQ rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -22654,45 +23427,45 @@ class OpenAQ( Fetcher ):
 			)
 			raise exception
 	
-	def fetch_locations( self, country_id: int=None,
+	def fetch_locations( self, country_id: Optional[ int ]=None,
 			coordinates: str='', radius: int=25000,
 			providers_id: str='', parameters_id: str='',
 			limit: int=25, page: int=1,
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch OpenAQ locations.
+				Fetch OpenAQ locations.
 
-			Parameters:
-			-----------
-			country_id (int | None):
+			Args:
+				country_id (int | None):
 				Optional OpenAQ country identifier.
 
-			coordinates (str):
+				coordinates (str):
 				Optional latitude,longitude string for geospatial filtering.
 
-			radius (int):
+				radius (int):
 				Optional radius in meters when coordinates are supplied.
 
-			providers_id (str):
+				providers_id (str):
 				Optional provider ID filter.
 
-			parameters_id (str):
+				parameters_id (str):
 				Optional parameter ID filter.
 
-			limit (int):
+				limit (int):
 				Maximum returned locations.
 
-			page (int):
+				page (int):
 				Result page number.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'locations'
@@ -22737,20 +23510,20 @@ class OpenAQ( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch latest measurements for a single OpenAQ location.
+				Fetch latest measurements for a single OpenAQ location.
 
-			Parameters:
-			-----------
-			location_id (int):
+			Args:
+				location_id (int):
 				OpenAQ location identifier.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'location_id', location_id )
@@ -22784,20 +23557,18 @@ class OpenAQ( Fetcher ):
 			)
 			raise exception
 	
-	def fetch( self, mode: str='locations', location_id: int=None,
-			country_id: int=None, coordinates: str='',
+	def fetch( self, mode: str='locations', location_id: Optional[ int ]=None,
+			country_id: Optional[ int ]=None, coordinates: str='',
 			radius: int=25000, providers_id: str='',
 			parameters_id: str='', limit: int=25, page: int=1,
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for OpenAQ location discovery and latest measurement
-			retrieval.
+				Unified dispatcher for OpenAQ location discovery and latest measurement
+				retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- locations
 				- latest
@@ -22830,8 +23601,10 @@ class OpenAQ( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'locations').strip( ).lower( )
@@ -22873,29 +23646,29 @@ class OpenAQ( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -22944,9 +23717,8 @@ class OpenAQ( Fetcher ):
 class Firms( Fetcher ):
 	'''
 		Purpose:
-		--------
-		Provides access to NASA FIRMS area fire-detection and data-availability
-		services using a MAP_KEY and human-readable normalized output.
+			Provides access to NASA FIRMS area fire-detection and data-availability
+			services using a MAP_KEY and human-readable normalized output.
 
 		Referenced API Requirements:
 		----------------------------
@@ -22965,6 +23737,26 @@ class Firms( Fetcher ):
 			- DAY_RANGE from 1 to 5
 			- Optional DATE in YYYY-MM-DD format
 
+		Attributes:
+			base_url (Optional[ str ]): Provider API base URL.
+			map_key (Optional[ str ]): Instance state retained for map key operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): HTTP User-Agent identity or agent metadata supplied by the application.
+	
+			csv_text (Any): Runtime state for csv text in the Firms provider.
+			rows (Any): Tabular records produced by the most recent query.
+			source (Any): Runtime state for source in the Firms provider.
+			area_coordinates (Any): Runtime state for area coordinates in the Firms provider.
+			day_range (Any): Runtime state for day range in the Firms provider.
+			date (Any): Requested observation or reporting date.
+			required (Any): Names of mandatory inputs in the generated function schema.
+			function (Any): Function name exposed to the agent's tool interface.
+			tool (Any): Underlying external service identified in the function schema.
+			description (Any): Human-readable description used in tool metadata.
+			parameters (Any): JSON Schema property definitions for the function's inputs.
 	'''
 	base_url: Optional[ str ]
 	map_key: Optional[ str ]
@@ -22977,16 +23769,13 @@ class Firms( Fetcher ):
 	def __init__( self ) -> None:
 		'''
 			Purpose:
-			--------
-			Initialize the NASA FIRMS fetcher.
+				Initialize the NASA FIRMS fetcher.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			None
+				None
 		'''
 		super( ).__init__( )
 		self.base_url = 'https://firms.modaps.eosdis.nasa.gov/api'
@@ -23004,16 +23793,13 @@ class Firms( Fetcher ):
 	def __dir__( self ) -> List[ str ]:
 		'''
 			Purpose:
-			--------
-			Provide ordered member visibility.
+				Provide ordered member visibility.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			List[str]
+				List[str]
 		'''
 		return [
 				'base_url',
@@ -23035,16 +23821,16 @@ class Firms( Fetcher ):
 	def _resolve_map_key( self ) -> Optional[ str ]:
 		'''
 			Purpose:
-			--------
-			Resolve the NASA FIRMS MAP_KEY from environment variables.
+				Resolve the NASA FIRMS MAP_KEY from environment variables.
 
-			Parameters:
-			-----------
-			None
+			Args:
+				None
 
 			Returns:
-			--------
-			Optional[str]
+				Optional[str]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			candidates: List[ Optional[ str ] ] = [
@@ -23068,20 +23854,20 @@ class Firms( Fetcher ):
 	def request_csv( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Issue a GET request to a FIRMS CSV endpoint.
+				Issue a GET request to a FIRMS CSV endpoint.
 
-			Parameters:
-			-----------
-			url (str):
+			Args:
+				url (str):
 				Fully qualified request URL.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'url', url )
@@ -23124,17 +23910,17 @@ class Firms( Fetcher ):
 	def _csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]:
 		'''
 			Purpose:
-			--------
-			Convert FIRMS CSV text into normalized row dictionaries.
+				Convert FIRMS CSV text into normalized row dictionaries.
 
-			Parameters:
-			-----------
-			csv_text (str):
+			Args:
+				csv_text (str):
 				CSV response text.
 
 			Returns:
-			--------
-			List[Dict[str, Any]]
+				List[Dict[str, Any]]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.csv_text = csv_text
@@ -23167,17 +23953,17 @@ class Firms( Fetcher ):
 	def _summarize_rows( self, rows: List[ Dict[ str, Any ] ] ) -> Dict[ str, Any ]:
 		'''
 			Purpose:
-			--------
-			Create a compact summary block from normalized FIRMS rows.
+				Create a compact summary block from normalized FIRMS rows.
 
-			Parameters:
-			-----------
-			rows (List[Dict[str, Any]]):
+			Args:
+				rows (List[Dict[str, Any]]):
 				Normalized row dictionaries.
 
 			Returns:
-			--------
-			Dict[str, Any]
+				Dict[str, Any]
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.rows = rows
@@ -23216,12 +24002,10 @@ class Firms( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch FIRMS fire detections for an area.
+				Fetch FIRMS fire detections for an area.
 
-			Parameters:
-			-----------
-			source (str):
+			Args:
+				source (str):
 				FIRMS source, such as:
 				- LANDSAT_NRT
 				- MODIS_NRT
@@ -23232,21 +24016,23 @@ class Firms( Fetcher ):
 				- VIIRS_SNPP_NRT
 				- VIIRS_SNPP_SP
 
-			area_coordinates (str):
+				area_coordinates (str):
 				Bounding box as west,south,east,north, or world.
 
-			day_range (int):
+				day_range (int):
 				Number of days from 1 to 5.
 
-			date (str):
+				date (str):
 				Optional YYYY-MM-DD start date. If omitted, most recent data is used.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'source', source )
@@ -23314,22 +24100,22 @@ class Firms( Fetcher ):
 			time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Fetch FIRMS data-availability rows for a sensor family.
+				Fetch FIRMS data-availability rows for a sensor family.
 
-			Parameters:
-			-----------
-			sensor (str):
+			Args:
+				sensor (str):
 				Sensor family such as ALL, LANDSAT_NRT, MODIS_NRT, MODIS_SP,
 				VIIRS_NOAA20_NRT, VIIRS_NOAA20_SP, VIIRS_NOAA21_NRT,
 				VIIRS_SNPP_NRT, or VIIRS_SNPP_SP.
 
-			time (int):
+				time (int):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.mode = 'data-availability'
@@ -23368,12 +24154,10 @@ class Firms( Fetcher ):
 			sensor: str='ALL', time: int=20 ) -> Dict[ str, Any ] | None:
 		'''
 			Purpose:
-			--------
-			Unified dispatcher for FIRMS area and data-availability retrieval.
+				Unified dispatcher for FIRMS area and data-availability retrieval.
 
-			Parameters:
-			-----------
-			mode (str):
+			Args:
+				mode (str):
 				Supported modes:
 				- area
 				- data-availability
@@ -23397,8 +24181,10 @@ class Firms( Fetcher ):
 				Request timeout in seconds.
 
 			Returns:
-			--------
-			Dict[str, Any] | None
+				Dict[str, Any] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			active_mode = (mode or 'area').strip( ).lower( )
@@ -23436,29 +24222,29 @@ class Firms( Fetcher ):
 			required: list[ str ] ) -> Dict[ str, str ] | None:
 		'''
 			Purpose:
-			--------
-			Construct and return a fully dynamic OpenAI Tool API schema definition.
+				Construct and return a fully dynamic OpenAI Tool API schema definition.
 
-			Parameters:
-			-----------
-			function (str):
+			Args:
+				function (str):
 				The function name exposed to the LLM.
 
-			tool (str):
+				tool (str):
 				The underlying system or service the function wraps.
 
-			description (str):
+				description (str):
 				Precise explanation of what the function does.
 
-			parameters (dict):
+				parameters (dict):
 				A dictionary defining parameter names and JSON schema descriptors.
 
-			required (list[str]):
+				required (list[str]):
 				List of required parameter names.
 
 			Returns:
-			--------
-			Dict[str, str] | None
+				Dict[str, str] | None
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.required = required
@@ -23507,10 +24293,20 @@ class OpenSky( Fetcher ):
 	'''
 
 		Purpose:
-		--------
-		Provides access to the OpenSky Network REST API for aircraft state
-		vectors, flights, airport arrivals/departures, and aircraft tracks.
+			Provides access to the OpenSky Network REST API for aircraft state
+			vectors, flights, airport arrivals/departures, and aircraft tracks.
 
+		Attributes:
+			token_url (Optional[ str ]): Instance state retained for token url operations.
+			base_url (Optional[ str ]): Provider API base URL.
+			client_id (Optional[ str ]): Instance state retained for client id operations.
+			client_secret (Optional[ str ]): Instance state retained for client secret operations.
+			access_token (Optional[ str ]): Active authentication token.
+	
+			endpoint (Any): Selected provider API resource path.
+			params (Any): Runtime state for params in the OpenSky provider.
+			payload (Any): Parsed provider payload from the latest request.
+			mode (Any): Requested endpoint or output mode.
 	'''
 	token_url: Optional[ str ]
 	base_url: Optional[ str ]
@@ -23519,6 +24315,14 @@ class OpenSky( Fetcher ):
 	access_token: Optional[ str ]
 	
 	def __init__( self ) -> None:
+		"""Initialize OpenSky provider state.
+
+		Purpose:
+			Initialize OpenSky provider state.
+
+		Returns:
+			None: Completes the operation through provider or instance state.
+		"""
 		super( ).__init__( )
 		self.timeout = 20
 		self.base_url = 'https://opensky-network.org/api'
@@ -23535,6 +24339,14 @@ class OpenSky( Fetcher ):
 		}
 	
 	def __dir__( self ) -> List[ str ]:
+		"""List available OpenSky members.
+
+		Purpose:
+			List available OpenSky members.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [
 				'timeout',
 				'headers',
@@ -23557,6 +24369,14 @@ class OpenSky( Fetcher ):
 	
 	@property
 	def mode_options( self ) -> List[ str ]:
+		"""mode options operation for OpenSky.
+
+		Purpose:
+			mode options operation for OpenSky.
+
+		Returns:
+			List[ str ]: Provider response or normalized result.
+		"""
 		return [
 				'states_bbox',
 				'flights_aircraft',
@@ -23569,22 +24389,21 @@ class OpenSky( Fetcher ):
 		'''
 	
 			Purpose:
-			--------
-			Request a bearer token from the OpenSky authentication server.
+				Request a bearer token from the OpenSky authentication server.
 	
-			Parameters:
-			-----------
-			client_id (str):
+			Args:
+				client_id (str):
 				OpenSky OAuth client id.
 	
-			client_secret (str):
+				client_secret (str):
 				OpenSky OAuth client secret.
 	
 			Returns:
-			--------
-			str:
+				str:
 				Bearer access token.
-	
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'client_id', client_id )
@@ -23620,33 +24439,32 @@ class OpenSky( Fetcher ):
 			exception.method = 'get_token( self, client_id: str, client_secret: str ) -> str'
 			raise exception
 	
-	def request( self, endpoint: str, params: Dict[ str, Any ], client_id: str=None,
-			client_secret: str=None ) -> Any:
+	def request( self, endpoint: str, params: Dict[ str, Any ], client_id: Optional[ str ]=None,
+			client_secret: Optional[ str ]=None ) -> Any:
 		'''
 	
 			Purpose:
-			--------
-			Send a GET request to an OpenSky REST endpoint.
+				Send a GET request to an OpenSky REST endpoint.
 	
-			Parameters:
-			-----------
-			endpoint (str):
+			Args:
+				endpoint (str):
 				OpenSky endpoint path beginning with '/'.
 	
-			params (Dict[str, Any]):
+				params (Dict[str, Any]):
 				Query-string parameters passed to the endpoint.
 	
-			client_id (str | None):
+				client_id (str | None):
 				Optional OAuth client id for authenticated requests.
 	
-			client_secret (str | None):
+				client_secret (str | None):
 				Optional OAuth client secret for authenticated requests.
 	
 			Returns:
-			--------
-			Any:
+				Any:
 				Parsed JSON payload returned by OpenSky.
-	
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			throw_if( 'endpoint', endpoint )
@@ -23704,19 +24522,18 @@ class OpenSky( Fetcher ):
 		'''
 		
 			Purpose:
-			--------
-			Normalize an OpenSky state-vector response into a structured dictionary with
-			mode metadata and aircraft state records.
+				Normalize an OpenSky state-vector response into a structured dictionary with
+				mode metadata and aircraft state records.
 		
-			Parameters:
-			-----------
-			payload (Dict[ str, Any ] | None): Raw OpenSky state-vector response payload.
+			Args:
+				payload (Dict[ str, Any ] | None): Raw OpenSky state-vector response payload.
 		
 			Returns:
-			--------
-			Dict[ str, Any ] | None: Normalized state-vector records and metadata, or
-			None when normalization fails.
-		
+				Dict[ str, Any ] | None: Normalized state-vector records and metadata, or
+				None when normalization fails.
+
+			Raises:
+				Error: Wraps and propagates the underlying provider or request exception.
 		'''
 		try:
 			self.payload = payload
@@ -23771,6 +24588,21 @@ class OpenSky( Fetcher ):
 			self,
 			payload: List[ Dict[ str, Any ] ] | None,
 			mode: str ) -> Dict[ str, Any ] | None:
+		"""Normalize flights records returned by OpenSky.
+
+		Purpose:
+			Normalize flights records returned by OpenSky.
+
+		Args:
+			payload (List[ Dict[ str, Any ] ] | None): payload value for the OpenSky operation.
+			mode (str): mode value for the OpenSky operation.
+
+		Returns:
+			Dict[ str, Any ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
+		"""
 		try:
 			self.payload = payload
 			throw_if( 'mode', mode )
@@ -23819,6 +24651,20 @@ class OpenSky( Fetcher ):
 			raise exception
 	
 	def normalize_track( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
+		"""Normalize track records returned by OpenSky.
+
+		Purpose:
+			Normalize track records returned by OpenSky.
+
+		Args:
+			payload (Dict[ str, Any ] | None): payload value for the OpenSky operation.
+
+		Returns:
+			Dict[ str, Any ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
+		"""
 		try:
 			self.payload = payload
 			if not self.payload:
@@ -23864,10 +24710,37 @@ class OpenSky( Fetcher ):
 			raise exception
 	
 	def fetch( self, mode: str='states_bbox', icao24: str='', airport: str='',
-			begin: int=None, end: int=None, time_value: int=None,
+			begin: Optional[ int ]=None, end: Optional[ int ]=None, time_value: Optional[ int ]=None,
 			lamin: float | None = None, lomin: float | None = None, lamax: float | None = None,
-			lomax: float | None = None, extended: bool=False, client_id: str=None,
-			client_secret: str=None, time: int=20 ) -> Dict[ str, Any ] | None:
+			lomax: float | None = None, extended: bool=False, client_id: Optional[ str ]=None,
+			client_secret: Optional[ str ]=None, time: int=20 ) -> Dict[ str, Any ] | None:
+		"""Fetch a result from the OpenSky provider.
+
+		Purpose:
+			Fetch a result from the OpenSky provider.
+
+		Args:
+			mode (str): mode value for the OpenSky operation.
+			icao24 (str): icao24 value for the OpenSky operation.
+			airport (str): airport value for the OpenSky operation.
+			begin (int): begin value for the OpenSky operation.
+			end (int): end value for the OpenSky operation.
+			time_value (int): time value value for the OpenSky operation.
+			lamin (float | None): lamin value for the OpenSky operation.
+			lomin (float | None): lomin value for the OpenSky operation.
+			lamax (float | None): lamax value for the OpenSky operation.
+			lomax (float | None): lomax value for the OpenSky operation.
+			extended (bool): extended value for the OpenSky operation.
+			client_id (str): client id value for the OpenSky operation.
+			client_secret (str): client secret value for the OpenSky operation.
+			time (int): time value for the OpenSky operation.
+
+		Returns:
+			Dict[ str, Any ] | None: Provider response or normalized result.
+
+		Raises:
+			Error: Wraps and propagates the underlying provider or request exception.
+		"""
 		try:
 			if type( time ) is not int or time <= 0:
 				raise ValueError( 'time must be a positive integer.' )
@@ -23985,7 +24858,21 @@ class OpenSky( Fetcher ):
 
 	def build_fetch_result( source: str, mode: str, url: str, status: int,
 		data: Any ) -> Dict[ str, Any ]:
-		"""Build the common structured result returned by demographic API fetchers."""
+		"""Build the common structured result returned by demographic API fetchers.
+
+		Purpose:
+			Build the common structured result returned by demographic API fetchers.
+
+		Args:
+			source (str): source value for the OpenSky operation.
+			mode (str): mode value for the OpenSky operation.
+			url (str): url value for the OpenSky operation.
+			status (int): status value for the OpenSky operation.
+			data (Any): data value for the OpenSky operation.
+
+		Returns:
+			Dict[ str, Any ]: Provider response or normalized result.
+		"""
 		throw_if( 'source', source )
 		throw_if( 'mode', mode )
 		throw_if( 'url', url )
