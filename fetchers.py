@@ -5192,7 +5192,7 @@ class AstroCatalog( Fetcher ):
 		
 		return '/'.join( parts )
 	
-	def parse_argument_string( self, argument_string: str ) -> Dict[ str, Any ]:
+	def parse_argument_string( self, argument_string: str | None='' ) -> Dict[ str, Any ]:
 		"""
 			Purpose:
 				Parse a comma-separated or newline-separated list of OAC query
@@ -5209,6 +5209,8 @@ class AstroCatalog( Fetcher ):
 		Returns:
 			Dict[ str, Any ]: Provider response or normalized result.
 		"""
+		if argument_string is not None and not isinstance( argument_string, str ):
+			raise TypeError( 'argument_string must be a string or None.' )
 		self.argument_string = argument_string
 		params: Dict[ str, Any ] = { }
 		
@@ -5524,7 +5526,7 @@ class AstroQuery( Fetcher ):
 				'fetch',
 		]
 	
-	def table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]:
+	def table_to_records( self, table: Table | None=None ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -5950,7 +5952,7 @@ class StarMap( Fetcher ):
 		self.value = value
 		return '1' if self.value else '0'
 	
-	def extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]:
+	def extract_snapshot_links( self, html: str | None, base_url: str ) -> Dict[ str, str ]:
 		"""
 
 		Purpose:
@@ -5969,6 +5971,8 @@ class StarMap( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if html is not None and not isinstance( html, str ):
+				raise TypeError( 'html must be a string or None.' )
 			self.html = html
 			throw_if( 'base_url', base_url )
 			self.base_url = base_url
@@ -11433,7 +11437,7 @@ class CensusData( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def parse_predicates( self, predicates: str ) -> Dict[ str, Any ]:
+	def parse_predicates( self, predicates: str | None='' ) -> Dict[ str, Any ]:
 		"""
 
 		Purpose:
@@ -11449,6 +11453,8 @@ class CensusData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if predicates is not None and not isinstance( predicates, str ):
+				raise TypeError( 'predicates must be a string or None.' )
 			self.predicates = predicates
 			output: Dict[ str, Any ] = { }
 			text = str( self.predicates or '' ).strip( )
@@ -22467,7 +22473,7 @@ class Firms( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def csv_to_rows( self, csv_text: str ) -> List[ Dict[ str, Any ] ]:
+	def csv_to_rows( self, csv_text: str | None='' ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 		Purpose:
@@ -22483,6 +22489,8 @@ class Firms( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if csv_text is not None and not isinstance( csv_text, str ):
+				raise TypeError( 'csv_text must be a string or None.' )
 			self.csv_text = csv_text
 			if self.csv_text is None or not self.csv_text.strip( ):
 				return [ ]
@@ -23076,7 +23084,7 @@ class OpenSky( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def normalize_states( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
+	def normalize_states( self, payload: Dict[ str, Any ] | None=None ) -> Dict[ str, Any ] | None:
 		'''
 		
 			Purpose:
@@ -23210,7 +23218,7 @@ class OpenSky( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def normalize_track( self, payload: Dict[ str, Any ] | None ) -> Dict[ str, Any ] | None:
+	def normalize_track( self, payload: Dict[ str, Any ] | None=None ) -> Dict[ str, Any ] | None:
 		"""Normalize track records returned by OpenSky.
 
 		Purpose:
