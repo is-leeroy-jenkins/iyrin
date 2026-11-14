@@ -60,17 +60,16 @@ from langchain_core.embeddings import Embeddings
 
 def throw_if( name: str, value: object ) -> None:
 	"""
-	
-		Purpose:
+
+	Purpose:
 		Validate that a required value is not empty.
-		
-		Args:
-			name (str): Name of the argument being validated.
-			value (object): Value to validate.
-		
-		Returns:
-			None: Validates the required argument and raises for empty values.
-		
+
+	Args:
+		name (str): Name of the argument being validated.
+		value (object): Value to validate.
+
+	Returns:
+		None: Validates the required argument and raises for empty values.
 		"""
 	if value is None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
@@ -212,18 +211,17 @@ class BaseCache( ):
 	def namespace_key( self, namespace: str, key: str ) -> str:
 		"""
 
-			Purpose:
-				Create a cache key prefixed by a namespace.
+		Purpose:
+			Create a cache key prefixed by a namespace.
 
-			Args:
-				namespace (str): Logical cache namespace, such as geocode, places, weather,
-					distance, or fetcher.
+		Args:
+			namespace (str): Logical cache namespace, such as geocode, places, weather,
+				distance, or fetcher.
 
-				key (str): Raw cache key.
+			key (str): Raw cache key.
 
-			Returns:
-				str: Namespace-qualified cache key.
-
+		Returns:
+			str: Namespace-qualified cache key.
 		"""
 		try:
 			throw_if( 'namespace', namespace )
@@ -285,12 +283,11 @@ class InMemoryCache( BaseCache ):
 	def now( self ) -> float:
 		"""
 
-			Purpose:
-				Return the current Unix timestamp.
+		Purpose:
+			Return the current Unix timestamp.
 
-			Returns:
-				float: Current Unix timestamp.
-
+		Returns:
+			float: Current Unix timestamp.
 		"""
 		try:
 			return time.time( )
@@ -306,19 +303,18 @@ class InMemoryCache( BaseCache ):
 			ttl: Optional[ int ] = None ) -> Dict[ str, Any ]:
 		"""
 
-			Purpose:
-				Create a cache metadata record for the supplied key and value.
+		Purpose:
+			Create a cache metadata record for the supplied key and value.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-				value (Dict[str, Any]): JSON-serializable cache value.
+			value (Dict[str, Any]): JSON-serializable cache value.
 
-				ttl (Optional[int]): Optional time-to-live in seconds.
+			ttl (Optional[int]): Optional time-to-live in seconds.
 
-			Returns:
-				Dict[str, Any]: Cache metadata record.
-
+		Returns:
+			Dict[str, Any]: Cache metadata record.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -340,15 +336,14 @@ class InMemoryCache( BaseCache ):
 	def is_expired( self, record: Dict[ str, Any ] ) -> bool:
 		"""
 
-			Purpose:
-				Determine whether an in-memory cache record has expired.
+		Purpose:
+			Determine whether an in-memory cache record has expired.
 
-			Args:
-				record (Dict[str, Any]): Cache metadata record.
+		Args:
+			record (Dict[str, Any]): Cache metadata record.
 
-			Returns:
-				bool: True if expired; otherwise False.
-
+		Returns:
+			bool: True if expired; otherwise False.
 		"""
 		try:
 			throw_if( 'record', record )
@@ -369,15 +364,14 @@ class InMemoryCache( BaseCache ):
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
 
-			Purpose:
-				Return a cached value by key when present and not expired.
+		Purpose:
+			Return a cached value by key when present and not expired.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				Optional[Dict[str, Any]]: Cached value or None.
-
+		Returns:
+			Optional[Dict[str, Any]]: Cached value or None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -406,19 +400,18 @@ class InMemoryCache( BaseCache ):
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
 		"""
 
-			Purpose:
-				Set a cache value by key.
+		Purpose:
+			Set a cache value by key.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-				value (Dict[str, Any]): JSON-serializable cache value.
+			value (Dict[str, Any]): JSON-serializable cache value.
 
-				ttl (Optional[int]): Optional time-to-live in seconds.
+			ttl (Optional[int]): Optional time-to-live in seconds.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -436,15 +429,14 @@ class InMemoryCache( BaseCache ):
 	def delete( self, key: str ) -> None:
 		"""
 
-			Purpose:
-				Delete a cache entry by key.
+		Purpose:
+			Delete a cache entry by key.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -462,15 +454,14 @@ class InMemoryCache( BaseCache ):
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
 		"""
 
-			Purpose:
-				Clear all cache entries or only entries under a namespace prefix.
+		Purpose:
+			Clear all cache entries or only entries under a namespace prefix.
 
-			Args:
-				namespace (Optional[str]): Optional namespace prefix.
+		Args:
+			namespace (Optional[str]): Optional namespace prefix.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			if namespace:
@@ -493,15 +484,14 @@ class InMemoryCache( BaseCache ):
 	def contains( self, key: str ) -> bool:
 		"""
 
-			Purpose:
-				Determine whether a cache key exists and is not expired.
+		Purpose:
+			Determine whether a cache key exists and is not expired.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				bool: True if the key exists and is not expired.
-
+		Returns:
+			bool: True if the key exists and is not expired.
 		"""
 		try:
 			return self.get( key ) is not None
@@ -516,12 +506,11 @@ class InMemoryCache( BaseCache ):
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
 
-			Purpose:
-				Return cache diagnostics.
+		Purpose:
+			Return cache diagnostics.
 
-			Returns:
-				Dict[str, Any]: Cache diagnostics.
-
+		Returns:
+			Dict[str, Any]: Cache diagnostics.
 		"""
 		try:
 			expired = 0
@@ -574,12 +563,11 @@ class SQLiteCache( BaseCache ):
 	def initialize( self ) -> None:
 		"""
 
-			Purpose:
-				Create the SQLite cache table when it does not already exist.
+		Purpose:
+			Create the SQLite cache table when it does not already exist.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			self.connection.execute( '''
@@ -604,12 +592,11 @@ class SQLiteCache( BaseCache ):
 	def migrate( self ) -> None:
 		"""
 
-			Purpose:
-				Add metadata columns to older kv tables that only contain k and v.
+		Purpose:
+			Add metadata columns to older kv tables that only contain k and v.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			cursor = self.connection.execute( 'PRAGMA table_info(kv)' )
@@ -635,12 +622,11 @@ class SQLiteCache( BaseCache ):
 	def now( self ) -> float:
 		"""
 
-			Purpose:
-				Return the current Unix timestamp.
+		Purpose:
+			Return the current Unix timestamp.
 
-			Returns:
-				float: Current Unix timestamp.
-
+		Returns:
+			float: Current Unix timestamp.
 		"""
 		try:
 			return time.time( )
@@ -655,13 +641,11 @@ class SQLiteCache( BaseCache ):
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
 
-			Purpose:
-				Return a cached value by key when present and not expired.
+		Purpose:
+			Return a cached value by key when present and not expired.
 
-			Args:
-				key (str): Cached value or None.
-
-		
+		Args:
+			key (str): Cached value or None.
 
 		Returns:
 			Optional[ Dict[ str, Any ] ]: Result of the get operation.
@@ -696,17 +680,16 @@ class SQLiteCache( BaseCache ):
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:
 		"""
 
-			Purpose:
-				Set a cache value by key.
+		Purpose:
+			Set a cache value by key.
 
-			Args:
-				key (str): Cache key.
-				value (Dict[str, Any]): JSON-serializable cache value.
-				ttl (Optional[int]): Optional time-to-live in seconds.
+		Args:
+			key (str): Cache key.
+			value (Dict[str, Any]): JSON-serializable cache value.
+			ttl (Optional[int]): Optional time-to-live in seconds.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -735,15 +718,14 @@ class SQLiteCache( BaseCache ):
 	def delete( self, key: str ) -> None:
 		"""
 
-			Purpose:
-				Delete a cache entry by key.
+		Purpose:
+			Delete a cache entry by key.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -760,15 +742,14 @@ class SQLiteCache( BaseCache ):
 	def clear( self, namespace: Optional[ str ]=None ) -> None:
 		"""
 
-			Purpose:
-				Clear all cache entries or only entries under a namespace prefix.
+		Purpose:
+			Clear all cache entries or only entries under a namespace prefix.
 
-			Args:
-				namespace (Optional[str]): Optional namespace prefix.
+		Args:
+			namespace (Optional[str]): Optional namespace prefix.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			if namespace:
@@ -789,15 +770,14 @@ class SQLiteCache( BaseCache ):
 	def contains( self, key: str ) -> bool:
 		"""
 
-			Purpose:
-				Determine whether a cache key exists and is not expired.
+		Purpose:
+			Determine whether a cache key exists and is not expired.
 
-			Args:
-				key (str): Cache key.
+		Args:
+			key (str): Cache key.
 
-			Returns:
-				bool: True if the key exists and is not expired.
-
+		Returns:
+			bool: True if the key exists and is not expired.
 		"""
 		try:
 			throw_if( 'key', key )
@@ -813,12 +793,11 @@ class SQLiteCache( BaseCache ):
 	def purge_expired( self ) -> int:
 		"""
 
-			Purpose:
-				Delete expired cache entries.
+		Purpose:
+			Delete expired cache entries.
 
-			Returns:
-				int: Number of rows deleted.
-
+		Returns:
+			int: Number of rows deleted.
 		"""
 		try:
 			cursor = self.connection.execute(
@@ -841,12 +820,11 @@ class SQLiteCache( BaseCache ):
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
 
-			Purpose:
-				Return SQLite cache diagnostics.
+		Purpose:
+			Return SQLite cache diagnostics.
 
-			Returns:
-				Dict[str, Any]: Cache diagnostics.
-
+		Returns:
+			Dict[str, Any]: Cache diagnostics.
 		"""
 		try:
 			total = self.connection.execute( 'SELECT COUNT(*) FROM kv' ).fetchone( )[ 0 ]
@@ -868,12 +846,11 @@ class SQLiteCache( BaseCache ):
 	def close( self ) -> None:
 		"""
 
-			Purpose:
-				Close the SQLite connection.
+		Purpose:
+			Close the SQLite connection.
 
-			Returns:
-				None.
-
+		Returns:
+			None.
 		"""
 		try:
 			self.connection.close( )
@@ -977,17 +954,16 @@ class SQLiteDatabase( ):
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
 
-			Purpose:
+		Purpose:
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
-			Args:
-				table (str): Table name.
-				limit (Optional[int]): Maximum rows to retrieve; None selects all rows.
-				offset (int): Number of rows to skip, starting at zero.
+		Args:
+			table (str): Table name.
+			limit (Optional[int]): Maximum rows to retrieve; None selects all rows.
+			offset (int): Number of rows to skip, starting at zero.
 
-			Returns:
-				pd.DataFrame: DataFrame of plain Python scalar values.
-
+		Returns:
+			pd.DataFrame: DataFrame of plain Python scalar values.
 			"""
 		try:
 			throw_if( 'table', table )
@@ -1068,16 +1044,15 @@ class SQLiteDatabase( ):
 	def render_table( self, df: pd.DataFrame ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
 			first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
 
-			Args:
-				df (pd.DataFrame): The DataFrame to render.
+		Args:
+			df (pd.DataFrame): The DataFrame to render.
 
-			Returns:
-				None: Renders the selected database table in Streamlit.
-
+		Returns:
+			None: Renders the selected database table in Streamlit.
 			"""
 		if df is None:
 			st.info( 'No data available.' )
@@ -1113,12 +1088,12 @@ class SQLiteDatabase( ):
 	
 	def drop_table( self, table: str ) -> None:
 		"""
-			Purpose:
+
+		Purpose:
 			Safely drop a table if it exists.
 
-			Args:
-				table (str): Table name.
-		
+		Args:
+			table (str): Table name.
 
 		Returns:
 			None: Completes the operation through side effects.
@@ -1141,20 +1116,20 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
 		"""
-			Purpose:
+
+		Purpose:
 			Create a safe SQLite index on a specified table column.
 
 			Handles:
-				- Spaces in column names
-				- Special characters
-				- Reserved words
-				- Duplicate index names
-				- Validation against actual table schema
+			- Spaces in column names
+			- Special characters
+			- Reserved words
+			- Duplicate index names
+			- Validation against actual table schema
 
-			Args:
-				table (str): Table name.
-				column (str): Column name to index.
-		
+		Args:
+			table (str): Table name.
+			column (str): Column name to index.
 
 		Returns:
 			None: Completes the operation through side effects.
@@ -1269,16 +1244,15 @@ class SQLiteDatabase( ):
 	def create_visualization( self, df: pd.DataFrame ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Render data visualizations without passing pandas objects directly into
 			Plotly/Narwhals.
 
-			Args:
-				df (pd.DataFrame): The input DataFrame.
+		Args:
+			df (pd.DataFrame): The input DataFrame.
 
-			Returns:
-				None: Renders a visualization in the Streamlit interface.
-
+		Returns:
+			None: Renders a visualization in the Streamlit interface.
 			"""
 		blue_divider( )
 		st.markdown( '##### Visualization Engine' )
@@ -1453,14 +1427,15 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def get_sqlite_type( self, dtype: Any ) -> str:
 		"""
-			Purpose:
+
+		Purpose:
 			Map a pandas dtype to an appropriate SQLite column type.
 
-			Args:
-				dtype (pandas dtype): The dtype of a pandas Series.
+		Args:
+			dtype (pandas dtype): The dtype of a pandas Series.
 
-			Returns:
-				str: SQLite column type.
+		Returns:
+			str: SQLite column type.
 			"""
 		dtype_str = str( dtype ).lower( )
 		# ------------------------------------------------------------------
@@ -1495,22 +1470,22 @@ class SQLiteDatabase( ):
 	
 	def create_custom_table( self, table_name: str, columns: list ) -> None:
 		"""
-			Purpose:
+
+		Purpose:
 			Create a custom SQLite table from column definitions.
 
-			Args:
-				table_name (str): Name of table.
+		Args:
+			table_name (str): Name of table.
 
-				columns (list of dict): [
-						{
-							"name": str,
-							"type": str,
-							"not_null": bool,
-							"primary_key": bool,
-							"auto_increment": bool
-						}
-					]
-		
+			columns (list of dict): [
+				{
+				"name": str,
+				"type": str,
+				"not_null": bool,
+				"primary_key": bool,
+				"auto_increment": bool
+				}
+				]
 
 		Returns:
 			None: Completes the operation through side effects.
@@ -1542,20 +1517,18 @@ class SQLiteDatabase( ):
 	def is_safe_query( self, query: str ) -> bool:
 		"""
 
-			Purpose:
+		Purpose:
 			Determine whether a SQL query is read-only and safe to execute.
 
 			Allows:
-				SELECT
-				WITH (CTE returning SELECT)
-				EXPLAIN SELECT
-				PRAGMA (read-only)
+			SELECT
+			WITH (CTE returning SELECT)
+			EXPLAIN SELECT
+			PRAGMA (read-only)
 
 			Blocks:
-				INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
-				DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
-
-		
+			INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, ATTACH,
+			DETACH, VACUUM, REPLACE, TRIGGER, and multiple statements.
 
 		Args:
 			query (str): SQL query or identifier to inspect.
@@ -1596,14 +1569,12 @@ class SQLiteDatabase( ):
 	def create_identifier( self, name: str ) -> str:
 		"""
 
-			Purpose:
+		Purpose:
 			Sanitize a string into a safe SQLite identifier.
 
 			- Replaces invalid characters with underscores
 			- Ensures it starts with a letter or underscore
 			- Prevents empty names
-
-		
 
 		Args:
 			name (str): Original identifier to sanitize.
@@ -1685,21 +1656,20 @@ class SQLiteDatabase( ):
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
 			first; if it fails, falls back to a schema-safe rebuild preserving column order, data,
 			and indexes.
 
-			Args:
-				table_name (str): Table containing the column.
+		Args:
+			table_name (str): Table containing the column.
 
-				old_name (str): Existing column name.
+			old_name (str): Existing column name.
 
-				new_name (str): New column name.
+			new_name (str): New column name.
 
-			Returns:
-				None: Renames the selected SQLite column.
-
+		Returns:
+			None: Renames the selected SQLite column.
 			"""
 		try:
 			throw_if( 'table_name', table_name )
@@ -1903,19 +1873,18 @@ class SQLiteDatabase( ):
 	def rename_table( self, old_name: str, new_name: str ) -> None:
 		"""
 
-			Purpose:
+		Purpose:
 			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
 			falls back to a schema-safe rebuild using the original CREATE TABLE statement and
 			preserves indexes.
 
-			Args:
-				old_name (str): Existing table name.
+		Args:
+			old_name (str): Existing table name.
 
-				new_name (str): New table name.
+			new_name (str): New table name.
 
-			Returns:
-				None: Renames the selected SQLite table.
-
+		Returns:
+			None: Renames the selected SQLite table.
 			"""
 		try:
 			throw_if( 'old_name', old_name )
