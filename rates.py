@@ -43,22 +43,22 @@
 '''
 import time
 from typing import Optional
-from boogr import Error, Logger
+import math
 
 def throw_if( name: str, value: object ) -> None:
 	"""
 	
 		Purpose:
-		--------
+
 		Validate that a required value is not empty.
 		
-		Parameters:
-		-----------
+		Args:
+
 		name (str): Name of the argument being validated.
 		value (object): Value to validate.
 		
 		Returns:
-		--------
+
 		None
 		
 	"""
@@ -66,6 +66,8 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be None.' )
 	
 	if isinstance( value, str ) and not value.strip( ):
+		raise ValueError( f'Argument "{name}" cannot be empty.' )
+	if isinstance( value, (list, tuple, dict, set) ) and len( value ) == 0:
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
 class RateLimiter( ):
@@ -76,7 +78,7 @@ class RateLimiter( ):
 		between outbound requests. The limiter is intentionally lightweight and
 		designed for single-process Streamlit/API usage.
 
-		Parameters:
+		Args:
 		max (Optional[float]):
 		Maximum queries per second. If None or <= 0, throttling is disabled.
 
@@ -94,7 +96,24 @@ class RateLimiter( ):
 	last_sleep: Optional[ float ]
 	
 	def __init__( self, max: Optional[ float ] ) -> None:
-		self.query_per_second = float( max ) if max is not None else None
+		"""Initialize a process-local request rate limiter.
+
+		Purpose:
+		    Sets the minimum spacing between requests using a valid numerical ceiling.
+		    None and nonpositive ceilings preserve disabled throttling behavior.
+
+		Args:
+		    max (Optional[float]): Maximum requests per second, or None to disable.
+
+		Returns:
+		    None: Initializes the limiter state.
+
+		Raises:
+		    ValueError: Raised for nonnumeric or nonfinite rate values.
+		"""
+		if max is not None and (type( max ) not in (int, float) or not math.isfinite( max )):
+			raise ValueError( 'max must be a finite number or None.' )
+		self.query_per_second = max
 		if self.query_per_second and self.query_per_second > 0:
 			self.interval = 1.0 / self.query_per_second
 		else:
@@ -113,11 +132,11 @@ class RateLimiter( ):
 				Sleep just enough so successive calls remain under the configured
 				query-per-second ceiling.
 
-			Parameters:
+			Args:
 				None.
 
 			Returns:
-				None.
+				None: Records one request and sleeps when necessary.
 
 		"""
 		try:
@@ -131,12 +150,12 @@ class RateLimiter( ):
 				self.last_sleep = self.interval - self.delta
 				time.sleep( self.last_sleep )
 				self.total_sleep += self.last_sleep
-			else:
-				self.last = time.time( )
+			self.last = time.time( )
 		except Exception as e:
+			from boogr import Error, Logger
 			exception = Error( e )
 			exception.module = 'Iyrin'
 			exception.cause = 'RateLimiter'
 			exception.method = 'wait( self )'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
