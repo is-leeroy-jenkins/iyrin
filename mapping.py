@@ -62,16 +62,13 @@ def throw_if( name: str, value: object ) -> None:
 	"""
 	
 		Purpose:
-		--------
 		Validate that a required value is not empty.
 		
-		Parameters:
-		-----------
+		Args:
 		name (str): Name of the argument being validated.
 		value (object): Value to validate.
 		
 		Returns:
-		--------
 		None
 		
 	"""
@@ -146,17 +143,33 @@ def fmt( o: AddressOrCoord ) -> str:
 
 class Map( ):
 	"""
+	Google Maps HTTP gateway.
 
-	    Purpose:
-	        Centralized HTTP gateway for Google Maps Web Services. Handles rate
-	        limiting, retry-with-backoff, API-key injection, response diagnostics,
-	        and Google payload-status normalization.
+	Purpose:
+		Manages authenticated Google Maps requests, throttling, retry state, and response diagnostics.
 
-	    The Google Maps API key is loaded from configuration during initialization.
-	    Use .request("geocode/json", {...}) or another supported endpoint path to
-	    execute requests through the configured gateway.
-
-    """
+	Attributes:
+		base_url (Optional[ str ]): Base URL for Google Maps Web Services.
+		endpoint (Optional[ str ]): Current endpoint path.
+		params (Optional[ Dict[ str, str ] ]): Parameters supplied for the current request.
+		api_key (str): Configured Google Maps API credential.
+		query_per_second (Optional[ float ]): Requested rate limit in queries per second.
+		retries (Optional[ int ]): Maximum permitted retry attempts.
+		min (Optional[ float ]): Initial retry backoff in seconds.
+		max (Optional[ float ]): Maximum retry backoff in seconds.
+		timeout (Optional[ float ]): HTTP request timeout in seconds.
+		url (Optional[ str ]): Fully qualified URL for the current request.
+		session (Optional[ requests.Session ]): Requests session used for HTTP transport.
+		limiter (Optional[ RateLimiter ]): Rate limiter applied before each request.
+		query (Optional[ Dict[ str, str ] ]): Current request query including the API credential.
+		response (Optional[ requests.Response ]): Most recent HTTP response.
+		last_url (Optional[ str ]): URL used for the most recent request.
+		last_query (Optional[ Dict[ str, str ] ]): Last request query with the credential removed.
+		last_status (Optional[ int ]): Last observed HTTP status code.
+		last_elapsed_ms (Optional[ float ]): Last request elapsed time in milliseconds.
+		last_payload_status (Optional[ str ]): Last Google API payload status.
+		last_payload_error (Optional[ str ]): Last Google API payload error.
+	"""
 	base_url: Optional[ str ]
 	endpoint: Optional[ str ]
 	params: Optional[ Dict[ str, str ] ]
@@ -181,6 +194,14 @@ class Map( ):
 	
 	def __init__( self, qps: float = 5.0, retries: int = 5, min: float = 1.0, max: float = 30.0,
 	              timeout: float = 15.0, api_key: str = None ) -> None:
+		"""Initialize the Google Maps session, rate limiter, credentials, and request state.
+
+		Purpose:
+			Initialize the Google Maps session, rate limiter, credentials, and request state.
+
+		Returns:
+			None: Initializes instance state.
+		"""
 		self.api_key = api_key if api_key is not None else cfg.GOOGLEMAPS_API_KEY
 		self.limiter = RateLimiter( qps )
 		self.retries = retries
@@ -287,18 +308,27 @@ class Map( ):
 
 class Geocoder( ):
 	"""
+	Google geocoding client.
 
-		Purpose:
-		Provide address, city/state/country, reverse, and batch geocoding with
-		optional caching and a consistent flattened output shape.
+	Purpose:
+		Resolves addresses and coordinates and optionally caches geocoding results.
 
-		Parameters:
-		maps (Maps): Maps gateway instance.
-		cache (Optional[BaseCache]): Pluggable cache for memoization.
-
-		Returns:
-		Geocoder instance with forward, reverse, and batch geocoding methods.
-
+	Attributes:
+		maps (Optional[ Map ]): Google Maps gateway used for requests.
+		cache (Optional[ BaseCache ]): Optional cache for resolved locations.
+		prefix (Optional[ str ]): Namespace prefix for generated cache keys.
+		data (Optional[ Dict ]): Most recently retrieved API payload.
+		output (Optional[ Dict ]): Most recently normalized location record.
+		parts (Optional[ Tuple ]): Current cache-key components.
+		city (Optional[ str ]): Current city input.
+		address (Optional[ str ]): Current address input.
+		state (Optional[ str ]): Current state input.
+		country (Optional[ str ]): Current country or region bias.
+		comps (Optional[ Dict[ str, str ] ]): Extracted address component values.
+		key (Optional[ str ]): Cache key for the current lookup.
+		query (Optional[ str ]): Current geocoding search value.
+		latitude (Optional[ float ]): Current latitude in decimal degrees.
+		longitude (Optional[ float ]): Current longitude in decimal degrees.
 	"""
 	maps: Optional[ Map ]
 	cache: Optional[ BaseCache ]
@@ -317,6 +347,14 @@ class Geocoder( ):
 	longitude: Optional[ float ]
 	
 	def __init__( self, maps: Map, cache: Optional[ BaseCache ]=None ) -> None:
+		"""Initialize geocoding with a Google Maps gateway and optional cache.
+
+		Purpose:
+			Initialize geocoding with a Google Maps gateway and optional cache.
+
+		Returns:
+			None: Initializes instance state.
+		"""
 		self._maps = maps
 		self._cache = cache
 		self.maps = maps
@@ -591,13 +629,16 @@ class Geocoder( ):
 
 class DistanceMatrix( ):
 	"""
+	Google distance matrix client.
 
-		Purpose:
-			Provide route, route-comparison, and matrix wrappers around the Google
-			Distance Matrix API.
+	Purpose:
+		Calculates distance and duration matrices and presents route comparisons.
 
-		The instance exposes summary, matrix, compare_modes, and DataFrame helpers.
-
+	Attributes:
+		_maps (Map): Google Maps gateway used for distance requests.
+		modes (List[ str ]): Supported Google travel modes.
+		data (Dict[ str, Any ] | None): Most recent raw matrix response.
+		rows (List[ Dict[ str, Any ] ] | None): Most recent flattened matrix results.
 	"""
 	_maps: Map
 	modes: List[ str ]
@@ -605,6 +646,14 @@ class DistanceMatrix( ):
 	rows: List[ Dict[ str, Any ] ] | None
 	
 	def __init__( self, maps: Map ) -> None:
+		"""Initialize supported travel modes and response state.
+
+		Purpose:
+			Initialize supported travel modes and response state.
+
+		Returns:
+			None: Initializes instance state.
+		"""
 		self._maps = maps
 		self.modes = [ 'driving', 'walking', 'bicycling', 'transit' ]
 		self.data = None
@@ -982,18 +1031,25 @@ class DistanceMatrix( ):
 		
 class Place( ):
 	"""
+	Google Places lookup client.
 
-		Purpose:
-			Use Places Text Search and Place Details to recover locations that
-			Geocoding may miss. Results are returned in the same canonical shape
-			used by Geocoder so both services can be used interchangeably.
+	Purpose:
+		Resolves place details and text queries into canonical location records.
 
-		Parameters:
-			maps (Maps): Maps gateway instance.
-			cache (Optional[BaseCache]): Optional cache for query results.
-
-		Returns: Places instance with text search and place-details helpers.
-
+	Attributes:
+		map (Optional[ Map ]): Declared legacy mapping gateway attribute.
+		cache (Optional[ BaseCache ]): Optional response cache.
+		country (Optional[ str ]): Current search region bias.
+		query (Optional[ str ]): Current place search query.
+		hit (Optional[ Dict[ str, Any ] ]): Most recent cache hit.
+		params (Optional[ Dict[ str, str ] ]): Current API query parameters.
+		request (Optional[ Dict[ str, str ] ]): Last request payload or query.
+		search (Optional[ Dict ]): Most recent search response.
+		results (Optional[ List ]): Most recent candidate locations.
+		details (Optional[ Dict ]): Most recently retrieved place details.
+		geometry (Optional[ Dict ]): Location geometry from a place response.
+		key (Optional[ str ]): Cache key for the current lookup.
+		output (Optional[ Dict ]): Most recent normalized location result.
 	"""
 	map: Optional[ Map ]
 	cache: Optional[ BaseCache ]
@@ -1298,13 +1354,23 @@ class Place( ):
 
 class Timezone:
 	"""
+	Google time zone client.
 
-		Purpose:
-			Wrap Google Time Zone API for coordinate lookups, full payload retrieval,
-			UTC offset extraction, local-time conversion, and batch enrichment.
+	Purpose:
+		Retrieves timezone identifiers, UTC offsets, and time-enriched location records.
 
-		The instance exposes get_id, lookup, offset_hours, local_time, and batch_lookup.
-
+	Attributes:
+		timestamp (Optional[ int ]): Unix timestamp used for timezone lookup.
+		maps (Optional[ Map ]): Google Maps gateway used for timezone requests.
+		latitude (Optional[ float ]): Current latitude in decimal degrees.
+		longitude (Optional[ float ]): Current longitude in decimal degrees.
+		data (Optional[ Dict ]): Most recent timezone API payload.
+		offset (Optional[ float ]): Computed UTC offset including daylight saving time.
+		local (Optional[ str ]): Last computed local datetime representation.
+		rows (Optional[ list ]): Input rows for batch enrichment.
+		lat_field (Optional[ str ]): Latitude field name for batch enrichment.
+		lng_field (Optional[ str ]): Longitude field name for batch enrichment.
+		utc_datetime (Optional[ dt.datetime ]): UTC datetime used for local time conversion.
 	"""
 	timestamp: Optional[ int ]
 	maps: Optional[ Map ]
@@ -1319,6 +1385,14 @@ class Timezone:
 	utc_datetime: Optional[ dt.datetime ]
 	
 	def __init__( self, maps: Map ) -> None:
+		"""Initialize timezone lookup state for the supplied Maps gateway.
+
+		Purpose:
+			Initialize timezone lookup state for the supplied Maps gateway.
+
+		Returns:
+			None: Initializes instance state.
+		"""
 		self.maps = maps
 		self.timestamp = None
 		self.latitude = None
@@ -1612,13 +1686,28 @@ class Timezone:
 
 class StaticMap( ):
 	"""
-		
-		Purpose:
-			Generate Google Static Maps URLs for single-point previews, multi-point
-			previews, paths, and bounding-box previews.
+	Google Static Maps URL builder.
 
-		The Google Maps API key is loaded from configuration during initialization.
-		
+	Purpose:
+		Builds static map URLs for markers, paths, and geographic bounding boxes.
+
+	Attributes:
+		api_key (Optional[ str ]): Google Maps credential attached to static URLs.
+		zoom (Optional[ int ]): Zoom level for the current static map.
+		size (Optional[ str ]): Map image dimensions in pixels.
+		latitude (Optional[ float ]): Latitude of the current marker.
+		longitude (Optional[ float ]): Longitude of the current marker.
+		params (Optional[ Dict ]): Current Static Maps query parameters.
+		markers (Optional[ str ]): Encoded marker coordinates.
+		base_url (Optional[ str ]): Static Maps HTTP endpoint.
+		points (Optional[ list ]): Coordinates used for markers or path geometry.
+		maptype (Optional[ str ]): Selected static map layer type.
+		color (Optional[ str ]): Marker or path color.
+		weight (Optional[ int ]): Path line weight.
+		west (Optional[ float ]): Western bounding longitude.
+		south (Optional[ float ]): Southern bounding latitude.
+		east (Optional[ float ]): Eastern bounding longitude.
+		north (Optional[ float ]): Northern bounding latitude.
 	"""
 	api_key: Optional[ str ]
 	zoom: Optional[ int ]
@@ -1638,6 +1727,14 @@ class StaticMap( ):
 	north: Optional[ float ]
 	
 	def __init__( self ) -> None:
+		"""Initialize Google Static Maps URL configuration and output state.
+
+		Purpose:
+			Initialize Google Static Maps URL configuration and output state.
+
+		Returns:
+			None: Initializes instance state.
+		"""
 		self.api_key = cfg.GOOGLEMAPS_API_KEY
 		self.zoom = None
 		self.size = None
