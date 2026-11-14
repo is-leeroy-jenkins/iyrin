@@ -321,7 +321,7 @@ class Map( ):
 					backoff = min( backoff * 2, self.max )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Maps'
 			exception.method = 'request( self, endpoint: str, params: Dict[ str, str ] )'
 			Logger( ).write( exception )
@@ -429,7 +429,7 @@ class Geocoder( ):
 			return f'{self.prefix}::{joined}'
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'key_for( self, *kwargs )'
 			raise exception
@@ -467,7 +467,7 @@ class Geocoder( ):
 			return lat, lng
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'validate_coordinates( self, latitude: float, longitude: float )'
 			raise exception
@@ -516,7 +516,7 @@ class Geocoder( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'freeform( self, address: str, country: str=US )'
 			raise exception
@@ -562,7 +562,7 @@ class Geocoder( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'reverse( self, latitude: float, longitude: float )'
 			raise exception
@@ -603,7 +603,7 @@ class Geocoder( ):
 			return self.freeform( self.query, hint )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'city_state_country( self, city: str, state: str, country: str )'
 			raise exception
@@ -655,7 +655,7 @@ class Geocoder( ):
 			return results
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
 			exception.method = 'batch_freeform( self, *kwargs )'
 			raise exception
@@ -733,7 +733,7 @@ class DistanceMatrix( ):
 			return value
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'normalize_mode( self, mode: str )'
 			Logger( ).write( exception )
@@ -770,7 +770,7 @@ class DistanceMatrix( ):
 			return locations
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'normalize_inputs( self, values: object )'
 			Logger( ).write( exception )
@@ -798,7 +798,7 @@ class DistanceMatrix( ):
 			         'distance_miles': round( meters / 1609.344, 3 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'convert_distance( self, meters: int | float | None )'
 			Logger( ).write( exception )
@@ -826,7 +826,7 @@ class DistanceMatrix( ):
 			         'duration_hours': round( seconds / 3600.0, 3 ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'convert_duration( self, seconds: int | float | None )'
 			Logger( ).write( exception )
@@ -879,7 +879,7 @@ class DistanceMatrix( ):
 			return row
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'flatten_element( self, **args )'
 			Logger( ).write( exception )
@@ -961,7 +961,7 @@ class DistanceMatrix( ):
 			return output_rows
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = "matrix( self, **args )"
 			Logger( ).write( exception )
@@ -1007,7 +1007,7 @@ class DistanceMatrix( ):
 			         'mode': row.get( 'mode' ), 'status': row.get( 'status' ) }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = "summary( self, origin, destination, mode: str='driving' ) -> Dict"
 			Logger( ).write( exception )
@@ -1050,7 +1050,7 @@ class DistanceMatrix( ):
 			return results
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = "compare_modes( self, origin, destination, modes=None, departure_time: str='' )"
 			Logger( ).write( exception )
@@ -1079,7 +1079,7 @@ class DistanceMatrix( ):
 			return pd.DataFrame( active_rows )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
 			exception.method = 'to_dataframe( self, rows=None ) -> pd.DataFrame'
 			Logger( ).write( exception )
@@ -1185,7 +1185,7 @@ class Place( ):
 			return f'{self.prefix}::{joined}'
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
 			exception.method = 'key_for( self, *args )'
 			raise exception
@@ -1222,7 +1222,7 @@ class Place( ):
 			return None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
 			exception.method = 'component_value( self, *args )'
 			raise exception
@@ -1274,7 +1274,7 @@ class Place( ):
 			         'source': 'places', 'query': query }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
 			exception.method = 'flatten_place_details( self, *args )'
 			raise exception
@@ -1315,7 +1315,7 @@ class Place( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
 			exception.method = 'place_details( self, *args )'
 			raise exception
@@ -1376,7 +1376,7 @@ class Place( ):
 			return self.output
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
 			exception.method = 'text_to_location( self, *args )'
 			raise exception
@@ -1416,7 +1416,7 @@ class Place( ):
 			return self.results[ :max( 1, int( lmt ) ) ]
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Places'
 			exception.method = 'search_candidates( self, *args )'
 			raise exception
@@ -1513,7 +1513,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'validate_coordinates( self, lat: float, lng: float )'
 			raise exception
@@ -1549,7 +1549,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'lookup( self, lat: float, lng: float )'
 			raise exception
@@ -1580,7 +1580,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'get_id( self, lat: float, lng: float )'
 			raise exception
@@ -1616,7 +1616,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'offset_hours( self, lat: float, lng: float )'
 			raise exception
@@ -1674,7 +1674,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'local_time( self, lat: float, lng: float, utc_datetime: Optional[ dt.datetime ]=None )'
 			raise exception
@@ -1752,7 +1752,7 @@ class Timezone:
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'Timezone'
 			exception.method = 'batch_lookup( self, rows: list, lat_field: str=lat, lng_field: str=lng )'
 			raise exception
@@ -1858,7 +1858,7 @@ class StaticMap( ):
 			return self.latitude, self.longitude
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'validate_coordinate( self, *args )'
 			Logger( ).write( exception )
@@ -1904,7 +1904,7 @@ class StaticMap( ):
 			return self.points		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'normalize_points( self, points: list )'
 			Logger( ).write( exception )
@@ -1933,7 +1933,7 @@ class StaticMap( ):
 			return f'{self.base_url}?{urlencode( self.params, doseq=True )}'		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'build_url( self, params: Dict ) -> str'
 			Logger( ).write( exception )
@@ -1980,7 +1980,7 @@ class StaticMap( ):
 			return self.build_url( self.params )		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'pin( self, *args )'
 			Logger( ).write( exception )
@@ -2044,7 +2044,7 @@ class StaticMap( ):
 			return self.build_url( self.params )		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMapUrl'
 			exception.method = 'pins( self, *args )'
 			Logger( ).write( exception )
@@ -2108,7 +2108,7 @@ class StaticMap( ):
 			return self.build_url( self.params )
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'path( self, points: list, size: str=600x400 )'
 			Logger( ).write( exception )
@@ -2173,7 +2173,7 @@ class StaticMap( ):
 		
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'Iyrin'
+			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
 			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
 			Logger( ).write( exception )
