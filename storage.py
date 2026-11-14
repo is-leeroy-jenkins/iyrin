@@ -329,7 +329,10 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'make_record( self, **kwargs )'
+			exception.method = (
+				"make_record( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) "
+				"-> Dict[ str, Any ]:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -422,7 +425,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'set( self, **kwargs )'
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -712,7 +715,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'set( self, **args )'
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -949,7 +952,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'create_schema( self, **args )'
+			exception.method = "create_schema( self, table: str ) -> List[ Tuple ]:"
 			Logger( ).write( exception )
 			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
@@ -1039,7 +1042,10 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'read_table( self, **args )'
+			exception.method = (
+				"read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> "
+				"pd.DataFrame:"
+			)
 			Logger( ).write( exception )
 			raise exception from e
 	def render_table( self, df: pd.DataFrame | None ) -> None:
@@ -1115,7 +1121,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'drop_table( self, **args )'
+			exception.method = "drop_table( self, table: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
@@ -1174,7 +1180,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'create_index( self, **args )'
+			exception.method = "create_index( self, table: str, column: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
@@ -1400,7 +1406,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'convert_dataframe( self, **args )'
+			exception.method = "convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def insert_data( self, table_name: str, df: pd.DataFrame ) -> None:
@@ -1435,7 +1441,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'insert_data( self, **args )'
+			exception.method = "insert_data( self, table_name: str, df: pd.DataFrame ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def get_sqlite_type( self, dtype: Any ) -> str:
@@ -1644,7 +1650,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'get_indexes( self, **args )'
+			exception.method = "get_indexes( self, table: str ) -> List[ Tuple ]:"
 			Logger( ).write( exception )
 			raise exception from e
 	def add_column( self, table: str, column: str, col_type: str ) -> None:
@@ -1678,7 +1684,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'add_column( self, **args )'
+			exception.method = "add_column( self, table: str, column: str, col_type: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
@@ -1768,7 +1774,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'rename_column( self, **args )'
+			exception.method = "rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_profile_table( self, table: str ) -> pd.DataFrame:
@@ -1814,7 +1820,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'create_profile_table( self, **args )'
+			exception.method = "create_profile_table( self, table: str ) -> pd.DataFrame:"
 			Logger( ).write( exception )
 			raise exception from e
 	def drop_column( self, table: str, column: str ) -> None:
@@ -1895,7 +1901,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'drop_column( self, **args )'
+			exception.method = "drop_column( self, table: str, column: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_table( self, old_name: str, new_name: str ) -> None:
@@ -1961,7 +1967,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = 'rename_table( self, **args )'
+			exception.method = "rename_table( self, old_name: str, new_name: str ) -> None:"
 			Logger( ).write( exception )
 			raise exception from e
 class ChromaStore( ):
