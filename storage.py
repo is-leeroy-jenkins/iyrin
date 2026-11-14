@@ -69,7 +69,7 @@ def throw_if( name: str, value: object ) -> None:
 			value (object): Value to validate.
 		
 		Returns:
-			None:
+			None: Validates the required argument and raises for empty values.
 		
 		"""
 	if value is None:
@@ -206,6 +206,7 @@ class BaseCache( ):
 			exception.module = ''
 			exception.cause = ''
 			exception.method = ''
+			Logger( ).write( exception )
 			raise exception
 	
 	def namespace_key( self, namespace: str, key: str ) -> str:
@@ -223,8 +224,7 @@ class BaseCache( ):
 					Raw cache key.
 
 			Returns:
-				str:
-					Namespace-qualified cache key.
+				str: Namespace-qualified cache key.
 
 		"""
 		try:
@@ -236,6 +236,7 @@ class BaseCache( ):
 			exception.module = 'Iyrin'
 			exception.cause = 'BaseCache'
 			exception.method = 'namespace_key( self, namespace: str, key: str ) -> str'
+			Logger( ).write( exception )
 			raise exception
 			
 	def stats( self ) -> Dict[ str, Any ]:
@@ -303,6 +304,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'now( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def make_record( self, key: str, value: Dict[ str, Any ],
@@ -323,8 +325,7 @@ class InMemoryCache( BaseCache ):
 					Optional time-to-live in seconds.
 
 			Returns:
-				Dict[str, Any]:
-					Cache metadata record.
+				Dict[str, Any]: Cache metadata record.
 
 		"""
 		try:
@@ -341,6 +342,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'make_record( self, **kwargs )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def is_expired( self, record: Dict[ str, Any ] ) -> bool:
@@ -369,6 +371,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'is_expired( self, record: Dict[ str, Any ] )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
@@ -405,6 +408,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'get( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
@@ -437,6 +441,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'set( self, **kwargs )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def delete( self, key: str ) -> None:
@@ -463,6 +468,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'delete( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
@@ -494,6 +500,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def contains( self, key: str ) -> bool:
@@ -507,8 +514,7 @@ class InMemoryCache( BaseCache ):
 					Cache key.
 
 			Returns:
-				bool:
-					True if the key exists and is not expired.
+				bool: True if the key exists and is not expired.
 
 		"""
 		try:
@@ -518,6 +524,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'contains( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def stats( self ) -> Dict[ str, Any ]:
@@ -530,8 +537,7 @@ class InMemoryCache( BaseCache ):
 				None.
 
 			Returns:
-				Dict[str, Any]:
-					Cache diagnostics.
+				Dict[str, Any]: Cache diagnostics.
 
 		"""
 		try:
@@ -547,6 +553,7 @@ class InMemoryCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'InMemoryCache'
 			exception.method = 'stats( self )'
+			Logger( ).write( exception )
 			raise exception
 
 class SQLiteCache( BaseCache ):
@@ -611,6 +618,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'initialize( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def migrate( self ) -> None:
@@ -644,6 +652,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'migrate( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def now( self ) -> float:
@@ -666,6 +675,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'now( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
@@ -706,6 +716,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'get( self, key: str ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
 			raise exception
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:
@@ -744,6 +755,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'set( self, **args )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def delete( self, key: str ) -> None:
@@ -768,6 +780,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'delete( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def clear( self, namespace: Optional[ str ]=None ) -> None:
@@ -796,6 +809,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def contains( self, key: str ) -> bool:
@@ -819,6 +833,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'contains( self, key: str )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def purge_expired( self ) -> int:
@@ -831,8 +846,7 @@ class SQLiteCache( BaseCache ):
 				None.
 
 			Returns:
-				int:
-					Number of rows deleted.
+				int: Number of rows deleted.
 
 		"""
 		try:
@@ -850,6 +864,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'purge_expired( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def stats( self ) -> Dict[ str, Any ]:
@@ -879,6 +894,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'stats( self )'
+			Logger( ).write( exception )
 			raise exception
 	
 	def close( self ) -> None:
@@ -901,6 +917,7 @@ class SQLiteCache( BaseCache ):
 			exception.module = 'Iyrin'
 			exception.cause = 'SQLiteCache'
 			exception.method = 'close( self )'
+			Logger( ).write( exception )
 			raise exception
 
 class SQLiteDatabase( ):
@@ -999,8 +1016,7 @@ class SQLiteDatabase( ):
 					Optional row offset.
 
 			Returns:
-				pd.DataFrame:
-					DataFrame of plain Python scalar values.
+				pd.DataFrame: DataFrame of plain Python scalar values.
 
 			"""
 		throw_if( 'table', table )
@@ -1083,7 +1099,7 @@ class SQLiteDatabase( ):
 					The DataFrame to render.
 
 			Returns:
-				None:
+				None: Renders the selected database table in Streamlit.
 
 			"""
 		if df is None:
@@ -1272,7 +1288,7 @@ class SQLiteDatabase( ):
 					The input DataFrame.
 
 			Returns:
-				None:
+				None: Renders a visualization in the Streamlit interface.
 
 			"""
 		blue_divider( )
@@ -1440,8 +1456,7 @@ class SQLiteDatabase( ):
 					The dtype of a pandas Series.
 
 			Returns:
-				str:
-					SQLite column type.
+				str: SQLite column type.
 			"""
 		dtype_str = str( dtype ).lower( )
 		# ------------------------------------------------------------------
@@ -1668,7 +1683,7 @@ class SQLiteDatabase( ):
 					New column name.
 
 			Returns:
-				None:
+				None: Renames the selected SQLite column.
 
 			"""
 		if not table_name or not old_name or not new_name:
@@ -1861,7 +1876,7 @@ class SQLiteDatabase( ):
 					New table name.
 
 			Returns:
-				None:
+				None: Renames the selected SQLite table.
 
 			"""
 		if not old_name or not new_name:
