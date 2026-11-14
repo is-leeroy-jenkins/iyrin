@@ -76,6 +76,37 @@ jobs:
               print(f'{filename}: {len(deficits)} functions missing mandatory guards')
               print('\n'.join(f'  {line}: {name}: {args}' for line,name,args in deficits[:35]))
           PY
+      - name: Report public method guard and exception contracts
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          files = ('loaders.py','fetchers.py','generators.py','processors.py')
+          for filename in files:
+              tree=ast.parse(Path(filename).read_text(encoding='utf-8'))
+              findings=[]
+              classes=[n for n in tree.body if isinstance(n,ast.ClassDef)]
+              definitions=[n for n in tree.body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))]
+              for klass in classes:
+                  definitions.extend(n for n in klass.body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef)))
+              for node in definitions:
+                  if node.name.startswith('_') or node.name=='throw_if': continue
+                  body=[n for n in node.body if not isinstance(n,ast.Expr) or not isinstance(n.value,ast.Constant) or not isinstance(n.value.value,str)]
+                  if len(body)==1 and isinstance(body[0],ast.Raise) and isinstance(body[0].exc,ast.Call) and isinstance(body[0].exc.func,ast.Name) and body[0].exc.func.id=='NotImplementedError':continue
+                  args=node.args.posonlyargs+node.args.args
+                  args=args[:len(args)-len(node.args.defaults)] if node.args.defaults else args
+                  required=[]
+                  for arg in args:
+                      if arg.arg in ('self','cls'):continue
+                      anno=ast.unparse(arg.annotation) if arg.annotation else ''
+                      if 'Optional' in anno or 'None' in anno:continue
+                      required.append(arg.arg)
+                  calls={c.args[0].value for c in ast.walk(node) if isinstance(c,ast.Call) and isinstance(c.func,ast.Name) and c.func.id=='throw_if' and c.args and isinstance(c.args[0],ast.Constant) and isinstance(c.args[0].value,str)}
+                  absent=[name for name in required if name not in calls]
+                  if absent: findings.append((node.lineno,node.name,','.join(absent)))
+              print(filename,'public method guard gaps:',len(findings))
+              print('\n'.join(f'{ln} {name} {args}' for ln,name,args in findings[:60]))
+          PY
       - name: Strict documentation build
         run: |
           python -m pip install mkdocs-material 'mkdocstrings[python]'
