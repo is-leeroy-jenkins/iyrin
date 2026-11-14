@@ -683,7 +683,7 @@ class WebFetcher( Fetcher ):
 			raise exception
 			
 	def create_schema( self, function: str, tool: str,
-			description: str, parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None:
+			description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 			Purpose:
@@ -2067,7 +2067,7 @@ class GoogleMaps( Fetcher ):
 			
 		
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 			Purpose:
@@ -2747,7 +2747,7 @@ class NavalObservatory( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Construct and return a fully dynamic OpenAI Tool API schema definition.
 
 		Purpose:
@@ -3426,7 +3426,7 @@ class EarthObservatory( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -4196,7 +4196,7 @@ class NearbyObjects( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -4622,7 +4622,7 @@ class OpenScience( Fetcher ):
 			raise exception
 	
 	def create_schema( self, function: str, tool: str, description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -5030,7 +5030,7 @@ class SpaceWeather( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -6944,7 +6944,7 @@ class GovData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -7657,7 +7657,7 @@ class StarChart( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -8720,7 +8720,7 @@ class Congress( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -9094,7 +9094,7 @@ class InternetArchive( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -9790,7 +9790,7 @@ class OpenWeather( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		'''
 
 			Purpose:
@@ -10264,7 +10264,7 @@ class HistoricalWeather( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		'''
 
 			Purpose:
@@ -10678,7 +10678,7 @@ class Grokipedia( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -11226,7 +11226,7 @@ class GoogleGeocoding( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -11751,7 +11751,7 @@ class CensusData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -12232,7 +12232,7 @@ class Socrata( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -12713,7 +12713,7 @@ class HealthData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -13090,7 +13090,7 @@ class GlobalHealthData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""Describe the GlobalHealthData tool arguments as a function schema.
 
 		Purpose:
@@ -13422,7 +13422,7 @@ class UnitedNations( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -13847,7 +13847,7 @@ class WorldPopulation( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -14237,7 +14237,7 @@ class Wonder( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -14873,7 +14873,7 @@ class USGSEarthquakes( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -15812,7 +15812,7 @@ class USGSWaterData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -16436,7 +16436,7 @@ class USGSTheNationalMap( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -17072,7 +17072,7 @@ class USGSScienceBase( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -17783,7 +17783,7 @@ class AirNow( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -18379,7 +18379,7 @@ class ClimateData( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -18976,7 +18976,7 @@ class EoNet( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -19483,7 +19483,7 @@ class EnviroFacts( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -20167,7 +20167,7 @@ class TidesAndCurrents( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -20778,7 +20778,7 @@ class UvIndex( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -21434,7 +21434,7 @@ class PurpleAir( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -22075,7 +22075,7 @@ class OpenAQ( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
@@ -22637,7 +22637,7 @@ class Firms( Fetcher ):
 	
 	def create_schema( self, function: str, tool: str,
 			description: str, parameters: dict,
-			required: list[ str ] ) -> Dict[ str, str ] | None:
+			required: list[ str ] | None=None ) -> Dict[ str, str ] | None:
 		"""
 
 		Purpose:
