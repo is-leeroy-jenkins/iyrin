@@ -402,7 +402,7 @@ class Geocoder( ):
 		self.latitude = None
 		self.longitude = None
 	
-	def key_for( self, prefix: str, *parts: str ) -> str | None:
+	def key_for( self, prefix: str, parts: List[ str ] ) -> str | None:
 		"""
 
 			Purpose:
@@ -412,7 +412,7 @@ class Geocoder( ):
 			Args:
 				prefix (str):
 					Cache namespace or operation prefix.
-				*parts (str):
+				parts (List[str]):
 					Values that uniquely identify the request.
 
 			Returns:
@@ -423,6 +423,9 @@ class Geocoder( ):
 		try:
 			throw_if( 'prefix', prefix )
 			throw_if( 'parts', parts )
+			if not isinstance( prefix, str ) or not isinstance( parts, list ) or any(
+					not isinstance( part, str ) for part in parts ):
+				raise TypeError( 'prefix must be a string and parts a list of strings.' )
 			self.prefix = prefix
 			self.parts = parts
 			joined = ' '.join( str( p ).strip( ) for p in parts if p and str( p ).strip( ) )
@@ -431,7 +434,7 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = 'key_for( self, *kwargs )'
+			exception.method = 'key_for( self, prefix: str, parts: List[ str ] ) -> str | None'
 			raise exception
 	
 	def validate_coordinates( self, latitude: float, longitude: float ) -> Tuple[ float, float ]:
@@ -498,7 +501,7 @@ class Geocoder( ):
 			throw_if( 'address', address )
 			self.address = address.strip( )
 			self.country = str( country or '' ).strip( )
-			self.key = self.key_for( 'geocode', self.address, self.country )
+			self.key = self.key_for( 'geocode', [ self.address, self.country ] )
 			if self._cache:
 				hit = self._cache.get( self.key )
 				if hit:
@@ -544,8 +547,8 @@ class Geocoder( ):
 		"""
 		try:
 			self.latitude, self.longitude = self.validate_coordinates( latitude, longitude )
-			self.key = self.key_for( 'reverse_geocode', str( self.latitude ),
-				str( self.longitude ) )
+			self.key = self.key_for( 'reverse_geocode', [ str( self.latitude ),
+				str( self.longitude ) ] )
 			if self._cache:
 				hit = self._cache.get( self.key )
 				if hit:
@@ -1158,7 +1161,7 @@ class Place( ):
 		self.parts = None
 		self.place_id = None
 	
-	def key_for( self, prefix: str, *parts: str ) -> str | None:
+	def key_for( self, prefix: str, parts: List[ str ] ) -> str | None:
 		"""
 
 			Purpose:
@@ -1168,7 +1171,7 @@ class Place( ):
 			Args:
 				prefix (str):
 					Cache namespace or operation prefix.
-				*parts (str):
+				parts (List[str]):
 					Values that uniquely identify the request.
 
 			Returns:
@@ -1179,6 +1182,9 @@ class Place( ):
 		try:
 			throw_if( 'prefix', prefix )
 			throw_if( 'parts', parts )
+			if not isinstance( prefix, str ) or not isinstance( parts, list ) or any(
+					not isinstance( part, str ) for part in parts ):
+				raise TypeError( 'prefix must be a string and parts a list of strings.' )
 			self.prefix = prefix
 			self.parts = parts
 			joined = ' '.join( str( p ).strip( ) for p in parts if p and str( p ).strip( ) )
@@ -1187,7 +1193,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = 'key_for( self, *args )'
+			exception.method = 'key_for( self, prefix: str, parts: List[ str ] ) -> str | None'
 			raise exception
 	
 	def component_value( self, components: List[ Dict[ str, Any ] ], kind: str,
@@ -1297,7 +1303,7 @@ class Place( ):
 		try:
 			throw_if( 'place_id', place_id )
 			self.place_id = place_id
-			self.key = self.key_for( 'place_details', self.place_id )
+			self.key = self.key_for( 'place_details', [ self.place_id ] )
 			if self.cache:
 				self.hit = self.cache.get( self.key )
 				if self.hit:
@@ -1346,7 +1352,7 @@ class Place( ):
 			throw_if( 'query', query )
 			self.query = query.strip( )
 			self.country = str( country or '' ).strip( )
-			self.key = self.key_for( 'places', self.query, self.country.upper( ) )
+			self.key = self.key_for( 'places', [ self.query, self.country.upper( ) ] )
 			if self.cache:
 				self.hit = self.cache.get( self.key )
 				if self.hit:
