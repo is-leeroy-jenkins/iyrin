@@ -379,27 +379,20 @@ Iyrin reads provider credentials from environment variables where required. Lega
 
 ## 📂 Project Structure
 
-```text
-iyr/
-├── app.py                  Streamlit application
+\`\`\`text
+iyrin/
+├── app.py                  Streamlit application and document-processing orchestration
 ├── config.py               Application configuration and API metadata
-├── world.py                Live World UI, normalization, analysis, rendering, and state
+├── realtime.py             Live World UI, normalization, analysis, rendering, and state
 ├── sources.py              Live operational provider clients
 ├── history.py              Live World SQLite persistence and replay
 ├── tools.py                Provider-neutral agent/tool-calling functions
-├── pipelines.py           Chunking, embedding, and vector-storage workflows
-├── embedders.py            Embedding providers and local GGUF embeddings
+├── embedders.py            Embedding providers and stable chunk identifiers
 ├── fetchers.py             Scientific, environmental, weather, and web providers
-├── maps.py                 Mapping gateway
-├── geocode.py              Geocoding
-├── distances.py            Distance Matrix functionality
-├── timezones.py            Time-zone resolution
-├── staticmaps.py           Static map generation
-├── places.py               Place lookup
+├── mapping.py              Maps, geocoding, places, distance, time zones, and static maps
+├── storage.py              Cache, SQLite utilities, Chroma, and Pinecone implementations
 ├── excel.py                Spreadsheet integration
-├── caches.py               Cache implementations
 ├── stores/
-│   ├── vector.py           Chroma and Pinecone vector-store wrappers
 │   ├── sqlite/             SQLite application persistence
 │   └── csv/                CSV-backed storage
 └── resources/              Images and application assets
