@@ -476,7 +476,10 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'build_instructions( self, **kwargs ) -> str | None'
+			exception.method = (
+				"build_instructions( self, system: str=None, response_format: str=None ) -> str | "
+				"None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -515,7 +518,10 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'build_tools( self, **kwargs) -> List[ Dict[ str, Any ] ]'
+			exception.method = (
+				"build_tools( self, web_search: bool=False, search_domains: Any=None ) -> List[ Dict[ "
+				"str, Any ] ]:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -551,7 +557,9 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'build_response_format( self, **args ) -> Dict[ str, Any ]'
+			exception.method = (
+				"build_response_format( self, response_format: str=None ) -> Dict[ str, Any ] | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -856,7 +864,13 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = 'fetch( self, **args ) -> str | None'
+			exception.method = (
+				"fetch( self, query: str, model: str='grok-4-fast-reasoning', temperature: float=0.7, "
+				"max_tokens: int=2048, top_p: float=1.0, seed: int | None=None, system: str=None, "
+				"response_format: str=None, reasoning_effort: str=None, web_search: bool=False, "
+				"search_domains: Any=None, stop: List[ str ]=None, stream: bool=False, store: "
+				"bool=True, parallel_tool_calls: bool=True, tool_choice: str='auto' ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1271,7 +1285,10 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'build_system_instruction( self, **args ) -> str | None'
+			exception.method = (
+				"build_system_instruction( self, system: str=None, response_format: str=None, "
+				"grounding: bool=False, search_domains: Any=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1334,7 +1351,10 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'build_thinking_config( self, **args ) -> Any'
+			exception.method = (
+				"build_thinking_config( self, model: str, reasoning: bool=False, thinking_level: "
+				"str=None, thinking_budget: int | None=None, include_thoughts: bool=False ) -> Any:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1468,7 +1488,14 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'build_config( self, **args ) -> Any'
+			exception.method = (
+				"build_config( self, model: str, temperature: float=0.7, max_tokens: int=2048, top_p: "
+				"float=1.0, top_k: int | None=None, candidate_count: int=1, seed: int | None=None, "
+				"system: str=None, response_format: str=None, stop_sequences: Any=None, grounding: "
+				"bool=False, search_domains: Any=None, reasoning: bool=False, thinking_level: "
+				"str=None, thinking_budget: int | None=None, include_thoughts: bool=False, "
+				"response_json_schema: Dict[ str, Any ] = None ) -> Any:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1625,7 +1652,15 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = 'fetch( self, *args ) -> str | None'
+			exception.method = (
+				"fetch( self, prompt: str, model: str='gemini-2.5-flash', temperature: float=0.7, "
+				"max_tokens: int=2048, top_p: float=1.0, top_k: int | None=None, candidate_count: "
+				"int=1, seed: int | None=None, system: str=None, response_format: str=None, "
+				"stop_sequences: Any=None, grounding: bool=False, search_domains: Any=None, "
+				"reasoning: bool=False, thinking_level: str=None, thinking_budget: int | None=None, "
+				"include_thoughts: bool=False, response_json_schema: Dict[ str, Any ] = None ) -> str "
+				"| None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2077,7 +2112,13 @@ class Claude( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = 'fetch( self, **args ) -> str | None'
+			exception.method = (
+				"fetch( self, query: str, model: str='claude-sonnet-4-6', temperature: float=0.7, "
+				"max_tokens: int=2048, top_p: float=1.0, top_k: int | None=None, system: str=None, "
+				"stop_sequences: List[ str ]=None, thinking: bool=False, thinking_budget: int | "
+				"None=None, web_search: bool=False, search_domains: Any=None, blocked_domains: "
+				"Any=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2378,7 +2419,11 @@ class Mistral( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Mistral'
-			exception.method = 'fetch( self, *args ) -> str | None'
+			exception.method = (
+				"fetch( self, query: str, model: str='mistral-large-latest', temperature: float=0.7, "
+				"max_tokens: int=1024, top_p: float=1.0, seed: int | None=None, safe_mode: "
+				"bool=False, system: str=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2723,7 +2768,10 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'build_instructions( self, **args ) -> str | None'
+			exception.method = (
+				"build_instructions( self, system: str=None, response_format: str=None, web_search: "
+				"bool=False, search_domains: Any=None ) -> str | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2777,7 +2825,11 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'build_text_format( self, **args ) -> Dict[ str, Any ] | None'
+			exception.method = (
+				"build_text_format( self, response_format: str | Dict[ str, Any ]=None, json_schema: "
+				"Dict[ str, Any ]=None, schema_name: str='structured_response', schema_description: "
+				"str='Structured JSON response.' ) -> Dict[ str, Any ] | None:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2824,7 +2876,11 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'build_tools( self, **args ) -> List[ Dict[ str, Any ] ]'
+			exception.method = (
+				"build_tools( self, web_search: bool=False, search_domains: Any=None, file_search: "
+				"bool=False, vector_store_ids: List[ str ]=None, max_file_results: int=20 ) -> List[ "
+				"Dict[ str, Any ] ]:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3034,7 +3090,15 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = 'fetch( self, **args ) -> str'
+			exception.method = (
+				"fetch( self, prompt: str, model: str='gpt-5-mini', temperature: float=0.7, "
+				"max_tokens: int=1024, top_p: float=1.0, seed: int | None=None, system: str=None, "
+				"response_format: str | Dict[ str, Any ] = None, reasoning_effort: str=None, "
+				"web_search: bool=False, search_domains: Any=None, store: bool=True, stream: "
+				"bool=False, parallel_tool_calls: bool=True, tool_choice: str='auto', json_schema: "
+				"Dict[ str, Any ] = None, schema_name: str='structured_response', schema_description: "
+				"str='Structured JSON response.' ) -> str:"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
