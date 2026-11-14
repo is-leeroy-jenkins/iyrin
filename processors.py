@@ -288,7 +288,7 @@ class TextParser( Processor ):
 	SYMBOLS: Optional[ Set[ str ] ]
 	NUMERALS: Optional[ str ]
 	
-	def __init__( self ):
+	def __init__( self ) -> None:
 		"""Initialize the TextParser instance.
 		
 		Purpose:
