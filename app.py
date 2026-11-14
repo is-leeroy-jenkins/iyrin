@@ -404,7 +404,8 @@ def throw_if( name: str, value: object ) -> None:
 	"""Throw if.
 
 	Purpose:
-		Validates that a required argument contains a usable value so failures occur before provider, filesystem, or parsing work begins.
+		Validates that a required argument contains a usable value so failures occur before provider,
+		filesystem, or parsing work begins.
 
 	Args:
 		name (str): Argument name included in validation error messages.
@@ -582,7 +583,8 @@ def init_env_state( key: str, config_name: str, env_name: str ) -> None:
 	"""Initialize session state from configuration and mirror configured credentials to the environment.
 
 	Purpose:
-		Initialize a session-state API/configuration key from config.py and mirror the value to os.environ when a configured value exists.
+		Initialize a session-state API/configuration key from config.py and mirror the value to os.environ
+		when a configured value exists.
 
 	Args:
 		key (str): Session-state key to initialize.
@@ -659,13 +661,20 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 	"""Render the interactive Celestial Map using local browser assets and observer coordinates.
 
 	Purpose:
-		Render the browser-based Celestial Map application inside Streamlit as a self-contained HTML component. The function preserves the existing HTML, CSS, JavaScript, D3, Leaflet, Pickr, star-map rendering, location picker, star detail panel, animation controls, and image-export behavior while loading local JSON data from the configured asset folder and passing iyr's observer location into the embedded JavaScript application.
+		Render the browser-based Celestial Map application inside Streamlit as a self-contained HTML
+		component. The function preserves the existing HTML, CSS, JavaScript, D3, Leaflet, Pickr, star-map
+		rendering, location picker, star detail panel, animation controls, and image-export behavior while
+		loading local JSON data from the configured asset folder and passing iyr's observer location into
+		the embedded JavaScript application.
 
 	Args:
-		asset_root (str): Root folder containing index.html, style.css, js/main.js, js/modules/*.js, and data/*.json.
+		asset_root (str): Root folder containing index.html, style.css, js/main.js, js/modules/*.js, and
+			data/*.json.
 		height (int): Component iframe height in pixels.
-		latitude (Optional[ float ]): Observer latitude supplied by iyr Location State or manual Celestial Map controls.
-		longitude (Optional[ float ]): Observer longitude supplied by iyr Location State or manual Celestial Map controls.
+		latitude (Optional[ float ]): Observer latitude supplied by iyr Location State or manual Celestial
+			Map controls.
+		longitude (Optional[ float ]): Observer longitude supplied by iyr Location State or manual
+			Celestial Map controls.
 		location (Optional[ str ]): Human-readable observer location label.
 		zoom (Optional[ int ]): Initial Leaflet location-picker zoom level.
 
@@ -997,7 +1006,8 @@ def get_global_location_default( fallback: str = '' ) -> str:
 		Return the best available global location text for location-based controls.
 
 	Args:
-		fallback (str): Fallback location text used when global Location State has no usable location value.
+		fallback (str): Fallback location text used when global Location State has no usable location
+			value.
 
 	Returns:
 		str: Value produced by this operation.
@@ -1217,7 +1227,8 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 	"""Initialize the active location using browser coordinates when available.
 
 	Purpose:
-		Request browser geolocation and keep the canonical global Location State synchronized with the browser coordinates before location-dependent modes render.
+		Request browser geolocation and keep the canonical global Location State synchronized with the
+		browser coordinates before location-dependent modes render.
 
 	Args:
 		geocoder (Geocoder): Existing geocoder instance used to reverse geocode browser coordinates.
@@ -1301,7 +1312,8 @@ def ensure_active_location_state( ) -> None:
 	"""Ensure the application has initialized location state.
 
 	Purpose:
-		Apply the active-location priority: browser location first and the most recent Geocoding result second. Leave location state empty when neither source is available.
+		Apply the active-location priority: browser location first and the most recent Geocoding result
+		second. Leave location state empty when neither source is available.
 
 	Returns:
 		None: Updates the application UI, session state, or other state as described.
@@ -1355,7 +1367,8 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 	"""Render a map of report locations and optional overlay data.
 
 	Purpose:
-		Render an interactive PyDeck map for records containing Latitude and Longitude fields. The map title, filters, tooltip fields, and mapped-record table adapt to known source schemas.
+		Render an interactive PyDeck map for records containing Latitude and Longitude fields. The map
+		title, filters, tooltip fields, and mapped-record table adapt to known source schemas.
 
 	Args:
 		df (pd.DataFrame): Source DataFrame containing geospatial records.
@@ -1636,11 +1649,13 @@ def get_value_by_path( obj: object, path: List[ object ] ) -> object:
 	"""Resolve a nested value using a sequence of dictionary or list keys.
 
 	Purpose:
-		Read a nested value from dictionaries, lists, tuples, or simple objects using a specified lookup path.
+		Read a nested value from dictionaries, lists, tuples, or simple objects using a specified lookup
+		path.
 
 	Args:
 		obj (object): Source object to inspect.
-		path (List[ object ]): Lookup path containing dictionary keys, object attributes, or integer sequence indexes.
+		path (List[ object ]): Lookup path containing dictionary keys, object attributes, or integer
+			sequence indexes.
 
 	Returns:
 		object: Value produced by this operation.
@@ -1771,7 +1786,8 @@ def read_missing_report_locations( table_name: str, limit: Optional[ int ] = Non
 	"""Load report records with missing or invalid geographic coordinates.
 
 	Purpose:
-		Read distinct City, State, and Country combinations from a Reports-like table where coordinates are missing, invalid, or placeholder values.
+		Read distinct City, State, and Country combinations from a Reports-like table where coordinates
+		are missing, invalid, or placeholder values.
 
 	Args:
 		table_name (str): SQLite table name to inspect.
@@ -1820,7 +1836,8 @@ def preview_report_coordinate_updates( table_name: str, geocoder: Geocoder, plac
 	"""Preview coordinates produced by geocoding existing report records.
 
 	Purpose:
-		Geocode distinct missing City, State, and Country combinations and return a dry-run preview without updating SQLite.
+		Geocode distinct missing City, State, and Country combinations and return a dry-run preview
+		without updating SQLite.
 
 	Args:
 		table_name (str): SQLite table name to inspect.
@@ -1915,7 +1932,8 @@ def apply_report_coordinate_updates( table_name: str, df_updates: pd.DataFrame )
 	"""Apply confirmed geographic updates to report records.
 
 	Purpose:
-		Apply matched latitude and longitude values to all missing-coordinate rows in a Reports-like table that share the same City, State, and Country values.
+		Apply matched latitude and longitude values to all missing-coordinate rows in a Reports-like table
+		that share the same City, State, and Country values.
 
 	Args:
 		table_name (str): SQLite table name to update.
@@ -2002,7 +2020,8 @@ def append_geocoding_map_result( query: str, source: str, result: object ) -> No
 	"""Add a resolved location result to the interactive map state.
 
 	Purpose:
-		Append a resolved geocoding result to the temporary Geocoding Mode map overlay and update the global Location State with the resolved coordinates.
+		Append a resolved geocoding result to the temporary Geocoding Mode map overlay and update the
+		global Location State with the resolved coordinates.
 
 	Args:
 		query (str): User-entered location query.
@@ -3001,7 +3020,8 @@ def invoke_provider( provider: object, prompt: str, parameters: Dict[ str, objec
 	"""Call a provider's text-generation method using supported arguments.
 
 	Purpose:
-		Invoke a provider's text-generation method using only parameters declared by the provider method signature.
+		Invoke a provider's text-generation method using only parameters declared by the provider method
+		signature.
 
 	Args:
 		provider (object): Provider wrapper instance.
@@ -10258,7 +10278,8 @@ elif mode == 'Artificial Intelligence':
 		"""Promote a provider response into the shared generation document state.
 
 		Purpose:
-			Converts the active provider response into LangChain documents used by the shared right-column viewer while retaining the original response object for provider-specific rendering.
+			Converts the active provider response into LangChain documents used by the shared right-column
+			viewer while retaining the original response object for provider-specific rendering.
 
 		Args:
 			provider (str): Name of the provider that generated the response.
@@ -10303,7 +10324,8 @@ elif mode == 'Artificial Intelligence':
 		"""Clear the shared generation result for the active provider.
 
 		Purpose:
-			Removes the shared generated document only when the provider being cleared currently owns the active result.
+			Removes the shared generated document only when the provider being cleared currently owns the
+			active result.
 
 		Args:
 			provider (str): Name of the provider whose controls are being cleared.
