@@ -203,9 +203,9 @@ class BaseCache( ):
 			return self.get( key ) is not None
 		except Exception as e:
 			exception = Error( e )
-			exception.module = ''
-			exception.cause = ''
-			exception.method = ''
+			exception.module = 'Iyrin'
+			exception.cause = 'BaseCache'
+			exception.method = 'contains( self, key: str ) -> bool'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -216,12 +216,10 @@ class BaseCache( ):
 				Create a cache key prefixed by a namespace.
 
 			Args:
-				namespace (str):
-					Logical cache namespace, such as geocode, places, weather,
+				namespace (str): Logical cache namespace, such as geocode, places, weather,
 					distance, or fetcher.
 
-				key (str):
-					Raw cache key.
+				key (str): Raw cache key.
 
 			Returns:
 				str: Namespace-qualified cache key.
@@ -315,14 +313,11 @@ class InMemoryCache( BaseCache ):
 				Create a cache metadata record for the supplied key and value.
 
 			Args:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
-				value (Dict[str, Any]):
-					JSON-serializable cache value.
+				value (Dict[str, Any]): JSON-serializable cache value.
 
-				ttl (Optional[int]):
-					Optional time-to-live in seconds.
+				ttl (Optional[int]): Optional time-to-live in seconds.
 
 			Returns:
 				Dict[str, Any]: Cache metadata record.
@@ -418,14 +413,11 @@ class InMemoryCache( BaseCache ):
 				Set a cache value by key.
 
 			Args:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
-				value (Dict[str, Any]):
-					JSON-serializable cache value.
+				value (Dict[str, Any]): JSON-serializable cache value.
 
-				ttl (Optional[int]):
-					Optional time-to-live in seconds.
+				ttl (Optional[int]): Optional time-to-live in seconds.
 
 			Returns:
 				None.
@@ -451,8 +443,7 @@ class InMemoryCache( BaseCache ):
 				Delete a cache entry by key.
 
 			Args:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
 			Returns:
 				None.
@@ -478,8 +469,7 @@ class InMemoryCache( BaseCache ):
 				Clear all cache entries or only entries under a namespace prefix.
 
 			Args:
-				namespace (Optional[str]):
-					Optional namespace prefix.
+				namespace (Optional[str]): Optional namespace prefix.
 
 			Returns:
 				None.
@@ -510,8 +500,7 @@ class InMemoryCache( BaseCache ):
 				Determine whether a cache key exists and is not expired.
 
 			Args:
-				key (str):
-					Cache key.
+				key (str): Cache key.
 
 			Returns:
 				bool: True if the key exists and is not expired.
@@ -1008,8 +997,7 @@ class SQLiteDatabase( ):
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
 			Args:
-				table (str):
-					Table name.
+				table (str): Table name.
 				limit : int = None
 					Optional row limit.
 				offset : int = 0
@@ -1095,8 +1083,7 @@ class SQLiteDatabase( ):
 			first, and fall back to HTML rendering if Streamlit/PyArrow serialization fails.
 
 			Args:
-				df (pd.DataFrame):
-					The DataFrame to render.
+				df (pd.DataFrame): The DataFrame to render.
 
 			Returns:
 				None: Renders the selected database table in Streamlit.
@@ -1140,8 +1127,7 @@ class SQLiteDatabase( ):
 			Safely drop a table if it exists.
 
 			Args:
-				table (str):
-					Table name.
+				table (str): Table name.
 		
 
 		Returns:
@@ -1168,10 +1154,8 @@ class SQLiteDatabase( ):
 				- Validation against actual table schema
 
 			Args:
-				table (str):
-					Table name.
-				column (str):
-					Column name to index.
+				table (str): Table name.
+				column (str): Column name to index.
 		
 
 		Returns:
@@ -1284,8 +1268,7 @@ class SQLiteDatabase( ):
 			Plotly/Narwhals.
 
 			Args:
-				df (pd.DataFrame):
-					The input DataFrame.
+				df (pd.DataFrame): The input DataFrame.
 
 			Returns:
 				None: Renders a visualization in the Streamlit interface.
@@ -1452,8 +1435,7 @@ class SQLiteDatabase( ):
 			Map a pandas dtype to an appropriate SQLite column type.
 
 			Args:
-				dtype (pandas dtype):
-					The dtype of a pandas Series.
+				dtype (pandas dtype): The dtype of a pandas Series.
 
 			Returns:
 				str: SQLite column type.
@@ -1495,11 +1477,9 @@ class SQLiteDatabase( ):
 			Create a custom SQLite table from column definitions.
 
 			Args:
-				table_name (str):
-					Name of table.
+				table_name (str): Name of table.
 
-				columns (list of dict):
-					[
+				columns (list of dict): [
 						{
 							"name": str,
 							"type": str,
@@ -1673,14 +1653,11 @@ class SQLiteDatabase( ):
 			and indexes.
 
 			Args:
-				table_name (str):
-					Table containing the column.
+				table_name (str): Table containing the column.
 
-				old_name (str):
-					Existing column name.
+				old_name (str): Existing column name.
 
-				new_name (str):
-					New column name.
+				new_name (str): New column name.
 
 			Returns:
 				None: Renames the selected SQLite column.
@@ -1869,11 +1846,9 @@ class SQLiteDatabase( ):
 			preserves indexes.
 
 			Args:
-				old_name (str):
-					Existing table name.
+				old_name (str): Existing table name.
 
-				new_name (str):
-					New table name.
+				new_name (str): New table name.
 
 			Returns:
 				None: Renames the selected SQLite table.
