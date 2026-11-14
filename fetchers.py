@@ -56,7 +56,8 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import asyncio
 import requests
-from PIL.Image import Image
+from PIL import Image
+import cartopy.crs as cartopy_crs
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 from astropy import units as u
@@ -3563,87 +3564,107 @@ class GlobalImagery( Fetcher ):
 		self.headers[ 'User-Agent' ] = self.agents
 		self.era = None
 	
-	def fetch_map_services( self ):
-		"""Fetch a representative NASA GIBS Web Map Service image using the configured
+	def fetch_map_services( self ) -> Image.Image:
+		"""Fetch a NASA GIBS Web Map Service image and retain its output file.
 
 		Purpose:
-			Fetch a representative NASA GIBS Web Map Service image using the configured global imagery endpoint and default corrected reflectance layer.
+			Request a MODIS true-color layer and write the returned PNG to the
+			established python-examples location before returning the image.
 
 		Returns:
-			Any | None: The fetched map image object or None when the request fails.
+			Image.Image: Retrieved map image with its underlying file handle closed.
 
 		Raises:
-			Error: Wraps and propagates the underlying provider or request exception.
+			Error: Raised for an unavailable map layer or local output failure.
 		"""
 		try:
-			wms = WebMapService( 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?',
-				version='1.1.1' )
-			img = wms.getmap( layers=[ 'MODIS_Terra_CorrectedReflectance_TrueColor' ],  # Layers
+			self.url = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?'
+			self.file_path = str( Path( 'python-examples' ) /
+				'MODIS_Terra_CorrectedReflectance_TrueColor.png' )
+			self.fetcher = WebMapService( self.url, version='1.1.1' )
+			image_response = self.fetcher.getmap(
+				layers=[ 'MODIS_Terra_CorrectedReflectance_TrueColor' ],  # Layers
 				srs='epsg:4326',  # Map projection
 				bbox=(-180, -90, 180, 90),  # Bounds
 				size=( 1200, 600 ),  # Image size
 				time='2021-09-21',  # Time of data
 				format='image/png',  # Image format
 				transparent=True )  # Nodata transparency
-			out = open( 'python-examples/MODIS_Terra_CorrectedReflectance_TrueColor.png', 'wb' )
-			out.write( img.read( ) )
-			out.close( )
-			Image( 'python-examples/MODIS_Terra_CorrectedReflectance_TrueColor.png' )
+			output_path = Path( self.file_path )
+			output_path.parent.mkdir( parents=True, exist_ok=True )
+			with output_path.open( 'wb' ) as stream:
+				stream.write( image_response.read( ) )
+			with Image.open( output_path ) as image:
+				return image.copy( )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_sidereal( self, date: str ) -> float'
+			exception.method = 'fetch_map_services( self ) -> Image.Image'
 			Logger( ).write( exception )
 			raise exception
-			
-	def fetch_mercator_map( self , ccrs=None ):
-		"""Fetch a NASA GIBS Mercator map image and render it through the provided
+
+	def fetch_mercator_map( self, ccrs: Any | None=None ) -> Any:
+		"""Fetch and render a NASA GIBS map in its Web Mercator projection.
 
 		Purpose:
-			Fetch a NASA GIBS Mercator map image and render it through the provided Cartopy coordinate reference system module.
+			Retrieve a NASA WMS PNG with a finite network timeout, render it using
+			Cartopy and Matplotlib, and return the resulting figure.
 
 		Args:
-			ccrs (Any | None): Optional Cartopy coordinate reference system module used
-				to project and render the returned map image.
+			ccrs (Any | None): Optional Cartopy CRS module or compatible object.
 
 		Returns:
-			Any | None: The rendered map result or None when the request fails.
+			Any: Matplotlib figure containing the Mercator map.
 
 		Raises:
-			Error: Wraps and propagates the underlying provider or request exception.
+			Error: Raised for HTTP, image decoding, or projection failures.
 		"""
 		try:
-			proj3857 = 'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?\
-			version=1.3.0&service=WMS&\
-			request=GetMap&format=image/png&STYLE=default&bbox=-8000000,-8000000,8000000,8000000&\
-			CRS=EPSG:3857&HEIGHT=600&WIDTH=600&TIME=2000-12-01&layers=Landsat_WELD_CorrectedReflectance_Bands157_Global_Annual'
-			img = io.imread( proj3857 )
-			fig = plt.figure( )
-			ax = fig.add_subplot( 1, 1, 1, projection=ccrs.Mercator.GOOGLE )
+			self.ccrs = cartopy_crs if ccrs is None else ccrs
+			self.url = 'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi'
+			self.timeout = 20
+			self.params = {
+				'version': '1.3.0', 'service': 'WMS', 'request': 'GetMap',
+				'format': 'image/png', 'styles': 'default',
+				'bbox': '-8000000,-8000000,8000000,8000000',
+				'crs': 'EPSG:3857', 'height': 600, 'width': 600,
+				'time': '2000-12-01',
+				'layers': 'Landsat_WELD_CorrectedReflectance_Bands157_Global_Annual'
+			}
+			self.response = requests.get( self.url, params=self.params,
+				headers=self.headers, timeout=self.timeout )
+			self.response.raise_for_status( )
+			image = plt.imread( io.BytesIO( self.response.content ), format='png' )
+			projection = self.ccrs.Mercator( )
+			figure = plt.figure( )
+			axes = figure.add_subplot( 1, 1, 1, projection=projection )
 			extent = (-8000000, 8000000, -8000000, 8000000)
-			plt.imshow( img, transform=ccrs.Mercator.GOOGLE, extent=extent, origin='upper' )
-			gl = ax.gridlines( ccrs.PlateCarree( ), linewidth=1, color='blue', alpha=0.3, draw_labels=True )
-			gl.top_labels = False
-			gl.right_labels = False
-			gl.xlines = True
-			gl.ylines = True
-			gl.xlocator = mticker.FixedLocator( [ 0, 30, -30,  0 ] )
-			gl.ylocator = mticker.FixedLocator( [ -30, 0, 30 ] )
-			gl.xformatter = LONGITUDE_FORMATTER
-			gl.yformatter = LATITUDE_FORMATTER
-			gl.xlabel_style = { 'color': 'blue' }
-			gl.ylabel_style = { 'color': 'blue' }
-			plt.title( 'Mercator Projection', fontname='Roboto', fontsize=20, color='green' )
+			axes.imshow( image, transform=projection, extent=extent, origin='upper' )
+			grid = axes.gridlines( crs=self.ccrs.PlateCarree( ), linewidth=1,
+				color='blue', alpha=0.3, draw_labels=True )
+			grid.top_labels = False
+			grid.right_labels = False
+			grid.xlines = True
+			grid.ylines = True
+			grid.xlocator = mticker.FixedLocator( [ 0, 30, -30, 0 ] )
+			grid.ylocator = mticker.FixedLocator( [ -30, 0, 30 ] )
+			grid.xformatter = LONGITUDE_FORMATTER
+			grid.yformatter = LATITUDE_FORMATTER
+			grid.xlabel_style = { 'color': 'blue' }
+			grid.ylabel_style = { 'color': 'blue' }
+			axes.set_title( 'Mercator Projection' )
 			plt.show( )
+			return figure
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_sidereal( self, date: str ) -> float'
+			exception.method = 'fetch_mercator_map( self, ccrs: Any | None=None ) -> Any'
 			Logger( ).write( exception )
 			raise exception
-		
+
+
 class NearbyObjects( Fetcher ):
 	'''Provides access to current JPL SSD / CNEOS APIs relevant to near-Earth
 		objects, close approaches, and human-accessible target screening.
