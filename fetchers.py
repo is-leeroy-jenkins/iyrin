@@ -135,11 +135,9 @@ class Fetcher:
 	'''
 
 		Purpose:
-		--------
 		Base class for fetchers.
 
 		Legacy member listing:
-		-----------
 		timeout - int
 		headers - Dict[ str, Any ]
 		response - requests.Response
@@ -152,12 +150,12 @@ class Fetcher:
 		fetch( ) -> Dict[ str, Any ]
 
 		Attributes:
-		timeout (Optional[ int ]): Request timeout in seconds.
-		headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
-		response (Optional[ Response ]): Most recent HTTP response.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		result (Optional[ Result ]): Normalized result of the latest request.
-		query (Optional[ str ]): Current query or search expression.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
+			response (Optional[ Response ]): Most recent HTTP response.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			result (Optional[ Result ]): Normalized result of the latest request.
+			query (Optional[ str ]): Current query or search expression.
 	'''
 	timeout: Optional[ int ]
 	headers: Optional[ Dict[ str, Any ] ]
@@ -219,11 +217,9 @@ class WebFetcher( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches web pages with requests and extracts common HTML content structures.
 
 		Legacy member listing:
-		-----------
 		soup,
 		agents,
 		url,
@@ -251,14 +247,20 @@ class WebFetcher( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		soup (Optional[ BeautifulSoup ]): Instance state retained for soup operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		html (Optional[ str ]): Instance state retained for html operations.
-		re_tag (Optional[ Pattern ]): Instance state retained for re tag operations.
-		re_ws (Optional[ Pattern ]): Instance state retained for re ws operations.
-		response (Optional[ Response ]): Most recent HTTP response.
-	'''
+			soup (Optional[ BeautifulSoup ]): Instance state retained for soup operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			html (Optional[ str ]): Instance state retained for html operations.
+			re_tag (Optional[ Pattern ]): Instance state retained for re tag operations.
+			re_ws (Optional[ Pattern ]): Instance state retained for re ws operations.
+			response (Optional[ Response ]): Most recent HTTP response.
+	
+			uri (Any): Runtime state for uri in the WebFetcher provider.
+			required (Any): Runtime state for required in the WebFetcher provider.
+			function (Any): Runtime state for function in the WebFetcher provider.
+			tool (Any): Runtime state for tool in the WebFetcher provider.
+			description (Any): Runtime state for description in the WebFetcher provider.
+			parameters (Any): Runtime state for parameters in the WebFetcher provider.'''
 	soup: Optional[ BeautifulSoup ]
 	agents: Optional[ str ]
 	url: Optional[ str ]
@@ -776,11 +778,9 @@ class WebCrawler( WebFetcher ):
 	'''
 
 		Purpose:
-		--------
 		Extends web fetching with optional Playwright-backed page rendering.
 
 		Legacy member listing:
-		-----------
 		use_playwright,
 		browser_context,
 
@@ -792,9 +792,11 @@ class WebCrawler( WebFetcher ):
 		render_with_playwright(...): Performs the render_with_playwright operation for this fetcher.
 
 		Attributes:
-		use_playwright (Optional[ bool ]): Instance state retained for use playwright operations.
-		browser_context (Optional[ Any ]): Instance state retained for browser context operations.
-	'''
+			use_playwright (Optional[ bool ]): Instance state retained for use playwright operations.
+			browser_context (Optional[ Any ]): Instance state retained for browser context operations.
+	
+			raw_url (Any): Runtime state for raw url in the WebCrawler provider.
+			raw_html (Any): Runtime state for raw html in the WebCrawler provider.'''
 	use_playwright: Optional[ bool ]
 	browser_context: Optional[ Any ]
 
@@ -924,11 +926,9 @@ class ArXiv( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches ArXiv documents through the LangChain ArxivRetriever.
 
 		Legacy member listing:
-		-----------
 		fetcher,
 		documents,
 		max_documents,
@@ -942,13 +942,14 @@ class ArXiv( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
-		fetcher (Optional[ ArxivRetriever ]): Provider-specific retrieval client.
-		documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
-		max_documents (Optional[ int ]): Instance state retained for max documents operations.
-		full_documents (Optional[ bool ]): Instance state retained for full documents operations.
-		include_metadata (Optional[ bool ]): Instance state retained for include metadata operations.
-		query (Optional[ str ]): Current query or search expression.
-	'''
+			fetcher (Optional[ ArxivRetriever ]): Provider-specific retrieval client.
+			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
+			max_documents (Optional[ int ]): Instance state retained for max documents operations.
+			full_documents (Optional[ bool ]): Instance state retained for full documents operations.
+			include_metadata (Optional[ bool ]): Instance state retained for include metadata operations.
+			query (Optional[ str ]): Current query or search expression.
+	
+			question (Any): Runtime state for question in the ArXiv provider.'''
 	fetcher: Optional[ ArxivRetriever ]
 	documents: Optional[ List[ Document ] ]
 	max_documents: Optional[ int ]
@@ -1030,11 +1031,9 @@ class GoogleDrive( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Google Drive documents through the LangChain GoogleDriveRetriever.
 
 		Legacy member listing:
-		-----------
 		fetcher,
 		documents,
 		num_results,
@@ -1053,15 +1052,16 @@ class GoogleDrive( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
-		fetcher (Optional[ GoogleDriveRetriever ]): Provider-specific retrieval client.
-		documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
-		num_results (Optional[ int ]): Instance state retained for num results operations.
-		folder_id (Optional[ str ]): Instance state retained for folder id operations.
-		template (Optional[ str ]): Instance state retained for template operations.
-		query (Optional[ str ]): Current query or search expression.
-		mime_type (Optional[ str ]): Instance state retained for mime type operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-	'''
+			fetcher (Optional[ GoogleDriveRetriever ]): Provider-specific retrieval client.
+			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
+			num_results (Optional[ int ]): Instance state retained for num results operations.
+			folder_id (Optional[ str ]): Instance state retained for folder id operations.
+			template (Optional[ str ]): Instance state retained for template operations.
+			query (Optional[ str ]): Current query or search expression.
+			mime_type (Optional[ str ]): Instance state retained for mime type operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+	
+			question (Any): Runtime state for question in the GoogleDrive provider.'''
 	fetcher: Optional[ GoogleDriveRetriever ]
 	documents: Optional[ List[ Document ] ]
 	num_results: Optional[ int ]
@@ -1225,11 +1225,9 @@ class Wikipedia( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Wikipedia documents through the LangChain WikipediaRetriever.
 
 		Legacy member listing:
-		-----------
 		fetcher,
 		documents,
 		max_documents,
@@ -1243,13 +1241,14 @@ class Wikipedia( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
-		fetcher (Optional[ WikipediaRetriever ]): Provider-specific retrieval client.
-		documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
-		max_documents (Optional[ int ]): Instance state retained for max documents operations.
-		include_metadata (Optional[ bool ]): Instance state retained for include metadata operations.
-		language (Optional[ str ]): Instance state retained for language operations.
-		query (Optional[ str ]): Current query or search expression.
-	'''
+			fetcher (Optional[ WikipediaRetriever ]): Provider-specific retrieval client.
+			documents (Optional[ List[ Document ] ]): Retrieved LangChain documents.
+			max_documents (Optional[ int ]): Instance state retained for max documents operations.
+			include_metadata (Optional[ bool ]): Instance state retained for include metadata operations.
+			language (Optional[ str ]): Instance state retained for language operations.
+			query (Optional[ str ]): Current query or search expression.
+	
+			question (Any): Runtime state for question in the Wikipedia provider.'''
 	fetcher: Optional[ WikipediaRetriever ]
 	documents: Optional[ List[ Document ] ]
 	max_documents: Optional[ int ]
@@ -1352,18 +1351,17 @@ class TheNews( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides a structured wrapper around The News API endpoints.
 
 		Attributes:
-		agents (Optional[ str ]): Instance state retained for agents operations.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		response (Optional[ Response ]): Most recent HTTP response.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		endpoint (Optional[ str ]): Instance state retained for endpoint operations.
-		limit (Optional[ int ]): Maximum records requested.
-		page (Optional[ int ]): Requested results page.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			response (Optional[ Response ]): Most recent HTTP response.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			endpoint (Optional[ str ]): Instance state retained for endpoint operations.
+			limit (Optional[ int ]): Maximum records requested.
+			page (Optional[ int ]): Requested results page.
 	'''
 	agents: Optional[ str ]
 	url: Optional[ str ]
@@ -1607,11 +1605,9 @@ class GoogleSearch( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Google Custom Search results.
 	
 		Legacy member listing:
-		-----------
 		keywords,
 		url,
 		re_tag,
@@ -1630,17 +1626,18 @@ class GoogleSearch( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
-		keywords (Optional[ str ]): Instance state retained for keywords operations.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		re_tag (Optional[ Pattern ]): Instance state retained for re tag operations.
-		re_ws (Optional[ Pattern ]): Instance state retained for re ws operations.
-		response (Optional[ Response ]): Most recent HTTP response.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		cse_id (Optional[ str ]): Instance state retained for cse id operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		results (Optional[ int ]): Collection of provider results.
-		start (Optional[ int ]): Instance state retained for start operations.
-	'''
+			keywords (Optional[ str ]): Instance state retained for keywords operations.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			re_tag (Optional[ Pattern ]): Instance state retained for re tag operations.
+			re_ws (Optional[ Pattern ]): Instance state retained for re ws operations.
+			response (Optional[ Response ]): Most recent HTTP response.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			cse_id (Optional[ str ]): Instance state retained for cse id operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			results (Optional[ int ]): Collection of provider results.
+			start (Optional[ int ]): Instance state retained for start operations.
+	
+			agents (Any): Runtime state for agents in the GoogleSearch provider.'''
 	keywords: Optional[ str ]
 	url: Optional[ str ]
 	re_tag: Optional[ Pattern ]
@@ -1838,11 +1835,9 @@ class GoogleMaps( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides Google Maps geocoding, validation, and directions requests.
 
 		Legacy member listing:
-		-----------
 		file_path,
 		headers,
 		num_results,
@@ -1865,18 +1860,32 @@ class GoogleMaps( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		file_path (Optional[ str ]): Instance state retained for file path operations.
-		headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
-		num_results (Optional[ int ]): Instance state retained for num results operations.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		mode (Optional[ str ]): Selected request or operation mode.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		coordinates (Optional[ Tuple[ float, float ] ]): Instance state retained for coordinates operations.
-		address (Optional[ str ]): Instance state retained for address operations.
-		directions (Optional[ str ]): Instance state retained for directions operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-	'''
+			file_path (Optional[ str ]): Instance state retained for file path operations.
+			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
+			num_results (Optional[ int ]): Instance state retained for num results operations.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			coordinates (Optional[ Tuple[ float, float ] ]): Instance state retained for coordinates operations.
+			address (Optional[ str ]): Instance state retained for address operations.
+			directions (Optional[ str ]): Instance state retained for directions operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			fetcher (Any): Runtime state for fetcher in the GoogleMaps provider.
+			agents (Any): Runtime state for agents in the GoogleMaps provider.
+			payload (Any): Runtime state for payload in the GoogleMaps provider.
+			status (Any): Runtime state for status in the GoogleMaps provider.
+			results (Any): Runtime state for results in the GoogleMaps provider.
+			message (Any): Runtime state for message in the GoogleMaps provider.
+			origin (Any): Runtime state for origin in the GoogleMaps provider.
+			destination (Any): Runtime state for destination in the GoogleMaps provider.
+			routes (Any): Runtime state for routes in the GoogleMaps provider.
+			required (Any): Runtime state for required in the GoogleMaps provider.
+			function (Any): Runtime state for function in the GoogleMaps provider.
+			tool (Any): Runtime state for tool in the GoogleMaps provider.
+			description (Any): Runtime state for description in the GoogleMaps provider.
+			parameters (Any): Runtime state for parameters in the GoogleMaps provider.'''
 	file_path: Optional[ str ]
 	headers: Optional[ Dict[ str, Any ] ]
 	num_results: Optional[ int ]
@@ -2200,11 +2209,9 @@ class GoogleWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides Google Weather current, forecast, and alert requests.
 
 		Legacy member listing:
-		-----------
 		gmaps,
 		headers,
 		api_key,
@@ -2229,18 +2236,21 @@ class GoogleWeather( Fetcher ):
 		fetch_alerts(...): Performs the fetch_alerts operation for this fetcher.
 
 		Attributes:
-		gmaps (Optional[ GoogleMaps ]): Instance state retained for gmaps operations.
-		headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		mode (Optional[ str ]): Selected request or operation mode.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		coordinates (Optional[ Tuple[ float, float ] ]): Instance state retained for coordinates operations.
-		address (Optional[ str ]): Instance state retained for address operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		response (Optional[ Response ]): Most recent HTTP response.
-		result (Optional[ Dict[ str, Any ] ]): Normalized result of the latest request.
-	'''
+			gmaps (Optional[ GoogleMaps ]): Instance state retained for gmaps operations.
+			headers (Optional[ Dict[ str, Any ] ]): HTTP headers used for provider requests.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			coordinates (Optional[ Tuple[ float, float ] ]): Instance state retained for coordinates operations.
+			address (Optional[ str ]): Instance state retained for address operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			response (Optional[ Response ]): Most recent HTTP response.
+			result (Optional[ Dict[ str, Any ] ]): Normalized result of the latest request.
+	
+			fetcher (Any): Runtime state for fetcher in the GoogleWeather provider.
+			agents (Any): Runtime state for agents in the GoogleWeather provider.
+			path (Any): Runtime state for path in the GoogleWeather provider.'''
 	gmaps: Optional[ GoogleMaps ]
 	headers: Optional[ Dict[ str, Any ] ]
 	api_key: Optional[ str ]
@@ -2513,7 +2523,6 @@ class NavalObservatory( Fetcher ):
 	'''Fetches celestial-navigation data from the U.S. Naval Observatory API.
 
 		Legacy member listing:
-		-----------
 		base_url,
 		url,
 		params,
@@ -2541,16 +2550,21 @@ class NavalObservatory( Fetcher ):
 			Provides the NavalObservatory provider interface and request handling.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		date_value (Optional[ str ]): Instance state retained for date value operations.
-		time_value (Optional[ str ]): Instance state retained for time value operations.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		location_label (Optional[ str ]): Instance state retained for location label operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			date_value (Optional[ str ]): Instance state retained for date value operations.
+			time_value (Optional[ str ]): Instance state retained for time value operations.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			location_label (Optional[ str ]): Instance state retained for location label operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the NavalObservatory provider.
+			function (Any): Runtime state for function in the NavalObservatory provider.
+			tool (Any): Runtime state for tool in the NavalObservatory provider.
+			description (Any): Runtime state for description in the NavalObservatory provider.
+			parameters (Any): Runtime state for parameters in the NavalObservatory provider.'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -2889,7 +2903,6 @@ class SatelliteCenter( Fetcher ):
 	'''Fetches satellite observatory, ground-station, and location data from SSC Web Services.
 	
 		Legacy member listing:
-		-----------
 		ssc,
 		url,
 		params,
@@ -2912,13 +2925,16 @@ class SatelliteCenter( Fetcher ):
 			Provides the SatelliteCenter provider interface and request handling.
 
 		Attributes:
-		ssc (Optional[ SscWs ]): Instance state retained for ssc operations.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		observatories (Optional[ List[ Dict[ str, Any ] ] ]): Instance state retained for observatories operations.
-		ground_stations (Optional[ List[ Dict[ str, Any ] ] ]): Instance state retained for ground stations operations.
-		timeout (Optional[ int ]): Request timeout in seconds.
-	'''
+			ssc (Optional[ SscWs ]): Instance state retained for ssc operations.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			observatories (Optional[ List[ Dict[ str, Any ] ] ]): Instance state retained for observatories operations.
+			ground_stations (Optional[ List[ Dict[ str, Any ] ] ]): Instance state retained for ground stations operations.
+			timeout (Optional[ int ]): Request timeout in seconds.
+	
+			agents (Any): Runtime state for agents in the SatelliteCenter provider.
+			start_time (Any): Runtime state for start time in the SatelliteCenter provider.
+			end_time (Any): Runtime state for end time in the SatelliteCenter provider.'''
 	ssc: Optional[ SscWs ]
 	url: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -3115,7 +3131,6 @@ class EarthObservatory( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		NASA Earth Observatory's Natural Event Tracker (EONET) allows users to access imagery,
 		often in near real-time (NRT), of natural events such as dust storms, forest fires, and
 		tropical cyclones—empowering people all across the planet to locate, track, and potentially
@@ -3156,7 +3171,6 @@ class EarthObservatory( Fetcher ):
 				https://eonet.gsfc.nasa.gov/api/v3/layers/{category}
 
 		Legacy member listing:
-		-----------
 		base_url: Optional[str]
 			Base EONET API URL.
 
@@ -3223,19 +3237,24 @@ class EarthObservatory( Fetcher ):
 			Construct a dynamic tool schema.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		mode (Optional[ str ]): Selected request or operation mode.
-		status (Optional[ str ]): Instance state retained for status operations.
-		category (Optional[ str ]): Instance state retained for category operations.
-		source (Optional[ str ]): Provider or source identifier.
-		days (Optional[ int ]): Instance state retained for days operations.
-		limit (Optional[ int ]): Maximum records requested.
-		start_date (Optional[ str ]): Beginning of the requested date range.
-		end_date (Optional[ str ]): End of the requested date range.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			status (Optional[ str ]): Instance state retained for status operations.
+			category (Optional[ str ]): Instance state retained for category operations.
+			source (Optional[ str ]): Provider or source identifier.
+			days (Optional[ int ]): Instance state retained for days operations.
+			limit (Optional[ int ]): Maximum records requested.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the EarthObservatory provider.
+			function (Any): Runtime state for function in the EarthObservatory provider.
+			tool (Any): Runtime state for tool in the EarthObservatory provider.
+			description (Any): Runtime state for description in the EarthObservatory provider.
+			parameters (Any): Runtime state for parameters in the EarthObservatory provider.'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -3646,7 +3665,6 @@ class GlobalImagery( Fetcher ):
 	'''Fetches and renders global imagery and WMS map service data.
 	
 		Legacy member listing:
-		-----------
 		file_path,
 		api_key,
 		url,
@@ -3677,23 +3695,26 @@ class GlobalImagery( Fetcher ):
 			Provides the GlobalImagery provider interface and request handling.
 
 		Attributes:
-		file_path (Optional[ str ]): Instance state retained for file path operations.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		coordinates (Optional[ Tuple[ float, float ] ]): Instance state retained for coordinates operations.
-		calendar_date (Optional[ dt.datetime ]): Instance state retained for calendar date operations.
-		julian_date (Optional[ float ]): Instance state retained for julian date operations.
-		sidereal_time (Optional[ str ]): Instance state retained for sidereal time operations.
-		utc_time (Optional[ dt.time ]): Instance state retained for utc time operations.
-		local_time (Optional[ dt.time ]): Instance state retained for local time operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		era (Optional[ str ]): Instance state retained for era operations.
-		year (Optional[ str ]): Year used by the current request.
-		month (Optional[ str ]): Instance state retained for month operations.
-		day (Optional[ str ]): Instance state retained for day operations.
-	'''
+			file_path (Optional[ str ]): Instance state retained for file path operations.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			coordinates (Optional[ Tuple[ float, float ] ]): Instance state retained for coordinates operations.
+			calendar_date (Optional[ dt.datetime ]): Instance state retained for calendar date operations.
+			julian_date (Optional[ float ]): Instance state retained for julian date operations.
+			sidereal_time (Optional[ str ]): Instance state retained for sidereal time operations.
+			utc_time (Optional[ dt.time ]): Instance state retained for utc time operations.
+			local_time (Optional[ dt.time ]): Instance state retained for local time operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			era (Optional[ str ]): Instance state retained for era operations.
+			year (Optional[ str ]): Year used by the current request.
+			month (Optional[ str ]): Instance state retained for month operations.
+			day (Optional[ str ]): Instance state retained for day operations.
+	
+			mode (Any): Runtime state for mode in the GlobalImagery provider.
+			fetcher (Any): Runtime state for fetcher in the GlobalImagery provider.
+			agents (Any): Runtime state for agents in the GlobalImagery provider.'''
 	file_path: Optional[ str ]
 	api_key: Optional[ str ]
 	url: Optional[ str ]
@@ -3877,7 +3898,6 @@ class NearbyObjects( Fetcher ):
 				- limit
 
 		Legacy member listing:
-		-----------
 		base_url: Optional[str]
 			Base SSD API URL.
 
@@ -3949,19 +3969,25 @@ class NearbyObjects( Fetcher ):
 			Provides the NearbyObjects provider interface and request handling.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		mode (Optional[ str ]): Selected request or operation mode.
-		start_date (Optional[ str ]): Beginning of the requested date range.
-		end_date (Optional[ str ]): End of the requested date range.
-		query (Optional[ str ]): Current query or search expression.
-		dist_max (Optional[ str ]): Instance state retained for dist max operations.
-		body (Optional[ str ]): Instance state retained for body operations.
-		sort (Optional[ str ]): Instance state retained for sort operations.
-		limit (Optional[ int ]): Maximum records requested.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			query (Optional[ str ]): Current query or search expression.
+			dist_max (Optional[ str ]): Instance state retained for dist max operations.
+			body (Optional[ str ]): Instance state retained for body operations.
+			sort (Optional[ str ]): Instance state retained for sort operations.
+			limit (Optional[ int ]): Maximum records requested.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			designation (Any): Runtime state for designation in the NearbyObjects provider.
+			required (Any): Runtime state for required in the NearbyObjects provider.
+			function (Any): Runtime state for function in the NearbyObjects provider.
+			tool (Any): Runtime state for tool in the NearbyObjects provider.
+			description (Any): Runtime state for description in the NearbyObjects provider.
+			parameters (Any): Runtime state for parameters in the NearbyObjects provider.'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -4500,11 +4526,9 @@ class OpenScience( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches open-science dataset, metadata, assay, and data resources.
 
 		Legacy member listing:
-		-----------
 		base_url,
 		url,
 		params,
@@ -4528,15 +4552,21 @@ class OpenScience( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		query_text (Optional[ str ]): Instance state retained for query text operations.
-		format_value (Optional[ str ]): Instance state retained for format value operations.
-		size (Optional[ int ]): Requested result size.
-		endpoint (Optional[ str ]): Instance state retained for endpoint operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			query_text (Optional[ str ]): Instance state retained for query text operations.
+			format_value (Optional[ str ]): Instance state retained for format value operations.
+			size (Optional[ int ]): Requested result size.
+			endpoint (Optional[ str ]): Instance state retained for endpoint operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			accession (Any): Runtime state for accession in the OpenScience provider.
+			required (Any): Runtime state for required in the OpenScience provider.
+			function (Any): Runtime state for function in the OpenScience provider.
+			tool (Any): Runtime state for tool in the OpenScience provider.
+			description (Any): Runtime state for description in the OpenScience provider.
+			parameters (Any): Runtime state for parameters in the OpenScience provider.'''
 	base_url: Optional[ str ]
 	url: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -4928,7 +4958,6 @@ class SpaceWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides access to NASA DONKI space weather endpoints through the
 		NASA Open APIs gateway.
 
@@ -4968,7 +4997,6 @@ class SpaceWeather( Fetcher ):
 			- keyword
 
 		Legacy member listing:
-		-----------
 		base_url: Optional[str]
 			Base DONKI API URL.
 
@@ -5023,19 +5051,25 @@ class SpaceWeather( Fetcher ):
 			Construct a dynamic tool schema.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		mode (Optional[ str ]): Selected request or operation mode.
-		start_date (Optional[ str ]): Beginning of the requested date range.
-		end_date (Optional[ str ]): End of the requested date range.
-		location (Optional[ str ]): Instance state retained for location operations.
-		catalog (Optional[ str ]): Instance state retained for catalog operations.
-		notification_type (Optional[ str ]): Instance state retained for notification type operations.
-		limit_note (Optional[ str ]): Instance state retained for limit note operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			location (Optional[ str ]): Instance state retained for location operations.
+			catalog (Optional[ str ]): Instance state retained for catalog operations.
+			notification_type (Optional[ str ]): Instance state retained for notification type operations.
+			limit_note (Optional[ str ]): Instance state retained for limit note operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the SpaceWeather provider.
+			required (Any): Runtime state for required in the SpaceWeather provider.
+			function (Any): Runtime state for function in the SpaceWeather provider.
+			tool (Any): Runtime state for tool in the SpaceWeather provider.
+			description (Any): Runtime state for description in the SpaceWeather provider.
+			parameters (Any): Runtime state for parameters in the SpaceWeather provider.'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
 	url: Optional[ str ]
@@ -5417,18 +5451,22 @@ class AstroCatalog( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides structured access to the Open Astronomy Catalog API (OACAPI).
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		format (Optional[ str ]): Instance state retained for format operations.
-		name (Optional[ str ]): Instance state retained for name operations.
-		declination (Optional[ str ]): Instance state retained for declination operations.
-		right_ascension (Optional[ str ]): Instance state retained for right ascension operations.
-		radius (Optional[ int ]): Instance state retained for radius operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			format (Optional[ str ]): Instance state retained for format operations.
+			name (Optional[ str ]): Instance state retained for name operations.
+			declination (Optional[ str ]): Instance state retained for declination operations.
+			right_ascension (Optional[ str ]): Instance state retained for right ascension operations.
+			radius (Optional[ int ]): Instance state retained for radius operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			agents (Any): Runtime state for agents in the AstroCatalog provider.
+			argument_string (Any): Runtime state for argument string in the AstroCatalog provider.
+			route (Any): Runtime state for route in the AstroCatalog provider.
+			ra (Any): Runtime state for ra in the AstroCatalog provider.
+			dec (Any): Runtime state for dec in the AstroCatalog provider.'''
 	base_url: Optional[ str ]
 	format: Optional[ str ]
 	name: Optional[ str ]
@@ -5750,11 +5788,9 @@ class AstroQuery( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
 		Fetches astronomical object and region data with astroquery SIMBAD operations.
 	
 		Legacy member listing:
-		-----------
 		url,
 		radius,
 		name,
@@ -5774,14 +5810,18 @@ class AstroQuery( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
-		url (Optional[ str ]): Current resource or endpoint URL.
-		radius (Optional[ float ]): Instance state retained for radius operations.
-		name (Optional[ str ]): Instance state retained for name operations.
-		declination (Optional[ str ]): Instance state retained for declination operations.
-		right_ascension (Optional[ str ]): Instance state retained for right ascension operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		row_limit (Optional[ int ]): Instance state retained for row limit operations.
-	'''
+			url (Optional[ str ]): Current resource or endpoint URL.
+			radius (Optional[ float ]): Instance state retained for radius operations.
+			name (Optional[ str ]): Instance state retained for name operations.
+			declination (Optional[ str ]): Instance state retained for declination operations.
+			right_ascension (Optional[ str ]): Instance state retained for right ascension operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			row_limit (Optional[ int ]): Instance state retained for row limit operations.
+	
+			agents (Any): Runtime state for agents in the AstroQuery provider.
+			table (Any): Runtime state for table in the AstroQuery provider.
+			ra (Any): Runtime state for ra in the AstroQuery provider.
+			dec (Any): Runtime state for dec in the AstroQuery provider.'''
 	url: Optional[ str ]
 	radius: Optional[ float ]
 	name: Optional[ str ]
@@ -6115,11 +6155,9 @@ class StarMap( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Builds star-map links and image snapshots for objects or coordinates.
 
 		Legacy member listing:
-		-----------
 		base_url,
 		snapshot_url,
 		image_source,
@@ -6147,21 +6185,25 @@ class StarMap( Fetcher ):
 		fetch(...): Performs the fetch operation for this fetcher.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		snapshot_url (Optional[ str ]): Instance state retained for snapshot url operations.
-		image_source (Optional[ str ]): Instance state retained for image source operations.
-		object (Optional[ str ]): Instance state retained for object operations.
-		right_ascension (Optional[ float ]): Instance state retained for right ascension operations.
-		declination (Optional[ float ]): Instance state retained for declination operations.
-		box_color (Optional[ str ]): Instance state retained for box color operations.
-		show_box (Optional[ bool ]): Instance state retained for show box operations.
-		show_grid (Optional[ bool ]): Instance state retained for show grid operations.
-		show_lines (Optional[ bool ]): Instance state retained for show lines operations.
-		show_boundaries (Optional[ bool ]): Instance state retained for show boundaries operations.
-		show_const_names (Optional[ bool ]): Instance state retained for show const names operations.
-		zoom (Optional[ int ]): Instance state retained for zoom operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			snapshot_url (Optional[ str ]): Instance state retained for snapshot url operations.
+			image_source (Optional[ str ]): Instance state retained for image source operations.
+			object (Optional[ str ]): Instance state retained for object operations.
+			right_ascension (Optional[ float ]): Instance state retained for right ascension operations.
+			declination (Optional[ float ]): Instance state retained for declination operations.
+			box_color (Optional[ str ]): Instance state retained for box color operations.
+			show_box (Optional[ bool ]): Instance state retained for show box operations.
+			show_grid (Optional[ bool ]): Instance state retained for show grid operations.
+			show_lines (Optional[ bool ]): Instance state retained for show lines operations.
+			show_boundaries (Optional[ bool ]): Instance state retained for show boundaries operations.
+			show_const_names (Optional[ bool ]): Instance state retained for show const names operations.
+			zoom (Optional[ int ]): Instance state retained for zoom operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			agents (Any): Runtime state for agents in the StarMap provider.
+			value (Any): Runtime state for value in the StarMap provider.
+			html (Any): Runtime state for html in the StarMap provider.
+			name (Any): Runtime state for name in the StarMap provider.'''
 	base_url: Optional[ str ]
 	snapshot_url: Optional[ str ]
 	image_source: Optional[ str ]
@@ -6718,11 +6760,9 @@ class GovData( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Data.gov package search, package summary, and collection records.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		base_url,
 		url,
@@ -6753,21 +6793,26 @@ class GovData( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		base_url (Optional[ str ]): Provider API base URL.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
-		query (Optional[ str ]): Current query or search expression.
-		page_size (Optional[ int ]): Instance state retained for page size operations.
-		offset_mark (Optional[ str ]): Instance state retained for offset mark operations.
-		sort_field (Optional[ str ]): Instance state retained for sort field operations.
-		sort_order (Optional[ str ]): Instance state retained for sort order operations.
-		package_id (Optional[ str ]): Instance state retained for package id operations.
-		collection (Optional[ str ]): Instance state retained for collection operations.
-		start_date (Optional[ str ]): Beginning of the requested date range.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			query (Optional[ str ]): Current query or search expression.
+			page_size (Optional[ int ]): Instance state retained for page size operations.
+			offset_mark (Optional[ str ]): Instance state retained for offset mark operations.
+			sort_field (Optional[ str ]): Instance state retained for sort field operations.
+			sort_order (Optional[ str ]): Instance state retained for sort order operations.
+			package_id (Optional[ str ]): Instance state retained for package id operations.
+			collection (Optional[ str ]): Instance state retained for collection operations.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the GovData provider.
+			function (Any): Runtime state for function in the GovData provider.
+			tool (Any): Runtime state for tool in the GovData provider.
+			description (Any): Runtime state for description in the GovData provider.
+			parameters (Any): Runtime state for parameters in the GovData provider.'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
 	url: Optional[ str ]
@@ -7322,7 +7367,6 @@ class StarChart( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides static and link-based star chart generation using the SKY-MAP.ORG
 		XML API, Site Linker, and Image Generator interfaces.
 
@@ -7365,7 +7409,6 @@ class StarChart( Fetcher ):
 				- mag
 
 		Legacy member listing:
-		-----------
 		search_url: Optional[str]
 			SKY-MAP XML search endpoint.
 
@@ -7456,28 +7499,35 @@ class StarChart( Fetcher ):
 			Construct a dynamic tool schema.
 
 		Attributes:
-		search_url (Optional[ str ]): Instance state retained for search url operations.
-		link_url (Optional[ str ]): Instance state retained for link url operations.
-		image_url (Optional[ str ]): Instance state retained for image url operations.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		mode (Optional[ str ]): Selected request or operation mode.
-		query (Optional[ str ]): Current query or search expression.
-		ra (Optional[ float ]): Instance state retained for ra operations.
-		dec (Optional[ float ]): Instance state retained for dec operations.
-		zoom (Optional[ int ]): Instance state retained for zoom operations.
-		image_source (Optional[ str ]): Instance state retained for image source operations.
-		box_color (Optional[ str ]): Instance state retained for box color operations.
-		show_box (Optional[ bool ]): Instance state retained for show box operations.
-		show_grid (Optional[ bool ]): Instance state retained for show grid operations.
-		show_lines (Optional[ bool ]): Instance state retained for show lines operations.
-		show_boundaries (Optional[ bool ]): Instance state retained for show boundaries operations.
-		show_const_names (Optional[ bool ]): Instance state retained for show const names operations.
-		width (Optional[ int ]): Instance state retained for width operations.
-		height (Optional[ int ]): Instance state retained for height operations.
-		magnitude (Optional[ float ]): Instance state retained for magnitude operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			search_url (Optional[ str ]): Instance state retained for search url operations.
+			link_url (Optional[ str ]): Instance state retained for link url operations.
+			image_url (Optional[ str ]): Instance state retained for image url operations.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query (Optional[ str ]): Current query or search expression.
+			ra (Optional[ float ]): Instance state retained for ra operations.
+			dec (Optional[ float ]): Instance state retained for dec operations.
+			zoom (Optional[ int ]): Instance state retained for zoom operations.
+			image_source (Optional[ str ]): Instance state retained for image source operations.
+			box_color (Optional[ str ]): Instance state retained for box color operations.
+			show_box (Optional[ bool ]): Instance state retained for show box operations.
+			show_grid (Optional[ bool ]): Instance state retained for show grid operations.
+			show_lines (Optional[ bool ]): Instance state retained for show lines operations.
+			show_boundaries (Optional[ bool ]): Instance state retained for show boundaries operations.
+			show_const_names (Optional[ bool ]): Instance state retained for show const names operations.
+			width (Optional[ int ]): Instance state retained for width operations.
+			height (Optional[ int ]): Instance state retained for height operations.
+			magnitude (Optional[ float ]): Instance state retained for magnitude operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			value (Any): Runtime state for value in the StarChart provider.
+			name (Any): Runtime state for name in the StarChart provider.
+			required (Any): Runtime state for required in the StarChart provider.
+			function (Any): Runtime state for function in the StarChart provider.
+			tool (Any): Runtime state for tool in the StarChart provider.
+			description (Any): Runtime state for description in the StarChart provider.
+			parameters (Any): Runtime state for parameters in the StarChart provider.'''
 	search_url: Optional[ str ]
 	link_url: Optional[ str ]
 	image_url: Optional[ str ]
@@ -8139,11 +8189,9 @@ class Congress( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Congress.gov congress, bill, law, and report resources.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		base_url,
 		url,
@@ -8186,26 +8234,31 @@ class Congress( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		base_url (Optional[ str ]): Provider API base URL.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		mode (Optional[ str ]): Selected request or operation mode.
-		congress_number (Optional[ int ]): Instance state retained for congress number operations.
-		bill_type (Optional[ str ]): Instance state retained for bill type operations.
-		bill_number (Optional[ int ]): Instance state retained for bill number operations.
-		law_type (Optional[ str ]): Instance state retained for law type operations.
-		law_number (Optional[ int ]): Instance state retained for law number operations.
-		report_type (Optional[ str ]): Instance state retained for report type operations.
-		report_number (Optional[ int ]): Instance state retained for report number operations.
-		offset (Optional[ int ]): Instance state retained for offset operations.
-		limit (Optional[ int ]): Maximum records requested.
-		sort (Optional[ str ]): Instance state retained for sort operations.
-		from_date_time (Optional[ str ]): Instance state retained for from date time operations.
-		to_date_time (Optional[ str ]): Instance state retained for to date time operations.
-		conference (Optional[ bool ]): Instance state retained for conference operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			congress_number (Optional[ int ]): Instance state retained for congress number operations.
+			bill_type (Optional[ str ]): Instance state retained for bill type operations.
+			bill_number (Optional[ int ]): Instance state retained for bill number operations.
+			law_type (Optional[ str ]): Instance state retained for law type operations.
+			law_number (Optional[ int ]): Instance state retained for law number operations.
+			report_type (Optional[ str ]): Instance state retained for report type operations.
+			report_number (Optional[ int ]): Instance state retained for report number operations.
+			offset (Optional[ int ]): Instance state retained for offset operations.
+			limit (Optional[ int ]): Maximum records requested.
+			sort (Optional[ str ]): Instance state retained for sort operations.
+			from_date_time (Optional[ str ]): Instance state retained for from date time operations.
+			to_date_time (Optional[ str ]): Instance state retained for to date time operations.
+			conference (Optional[ bool ]): Instance state retained for conference operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the Congress provider.
+			function (Any): Runtime state for function in the Congress provider.
+			tool (Any): Runtime state for tool in the Congress provider.
+			description (Any): Runtime state for description in the Congress provider.
+			parameters (Any): Runtime state for parameters in the Congress provider.'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
 	url: Optional[ str ]
@@ -9235,11 +9288,9 @@ class InternetArchive( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
 		Fetches Internet Archive search records.
 	
 		Legacy member listing:
-		-----------
 		keywords,
 		url,
 		response,
@@ -9263,18 +9314,23 @@ class InternetArchive( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		keywords (Optional[ str ]): Instance state retained for keywords operations.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		response (Optional[ Response ]): Most recent HTTP response.
-		fields (Optional[ List[ str ] ]): Instance state retained for fields operations.
-		rows (Optional[ int ]): Rows returned by the most recent query.
-		page (Optional[ int ]): Requested results page.
-		sort (Optional[ str ]): Instance state retained for sort operations.
-		media_type (Optional[ str ]): Instance state retained for media type operations.
-		collection (Optional[ str ]): Instance state retained for collection operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			keywords (Optional[ str ]): Instance state retained for keywords operations.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			response (Optional[ Response ]): Most recent HTTP response.
+			fields (Optional[ List[ str ] ]): Instance state retained for fields operations.
+			rows (Optional[ int ]): Rows returned by the most recent query.
+			page (Optional[ int ]): Requested results page.
+			sort (Optional[ str ]): Instance state retained for sort operations.
+			media_type (Optional[ str ]): Instance state retained for media type operations.
+			collection (Optional[ str ]): Instance state retained for collection operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the InternetArchive provider.
+			function (Any): Runtime state for function in the InternetArchive provider.
+			tool (Any): Runtime state for tool in the InternetArchive provider.
+			description (Any): Runtime state for description in the InternetArchive provider.
+			parameters (Any): Runtime state for parameters in the InternetArchive provider.'''
 	keywords: Optional[ str ]
 	url: Optional[ str ]
 	response: Optional[ Response ]
@@ -9625,7 +9681,6 @@ class OpenWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides forecast weather retrieval by location name using the Open-Meteo
 		Geocoding API and Open-Meteo Forecast API.
 
@@ -9655,7 +9710,6 @@ class OpenWeather( Fetcher ):
 				- precipitation_unit
 
 		Legacy member listing:
-		-----------
 		geocode_url: Optional[str]
 			The Open-Meteo geocoding endpoint.
 
@@ -9731,24 +9785,29 @@ class OpenWeather( Fetcher ):
 			Generate a dynamic tool schema definition.
 
 		Attributes:
-		geocode_url (Optional[ str ]): Instance state retained for geocode url operations.
-		forecast_url (Optional[ str ]): Instance state retained for forecast url operations.
-		location (Optional[ str ]): Instance state retained for location operations.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		timezone (Optional[ str ]): Instance state retained for timezone operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		current_metrics (Optional[ List[ str ] ]): Instance state retained for current metrics operations.
-		hourly_metrics (Optional[ List[ str ] ]): Instance state retained for hourly metrics operations.
-		daily_metrics (Optional[ List[ str ] ]): Instance state retained for daily metrics operations.
-		windspeed_unit (Optional[ str ]): Instance state retained for windspeed unit operations.
-		temperature_unit (Optional[ str ]): Instance state retained for temperature unit operations.
-		precipitation_unit (Optional[ str ]): Instance state retained for precipitation unit operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		geocode_params (Optional[ Dict[ str, Any ] ]): Instance state retained for geocode params operations.
-		result_limit (Optional[ int ]): Instance state retained for result limit operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			geocode_url (Optional[ str ]): Instance state retained for geocode url operations.
+			forecast_url (Optional[ str ]): Instance state retained for forecast url operations.
+			location (Optional[ str ]): Instance state retained for location operations.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			timezone (Optional[ str ]): Instance state retained for timezone operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			current_metrics (Optional[ List[ str ] ]): Instance state retained for current metrics operations.
+			hourly_metrics (Optional[ List[ str ] ]): Instance state retained for hourly metrics operations.
+			daily_metrics (Optional[ List[ str ] ]): Instance state retained for daily metrics operations.
+			windspeed_unit (Optional[ str ]): Instance state retained for windspeed unit operations.
+			temperature_unit (Optional[ str ]): Instance state retained for temperature unit operations.
+			precipitation_unit (Optional[ str ]): Instance state retained for precipitation unit operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			geocode_params (Optional[ Dict[ str, Any ] ]): Instance state retained for geocode params operations.
+			result_limit (Optional[ int ]): Instance state retained for result limit operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the OpenWeather provider.
+			function (Any): Runtime state for function in the OpenWeather provider.
+			tool (Any): Runtime state for tool in the OpenWeather provider.
+			description (Any): Runtime state for description in the OpenWeather provider.
+			parameters (Any): Runtime state for parameters in the OpenWeather provider.'''
 	geocode_url: Optional[ str ]
 	forecast_url: Optional[ str ]
 	location: Optional[ str ]
@@ -10379,7 +10438,6 @@ class HistoricalWeather( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides historical weather retrieval by location name and date using the
 		Open-Meteo Geocoding API and Open-Meteo Historical Weather API.
 
@@ -10406,7 +10464,6 @@ class HistoricalWeather( Fetcher ):
 				- precipitation_unit
 
 		Legacy member listing:
-		-----------
 		geocode_url: Optional[str]
 			The Open-Meteo geocoding endpoint.
 
@@ -10473,23 +10530,29 @@ class HistoricalWeather( Fetcher ):
 			Generate a dynamic tool schema definition.
 
 		Attributes:
-		geocode_url (Optional[ str ]): Instance state retained for geocode url operations.
-		archive_url (Optional[ str ]): Instance state retained for archive url operations.
-		location (Optional[ str ]): Instance state retained for location operations.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		timezone (Optional[ str ]): Instance state retained for timezone operations.
-		target_date (Optional[ dt.date ]): Instance state retained for target date operations.
-		daily_metrics (Optional[ List[ str ] ]): Instance state retained for daily metrics operations.
-		hourly_metrics (Optional[ List[ str ] ]): Instance state retained for hourly metrics operations.
-		windspeed_unit (Optional[ str ]): Instance state retained for windspeed unit operations.
-		temperature_unit (Optional[ str ]): Instance state retained for temperature unit operations.
-		precipitation_unit (Optional[ str ]): Instance state retained for precipitation unit operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		geocode_params (Optional[ Dict[ str, Any ] ]): Instance state retained for geocode params operations.
-		result_limit (Optional[ int ]): Instance state retained for result limit operations.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			geocode_url (Optional[ str ]): Instance state retained for geocode url operations.
+			archive_url (Optional[ str ]): Instance state retained for archive url operations.
+			location (Optional[ str ]): Instance state retained for location operations.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			timezone (Optional[ str ]): Instance state retained for timezone operations.
+			target_date (Optional[ dt.date ]): Instance state retained for target date operations.
+			daily_metrics (Optional[ List[ str ] ]): Instance state retained for daily metrics operations.
+			hourly_metrics (Optional[ List[ str ] ]): Instance state retained for hourly metrics operations.
+			windspeed_unit (Optional[ str ]): Instance state retained for windspeed unit operations.
+			temperature_unit (Optional[ str ]): Instance state retained for temperature unit operations.
+			precipitation_unit (Optional[ str ]): Instance state retained for precipitation unit operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			geocode_params (Optional[ Dict[ str, Any ] ]): Instance state retained for geocode params operations.
+			result_limit (Optional[ int ]): Instance state retained for result limit operations.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			date (Any): Runtime state for date in the HistoricalWeather provider.
+			required (Any): Runtime state for required in the HistoricalWeather provider.
+			function (Any): Runtime state for function in the HistoricalWeather provider.
+			tool (Any): Runtime state for tool in the HistoricalWeather provider.
+			description (Any): Runtime state for description in the HistoricalWeather provider.
+			parameters (Any): Runtime state for parameters in the HistoricalWeather provider.'''
 	geocode_url: Optional[ str ]
 	archive_url: Optional[ str ]
 	location: Optional[ str ]
@@ -10906,11 +10969,9 @@ class Grokipedia( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Grokipedia search results and page content.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		client,
 		query,
@@ -10934,16 +10995,21 @@ class Grokipedia( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		client (Optional[ GrokipediaClient ]): Provider SDK or HTTP client.
-		query (Optional[ str ]): Current query or search expression.
-		page (Optional[ str ]): Requested results page.
-		limit (Optional[ int ]): Maximum records requested.
-		offset (Optional[ int ]): Instance state retained for offset operations.
-		include_content (Optional[ bool ]): Instance state retained for include content operations.
-		response (Optional[ Dict[ str, Any ] ]): Most recent HTTP response.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			client (Optional[ GrokipediaClient ]): Provider SDK or HTTP client.
+			query (Optional[ str ]): Current query or search expression.
+			page (Optional[ str ]): Requested results page.
+			limit (Optional[ int ]): Maximum records requested.
+			offset (Optional[ int ]): Instance state retained for offset operations.
+			include_content (Optional[ bool ]): Instance state retained for include content operations.
+			response (Optional[ Dict[ str, Any ] ]): Most recent HTTP response.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+	
+			required (Any): Runtime state for required in the Grokipedia provider.
+			function (Any): Runtime state for function in the Grokipedia provider.
+			tool (Any): Runtime state for tool in the Grokipedia provider.
+			description (Any): Runtime state for description in the Grokipedia provider.
+			parameters (Any): Runtime state for parameters in the Grokipedia provider.'''
 	api_key: Optional[ str ]
 	client: Optional[ GrokipediaClient ]
 	query: Optional[ str ]
@@ -11330,11 +11396,9 @@ class GoogleGeocoding( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Google Geocoding forward, reverse, and place lookup records.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		url,
 		params,
@@ -11363,21 +11427,26 @@ class GoogleGeocoding( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		url (Optional[ str ]): Current resource or endpoint URL.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		mode (Optional[ str ]): Selected request or operation mode.
-		query (Optional[ str ]): Current query or search expression.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		place_id (Optional[ str ]): Instance state retained for place id operations.
-		language (Optional[ str ]): Instance state retained for language operations.
-		region (Optional[ str ]): Instance state retained for region operations.
-		result_type (Optional[ str ]): Instance state retained for result type operations.
-		location_type (Optional[ str ]): Instance state retained for location type operations.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			url (Optional[ str ]): Current resource or endpoint URL.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query (Optional[ str ]): Current query or search expression.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			place_id (Optional[ str ]): Instance state retained for place id operations.
+			language (Optional[ str ]): Instance state retained for language operations.
+			region (Optional[ str ]): Instance state retained for region operations.
+			result_type (Optional[ str ]): Instance state retained for result type operations.
+			location_type (Optional[ str ]): Instance state retained for location type operations.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			required (Any): Runtime state for required in the GoogleGeocoding provider.
+			function (Any): Runtime state for function in the GoogleGeocoding provider.
+			tool (Any): Runtime state for tool in the GoogleGeocoding provider.
+			description (Any): Runtime state for description in the GoogleGeocoding provider.
+			parameters (Any): Runtime state for parameters in the GoogleGeocoding provider.'''
 	api_key: Optional[ str ]
 	url: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -11901,11 +11970,9 @@ class CensusData( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches Census API variables and tabular data.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		base_url,
 		year,
@@ -11932,18 +11999,24 @@ class CensusData( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		base_url (Optional[ str ]): Provider API base URL.
-		year (Optional[ str ]): Year used by the current request.
-		dataset (Optional[ str ]): Instance state retained for dataset operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		fields (Optional[ List[ str ] ]): Instance state retained for fields operations.
-		geography_for (Optional[ str ]): Instance state retained for geography for operations.
-		geography_in (Optional[ str ]): Instance state retained for geography in operations.
-		predicates (Optional[ Dict[ str, Any ] ]): Instance state retained for predicates operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			year (Optional[ str ]): Year used by the current request.
+			dataset (Optional[ str ]): Instance state retained for dataset operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			fields (Optional[ List[ str ] ]): Instance state retained for fields operations.
+			geography_for (Optional[ str ]): Instance state retained for geography for operations.
+			geography_in (Optional[ str ]): Instance state retained for geography in operations.
+			predicates (Optional[ Dict[ str, Any ] ]): Instance state retained for predicates operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+	
+			rows (Any): Runtime state for rows in the CensusData provider.
+			required (Any): Runtime state for required in the CensusData provider.
+			function (Any): Runtime state for function in the CensusData provider.
+			tool (Any): Runtime state for tool in the CensusData provider.
+			description (Any): Runtime state for description in the CensusData provider.
+			parameters (Any): Runtime state for parameters in the CensusData provider.'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
 	year: Optional[ str ]
@@ -12444,11 +12517,9 @@ class Socrata( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches metadata and rows from Socrata-backed open-data portals.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		base_url,
 		domain,
@@ -12476,20 +12547,25 @@ class Socrata( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		base_url (Optional[ str ]): Provider API base URL.
-		domain (Optional[ str ]): Instance state retained for domain operations.
-		dataset_id (Optional[ str ]): Instance state retained for dataset id operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		select_clause (Optional[ str ]): Instance state retained for select clause operations.
-		where_clause (Optional[ str ]): Instance state retained for where clause operations.
-		order_clause (Optional[ str ]): Instance state retained for order clause operations.
-		group_clause (Optional[ str ]): Instance state retained for group clause operations.
-		limit_value (Optional[ int ]): Instance state retained for limit value operations.
-		offset_value (Optional[ int ]): Instance state retained for offset value operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			domain (Optional[ str ]): Instance state retained for domain operations.
+			dataset_id (Optional[ str ]): Instance state retained for dataset id operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			select_clause (Optional[ str ]): Instance state retained for select clause operations.
+			where_clause (Optional[ str ]): Instance state retained for where clause operations.
+			order_clause (Optional[ str ]): Instance state retained for order clause operations.
+			group_clause (Optional[ str ]): Instance state retained for group clause operations.
+			limit_value (Optional[ int ]): Instance state retained for limit value operations.
+			offset_value (Optional[ int ]): Instance state retained for offset value operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Runtime state for required in the Socrata provider.
+			function (Any): Runtime state for function in the Socrata provider.
+			tool (Any): Runtime state for tool in the Socrata provider.
+			description (Any): Runtime state for description in the Socrata provider.
+			parameters (Any): Runtime state for parameters in the Socrata provider.'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
 	domain: Optional[ str ]
@@ -12949,11 +13025,9 @@ class HealthData( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches metadata and rows from HealthData.gov Socrata datasets.
 
 		Legacy member listing:
-		-----------
 		api_key,
 		base_url,
 		domain,
@@ -12981,20 +13055,25 @@ class HealthData( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		base_url (Optional[ str ]): Provider API base URL.
-		domain (Optional[ str ]): Instance state retained for domain operations.
-		dataset_id (Optional[ str ]): Instance state retained for dataset id operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		select_clause (Optional[ str ]): Instance state retained for select clause operations.
-		where_clause (Optional[ str ]): Instance state retained for where clause operations.
-		order_clause (Optional[ str ]): Instance state retained for order clause operations.
-		group_clause (Optional[ str ]): Instance state retained for group clause operations.
-		limit_value (Optional[ int ]): Instance state retained for limit value operations.
-		offset_value (Optional[ int ]): Instance state retained for offset value operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			domain (Optional[ str ]): Instance state retained for domain operations.
+			dataset_id (Optional[ str ]): Instance state retained for dataset id operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			select_clause (Optional[ str ]): Instance state retained for select clause operations.
+			where_clause (Optional[ str ]): Instance state retained for where clause operations.
+			order_clause (Optional[ str ]): Instance state retained for order clause operations.
+			group_clause (Optional[ str ]): Instance state retained for group clause operations.
+			limit_value (Optional[ int ]): Instance state retained for limit value operations.
+			offset_value (Optional[ int ]): Instance state retained for offset value operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Runtime state for required in the HealthData provider.
+			function (Any): Runtime state for function in the HealthData provider.
+			tool (Any): Runtime state for tool in the HealthData provider.
+			description (Any): Runtime state for description in the HealthData provider.
+			parameters (Any): Runtime state for parameters in the HealthData provider.'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
 	domain: Optional[ str ]
@@ -13462,11 +13541,9 @@ class GlobalHealthData( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
 		Fetches United Nations SDMX catalog and query data.
 	
 		Legacy member listing:
-		-----------
 		base_url,
 		catalog_url,
 		mode,
@@ -13485,14 +13562,19 @@ class GlobalHealthData( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		base_url (Optional[ str ]): Provider API base URL.
-		athena_base_url (Optional[ str ]): Instance state retained for athena base url operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		query_path (Optional[ str ]): Instance state retained for query path operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-	'''
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			base_url (Optional[ str ]): Provider API base URL.
+			athena_base_url (Optional[ str ]): Instance state retained for athena base url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query_path (Optional[ str ]): Instance state retained for query path operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Runtime state for required in the GlobalHealthData provider.
+			function (Any): Runtime state for function in the GlobalHealthData provider.
+			tool (Any): Runtime state for tool in the GlobalHealthData provider.
+			description (Any): Runtime state for description in the GlobalHealthData provider.
+			parameters (Any): Runtime state for parameters in the GlobalHealthData provider.'''
 	api_key: Optional[ str ]
 	base_url: Optional[ str ]
 	athena_base_url: Optional[ str ]
@@ -13835,11 +13917,9 @@ class GlobalHealthData( Fetcher ):
 class UnitedNations( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Fetch catalog and SDMX query results from the United Nations UNdata API.
 
 		Legacy member listing:
-		-----------
 		base_url - Optional[ str ]
 		catalog_url - Optional[ str ]
 		mode - Optional[ str ]
@@ -13858,13 +13938,18 @@ class UnitedNations( Fetcher ):
 			parameters: dict, required: list[ str ] ) -> Dict[ str, str ] | None
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		catalog_url (Optional[ str ]): Instance state retained for catalog url operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		query_path (Optional[ str ]): Instance state retained for query path operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			catalog_url (Optional[ str ]): Instance state retained for catalog url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query_path (Optional[ str ]): Instance state retained for query path operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Runtime state for required in the UnitedNations provider.
+			function (Any): Runtime state for function in the UnitedNations provider.
+			tool (Any): Runtime state for tool in the UnitedNations provider.
+			description (Any): Runtime state for description in the UnitedNations provider.
+			parameters (Any): Runtime state for parameters in the UnitedNations provider.'''
 	base_url: Optional[ str ]
 	catalog_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -14177,11 +14262,9 @@ class WorldPopulation( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Fetches WorldPop catalog and raster metadata records.
 
 		Legacy member listing:
-		-----------
 		base_url,
 		stac_url,
 		mode,
@@ -14202,14 +14285,19 @@ class WorldPopulation( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		stac_url (Optional[ str ]): Instance state retained for stac url operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		query_text (Optional[ str ]): Instance state retained for query text operations.
-		asset_path (Optional[ str ]): Instance state retained for asset path operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			stac_url (Optional[ str ]): Instance state retained for stac url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			query_text (Optional[ str ]): Instance state retained for query text operations.
+			asset_path (Optional[ str ]): Instance state retained for asset path operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Runtime state for required in the WorldPopulation provider.
+			function (Any): Runtime state for function in the WorldPopulation provider.
+			tool (Any): Runtime state for tool in the WorldPopulation provider.
+			description (Any): Runtime state for description in the WorldPopulation provider.
+			parameters (Any): Runtime state for parameters in the WorldPopulation provider.'''
 	base_url: Optional[ str ]
 	stac_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -14610,11 +14698,9 @@ class Wonder( Fetcher ):
 	'''
 	
 		Purpose:
-		--------
 		Builds and submits CDC WONDER query templates.
 	
 		Legacy member listing:
-		-----------
 		base_url,
 		mode,
 		dataset_id,
@@ -14634,13 +14720,18 @@ class Wonder( Fetcher ):
 		create_schema(...): Performs the create_schema operation for this fetcher.
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		dataset_id (Optional[ str ]): Instance state retained for dataset id operations.
-		request_xml (Optional[ str ]): Instance state retained for request xml operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			dataset_id (Optional[ str ]): Instance state retained for dataset id operations.
+			request_xml (Optional[ str ]): Instance state retained for request xml operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+	
+			required (Any): Runtime state for required in the Wonder provider.
+			function (Any): Runtime state for function in the Wonder provider.
+			tool (Any): Runtime state for tool in the Wonder provider.
+			description (Any): Runtime state for description in the Wonder provider.
+			parameters (Any): Runtime state for parameters in the Wonder provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	dataset_id: Optional[ str ]
@@ -15003,7 +15094,6 @@ class Wonder( Fetcher ):
 class USGSEarthquakes( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the U.S. Geological Survey (USGS) earthquake feeds and
 		event search API for human-readable geospatial earthquake retrieval.
 
@@ -15037,25 +15127,32 @@ class USGSEarthquakes( Fetcher ):
 			  - maxradiuskm
 
 		Attributes:
-		feed_url (Optional[ str ]): Instance state retained for feed url operations.
-		search_url (Optional[ str ]): Instance state retained for search url operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		feed (Optional[ str ]): Instance state retained for feed operations.
-		start_date (Optional[ str ]): Beginning of the requested date range.
-		end_date (Optional[ str ]): End of the requested date range.
-		min_magnitude (Optional[ float ]): Instance state retained for min magnitude operations.
-		max_magnitude (Optional[ float ]): Instance state retained for max magnitude operations.
-		limit (Optional[ int ]): Maximum records requested.
-		order_by (Optional[ str ]): Instance state retained for order by operations.
-		event_type (Optional[ str ]): Instance state retained for event type operations.
-		latitude (Optional[ float ]): Latitude of the selected geographic point.
-		longitude (Optional[ float ]): Longitude of the selected geographic point.
-		max_radius_km (Optional[ float ]): Instance state retained for max radius km operations.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			feed_url (Optional[ str ]): Instance state retained for feed url operations.
+			search_url (Optional[ str ]): Instance state retained for search url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			feed (Optional[ str ]): Instance state retained for feed operations.
+			start_date (Optional[ str ]): Beginning of the requested date range.
+			end_date (Optional[ str ]): End of the requested date range.
+			min_magnitude (Optional[ float ]): Instance state retained for min magnitude operations.
+			max_magnitude (Optional[ float ]): Instance state retained for max magnitude operations.
+			limit (Optional[ int ]): Maximum records requested.
+			order_by (Optional[ str ]): Instance state retained for order by operations.
+			event_type (Optional[ str ]): Instance state retained for event type operations.
+			latitude (Optional[ float ]): Latitude of the selected geographic point.
+			longitude (Optional[ float ]): Longitude of the selected geographic point.
+			max_radius_km (Optional[ float ]): Instance state retained for max radius km operations.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			features (Any): Runtime state for features in the USGSEarthquakes provider.
+			rows (Any): Runtime state for rows in the USGSEarthquakes provider.
+			required (Any): Runtime state for required in the USGSEarthquakes provider.
+			function (Any): Runtime state for function in the USGSEarthquakes provider.
+			tool (Any): Runtime state for tool in the USGSEarthquakes provider.
+			description (Any): Runtime state for description in the USGSEarthquakes provider.
+			parameters (Any): Runtime state for parameters in the USGSEarthquakes provider.'''
 	feed_url: Optional[ str ]
 	search_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -15634,7 +15731,6 @@ class USGSEarthquakes( Fetcher ):
 class USGSWaterData( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the modern USGS Water Data APIs for monitoring
 		locations, time-series metadata, latest continuous values, and latest
 		daily values.
@@ -15655,14 +15751,22 @@ class USGSWaterData( Fetcher ):
 			- API keys increase rate limits but are not required for basic use
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			collection (Any): Runtime state for collection in the USGSWaterData provider.
+			records (Any): Runtime state for records in the USGSWaterData provider.
+			rows (Any): Runtime state for rows in the USGSWaterData provider.
+			required (Any): Runtime state for required in the USGSWaterData provider.
+			function (Any): Runtime state for function in the USGSWaterData provider.
+			tool (Any): Runtime state for tool in the USGSWaterData provider.
+			description (Any): Runtime state for description in the USGSWaterData provider.
+			parameters (Any): Runtime state for parameters in the USGSWaterData provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	api_key: Optional[ str ]
@@ -16548,7 +16652,6 @@ class USGSWaterData( Fetcher ):
 class USGSTheNationalMap( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the USGS The National Map (TNM) TNMAccess API for
 		dataset discovery and downloadable product search.
 
@@ -16570,13 +16673,21 @@ class USGSTheNationalMap( Fetcher ):
 			- offset
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the USGSTheNationalMap provider.
+			records (Any): Runtime state for records in the USGSTheNationalMap provider.
+			rows (Any): Runtime state for rows in the USGSTheNationalMap provider.
+			required (Any): Runtime state for required in the USGSTheNationalMap provider.
+			function (Any): Runtime state for function in the USGSTheNationalMap provider.
+			tool (Any): Runtime state for tool in the USGSTheNationalMap provider.
+			description (Any): Runtime state for description in the USGSTheNationalMap provider.
+			parameters (Any): Runtime state for parameters in the USGSTheNationalMap provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -17151,7 +17262,6 @@ class USGSTheNationalMap( Fetcher ):
 class USGSScienceBase( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides read-only access to the USGS ScienceBase REST/JSON API for
 		item search and item retrieval.
 
@@ -17171,13 +17281,23 @@ class USGSScienceBase( Fetcher ):
 			- fields
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Dict[ str, Any ] ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the USGSScienceBase provider.
+			records (Any): Runtime state for records in the USGSScienceBase provider.
+			item (Any): Runtime state for item in the USGSScienceBase provider.
+			rows (Any): Runtime state for rows in the USGSScienceBase provider.
+			item_id (Any): Runtime state for item id in the USGSScienceBase provider.
+			required (Any): Runtime state for required in the USGSScienceBase provider.
+			function (Any): Runtime state for function in the USGSScienceBase provider.
+			tool (Any): Runtime state for tool in the USGSScienceBase provider.
+			description (Any): Runtime state for description in the USGSScienceBase provider.
+			parameters (Any): Runtime state for parameters in the USGSScienceBase provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -17762,7 +17882,6 @@ class USGSScienceBase( Fetcher ):
 class AirNow( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the AirNow API for current observations and forecasts by
 		Zip code or latitude/longitude, returning human-readable normalized rows.
 
@@ -17778,14 +17897,26 @@ class AirNow( Fetcher ):
 			- API key required by AirNow web services
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the AirNow provider.
+			records (Any): Runtime state for records in the AirNow provider.
+			rows (Any): Runtime state for rows in the AirNow provider.
+			zip_code (Any): Runtime state for zip code in the AirNow provider.
+			latitude (Any): Runtime state for latitude in the AirNow provider.
+			longitude (Any): Runtime state for longitude in the AirNow provider.
+			date (Any): Runtime state for date in the AirNow provider.
+			required (Any): Runtime state for required in the AirNow provider.
+			function (Any): Runtime state for function in the AirNow provider.
+			tool (Any): Runtime state for tool in the AirNow provider.
+			description (Any): Runtime state for description in the AirNow provider.
+			parameters (Any): Runtime state for parameters in the AirNow provider.'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
 	mode: Optional[ str ]
@@ -18451,7 +18582,6 @@ class AirNow( Fetcher ):
 class ClimateData( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to NOAA NCEI climate data search and retrieval services for
 		dataset discovery and subsetted climate data extraction.
 
@@ -18479,14 +18609,24 @@ class ClimateData( Fetcher ):
 			  - limit
 
 		Attributes:
-		data_url (Optional[ str ]): Instance state retained for data url operations.
-		search_url (Optional[ str ]): Instance state retained for search url operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			data_url (Optional[ str ]): Instance state retained for data url operations.
+			search_url (Optional[ str ]): Instance state retained for search url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			records (Any): Runtime state for records in the ClimateData provider.
+			rows (Any): Runtime state for rows in the ClimateData provider.
+			dataset (Any): Runtime state for dataset in the ClimateData provider.
+			start_date (Any): Runtime state for start date in the ClimateData provider.
+			end_date (Any): Runtime state for end date in the ClimateData provider.
+			required (Any): Runtime state for required in the ClimateData provider.
+			function (Any): Runtime state for function in the ClimateData provider.
+			tool (Any): Runtime state for tool in the ClimateData provider.
+			description (Any): Runtime state for description in the ClimateData provider.
+			parameters (Any): Runtime state for parameters in the ClimateData provider.'''
 	data_url: Optional[ str ]
 	search_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -19035,7 +19175,6 @@ class ClimateData( Fetcher ):
 class EoNet( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to NASA EONET Version 3 for event discovery and category
 		discovery, returning human-readable normalized rows.
 
@@ -19060,13 +19199,21 @@ class EoNet( Fetcher ):
 			- bbox
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the EoNet provider.
+			records (Any): Runtime state for records in the EoNet provider.
+			rows (Any): Runtime state for rows in the EoNet provider.
+			required (Any): Runtime state for required in the EoNet provider.
+			function (Any): Runtime state for function in the EoNet provider.
+			tool (Any): Runtime state for tool in the EoNet provider.
+			description (Any): Runtime state for description in the EoNet provider.
+			parameters (Any): Runtime state for parameters in the EoNet provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -19619,7 +19766,6 @@ class EoNet( Fetcher ):
 class EnviroFacts( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to selected EPA Envirofacts Data Service API tables using
 		a constrained, human-readable wrapper for common environmental queries.
 
@@ -19642,13 +19788,21 @@ class EnviroFacts( Fetcher ):
 			- JSON output
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			table_name (Any): Runtime state for table name in the EnviroFacts provider.
+			records (Any): Runtime state for records in the EnviroFacts provider.
+			rows (Any): Runtime state for rows in the EnviroFacts provider.
+			required (Any): Runtime state for required in the EnviroFacts provider.
+			function (Any): Runtime state for function in the EnviroFacts provider.
+			tool (Any): Runtime state for tool in the EnviroFacts provider.
+			description (Any): Runtime state for description in the EnviroFacts provider.
+			parameters (Any): Runtime state for parameters in the EnviroFacts provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -20111,7 +20265,6 @@ class EnviroFacts( Fetcher ):
 class TidesAndCurrents( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to NOAA CO-OPS Tides and Currents APIs for station metadata,
 		water-level observations, and tide predictions.
 
@@ -20134,14 +20287,23 @@ class TidesAndCurrents( Fetcher ):
 			- format
 
 		Attributes:
-		data_url (Optional[ str ]): Instance state retained for data url operations.
-		metadata_url (Optional[ str ]): Instance state retained for metadata url operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			data_url (Optional[ str ]): Instance state retained for data url operations.
+			metadata_url (Optional[ str ]): Instance state retained for metadata url operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			rows (Any): Runtime state for rows in the TidesAndCurrents provider.
+			station_id (Any): Runtime state for station id in the TidesAndCurrents provider.
+			begin_date (Any): Runtime state for begin date in the TidesAndCurrents provider.
+			end_date (Any): Runtime state for end date in the TidesAndCurrents provider.
+			required (Any): Runtime state for required in the TidesAndCurrents provider.
+			function (Any): Runtime state for function in the TidesAndCurrents provider.
+			tool (Any): Runtime state for tool in the TidesAndCurrents provider.
+			description (Any): Runtime state for description in the TidesAndCurrents provider.
+			parameters (Any): Runtime state for parameters in the TidesAndCurrents provider.'''
 	data_url: Optional[ str ]
 	metadata_url: Optional[ str ]
 	mode: Optional[ str ]
@@ -20782,7 +20944,6 @@ class TidesAndCurrents( Fetcher ):
 class UvIndex( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the EPA UV Index web services for daily and hourly UV
 		forecast retrieval by ZIP code or by city and state.
 
@@ -20798,13 +20959,23 @@ class UvIndex( Fetcher ):
 			- https://enviro.epa.gov/enviro/efservice
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			records (Any): Runtime state for records in the UvIndex provider.
+			rows (Any): Runtime state for rows in the UvIndex provider.
+			zip_code (Any): Runtime state for zip code in the UvIndex provider.
+			city (Any): Runtime state for city in the UvIndex provider.
+			state (Any): Runtime state for state in the UvIndex provider.
+			required (Any): Runtime state for required in the UvIndex provider.
+			function (Any): Runtime state for function in the UvIndex provider.
+			tool (Any): Runtime state for tool in the UvIndex provider.
+			description (Any): Runtime state for description in the UvIndex provider.
+			parameters (Any): Runtime state for parameters in the UvIndex provider.'''
 	base_url: Optional[ str ]
 	mode: Optional[ str ]
 	params: Optional[ Dict[ str, Any ] ]
@@ -21366,7 +21537,6 @@ class UvIndex( Fetcher ):
 class PurpleAir( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the PurpleAir API for bounding-box sensor discovery and
 		single-sensor detail retrieval using explicit field selection to reduce
 		point consumption and improve readability.
@@ -21392,14 +21562,26 @@ class PurpleAir( Fetcher ):
 			- modified_since
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the PurpleAir provider.
+			rows (Any): Runtime state for rows in the PurpleAir provider.
+			nwlng (Any): Runtime state for nwlng in the PurpleAir provider.
+			nwlat (Any): Runtime state for nwlat in the PurpleAir provider.
+			selng (Any): Runtime state for selng in the PurpleAir provider.
+			selat (Any): Runtime state for selat in the PurpleAir provider.
+			sensor_index (Any): Runtime state for sensor index in the PurpleAir provider.
+			required (Any): Runtime state for required in the PurpleAir provider.
+			function (Any): Runtime state for function in the PurpleAir provider.
+			tool (Any): Runtime state for tool in the PurpleAir provider.
+			description (Any): Runtime state for description in the PurpleAir provider.
+			parameters (Any): Runtime state for parameters in the PurpleAir provider.'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
 	mode: Optional[ str ]
@@ -22004,7 +22186,6 @@ class PurpleAir( Fetcher ):
 class OpenAQ( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to the OpenAQ v3 API for location discovery and latest
 		measurement retrieval using authenticated requests and human-readable
 		normalized output.
@@ -22029,14 +22210,22 @@ class OpenAQ( Fetcher ):
 			- page
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		api_key (Optional[ str ]): API credential retained for provider requests.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			api_key (Optional[ str ]): API credential retained for provider requests.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			endpoint (Any): Runtime state for endpoint in the OpenAQ provider.
+			rows (Any): Runtime state for rows in the OpenAQ provider.
+			location_id (Any): Runtime state for location id in the OpenAQ provider.
+			required (Any): Runtime state for required in the OpenAQ provider.
+			function (Any): Runtime state for function in the OpenAQ provider.
+			tool (Any): Runtime state for tool in the OpenAQ provider.
+			description (Any): Runtime state for description in the OpenAQ provider.
+			parameters (Any): Runtime state for parameters in the OpenAQ provider.'''
 	base_url: Optional[ str ]
 	api_key: Optional[ str ]
 	mode: Optional[ str ]
@@ -22631,7 +22820,6 @@ class OpenAQ( Fetcher ):
 class Firms( Fetcher ):
 	'''
 		Purpose:
-		--------
 		Provides access to NASA FIRMS area fire-detection and data-availability
 		services using a MAP_KEY and human-readable normalized output.
 
@@ -22653,14 +22841,25 @@ class Firms( Fetcher ):
 			- Optional DATE in YYYY-MM-DD format
 
 		Attributes:
-		base_url (Optional[ str ]): Provider API base URL.
-		map_key (Optional[ str ]): Instance state retained for map key operations.
-		mode (Optional[ str ]): Selected request or operation mode.
-		params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
-		payload (Optional[ Any ]): Last parsed response payload.
-		timeout (Optional[ int ]): Request timeout in seconds.
-		agents (Optional[ str ]): Instance state retained for agents operations.
-	'''
+			base_url (Optional[ str ]): Provider API base URL.
+			map_key (Optional[ str ]): Instance state retained for map key operations.
+			mode (Optional[ str ]): Selected request or operation mode.
+			params (Optional[ Dict[ str, Any ] ]): Query parameters for the current API request.
+			payload (Optional[ Any ]): Last parsed response payload.
+			timeout (Optional[ int ]): Request timeout in seconds.
+			agents (Optional[ str ]): Instance state retained for agents operations.
+	
+			csv_text (Any): Runtime state for csv text in the Firms provider.
+			rows (Any): Runtime state for rows in the Firms provider.
+			source (Any): Runtime state for source in the Firms provider.
+			area_coordinates (Any): Runtime state for area coordinates in the Firms provider.
+			day_range (Any): Runtime state for day range in the Firms provider.
+			date (Any): Runtime state for date in the Firms provider.
+			required (Any): Runtime state for required in the Firms provider.
+			function (Any): Runtime state for function in the Firms provider.
+			tool (Any): Runtime state for tool in the Firms provider.
+			description (Any): Runtime state for description in the Firms provider.
+			parameters (Any): Runtime state for parameters in the Firms provider.'''
 	base_url: Optional[ str ]
 	map_key: Optional[ str ]
 	mode: Optional[ str ]
@@ -23172,17 +23371,20 @@ class OpenSky( Fetcher ):
 	'''
 
 		Purpose:
-		--------
 		Provides access to the OpenSky Network REST API for aircraft state
 		vectors, flights, airport arrivals/departures, and aircraft tracks.
 
 		Attributes:
-		token_url (Optional[ str ]): Instance state retained for token url operations.
-		base_url (Optional[ str ]): Provider API base URL.
-		client_id (Optional[ str ]): Instance state retained for client id operations.
-		client_secret (Optional[ str ]): Instance state retained for client secret operations.
-		access_token (Optional[ str ]): Active authentication token.
-	'''
+			token_url (Optional[ str ]): Instance state retained for token url operations.
+			base_url (Optional[ str ]): Provider API base URL.
+			client_id (Optional[ str ]): Instance state retained for client id operations.
+			client_secret (Optional[ str ]): Instance state retained for client secret operations.
+			access_token (Optional[ str ]): Active authentication token.
+	
+			endpoint (Any): Runtime state for endpoint in the OpenSky provider.
+			params (Any): Runtime state for params in the OpenSky provider.
+			payload (Any): Runtime state for payload in the OpenSky provider.
+			mode (Any): Runtime state for mode in the OpenSky provider.'''
 	token_url: Optional[ str ]
 	base_url: Optional[ str ]
 	client_id: Optional[ str ]
