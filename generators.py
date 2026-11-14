@@ -607,15 +607,24 @@ class Grok( Generator ):
 				parts: List[ str ]=[ ]
 				
 				for event in response:
-					event_type = getattr( event, 'type', '' )
+					try:
+						event_type = event.type
+					except AttributeError:
+						event_type = ''
 					
 					if event_type == 'response.output_text.delta':
-						delta = getattr( event, 'delta', '' )
+						try:
+							delta = event.delta
+						except AttributeError:
+							delta = ''
 						if delta:
 							parts.append( str( delta ) )
 					
 					elif event_type == 'response.completed':
-						final_response = getattr( event, 'response', None )
+						try:
+							final_response = event.response
+						except AttributeError:
+							final_response = None
 						if final_response is not None:
 							text = self.extract_output_text( final_response )
 							if text:
@@ -624,16 +633,25 @@ class Grok( Generator ):
 				if parts:
 					return ''.join( parts )
 			
-			output = getattr( response, 'output', None )
+			try:
+				output = response.output
+			except AttributeError:
+				output = None
 			if output:
 				parts: List[ str ]=[ ]
 				
 				for item in output:
-					content = getattr( item, 'content', None )
+					try:
+						content = item.content
+					except AttributeError:
+						content = None
 					
 					if content:
 						for block in content:
-							text = getattr( block, 'text', None )
+							try:
+								text = block.text
+							except AttributeError:
+								text = None
 							
 							if text:
 								parts.append( str( text ) )
@@ -1458,19 +1476,28 @@ class Gemini( Generator ):
 				if response.get( 'text' ):
 					return str( response.get( 'text' ) )
 			
-			candidates = getattr( response, 'candidates', None )
+			try:
+				candidates = response.candidates
+			except AttributeError:
+				candidates = None
 			if candidates:
 				parts: List[ str ]=[ ]
 				
 				for candidate in candidates:
-					content = getattr( candidate, 'content', None )
+					try:
+						content = candidate.content
+					except AttributeError:
+						content = None
 					candidate_parts = getattr( content, 'parts', None ) if content else None
 					
 					if not candidate_parts:
 						continue
 					
 					for part in candidate_parts:
-						text = getattr( part, 'text', None )
+						try:
+							text = part.text
+						except AttributeError:
+							text = None
 						
 						if text:
 							parts.append( str( text ) )
@@ -1887,9 +1914,15 @@ class Claude( Generator ):
 			if hasattr( response, 'content' ) and response.content:
 				_parts = [ ]
 				for _block in response.content:
-					_type = getattr( _block, 'type', None )
+					try:
+						_type = _block.type
+					except AttributeError:
+						_type = None
 					if _type == 'text':
-						_text = getattr( _block, 'text', '' )
+						try:
+							_text = _block.text
+						except AttributeError:
+							_text = ''
 						if _text:
 							_parts.append( _text )
 				if _parts:
@@ -2225,7 +2258,10 @@ class Mistral( Generator ):
 								if isinstance( item, str ) and item.strip( ):
 									parts.append( item.strip( ) )
 								elif hasattr( item, 'text' ):
-									text_value = getattr( item, 'text', '' )
+									try:
+										text_value = item.text
+									except AttributeError:
+										text_value = ''
 									if text_value:
 										parts.append( str( text_value ).strip( ) )
 							
@@ -2779,15 +2815,24 @@ class Chat( Generator ):
 				parts: List[ str ]=[ ]
 				
 				for event in response:
-					event_type = getattr( event, 'type', '' )
+					try:
+						event_type = event.type
+					except AttributeError:
+						event_type = ''
 					
 					if event_type == 'response.output_text.delta':
-						delta = getattr( event, 'delta', '' )
+						try:
+							delta = event.delta
+						except AttributeError:
+							delta = ''
 						if delta:
 							parts.append( str( delta ) )
 					
 					elif event_type == 'response.completed':
-						final_response = getattr( event, 'response', None )
+						try:
+							final_response = event.response
+						except AttributeError:
+							final_response = None
 						if final_response is not None and hasattr( final_response, 'output_text' ):
 							text = str( final_response.output_text or '' )
 							if text:
@@ -2796,14 +2841,23 @@ class Chat( Generator ):
 				if parts:
 					return ''.join( parts )
 			
-			output = getattr( response, 'output', None )
+			try:
+				output = response.output
+			except AttributeError:
+				output = None
 			if output:
 				parts: List[ str ]=[ ]
 				for item in output:
-					content = getattr( item, 'content', None )
+					try:
+						content = item.content
+					except AttributeError:
+						content = None
 					if content:
 						for block in content:
-							text = getattr( block, 'text', None )
+							try:
+								text = block.text
+							except AttributeError:
+								text = None
 							if text:
 								parts.append( str( text ) )
 				
