@@ -50,7 +50,7 @@
 '''
 from __future__ import annotations
 
-from anthropic import Anthropic as Claude
+from anthropic import Anthropic as AnthropicClient
 import base64
 from boogr import Error, Logger
 from core import Result
@@ -1749,7 +1749,7 @@ class Claude( Generator ):
 	    Wraps Anthropic Claude message generation and optional web-search tooling behind a consistent Foo interface.
 
 	Attributes:
-	    client (Optional[Claude]): Initialized provider SDK client used to execute API requests.
+	    client (Optional[AnthropicClient]): Initialized provider SDK client used to execute API requests.
 	    model (Optional[str]): Provider model identifier used for generation requests.
 	    response (Optional[Any]): Most recent raw response returned by the provider client.
 	    api_key (Optional[str]): Provider credential loaded from application configuration.
@@ -1770,7 +1770,7 @@ class Claude( Generator ):
 	    content (Any): Current content retained by the Claude workflow between related operations.
 	    agents (Any): Configured user-agent string sent with web requests.
 	"""
-	client: Optional[ Claude ]
+	client: Optional[ AnthropicClient ]
 	model: Optional[ str ]
 	response: Optional[ Any ]
 	api_key: Optional[ str ]
@@ -1967,7 +1967,7 @@ class Claude( Generator ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'Claude'
-			exception.method = '_extract_text( self, response: Any ) -> str'
+			exception.method = 'extract_text( self, response: Any ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2014,7 +2014,7 @@ class Claude( Generator ):
 			self.top_k = int( top_k ) if top_k is not None else None
 			self.system_instructions = system if system and str( system ).strip( ) else None
 			self.web_search = bool( web_search )
-			self.client = Claude( api_key=self.api_key )
+			self.client = AnthropicClient( api_key=self.api_key )
 			self.search_domains = self.normalize_domains( search_domains )
 			self.blocked_domains = self.normalize_domains( blocked_domains )
 			self.thinking_budget = int( thinking_budget ) if thinking_budget is not None else None
@@ -2253,9 +2253,9 @@ class Mistral( Generator ):
 		"""
 		return [ 'content', 'client', 'timeout', 'headers', 'fetch', 'api_key', 'response',
 			'params', 'agents', 'model', 'temperature', 'max_tokens', 'top_p', 'messages',
-			'system_instructions', 'seed', 'safe_prompt', '_extract_text', 'create_schema', ]
+			'system_instructions', 'seed', 'safe_prompt', 'extract_text', 'create_schema', ]
 	
-	def _extract_text( self, response: Any ) -> str:
+	def extract_text( self, response: Any ) -> str:
 		"""Extract text.
 
 		Purpose:
@@ -2318,7 +2318,7 @@ class Mistral( Generator ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'Mistral'
-			exception.method = '_extract_text( self, response: Any ) -> str'
+			exception.method = 'extract_text( self, response: Any ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2373,7 +2373,7 @@ class Mistral( Generator ):
 				self.params[ 'random_seed' ] = self.seed
 			
 			self.response = self.client.chat.complete( **self.params )
-			return self._extract_text( self.response )
+			return self.extract_text( self.response )
 		except Exception as exc:
 			exception = Error( exc )
 			exception.module = 'fetchers'
