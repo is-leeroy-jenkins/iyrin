@@ -443,16 +443,20 @@ class Excel:
 			self.country = country_value
 			try:
 				result = self.geocoder.freeform( self.address, country=self.country )
-				return { 'result': result or { }, 'status': 'ok', 'error': None }
-			
+				if result:
+					return { 'result': result, 'status': 'ok', 'error': None }
+				geocode_message = 'Geocoder returned no results.'
 			except Exception as geocode_error:
-				try:
-					result = self.places.text_to_location( self.address, country=self.country )
-					return { 'result': result or { }, 'status': 'ok_places', 'error': None }
-				
-				except Exception as places_error:
-					return { 'result': { }, 'status': 'not_found',
-							'error': f'{geocode_error}; {places_error}' }
+				geocode_message = str( geocode_error )
+			try:
+				result = self.places.text_to_location( self.address, country=self.country )
+				if result:
+					return { 'result': result, 'status': 'ok_places', 'error': None }
+				return { 'result': { }, 'status': 'not_found',
+						'error': f'{geocode_message}; Places returned no results.' }
+			except Exception as places_error:
+				return { 'result': { }, 'status': 'not_found',
+						'error': f'{geocode_message}; {places_error}' }
 		
 		except Exception as e:
 			exception = Error( e )
@@ -489,18 +493,22 @@ class Excel:
 			self.country = country_value
 			try:
 				result = self.geocoder.city_state_country( self.city, self.state, self.country )
-				return { 'result': result or { }, 'status': 'ok', 'error': None }
-			
+				if result:
+					return { 'result': result, 'status': 'ok', 'error': None }
+				geocode_message = 'Geocoder returned no results.'
 			except Exception as geocode_error:
-				query = ', '.join(
-					[ value for value in [ self.city, self.state, self.country ] if value ] )
-				try:
-					result = self.places.text_to_location( query, country=self.country )
-					return { 'result': result or { }, 'status': 'ok_places', 'error': None }
-				
-				except Exception as places_error:
-					return { 'result': { }, 'status': 'not_found',
-							'error': f'{geocode_error}; {places_error}' }
+				geocode_message = str( geocode_error )
+			query = ', '.join(
+				[ value for value in [ self.city, self.state, self.country ] if value ] )
+			try:
+				result = self.places.text_to_location( query, country=self.country )
+				if result:
+					return { 'result': result, 'status': 'ok_places', 'error': None }
+				return { 'result': { }, 'status': 'not_found',
+						'error': f'{geocode_message}; Places returned no results.' }
+			except Exception as places_error:
+				return { 'result': { }, 'status': 'not_found',
+						'error': f'{geocode_message}; {places_error}' }
 		
 		except Exception as e:
 			exception = Error( e )
