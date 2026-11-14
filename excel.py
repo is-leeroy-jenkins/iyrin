@@ -73,21 +73,31 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 class Excel:
+	"""Excel and CSV location enrichment interface.
+
+	Purpose:
+		Reads or writes spreadsheets, preserves existing data columns, and enriches
+		geographic records using Geocoder with Places as a fallback. Records row-level
+		status, errors, and summary metrics without changing the input column schema.
+
+	Attributes:
+		api_key (str): Google Maps credential used by the gateway.
+		maps (Optional[Map]): Google Maps request gateway.
+		geocoder (Optional[Geocoder]): Address geocoding service.
+		places (Optional[Place]): Google Places fallback resolver.
+		input_path (Optional[str]): Source spreadsheet filename.
+		output_path (Optional[str]): Output spreadsheet filename.
+		dataframe (Optional[pd.DataFrame]): Most recent loaded or enriched DataFrame.
+		worksheet (Optional[str]): Selected Excel worksheet name.
+		output (Optional[Dict[str, List]]): Enrichment output columns and their values.
+		address (Optional[str]): Selected address or address-column name.
+		cache (Optional[BaseCache]): Optional provider lookup cache.
+		file_path (Optional[str]): Most recent file path used for I/O.
+		last_summary (Optional[Dict]): Most recently computed enrichment summary.
+		city (Optional[str]): City or city-column name.
+		state (Optional[str]): State or region-column name.
+		country (Optional[str]): Country or country-column name.
 	"""
-	
-        Purpose:
-        Read and write spreadsheets while enriching location rows using Google
-        Maps APIs. Keeps original columns; appends geocode outputs, row-level
-        status, row-level errors, and summary metrics.
-
-        Parameters:
-        api_key (str): Google Maps Platform API key.
-        cache (Optional[BaseCache]): Optional cache for memoization.
-
-        Returns:
-        Excel helper with file-based and DataFrame-first enrichment entry points.
-        
-    """
 	api_key: str
 	maps: Optional[ Map ]
 	geocoder: Optional[ Geocoder ]
@@ -106,7 +116,18 @@ class Excel:
 	country: Optional[ str ]
 	
 	def __init__( self, api: str, cache: Optional[ BaseCache ] = None ) -> None:
-		self.api_key = api
+		"""Initialize Excel enrichment with a Google Maps gateway and optional cache.
+
+		Purpose:
+			Creates the mapping, geocoding, and Places client members used by enrichment methods.
+
+		Args:
+			api (str): Google Maps Platform API credential.
+			cache (Optional[BaseCache]): Optional cache shared by the mapping providers.
+
+		Returns:
+			None: Initializes the enrichment helper and its member attributes.
+		"""self.api_key = api
 		self.cache = cache
 		self.maps = Map( api_key=self.api_key )
 		self.geocoder = Geocoder( self.maps, cache=self.cache )
@@ -124,25 +145,26 @@ class Excel:
 		self.country = None
 	
 	def read( self, path: str, sheet: Optional[ str ] ) -> pd.DataFrame:
+		"""Read a CSV or Excel workbook without losing text identifiers.
+
+		Purpose:
+			Loads CSV or XLSX data with string preservation, including account codes and leading zeros.
+
+		Args:
+			path (str): Source CSV or XLSX file path.
+			sheet (Optional[str]): Worksheet to read from an Excel file, or None for the first worksheet.
+
+		Returns:
+			pd.DataFrame: Loaded spreadsheet data.
 		"""
-
-            Purpose:
-                Robustly read CSV/XLSX and preserve strings, including leading zeros.
-
-            Parameters:
-	            path (str): Input file path, either .csv or .xlsx.
-	            sheet (Optional[str]): Optional sheet name for Excel.
-
-            Returns:
-                pd.DataFrame: DataFrame with dtype=str for string-like columns.
-
-        """
 		try:
 			throw_if( 'path', path )
-			path_value = path
-			sheet_value = sheet
-			self.file_path = path_value
-			self.worksheet = sheet_value
+			if not isinstance( path, str ):
+				raise TypeError( 'path must be a string.' )
+			if sheet is not None and not isinstance( sheet, str ):
+				raise TypeError( 'sheet must be a string when provided.' )
+			self.file_path = path
+			self.worksheet = sheet
 			if self.file_path.lower( ).endswith( '.csv' ):
 				self.dataframe = pd.read_csv( self.file_path, dtype=str )
 			else:
@@ -166,33 +188,30 @@ class Excel:
 			raise exception
 	
 	def write( self, df: pd.DataFrame, path: str, sheet: Optional[ str ] ) -> None:
+		"""Write the current DataFrame to CSV or Excel.
+
+		Purpose:
+			Writes spreadsheet data without exporting the DataFrame index.
+
+		Args:
+			df (pd.DataFrame): DataFrame to write.
+			path (str): Destination CSV or XLSX file path.
+			sheet (Optional[str]): Excel worksheet name, or None to use Sheet1.
+
+		Returns:
+			None: Writes the output file.
 		"""
-
-	        Purpose:
-	            Write CSV/XLSX with index suppressed.
-
-	        Parameters:
-	            df (pd.DataFrame):
-	                Data to persist.
-	            path (str):
-	                Output path, either .csv or .xlsx.
-	            sheet (Optional[str]):
-	                Optional Excel sheet name.
-
-	        Returns:
-	            None.
-
-        """
 		try:
 			throw_if( 'df', df )
 			throw_if( 'path', path )
 			
-			path_value = path
-			sheet_value = sheet or 'Sheet1'
-			dataframe_value = df.copy( )
-			self.file_path = path_value
-			self.dataframe = dataframe_value
-			self.worksheet = sheet_value
+			if not isinstance( df, pd.DataFrame ) or not isinstance( path, str ):
+				raise TypeError( 'Expected a pandas DataFrame and a string path.' )
+			if sheet is not None and not isinstance( sheet, str ):
+				raise TypeError( 'sheet must be a string when provided.' )
+			self.file_path = path
+			self.dataframe = df.copy( )
+			self.worksheet = sheet or 'Sheet1'
 			if self.file_path.lower( ).endswith( '.csv' ):
 				self.dataframe.to_csv( self.file_path, index=False )
 			else:
@@ -209,15 +228,13 @@ class Excel:
 			raise exception
 	
 	def create_outputs( self ) -> Dict[ str, List ]:
-		"""
+		"""Create the standard enrichment output columns.
 
-			Purpose:
-				Create the standard geocode enrichment output-column container.
+		Purpose:
+			Returns empty lists for geocode data, status, and error fields.
 
-			Returns:
-				Dict[str, List]:
-					Dictionary of output column names and empty value lists.
-
+		Returns:
+			Dict[str, List]: Empty output lists keyed by enrichment column names.
 		"""
 		try:
 			return { 'formatted_address': [ ], 'lat': [ ], 'lng': [ ], 'place_id': [ ],
@@ -234,22 +251,18 @@ class Excel:
 	
 	def append_empty( self, outputs: Dict[ str, List ], status: str='skipped_empty',
 			error: Optional[ str ]=None ) -> None:
-		"""
+		"""Append an empty geographic resolution record.
 
-			Purpose:
-				Append an empty geocode result to the output container.
+		Purpose:
+			Marks a record skipped or unresolved while retaining aligned output columns.
 
-			Parameters:
-				outputs (Dict[str, List]):
-					Output column container.
-				status (str):
-					Row-level geocode status.
-				error (Optional[str]):
-					Optional row-level error message.
+		Args:
+			outputs (Dict[str, List]): Existing output-column container.
+			status (str): Row-level status code.
+			error (Optional[str]): Optional error description.
 
-			Returns:
-				None.
-
+		Returns:
+			None: Appends the empty result and its status to the container.
 		"""
 		try:
 			throw_if( 'outputs', outputs )
@@ -276,24 +289,19 @@ class Excel:
 	
 	def append_result( self, outputs: Dict[ str, List ], result: Dict,
 			status: str, error: Optional[ str ] = None ) -> None:
-		"""
+		"""Append a normalized geocode or Places record.
 
-			Purpose:
-				Append a geocode result dictionary to the output container.
+		Purpose:
+			Adds a resolved geographic record and status to the existing output columns.
 
-			Parameters:
-				outputs (Dict[str, List]):
-					Output column container.
-				result (Dict):
-					Flattened geocode or Places result.
-				status (str):
-					Row-level status.
-				error (Optional[str]):
-					Optional row-level error message.
+		Args:
+			outputs (Dict[str, List]): Existing output-column container.
+			result (Dict): Flattened geocode or Places result.
+			status (str): Resolution status code.
+			error (Optional[str]): Optional failure description.
 
-			Returns:
-				None.
-
+		Returns:
+			None: Appends the result and status to the container.
 		"""
 		try:
 			throw_if( 'outputs', outputs )
@@ -321,19 +329,16 @@ class Excel:
 			raise exception
 	
 	def summarize( self, df: pd.DataFrame ) -> Dict:
-		"""
+		"""Summarize the outcome of a spreadsheet enrichment.
 
-			Purpose:
-				Build summary metrics for the most recent enrichment result.
+		Purpose:
+			Calculates row and status counts from the enriched DataFrame.
 
-			Parameters:
-				df (pd.DataFrame):
-					Enriched DataFrame.
+		Args:
+			df (pd.DataFrame): Enriched spreadsheet data.
 
-			Returns:
-				Dict:
-					Summary metrics.
-
+		Returns:
+			Dict: Row counts, status counts, and summary metrics.
 		"""
 		try:
 			throw_if( 'df', df )
@@ -359,26 +364,33 @@ class Excel:
 			raise exception
 	
 	def detect_columns( self, df: pd.DataFrame ) -> Dict:
-		"""
+		"""Identify likely location columns in a spreadsheet.
 
-			Purpose:
-				Suggest likely address, city, state, and country columns from a
-				DataFrame's column names.
+		Purpose:
+			Matches column labels to common address, city, region, and country names.
 
-			Parameters:
-				df (pd.DataFrame):
-					DataFrame to inspect.
+		Args:
+			df (pd.DataFrame): Spreadsheet data to inspect.
 
-			Returns:
-				Dict:
-					Suggested column names.
-
+		Returns:
+			Dict: Suggested column names for geographic enrichment.
 		"""
 		try:
 			throw_if( 'df', df )
 			columns = list( df.columns )
 			lower_map = { str( column ).strip( ).lower( ): column for column in columns }
 			def find_first( names: List[ str ] ) -> Optional[ str ]:
+				"""Find the first normalized column label among the candidates.
+
+				Purpose:
+					Matches known address-field names to the input spreadsheet schema.
+
+				Args:
+					names (List[str]): Candidate normalized column names.
+
+				Returns:
+					Optional[str]: Matching source column or None when absent.
+				"""
 				for name in names:
 					if name in lower_map:
 						return lower_map[ name ]
@@ -399,26 +411,26 @@ class Excel:
 			raise exception
 	
 	def resolve_address( self, address: str, country: Optional[ str ] = None ) -> Dict:
-		"""
+		"""Resolve a free-form address through Google geospatial providers.
 
-			Purpose:
-				Resolve one free-form address using Geocoder first and Places fallback.
+		Purpose:
+			Queries the Geocoder first and falls back to Places if the geocoder fails.
 
-			Parameters:
-				address (str):
-					Free-form address text.
-				country (Optional[str]):
-					Optional ISO-2 country bias.
+		Args:
+			address (str): Free-form address to resolve.
+			country (Optional[str]): Optional ISO country-code bias.
 
-			Returns:
-				Dict:
-					Dictionary with result, status, and error fields.
-
+		Returns:
+			Dict: Result, resolution status, and any error message.
 		"""
 		try:
 			throw_if( 'address', address )
-			address_value = str( address ).strip( )
-			country_value = str( country or 'US' ).strip( ).upper( )
+			if not isinstance( address, str ):
+				raise TypeError( 'address must be a string.' )
+			address_value = address.strip( )
+			if country is not None and not isinstance( country, str ):
+				raise TypeError( 'country must be a string when provided.' )
+			country_value = (country or 'US').strip( ).upper( )
 			self.address = address_value
 			self.country = country_value
 			try:
@@ -443,24 +455,18 @@ class Excel:
 	
 	def resolve_city_state_country( self, city: str, state: Optional[ str ],
 			country: str ) -> Dict:
-		"""
+		"""Resolve a city, state, and country combination.
 
-			Purpose:
-				Resolve one city/state/country row using Geocoder first and Places
-				fallback.
+		Purpose:
+			Attempts structured geocoding and falls back to a Places query when necessary.
 
-			Parameters:
-				city (str):
-					City or locality value.
-				state (Optional[str]):
-					State, province, region, or territory value.
-				country (str):
-					Country name or ISO-2 country code.
+		Args:
+			city (str): City or locality text.
+			state (Optional[str]): Optional province, state, or region.
+			country (str): Country name or ISO country code.
 
-			Returns:
-				Dict:
-					Dictionary with result, status, and error fields.
-
+		Returns:
+			Dict: Result, resolution status, and any error message.
 		"""
 		try:
 			city_value = str( city or '' ).strip( )
@@ -496,27 +502,21 @@ class Excel:
 	
 	def enrich_from_address( self, inpath: str, outpath: str, address: str, sheet: Optional[ str ],
 			cntry: Optional[ str ] ) -> pd.DataFrame:
+		"""Enrich a spreadsheet using a free-form address column.
+
+		Purpose:
+			Reads the source file, resolves unique addresses, appends geographic fields, and writes the result.
+
+		Args:
+			inpath (str): Input CSV or XLSX path.
+			outpath (str): Output CSV or XLSX path.
+			address (str): Address-column name.
+			sheet (Optional[str]): Excel worksheet name.
+			cntry (Optional[str]): Optional country-bias column.
+
+		Returns:
+			pd.DataFrame: Enriched spreadsheet data also written to the output file.
 		"""
-            Purpose:
-                Enrich a file containing a single free-form address column, adding
-                lat/lng, place_id, canonical components, status, and error fields.
-
-            Parameters:
-                inpath (str):
-                    Path to input CSV/XLSX with an address column.
-                outpath (str):
-                    Output path to write enriched file.
-                address (str):
-                    Column name containing free-form addresses.
-                sheet (Optional[str]):
-                    Excel sheet name if .xlsx.
-                cntry (Optional[str]):
-                    Optional column containing ISO-2 country bias codes.
-
-            Returns:
-                pd.DataFrame:
-                    Enriched DataFrame. The output file is still written.
-        """
 		try:
 			throw_if( 'inpath', inpath )
 			throw_if( 'outpath', outpath )
@@ -565,23 +565,21 @@ class Excel:
 	
 	def enrich( self, inpath: str, outpath: str, city: str, state: Optional[ str ], cntry: str,
 			sheet: Optional[ str ] = None, ) -> pd.DataFrame:
-		"""
+		"""Enrich a spreadsheet using city, region, and country columns.
 
-			Purpose:
-				Enrich a file with City, State/Region, and Country columns by appending
-				lat/lng, place_id, canonical components, status, and error fields.
-	
-			Parameters:
-				inpath (str): Input CSV/XLSX path containing location columns.
-				outpath (str): Output CSV/XLSX path to write enriched results.
-				city (str): Column for city/locality.
-				state (Optional[str]): Column for state/region.
-				cntry (str): Column for country name or ISO-2 code.
-				sheet (Optional[str]): Excel sheet name if .xlsx.
-	
-			Returns:
-				pd.DataFrame: Enriched DataFrame. The output file is still written.
+		Purpose:
+			Resolves unique combinations, preserves input columns, and writes geographic fields and statuses.
 
+		Args:
+			inpath (str): Input CSV or XLSX path.
+			outpath (str): Output CSV or XLSX path.
+			city (str): City-column name.
+			state (Optional[str]): Optional state or province-column name.
+			cntry (str): Country-column name.
+			sheet (Optional[str]): Optional Excel worksheet.
+
+		Returns:
+			pd.DataFrame: Enriched spreadsheet data also written to the output file.
 		"""
 		try:
 			throw_if( 'inpath', inpath )
