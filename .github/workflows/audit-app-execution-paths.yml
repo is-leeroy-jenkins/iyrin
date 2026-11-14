@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - audit/roe-full-revalidation-pr80-pr84
+      - audit/roe-full-revalidation-pr80-pr84
   pull_request:
     branches:
       - main
