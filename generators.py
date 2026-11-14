@@ -2241,7 +2241,8 @@ class Mistral( Generator ):
 		    str | None: Normalized text produced by the operation, or ``None`` when no text is available.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata, writes it
+		        to the application logger, and re-raises it.
 		"""
 		try:
 			throw_if( 'query', query )
@@ -2568,7 +2569,8 @@ class Chat( Generator ):
 		    bool: ``True`` when the condition is satisfied; otherwise ``False``.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata, writes
+		        it to the application logger, and re-raises it.
 		"""
 		try:
 			throw_if( 'model', model )
@@ -2589,7 +2591,8 @@ class Chat( Generator ):
 		"""Build instructions.
 
 		Purpose:
-		    Combines system instructions and output-format constraints into a provider-ready instruction string.
+		    Combines system instructions and output-format constraints into a provider-ready
+		    instruction string.
 
 		Args:
 		    system (str): System-level instructions that define response behavior.
@@ -2601,7 +2604,8 @@ class Chat( Generator ):
 		    str | None: Normalized text produced by the operation, or ``None`` when no text is available.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata, writes it
+		        to the application logger, and re-raises it.
 		"""
 		try:
 			parts: List[ str ]=[ ]
@@ -2641,16 +2645,21 @@ class Chat( Generator ):
 		    Translates the requested text response mode into the OpenAI format configuration.
 
 		Args:
-		    response_format (str | Dict[str, Any]): Requested output representation, such as text or JSON.
-		    json_schema (Dict[str, Any]): Json schema supplied by the caller and interpreted according to the method contract.
-		    schema_name (str): Schema name supplied by the caller and interpreted according to the method contract.
-		    schema_description (str): Schema description supplied by the caller and interpreted according to the method contract.
+		    response_format (str | Dict[str, Any]): Requested output representation
+		    json_schema (Dict[str, Any]): Json schema supplied by the caller and interpreted
+		        according to the method contract.
+		    schema_name (str): Schema name supplied by the caller and interpreted according to
+		        the method contract.
+		    schema_description (str): Schema description supplied by the caller and interpreted
+		        according to the method contract.
 
 		Returns:
-		    Dict[str, Any] | None: Dictionary containing normalized provider data, configuration, metadata, or generated schema content.
+		    Dict[str, Any] | None: Dictionary containing normalized provider data, configuration,
+		        metadata, or generated schema content.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata, writes it
+		        to the application logger, and re-raises it.
 		"""
 		try:
 			if isinstance( response_format, dict ):
@@ -2666,16 +2675,10 @@ class Chat( Generator ):
 			
 			if mode in [ 'json', 'json_object' ]:
 				return { 'type': 'json_object' }
-			
 			if mode in [ 'json_schema', 'schema' ]:
 				throw_if( 'json_schema', json_schema )
-				return {
-						'type': 'json_schema',
-						'name': schema_name,
-						'description': schema_description,
-						'strict': True,
-						'schema': json_schema
-				}
+				return { 'type': 'json_schema', 'name': schema_name,
+						'description': schema_description, 'strict': True, 'schema': json_schema }
 			
 			return None
 		
@@ -2699,14 +2702,18 @@ class Chat( Generator ):
 		    web_search (bool): Whether to attach the provider web-search tool.
 		    search_domains (Any): Domain names or URLs allowed or preferred for grounded web search.
 		    file_search (bool): Whether file search behavior is enabled for the operation.
-		    vector_store_ids (List[str]): Vector store ids supplied by the caller and interpreted according to the method contract.
-		    max_file_results (int): Max file results supplied by the caller and interpreted according to the method contract.
+		    vector_store_ids (List[str]): Vector store ids supplied by the caller and interpreted
+		        according to the method contract.
+		    max_file_results (int): Max file results supplied by the caller and interpreted
+		        according to the method contract.
 
 		Returns:
-		    List[Dict[str, Any]]: Dictionary containing normalized provider data, configuration, metadata, or generated schema content.
+		    List[Dict[str, Any]]: Dictionary containing normalized provider data, configuration,
+		        metadata, or generated schema content.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata, writes
+		        it to the application logger, and re-raises it.
 		"""
 		try:
 			tools: List[ Dict[ str, Any ] ] = [ ]
@@ -2717,11 +2724,8 @@ class Chat( Generator ):
 			if file_search:
 				store_ids = vector_store_ids or self.vector_store_ids
 				throw_if( 'vector_store_ids', store_ids )
-				tools.append( {
-							'type': 'file_search',
-							'vector_store_ids': store_ids,
-							'max_num_results': int( max_file_results )
-					} )
+				tools.append( { 'type': 'file_search', 'vector_store_ids': store_ids,
+						'max_num_results': int( max_file_results ) } )
 			
 			return tools
 		
@@ -2817,7 +2821,8 @@ class Chat( Generator ):
 		"""Fetch.
 
 		Purpose:
-		    Dispatches the requested retrieval or generation operation using the class configuration and returns the normalized result.
+		    Dispatches the requested retrieval or generation operation using the class
+		    configuration and returns the normalized result.
 
 		Args:
 		    prompt (str): Prompt supplied by the caller and interpreted according to the method contract.
@@ -2835,15 +2840,19 @@ class Chat( Generator ):
 		    stream (bool): Whether the provider should return incremental response events.
 		    parallel_tool_calls (bool): Whether multiple eligible tool calls may execute in parallel.
 		    tool_choice (str): Provider tool-selection mode or explicit tool choice.
-		    json_schema (Dict[str, Any]): Json schema supplied by the caller and interpreted according to the method contract.
-		    schema_name (str): Schema name supplied by the caller and interpreted according to the method contract.
-		    schema_description (str): Schema description supplied by the caller and interpreted according to the method contract.
+		    json_schema (Dict[str, Any]): Json schema supplied by the caller and interpreted
+		        according to the method contract.
+		    schema_name (str): Schema name supplied by the caller and interpreted according to
+		        the method contract.
+		    schema_description (str): Schema description supplied by the caller and interpreted
+		        according to the method contract.
 
 		Returns:
 		    str: Normalized text produced by the operation.
 
 		Raises:
-		    Error: Wraps the source exception with module, class, and method metadata, writes it to the application logger, and re-raises it.
+		    Error: Wraps the source exception with module, class, and method metadata, writes
+		        it to the application logger, and re-raises it.
 		"""
 		try:
 			throw_if( 'prompt', prompt )
