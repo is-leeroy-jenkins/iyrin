@@ -1676,6 +1676,7 @@ class TextParser( Processor ):
 			Error: Raised when validation or processing fails.
 		"""
 		try:
+			throw_if( 'source', source )
 			throw_if( 'filepath', source )
 			throw_if( 'destination', destination )
 			if not os.path.exists( source ):
