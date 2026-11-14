@@ -1178,7 +1178,7 @@ class PdfLoader( Loader ):
 		"""
 		return [ 'html-img', 'markdown-img', 'text-img' ]
 	
-	def _normalize_mode( self, mode: str ) -> str:
+	def normalize_mode( self, mode: str ) -> str:
 		"""Normalize mode.
 
 		Purpose:
@@ -1200,7 +1200,7 @@ class PdfLoader( Loader ):
 		
 		return value
 	
-	def _normalize_extraction( self, extract: str ) -> str:
+	def normalize_extraction( self, extract: str ) -> str:
 		"""Normalize extraction.
 
 		Purpose:
@@ -1222,7 +1222,7 @@ class PdfLoader( Loader ):
 		
 		return value
 	
-	def _normalize_image_format( self, format: str ) -> str:
+	def normalize_image_format( self, format: str ) -> str:
 		"""Normalize image format.
 
 		Purpose:
@@ -1267,10 +1267,10 @@ class PdfLoader( Loader ):
 			throw_if( 'filepath', filepath )
 			throw_if( 'path', filepath )
 			self.file_path = self.verify_exists( filepath )
-			self.mode = self._normalize_mode( mode )
-			self.extraction = self._normalize_extraction( extract )
+			self.mode = self.normalize_mode( mode )
+			self.extraction = self.normalize_extraction( extract )
 			self.include_images = include
-			self.image_format = self._normalize_image_format( format )
+			self.image_format = self.normalize_image_format( format )
 			if self.include_images:
 				self.image_parser = RapidOCRBlobParser( )
 				self.loader = PyPDFLoader( file_path=self.file_path, mode=self.mode,
@@ -1389,7 +1389,7 @@ class ExcelLoader( Loader ):
 		"""
 		return [ 'single', 'elements' ]
 	
-	def _normalize_mode( self, mode: str ) -> str:
+	def normalize_mode( self, mode: str ) -> str:
 		"""Normalize mode.
 
 		Purpose:
@@ -1430,7 +1430,7 @@ class ExcelLoader( Loader ):
 		try:
 			throw_if( 'path', path )
 			self.file_path = self.verify_exists( path )
-			self.mode = self._normalize_mode( mode )
+			self.mode = self.normalize_mode( mode )
 			self.has_headers = has_headers
 			self.loader = UnstructuredExcelLoader( file_path=self.file_path, mode=self.mode )
 			self.documents = self.loader.load( )
@@ -1651,7 +1651,7 @@ class MarkdownLoader( Loader ):
 		"""
 		return [ 'single', 'elements' ]
 	
-	def _normalize_mode( self, mode: str ) -> str:
+	def normalize_mode( self, mode: str ) -> str:
 		"""Normalize mode.
 
 		Purpose:
@@ -1692,7 +1692,7 @@ class MarkdownLoader( Loader ):
 		try:
 			throw_if( 'path', path )
 			self.file_path = self.verify_exists( path )
-			self.mode = self._normalize_mode( mode )
+			self.mode = self.normalize_mode( mode )
 			self.loader = UnstructuredMarkdownLoader( file_path=self.file_path, mode=self.mode )
 			self.documents = self.loader.load( )
 			return self.documents
@@ -2463,7 +2463,7 @@ class PowerPointLoader( Loader ):
 			'verify_exists', 'resolve_paths', 'split_documents', 'load', 'load_multiple',
 			'split', ]
 	
-	def _normalize_mode( self, mode: str ) -> str:
+	def normalize_mode( self, mode: str ) -> str:
 		"""Normalize mode.
 
 		Purpose:
@@ -2504,7 +2504,7 @@ class PowerPointLoader( Loader ):
 		try:
 			throw_if( 'path', path )
 			self.file_path = self.verify_exists( path )
-			self.mode = self._normalize_mode( mode )
+			self.mode = self.normalize_mode( mode )
 			self.loader = UnstructuredPowerPointLoader( file_path=self.file_path, mode=self.mode )
 			self.documents = self.loader.load( )
 			return self.documents
