@@ -49,7 +49,7 @@ import config as cfg
 from mapping import Map, Geocoder, Place, DistanceMatrix, Timezone, StaticMap
 from typing import Any, Optional, Dict, List, Tuple
 from excel import Excel
-from storage import InMemoryCache, SQLiteCache
+from storage import InMemoryCache, SQLiteCache, SQLiteDatabase
 from langchain_core.documents import Document
 from lxml import etree
 from realtime import render_live_world_map, render_live_world_sidebar
@@ -72,6 +72,33 @@ from fetchers import (GoogleWeather, OpenWeather, HistoricalWeather, ClimateData
                       StarMap, StarChart, WebFetcher, EarthObservatory, NearbyObjects, OpenScience,
                       USGSScienceBase, CensusData, Socrata, HealthData, GlobalHealthData,
                       UnitedNations, WorldPopulation, Wonder)
+
+# ------- Consolidated Database Utility Bindings
+
+sqlite_database = SQLiteDatabase( )
+create_connection = sqlite_database.create_connection
+list_tables = sqlite_database.list_tables
+create_schema = sqlite_database.create_schema
+read_table = sqlite_database.read_table
+render_table = sqlite_database.render_table
+make_display_safe = sqlite_database.make_display_safe
+drop_table = sqlite_database.drop_table
+create_index = sqlite_database.create_index
+apply_filters = sqlite_database.apply_filters
+create_aggregation = sqlite_database.create_aggregation
+create_visualization = sqlite_database.create_visualization
+convert_dataframe = sqlite_database.convert_dataframe
+insert_data = sqlite_database.insert_data
+get_sqlite_type = sqlite_database.get_sqlite_type
+create_custom_table = sqlite_database.create_custom_table
+is_safe_query = sqlite_database.is_safe_query
+create_identifier = sqlite_database.create_identifier
+get_indexes = sqlite_database.get_indexes
+add_column = sqlite_database.add_column
+rename_column = sqlite_database.rename_column
+create_profile_table = sqlite_database.create_profile_table
+drop_column = sqlite_database.drop_column
+rename_table = sqlite_database.rename_table
 
 # ------- Session State Initialization
 
@@ -368,8 +395,6 @@ if st.session_state.purpleair_api_key == '':
 	if default:
 		st.session_state.purpleair_api_key = default
 		os.environ[ 'PURPLEAIR_API_KEY' ] = default
-
-initialize_loading_state( )
 
 # ---------------------------------------------------------------------
 # UTILITIES
@@ -2470,6 +2495,9 @@ def initialize_loading_state( ) -> None:
 	for key, value in defaults.items( ):
 		if key not in st.session_state:
 			st.session_state[ key ] = value
+
+# Initialize shared loader state after its implementation is available.
+initialize_loading_state( )
 
 def rebuild_raw_text_from_documents( ) -> str:
 	"""
