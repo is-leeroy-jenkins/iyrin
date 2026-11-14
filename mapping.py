@@ -597,6 +597,10 @@ class Geocoder( ):
 		"""
 		try:
 			throw_if( 'city', city )
+			if state is None:
+				throw_if( 'state', state )
+			if not isinstance( state, str ):
+				raise TypeError( 'state must be a string; an empty string is allowed.' )
 			throw_if( 'country', country )
 			self.city = city
 			self.state = state
