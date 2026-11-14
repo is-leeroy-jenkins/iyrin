@@ -1022,7 +1022,11 @@ class ArXiv( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'ArXiv'
-			exception.method = "fetch( self, question: str, max_documents: Optional[ int ]=None, full_documents: Optional[ bool ]=None, include_metadata: Optional[ bool ]=None ) -> List[ Document ] | None"
+			exception.method = (
+				"fetch( self, question: str, max_documents: Optional[ int ]=None, "
+				"full_documents: Optional[ bool ]=None, include_metadata: Optional[ "
+				"bool ]=None ) -> List[ Document ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
@@ -1202,7 +1206,11 @@ class GoogleDrive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleDrive'
-			exception.method = "fetch( self, question: str, folder_id: str='root', results: int=10, template: str='gdrive-query', mime_type: Optional[ str ]=None, mode: str='documents' ) -> List[ Document ] | None"
+			exception.method = (
+				"fetch( self, question: str, folder_id: str='root', results: int=10, "
+				"template: str='gdrive-query', mime_type: Optional[ str ]=None, mode: "
+				"str='documents' ) -> List[ Document ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
@@ -1316,7 +1324,11 @@ class Wikipedia( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'Wikipedia'
-			exception.method = "fetch( self, question: str, language: Optional[ str ]=None, max_documents: Optional[ int ]=None, include_metadata: Optional[ bool ]=None ) -> List[ Document ] | None"
+			exception.method = (
+				"fetch( self, question: str, language: Optional[ str ]=None, "
+				"max_documents: Optional[ int ]=None, include_metadata: Optional[ bool "
+				"]=None ) -> List[ Document ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
@@ -1574,7 +1586,16 @@ class TheNews( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'TheNews'
-			exception.method = "fetch( self, endpoint: str='all', query: str='', language: str='en', categories: str='', exclude_categories: str='', locale: str='', domains: str='', exclude_domains: str='', source_ids: str='', exclude_source_ids: str='', published_after: str='', published_before: str='', published_on: str='', sort: str='published_at', limit: int=10, page: int=1, include_similar: bool=True, headlines_per_category: int=6, time: int=10, api_key: Optional[ str ]=None ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch( self, endpoint: str='all', query: str='', language: str='en', "
+				"categories: str='', exclude_categories: str='', locale: str='', "
+				"domains: str='', exclude_domains: str='', source_ids: str='', "
+				"exclude_source_ids: str='', published_after: str='', published_before: "
+				"str='', published_on: str='', sort: str='published_at', limit: int=10, "
+				"page: int=1, include_similar: bool=True, headlines_per_category: "
+				"int=6, time: int=10, api_key: Optional[ str ]=None ) -> Dict[ str, Any "
+				"] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
@@ -2743,7 +2764,11 @@ class NavalObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = "fetch( self, mode: str='celnav', date_value: str='', time_value: str='', latitude: float=0.0, longitude: float=0.0, location_label: str='', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch( self, mode: str='celnav', date_value: str='', time_value: "
+				"str='', latitude: float=0.0, longitude: float=0.0, location_label: "
+				"str='', time: int=20 ) -> Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3028,7 +3053,11 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = "fetch( self, mode: str='observatories', query: str='', start_time: str='', end_time: str='', coordinate_systems: str='gse', resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch( self, mode: str='observatories', query: str='', start_time: "
+				"str='', end_time: str='', coordinate_systems: str='gse', "
+				"resolution_factor: int=1, time: int=20 ) -> Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
@@ -3242,7 +3271,11 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "fetch_events( self, status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
+			exception.method = (
+				"fetch_events( self, status: str='open', category: str='', source: "
+				"str='', limit: int=20, days: int=30, start_date: str='', end_date: "
+				"str='', time: int=20 ) -> Dict[ str, Any ]"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3423,7 +3456,11 @@ class EarthObservatory( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "fetch( self, mode: str='events', status: str='open', category: str='', source: str='', limit: int=20, days: int=30, start_date: str='', end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
+			exception.method = (
+				"fetch( self, mode: str='events', status: str='open', category: str='', "
+				"source: str='', limit: int=20, days: int=30, start_date: str='', "
+				"end_date: str='', time: int=20 ) -> Dict[ str, Any ]"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3487,7 +3524,11 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None"
+			exception.method = (
+				"create_schema( self, function: str, tool: str, description: str, "
+				"parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, "
+				"str ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 			
@@ -3860,7 +3901,11 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_close_approaches( self, start_date: str, end_date: str, dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch_close_approaches( self, start_date: str, end_date: str, "
+				"dist_max: str='10LD', body: str='Earth', sort: str='date', limit: "
+				"int=20, time: int=20 ) -> Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3936,7 +3981,12 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_object_lookup( self, query: str, query_type: str='sstr', include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch_object_lookup( self, query: str, query_type: str='sstr', "
+				"include_physical: bool=True, include_close_approaches: bool=True, "
+				"ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> "
+				"Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3996,7 +4046,11 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, "
+				"launch: str='2020-2045', h: float=26.0, occ: int=7, time: int=20 ) -> "
+				"Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4220,7 +4274,16 @@ class NearbyObjects( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "fetch( self, mode: str='close_approaches', start_date: str='', end_date: str='', query: str='', query_type: str='sstr', dist_max: str='10LD', body: str='Earth', sort: str='date', limit: int=20, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: float=26.0, occ: int=7, include_physical: bool=True, include_close_approaches: bool=True, ca_body: str='Earth', include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch( self, mode: str='close_approaches', start_date: str='', "
+				"end_date: str='', query: str='', query_type: str='sstr', dist_max: "
+				"str='10LD', body: str='Earth', sort: str='date', limit: int=20, dv: "
+				"float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045', h: "
+				"float=26.0, occ: int=7, include_physical: bool=True, "
+				"include_close_approaches: bool=True, ca_body: str='Earth', "
+				"include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | "
+				"None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4279,7 +4342,11 @@ class NearbyObjects( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None"
+			exception.method = (
+				"create_schema( self, function: str, tool: str, description: str, "
+				"parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, "
+				"str ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
@@ -4495,7 +4562,10 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_metadata( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch_metadata( self, query: str, format_value: str='json', time: "
+				"int=20 ) -> Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4537,7 +4607,10 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_assays( self, query: str, format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch_assays( self, query: str, format_value: str='json', time: int=20 "
+				") -> Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4646,7 +4719,10 @@ class OpenScience( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch( self, mode: str='dataset', query: str='', accession: str='', format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = (
+				"fetch( self, mode: str='dataset', query: str='', accession: str='', "
+				"format_value: str='json', time: int=20 ) -> Dict[ str, Any ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4702,7 +4778,11 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "create_schema( self, function: str, tool: str, description: str, parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, str ] | None"
+			exception.method = (
+				"create_schema( self, function: str, tool: str, description: str, "
+				"parameters: dict, required: list[ str ] | None=None ) -> Dict[ str, "
+				"str ] | None"
+			)
 			Logger( ).write( exception )
 			raise exception
 
