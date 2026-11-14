@@ -78,13 +78,16 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, str ) and not value.strip( ):
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
+	if isinstance( value, (list, tuple, dict, set) ) and len( value ) == 0:
+		raise ValueError( f'Argument "{name}" cannot be empty.' )
+
 def flatten_geocode( result: Dict[ str, Any ] ) -> Dict[ str, Any ]:
 	"""
 
 		Purpose:
 			Reduce a geocode result into a compact, row-friendly dict.
 
-		Parameters:
+		Args:
 			result (Dict[str, Any]):
 				One element from 'results' in Geocoding API response.
 
@@ -97,6 +100,15 @@ def flatten_geocode( result: Dict[ str, Any ] ) -> Dict[ str, Any ]:
 	comps = result.get( 'address_components', [ ] ) or [ ]
 
 	def comp( kind: str, want_long: bool = False ) -> Optional[ str ]:
+		"""Find an address component by Google component type.
+
+		Args:
+			kind (str): Google address component type.
+			want_long (bool): Return the long component name when True.
+
+		Returns:
+			Optional[str]: Component name, or None when not present.
+		"""
 		for c in comps:
 			if kind in (c.get( 'types' ) or [ ]):
 				return (c.get( 'long_name' ) if want_long else c.get( 'short_name' )) or None
@@ -122,7 +134,7 @@ def fmt( o: AddressOrCoord ) -> str:
 		Purpose:
 			Normalize an origin/destination input to the API's expected string.
 
-		Parameters:
+		Args:
 			o (AddressOrCoord): Either "lat,lng" as tuple or a free-form string address.
 
 		Returns: String representation for the API, "lat,lng" or the original string.
@@ -193,7 +205,7 @@ class Map( ):
 	BASE = 'https://maps.googleapis.com/maps/api'
 	
 	def __init__( self, qps: float = 5.0, retries: int = 5, min: float = 1.0, max: float = 30.0,
-	              timeout: float = 15.0, api_key: str = None ) -> None:
+	              timeout: float = 15.0, api_key: Optional[ str ] = None ) -> None:
 		"""Initialize the Google Maps session, rate limiter, credentials, and request state.
 
 		Purpose:
@@ -203,7 +215,8 @@ class Map( ):
 			None: Initializes instance state.
 		"""
 		self.api_key = api_key if api_key is not None else cfg.GOOGLEMAPS_API_KEY
-		self.limiter = RateLimiter( qps )
+		self.query_per_second = qps
+		self.limiter = RateLimiter( self.query_per_second )
 		self.retries = retries
 		self.min = min
 		self.max = max
@@ -230,7 +243,7 @@ class Map( ):
 	            params and robust retry/backoff for transient errors. The Google
 	            Maps API key is injected as the "key" query parameter.
 
-	        Parameters:
+	        Args:
 	            endpoint (str):
 	                Endpoint path, e.g., "geocode/json", "distancematrix/json".
 	            params (Dict[str, str]):
@@ -380,7 +393,7 @@ class Geocoder( ):
 				Create a stable cache key from a namespace prefix and one or more
 				string parts.
 
-			Parameters:
+			Args:
 				prefix (str):
 					Cache namespace or operation prefix.
 				*parts (str):
@@ -411,7 +424,7 @@ class Geocoder( ):
 			Purpose:
 				Validate and normalize a latitude/longitude coordinate pair.
 
-			Parameters:
+			Args:
 				latitude (float):
 					Latitude in decimal degrees.
 				longitude (float):
@@ -445,7 +458,7 @@ class Geocoder( ):
 			Purpose:
 				Geocode a free-form address string. Optionally bias by country code.
 
-			Parameters:
+			Args:
 				address (str):
 					Any human-entered address string.
 				country (str):
@@ -494,7 +507,7 @@ class Geocoder( ):
 			Purpose:
 				Reverse geocode a latitude/longitude pair into a canonical address.
 
-			Parameters:
+			Args:
 				latitude (float):
 					Latitude in decimal degrees.
 				longitude (float):
@@ -540,7 +553,7 @@ class Geocoder( ):
 			Purpose:
 				Geocode a structured city/state/country triple.
 
-			Parameters:
+			Args:
 				city (str):
 					City or locality.
 				state (str):
@@ -582,7 +595,7 @@ class Geocoder( ):
 				Geocode a list of free-form addresses while preserving row-level
 				success and failure status.
 
-			Parameters:
+			Args:
 				addresses (List[str]):
 					Address strings to geocode.
 				country (str):
@@ -665,7 +678,7 @@ class DistanceMatrix( ):
 			Purpose:
 				Validate and normalize a Google Distance Matrix travel mode.
 
-			Parameters:
+			Args:
 				mode (str): Travel mode: driving, walking, bicycling, or transit.
 
 			Returns:
@@ -695,7 +708,7 @@ class DistanceMatrix( ):
 			Purpose:
 				Normalize one or many origins/destinations into a list.
 
-			Parameters:
+			Args:
 				values (List[AddressOrCoord] | AddressOrCoord): Single address/coordinate or a list/tuple of them.
 
 			Returns:
@@ -731,7 +744,7 @@ class DistanceMatrix( ):
 			Purpose:
 				Convert meters into kilometers and miles.
 
-			Parameters:
+			Args:
 				meters (int | float | None): Distance in meters.
 
 			Returns:
@@ -759,7 +772,7 @@ class DistanceMatrix( ):
 			Purpose:
 				Convert seconds into minutes and hours.
 
-			Parameters:
+			Args:
 				seconds (int | float | None): Duration in seconds.
 
 			Returns:
@@ -788,7 +801,7 @@ class DistanceMatrix( ):
 			Purpose:
 				Flatten one Distance Matrix element into a row-friendly dictionary.
 
-			Parameters:
+			Args:
 				origin (str): Resolved origin label from the API.
 				destination (str): Resolved destination label from the API.
 				mode (str): Travel mode used for the request.
@@ -844,7 +857,7 @@ class DistanceMatrix( ):
 				Execute a Distance Matrix request for one or more origins and one
 				or more destinations.
 
-			Parameters:
+			Args:
 				origins (List[AddressOrCoord] | AddressOrCoord): Origins.
 				destinations (List[AddressOrCoord] | AddressOrCoord): Destinations.
 				mode (str): Travel mode: driving, walking, bicycling, or transit.
@@ -919,7 +932,7 @@ class DistanceMatrix( ):
 				Return a compact dict with meters/seconds and human text fields
 				for one origin, one destination, and one travel mode.
 
-			Parameters:
+			Args:
 				origin (AddressOrCoord): Origin address string or (lat, lng) tuple.
 				destination (AddressOrCoord): Destination address string or (lat, lng) tuple.
 				mode (str): Travel mode: driving, walking, bicycling, transit.
@@ -965,7 +978,7 @@ class DistanceMatrix( ):
 			Purpose:
 				Compare route distance and duration across multiple travel modes.
 
-			Parameters:
+			Args:
 				origin (AddressOrCoord): Origin address string or coordinate tuple.
 				destination (AddressOrCoord): Destination address string or coordinate tuple.
 				modes (List[str] | None): Optional travel modes. Defaults to all supported modes.
@@ -1007,7 +1020,7 @@ class DistanceMatrix( ):
 				Convert route rows into a pandas DataFrame for Streamlit display,
 				export, or downstream analytics.
 
-			Parameters:
+			Args:
 				rows (List[Dict[str, Any]] | None):
 					Optional rows. Defaults to the most recent matrix rows.
 
@@ -1037,7 +1050,7 @@ class Place( ):
 		Resolves place details and text queries into canonical location records.
 
 	Attributes:
-		map (Optional[ Map ]): Declared legacy mapping gateway attribute.
+		maps (Optional[ Map ]): Google Maps gateway used for Places requests.
 		cache (Optional[ BaseCache ]): Optional response cache.
 		country (Optional[ str ]): Current search region bias.
 		query (Optional[ str ]): Current place search query.
@@ -1051,7 +1064,7 @@ class Place( ):
 		key (Optional[ str ]): Cache key for the current lookup.
 		output (Optional[ Dict ]): Most recent normalized location result.
 	"""
-	map: Optional[ Map ]
+	maps: Optional[ Map ]
 	cache: Optional[ BaseCache ]
 	country: Optional[ str ]
 	query: Optional[ str ]
@@ -1071,7 +1084,7 @@ class Place( ):
 			Purpose:
 				Initializes Place objects given a map and optional cache
 
-			Parameters:
+			Args:
 				maps (Maps): Maps gateway instance.
 				cache (Optional[BaseCache]): Optional cache for query results.
 
@@ -1100,7 +1113,7 @@ class Place( ):
 				Create a stable cache key from a namespace prefix and one or more
 				string parts.
 
-			Parameters:
+			Args:
 				prefix (str):
 					Cache namespace or operation prefix.
 				*parts (str):
@@ -1131,7 +1144,7 @@ class Place( ):
 				Extract a single address component value from a Google Places or
 				Geocoding address_components collection.
 
-			Parameters:
+			Args:
 				components (List[Dict[str, Any]]):
 					Google address component dictionaries.
 				kind (str):
@@ -1168,7 +1181,7 @@ class Place( ):
 				Convert a Place Details result into the same flattened output shape
 				used by Geocoder.flatten_geocode(...).
 
-			Parameters:
+			Args:
 				details (Dict[str, Any]):
 					Google Place Details result dictionary.
 				query (str):
@@ -1218,7 +1231,7 @@ class Place( ):
 			Purpose:
 				Fetch and flatten details for a known Google place_id.
 
-			Parameters:
+			Args:
 				place_id (str):
 					Google Places place identifier.
 
@@ -1237,8 +1250,8 @@ class Place( ):
 			fields = ('formatted_address,geometry,address_component,place_id,type,'
 			          'name,business_status,rating,user_ratings_total,website,'
 			          'formatted_phone_number')
-			pyld = { 'place_id': place_id, 'fields': fields }
-			self.details = self.maps.request( 'place/details/json', pyld ).get( 'result', { } )
+			self.request = { 'place_id': place_id, 'fields': fields }
+			self.details = self.maps.request( 'place/details/json', self.request ).get( 'result', { } )
 			if not self.details:
 				raise NotFound( f'No place details found for "{place_id}" ' )
 			self.output = self.flatten_place_details( self.details, query=place_id )
@@ -1259,7 +1272,7 @@ class Place( ):
 				Resolve a free-text query into a canonical address and coordinate
 				record via Google Places Text Search and Place Details.
 
-			Parameters:
+			Args:
 				query (str):
 					Arbitrary human-entered text such as "Newcastle, NSW, AU".
 				country (str):
@@ -1298,7 +1311,8 @@ class Place( ):
 			          'name,business_status,rating,user_ratings_total,website,'
 			          'formatted_phone_number')
 			_payload = { 'place_id': place_id, 'fields': fields }
-			self.details = self.maps.request( 'place/details/json', _payload ).get( 'result', { } )
+			self.request = _payload
+			self.details = self.maps.request( 'place/details/json', self.request ).get( 'result', { } )
 			if not self.details:
 				raise NotFound( f'No place details found for "{self.query}" ' )
 			self.output = self.flatten_place_details( self.details, query=self.query )
@@ -1320,7 +1334,7 @@ class Place( ):
 				Return multiple Places Text Search candidates for a query. This is
 				intended for future UI candidate-selection workflows.
 
-			Parameters:
+			Args:
 				query (str):
 					Free-text search query.
 				country (str):
@@ -1411,7 +1425,7 @@ class Timezone:
 			Purpose:
 				Validate and normalize a latitude and longitude pair.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude in decimal degrees.
 
@@ -1449,7 +1463,7 @@ class Timezone:
 			Purpose:
 				Fetch the full Google Time Zone API response for a coordinate.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude.
 
@@ -1485,7 +1499,7 @@ class Timezone:
 			Purpose:
 				Fetch the IANA time zone id for a coordinate.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude.
 
@@ -1516,7 +1530,7 @@ class Timezone:
 			Purpose:
 				Fetch the total UTC offset in hours for a coordinate.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude.
 
@@ -1554,7 +1568,7 @@ class Timezone:
 				Convert a UTC datetime into local time at a coordinate using the
 				Google Time Zone API rawOffset and dstOffset fields.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude.
 
@@ -1610,7 +1624,7 @@ class Timezone:
 			Purpose:
 				Enrich a list of row dictionaries with Google Time Zone API fields.
 
-			Parameters:
+			Args:
 				rows (list):
 					List of dictionaries containing latitude and longitude fields.
 
@@ -1758,7 +1772,7 @@ class StaticMap( ):
 			Purpose:
 				Validate and normalize a latitude and longitude pair.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude in decimal degrees.
 
@@ -1796,7 +1810,7 @@ class StaticMap( ):
 				Normalize coordinate tuples, coordinate lists, or dictionaries with
 				lat/lng fields into validated coordinate tuples.
 
-			Parameters:
+			Args:
 				points (list):
 					List of coordinates. Supported item shapes include:
 					(lat, lng), [lat, lng], {'lat': value, 'lng': value}, and
@@ -1841,7 +1855,7 @@ class StaticMap( ):
 			Purpose:
 				Build a Google Static Maps URL from a parameter dictionary.
 
-			Parameters:
+			Args:
 				params (Dict):
 					Google Static Maps query parameters.
 
@@ -1870,7 +1884,7 @@ class StaticMap( ):
 			Purpose:
 				Build a static map URL centered on a coordinate with a single marker.
 
-			Parameters:
+			Args:
 				lat (float):
 					Latitude for the pin.
 
@@ -1919,7 +1933,7 @@ class StaticMap( ):
 				Build a static map URL with multiple markers. If zoom is zero,
 				Google is allowed to fit the visible area to the supplied points.
 
-			Parameters:
+			Args:
 				points (list):
 					List of coordinate tuples, coordinate lists, or dictionaries
 					containing lat/lng fields.
@@ -1982,7 +1996,7 @@ class StaticMap( ):
 			Purpose:
 				Build a static map URL showing a path through two or more points.
 
-			Parameters:
+			Args:
 				points (list):
 					List of coordinate tuples, coordinate lists, or dictionaries
 					containing lat/lng fields.
@@ -2046,7 +2060,7 @@ class StaticMap( ):
 			Purpose:
 				Build a static map URL showing a rectangular bounding box.
 
-			Parameters:
+			Args:
 				west (float):
 					Western longitude.
 
