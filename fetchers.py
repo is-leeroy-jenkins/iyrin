@@ -4338,8 +4338,11 @@ class OpenScience( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'format_value', format_value )
+			if not isinstance( format_value, str ):
+				raise TypeError( 'format_value must be a string.' )
 			self.format_value = format_value
-			value = str( self.format_value or 'json' ).strip( ).lower( )
+			value = self.format_value.strip( ).lower( )
 			allowed = { 'json', 'csv', 'tsv', 'browser' }
 			if value not in allowed:
 				raise ValueError( "Unsupported format. Use one of: json, csv, tsv, browser." )
