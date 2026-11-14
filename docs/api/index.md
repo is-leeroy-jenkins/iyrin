@@ -4,9 +4,9 @@ Iyrin modules are organized around geospatial services, acquisition, processing,
 
 | Group | Modules |
 |---|---|
-| Geospatial | `maps`, `geocode`, `places`, `distances`, `timezones`, `staticmaps`, `excel` |
-| AI / Processing | `pipelines`, `embedders`, `stores.vector` |
-| Live World | `world`, `sources`, `history`, `tools` |
-| Supporting | `caches`, `rates`, `exceptions`, `config` |
+| Geospatial | `mapping`, `excel` |
+| AI / Processing | `app`, `embedders`, `storage` |
+| Live World | `realtime`, `sources`, `history`, `tools` |
+| Supporting | `storage`, `rates`, `exceptions`, `config` |
 
 Selected modules use mkdocstrings. Large acquisition/parser modules are described in the architecture and guides because importing them can initialize optional runtime dependencies.

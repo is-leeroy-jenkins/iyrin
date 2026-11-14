@@ -4,10 +4,29 @@ from pathlib import Path
 from types import SimpleNamespace
 import unittest
 
-from chunk_ids import chunk_identifier, vector_document_ids
+from hashlib import sha256
 
 
 ROOT = Path( __file__ ).resolve( ).parents[ 1 ]
+
+
+def load_identifier_functions( ):
+    """Load production identifier helpers without importing optional model providers."""
+    source = (ROOT / 'embedders.py').read_text( encoding='utf-8' )
+    tree = ast.parse( source )
+    names = { 'chunk_identifier', 'vector_document_ids' }
+    functions = [ node for node in tree.body
+        if isinstance( node, ast.FunctionDef ) and node.name in names ]
+    if { node.name for node in functions } != names:
+        raise RuntimeError( 'The consolidated identifier functions are missing.' )
+    environment = { 'sha256': sha256 }
+    isolated = ast.Module( body=functions, type_ignores=[ ] )
+    exec( compile( ast.fix_missing_locations( isolated ), '<embedders>', 'exec' ),
+        environment )
+    return environment[ 'chunk_identifier' ], environment[ 'vector_document_ids' ]
+
+
+chunk_identifier, vector_document_ids = load_identifier_functions( )
 
 
 class ChunkIdentifierTests( unittest.TestCase ):
@@ -54,8 +73,8 @@ class ChunkIdentifierTests( unittest.TestCase ):
             vector_document_ids( docs )
 
     def test_pipeline_and_both_backends_use_shared_identifiers( self ) -> None:
-        pipeline = (ROOT / 'pipelines.py').read_text( encoding='utf-8' )
-        storage = (ROOT / 'stores' / 'vector.py').read_text( encoding='utf-8' )
+        pipeline = (ROOT / 'app.py').read_text( encoding='utf-8' )
+        storage = (ROOT / 'storage.py').read_text( encoding='utf-8' )
         self.assertIn( "document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )",
             pipeline )
         self.assertEqual( 2, storage.count( 'ids = vector_document_ids( self.documents )' ) )

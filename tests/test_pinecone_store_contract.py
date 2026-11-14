@@ -14,13 +14,26 @@ class PineconeStoreContractTests( unittest.TestCase ):
 
     @classmethod
     def setUpClass( cls ) -> None:
-        cls.vector_source = (ROOT / 'stores' / 'vector.py').read_text(
+        cls.vector_source = (ROOT / 'storage.py').read_text(
             encoding='utf-8' )
 
     def create_store( self, index_exists: bool=True ):
         """Construct a production store with mocked provider SDK modules."""
         import ast
-        from chunk_ids import vector_document_ids
+        from hashlib import sha256
+
+        identifier_tree = ast.parse( (ROOT / 'embedders.py').read_text(
+            encoding='utf-8' ) )
+        identifier_names = { 'chunk_identifier', 'vector_document_ids' }
+        identifier_functions = [ node for node in identifier_tree.body
+            if isinstance( node, ast.FunctionDef ) and node.name in identifier_names ]
+        if { node.name for node in identifier_functions } != identifier_names:
+            raise RuntimeError( 'The consolidated identifier functions are missing.' )
+        identifiers = { 'sha256': sha256 }
+        identifier_module = ast.Module( body=identifier_functions, type_ignores=[ ] )
+        exec( compile( ast.fix_missing_locations( identifier_module ), '<embedders>',
+            'exec' ), identifiers )
+        vector_document_ids = identifiers[ 'vector_document_ids' ]
 
         module = ast.parse( self.vector_source )
         store_class = next( node for node in module.body if isinstance( node, ast.ClassDef )

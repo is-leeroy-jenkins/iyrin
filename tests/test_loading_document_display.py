@@ -6,7 +6,7 @@ from pathlib import Path
 import unittest
 
 
-SOURCE = (Path( __file__ ).resolve( ).parents[ 1 ] / 'pipelines.py').read_text(
+SOURCE = (Path( __file__ ).resolve( ).parents[ 1 ] / 'app.py').read_text(
     encoding='utf-8' )
 
 
