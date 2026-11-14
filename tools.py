@@ -360,8 +360,15 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
             df_result = df_result[ df_result[ 'EntityType' ].astype( str ) == entity_type ].copy( )
         records: List[ Dict[ str, object ] ] = [ ]
         for _, row in df_result.iterrows( ):
-            row_latitude = float( row[ 'Latitude' ] )
-            row_longitude = float( row[ 'Longitude' ] )
+            row_latitude = row[ 'Latitude' ]
+            row_longitude = row[ 'Longitude' ]
+            if (type( row_latitude ) not in (int, float) or
+                    type( row_longitude ) not in (int, float) or
+                    not math.isfinite( row_latitude ) or
+                    not math.isfinite( row_longitude ) or
+                    not -90 <= row_latitude <= 90 or
+                    not -180 <= row_longitude <= 180):
+                continue
             distance_nm = calculate_distance_nm(
                 latitude, longitude, row_latitude, row_longitude )
             if distance_nm > radius_nm:
