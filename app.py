@@ -610,7 +610,8 @@ def normalize( obj: object ) -> object:
 
 	Returns:
 		object: Value produced by this operation.
-	"""if obj is None or isinstance( obj, (str, int, float, bool) ):
+	"""
+	if obj is None or isinstance( obj, (str, int, float, bool) ):
 		return obj
 	
 	if isinstance( obj, dict ):
@@ -633,7 +634,8 @@ def blue_divider( ) -> None:
 
 	Returns:
 		None: Updates the application UI, session state, or other state as described.
-	"""st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
+	"""
+	st.markdown( cfg.BLUE_DIVIDER, unsafe_allow_html=True )
 
 def log_step( msg: str ) -> None:
 	"""Append a processing step to the active pipeline log.
@@ -646,7 +648,8 @@ def log_step( msg: str ) -> None:
 
 	Returns:
 		None: Updates the application UI, session state, or other state as described.
-	"""st.session_state.pipeline_log.append( msg )
+	"""
+	st.session_state.pipeline_log.append( msg )
 
 # ------------- CELESTIAL MAP UTILITY
 
@@ -2979,7 +2982,8 @@ def _model_selector( key_prefix: str, label: str, options: list[ str ], default_
 
 	Returns:
 		str: Value produced by this operation.
-	"""base_options = options[ : ]
+	"""
+	base_options = options[ : ]
 	if "Custom..." not in base_options:
 		base_options.append( "Custom..." )
 	
@@ -8184,17 +8188,20 @@ elif mode == 'Public Health':
 			st.caption( 'API', help=cfg.CENSUS_DATA )
 			
 			def _clear_census_state( ) -> None:
-				"""clear census state.
+				"""
+				clear census state.
 
 				Purpose:
 					clear census state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'census_clear_request' ] = True
+				"""
+				st.session_state[ 'census_clear_request' ] = True
 			
 			def _validate_census_year( value: object ) -> str:
-				"""validate census year.
+				"""
+				validate census year.
 
 				Purpose:
 					validate census year.
@@ -8204,14 +8211,16 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				if not re.fullmatch( r'\d{4}', text ):
 					raise ValueError( 'Year must be a four-digit Census API vintage year.' )
 				
 				return text
 			
 			def _validate_census_dataset( value: object ) -> str:
-				"""validate census dataset.
+				"""
+				validate census dataset.
 
 				Purpose:
 					validate census dataset.
@@ -8221,7 +8230,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).strip( '/' )
+				"""
+				text = str( value or '' ).strip( ).strip( '/' )
 				if not text:
 					raise ValueError( 'Dataset is required.' )
 				
@@ -8233,7 +8243,8 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_census_fields( value: object ) -> str:
-				"""validate census fields.
+				"""
+				validate census fields.
 
 				Purpose:
 					validate census fields.
@@ -8243,7 +8254,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					raise ValueError( 'Fields are required for Census data mode.' )
@@ -8261,7 +8273,8 @@ elif mode == 'Public Health':
 			
 			def _validate_census_geography_clause( name: str,
 			                                       value: object, required: bool = False ) -> str:
-				"""validate census geography clause.
+				"""
+				validate census geography clause.
 
 				Purpose:
 					validate census geography clause.
@@ -8273,7 +8286,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					if required:
@@ -8389,17 +8403,20 @@ elif mode == 'Public Health':
 			SOCRATA_CDC_DOMAINS = [ 'data.cdc.gov', 'chronicdata.cdc.gov' ]
 			
 			def _clear_socrata_state( ) -> None:
-				"""clear socrata state.
+				"""
+				clear socrata state.
 
 				Purpose:
 					clear socrata state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'socrata_clear_request' ] = True
+				"""
+				st.session_state[ 'socrata_clear_request' ] = True
 			
 			def _validate_socrata_dataset_id( value: object ) -> str:
-				"""validate socrata dataset id.
+				"""
+				validate socrata dataset id.
 
 				Purpose:
 					validate socrata dataset id.
@@ -8409,7 +8426,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
+				"""
+				text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
 				
 				if not text:
 					raise ValueError( 'Dataset ID is required.' )
@@ -8547,17 +8565,20 @@ elif mode == 'Public Health':
 			HEALTHDATA_DOMAINS = [ 'healthdata.gov' ]
 			
 			def _clear_healthdata_state( ) -> None:
-				"""clear healthdata state.
+				"""
+				clear healthdata state.
 
 				Purpose:
 					clear healthdata state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'healthdata_clear_request' ] = True
+				"""
+				st.session_state[ 'healthdata_clear_request' ] = True
 			
 			def _validate_healthdata_dataset_id( value: object ) -> str:
-				"""validate healthdata dataset id.
+				"""
+				validate healthdata dataset id.
 
 				Purpose:
 					validate healthdata dataset id.
@@ -8567,7 +8588,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
+				"""
+				text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
 				
 				if not text:
 					raise ValueError( 'Dataset ID is required.' )
@@ -8708,17 +8730,20 @@ elif mode == 'Public Health':
 			WHO_FORMATS = [ 'json', 'xml', 'csv', 'csv&profile=text', 'csv&profile=verbose' ]
 			
 			def _clear_who_state( ) -> None:
-				"""clear who state.
+				"""
+				clear who state.
 
 				Purpose:
 					clear who state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'who_clear_request' ] = True
+				"""
+				st.session_state[ 'who_clear_request' ] = True
 			
 			def _validate_who_query_path( value: object ) -> str:
-				"""validate who query path.
+				"""
+				validate who query path.
 
 				Purpose:
 					validate who query path.
@@ -8728,7 +8753,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).lstrip( '/' )
+				"""
+				text = str( value or '' ).strip( ).lstrip( '/' )
 				
 				if not text:
 					raise ValueError( 'Query Path is required for WHO Athena mode.' )
@@ -8845,17 +8871,20 @@ elif mode == 'Public Health':
 			                     'Custom...' ]
 			
 			def _clear_un_state( ) -> None:
-				"""clear un state.
+				"""
+				clear un state.
 
 				Purpose:
 					clear un state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'un_clear_request' ] = True
+				"""
+				st.session_state[ 'un_clear_request' ] = True
 			
 			def _validate_un_query_path( value: object ) -> str:
-				"""validate un query path.
+				"""
+				validate un query path.
 
 				Purpose:
 					validate un query path.
@@ -8865,7 +8894,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).lstrip( '/' )
+				"""
+				text = str( value or '' ).strip( ).lstrip( '/' )
 				
 				if not text:
 					raise ValueError( 'Query Path is required for sdmx_query mode.' )
@@ -8971,17 +9001,20 @@ elif mode == 'Public Health':
 			                           'data/pop/wpgp?iso3=BRA', 'Custom...' ]
 			
 			def _clear_worldpop_state( ) -> None:
-				"""clear worldpop state.
+				"""
+				clear worldpop state.
 
 				Purpose:
 					clear worldpop state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'worldpop_clear_request' ] = True
+				"""
+				st.session_state[ 'worldpop_clear_request' ] = True
 			
 			def _validate_worldpop_query( value: object ) -> str:
-				"""validate worldpop query.
+				"""
+				validate worldpop query.
 
 				Purpose:
 					validate worldpop query.
@@ -8991,7 +9024,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					raise ValueError( 'Query is required for World Population search mode.' )
@@ -8999,7 +9033,8 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_worldpop_asset_path( value: object ) -> str:
-				"""validate worldpop asset path.
+				"""
+				validate worldpop asset path.
 
 				Purpose:
 					validate worldpop asset path.
@@ -9009,7 +9044,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).lstrip( '/' )
+				"""
+				text = str( value or '' ).strip( ).lstrip( '/' )
 				
 				if not text:
 					raise ValueError( 'Asset Path is required for raster_metadata mode.' )
@@ -9147,17 +9183,20 @@ elif mode == 'Public Health':
 			                    'D171', 'D172', 'D173', 'D174', 'D175', 'Other' ]
 			
 			def _clear_wonder_state( ) -> None:
-				"""clear wonder state.
+				"""
+				clear wonder state.
 
 				Purpose:
 					clear wonder state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'wonder_clear_request' ] = True
+				"""
+				st.session_state[ 'wonder_clear_request' ] = True
 			
 			def _validate_wonder_dataset_id( value: object ) -> str:
-				"""validate wonder dataset id.
+				"""
+				validate wonder dataset id.
 
 				Purpose:
 					validate wonder dataset id.
@@ -9167,7 +9206,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).upper( )
+				"""
+				text = str( value or '' ).strip( ).upper( )
 				
 				if not text:
 					raise ValueError( 'CDC WONDER Dataset ID is required.' )
@@ -9180,7 +9220,8 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_wonder_xml( value: object ) -> str:
-				"""validate wonder xml.
+				"""
+				validate wonder xml.
 
 				Purpose:
 					validate wonder xml.
@@ -9190,7 +9231,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					raise ValueError( 'Request XML is required for query_xml mode.' )
@@ -9294,14 +9336,16 @@ elif mode == 'Public Health':
 		with st.expander( label='Pub Med Search', icon='🏥', expanded=False ):
 			st.caption( 'API', help=cfg.PUB_MED_SEARCH_LOADER )
 			def _clear_pubmed_state( ) -> None:
-				"""clear pubmed state.
+				"""
+				clear pubmed state.
 
 				Purpose:
 					clear pubmed state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'pubmed_clear_request' ] = True
+				"""
+				st.session_state[ 'pubmed_clear_request' ] = True
 			
 			if 'pubmed_results' not in st.session_state:
 				st.session_state[ 'pubmed_results' ] = { }
@@ -9370,17 +9414,20 @@ elif mode == 'Public Health':
 			                      'data.nashville.gov', 'Other' ]
 			
 			def _clear_open_city_state( ) -> None:
-				"""clear open city state.
+				"""
+				clear open city state.
 
 				Purpose:
 					clear open city state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'open_city_clear_request' ] = True
+				"""
+				st.session_state[ 'open_city_clear_request' ] = True
 			
 			def _validate_open_city_domain( value: object ) -> str:
-				"""validate open city domain.
+				"""
+				validate open city domain.
 
 				Purpose:
 					validate open city domain.
@@ -9390,7 +9437,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).lower( )
+				"""
+				text = str( value or '' ).strip( ).lower( )
 				text = text.replace( 'https://', '' ).replace( 'http://', '' )
 				text = text.strip( '/' )
 				
@@ -9407,7 +9455,8 @@ elif mode == 'Public Health':
 				return text
 			
 			def _validate_open_city_dataset_id( value: object ) -> str:
-				"""validate open city dataset id.
+				"""
+				validate open city dataset id.
 
 				Purpose:
 					validate open city dataset id.
@@ -9417,7 +9466,8 @@ elif mode == 'Public Health':
 
 				Returns:
 					str: Value produced by this operation.
-				"""text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
+				"""
+				text = str( value or '' ).strip( ).replace( '.json', '' ).strip( '/' )
 				
 				if not text:
 					raise ValueError( 'Dataset ID is required.' )
@@ -10283,18 +10333,21 @@ elif mode == 'Artificial Intelligence':
 			CHAT_REASONING_EFFORTS = [ 'minimal', 'low', 'medium', 'high' ]
 			
 			def _clear_chat_state( ) -> None:
-				"""clear chat state.
+				"""
+				clear chat state.
 
 				Purpose:
 					clear chat state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'chat_clear_request' ] = True
+				"""
+				st.session_state[ 'chat_clear_request' ] = True
 				_clear_generation_result( 'ChatGPT' )
 			
 			def _normalize_chat_domains( value: object ) -> list[ str ]:
-				"""normalize chat domains.
+				"""
+				normalize chat domains.
 
 				Purpose:
 					normalize chat domains.
@@ -10304,7 +10357,8 @@ elif mode == 'Artificial Intelligence':
 
 				Returns:
 					list[ str ]: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					return [ ]
@@ -10525,18 +10579,21 @@ elif mode == 'Artificial Intelligence':
 			GROK_REASONING_EFFORTS = [ 'none', 'low', 'medium', 'high' ]
 			
 			def _clear_grok_state( ) -> None:
-				"""clear grok state.
+				"""
+				clear grok state.
 
 				Purpose:
 					clear grok state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'grok_clear_request' ] = True
+				"""
+				st.session_state[ 'grok_clear_request' ] = True
 				_clear_generation_result( 'Grok' )
 			
 			def _normalize_grok_domains( value: object ) -> list[ str ]:
-				"""normalize grok domains.
+				"""
+				normalize grok domains.
 
 				Purpose:
 					normalize grok domains.
@@ -10546,7 +10603,8 @@ elif mode == 'Artificial Intelligence':
 
 				Returns:
 					list[ str ]: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					return [ ]
@@ -10581,7 +10639,8 @@ elif mode == 'Artificial Intelligence':
 				return values
 			
 			def _normalize_grok_stop_lines( value: object ) -> List[ str ]:
-				"""normalize grok stop lines.
+				"""
+				normalize grok stop lines.
 
 				Purpose:
 					normalize grok stop lines.
@@ -10591,7 +10650,8 @@ elif mode == 'Artificial Intelligence':
 
 				Returns:
 					List[ str ]: Value produced by this operation.
-				"""text = str( value or '' )
+				"""
+				text = str( value or '' )
 				if not text.strip( ):
 					return [ ]
 				
@@ -10797,7 +10857,8 @@ elif mode == 'Artificial Intelligence':
 		# ---- Expander Claude
 		with st.expander( label='Claude', expanded=False ):
 			def _clear_claude_state( ) -> None:
-				"""clear claude state.
+				"""
+				clear claude state.
 
 				Purpose:
 					Flag the Claude generation state for reset on the next rerun.
@@ -10809,7 +10870,8 @@ elif mode == 'Artificial Intelligence':
 				_clear_generation_result( 'Claude' )
 			
 			def _normalize_claude_domains( value: object ) -> list[ str ]:
-				"""normalize claude domains.
+				"""
+				normalize claude domains.
 
 				Purpose:
 					Normalize newline-, comma-, or semicolon-delimited Claude web-search domain entries.
@@ -10855,7 +10917,8 @@ elif mode == 'Artificial Intelligence':
 				return values
 			
 			def _normalize_claude_stop_lines( value: object ) -> list[ str ]:
-				"""normalize claude stop lines.
+				"""
+				normalize claude stop lines.
 
 				Purpose:
 					Normalize stop sequences entered one per line.
@@ -11048,18 +11111,21 @@ elif mode == 'Artificial Intelligence':
 			GEMINI_THINKING_LEVELS = [ 'minimal', 'low', 'medium', 'high' ]
 			
 			def _clear_gemini_state( ) -> None:
-				"""clear gemini state.
+				"""
+				clear gemini state.
 
 				Purpose:
 					clear gemini state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'gemini_clear_request' ] = True
+				"""
+				st.session_state[ 'gemini_clear_request' ] = True
 				_clear_generation_result( 'Gemini' )
 			
 			def _normalize_gemini_domains( value: object ) -> list[ str ]:
-				"""normalize gemini domains.
+				"""
+				normalize gemini domains.
 
 				Purpose:
 					normalize gemini domains.
@@ -11069,7 +11135,8 @@ elif mode == 'Artificial Intelligence':
 
 				Returns:
 					list[ str ]: Value produced by this operation.
-				"""text = str( value or '' ).strip( )
+				"""
+				text = str( value or '' ).strip( )
 				
 				if not text:
 					return [ ]
@@ -11104,7 +11171,8 @@ elif mode == 'Artificial Intelligence':
 				return values
 			
 			def _normalize_gemini_stop_lines( value: object ) -> list[ str ]:
-				"""normalize gemini stop lines.
+				"""
+				normalize gemini stop lines.
 
 				Purpose:
 					normalize gemini stop lines.
@@ -11114,7 +11182,8 @@ elif mode == 'Artificial Intelligence':
 
 				Returns:
 					list[ str ]: Value produced by this operation.
-				"""text = str( value or '' )
+				"""
+				text = str( value or '' )
 				
 				if not text.strip( ):
 					return [ ]
@@ -11334,14 +11403,16 @@ elif mode == 'Artificial Intelligence':
 		# ---- Expander Mistral
 		with st.expander( label='Mistral', expanded=False ):
 			def _clear_mistral_state( ) -> None:
-				"""clear mistral state.
+				"""
+				clear mistral state.
 
 				Purpose:
 					clear mistral state.
 
 				Returns:
 					None: Updates the application UI, session state, or other state as described.
-				"""st.session_state[ 'mistral_clear_request' ] = True
+				"""
+				st.session_state[ 'mistral_clear_request' ] = True
 				_clear_generation_result( 'Mistral' )
 			
 			if 'mistral_clear_request' not in st.session_state:
