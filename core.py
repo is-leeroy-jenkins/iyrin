@@ -72,13 +72,13 @@ class Result( ):
 	"""
 
 		Purpose:
-		--------
-		Immutable container that represents the outcome of fetching a single
+
+		Result container that represents the outcome of fetching a single
 		page. It stores the canonical URL, http status code, extracted plain
 		text, optional raw HTML, and response headers.
 	
-		Parameters:
-		----------
+		Args:
+
 		url (str): Canonical URL that was fetched.
 		status_code (int): HTTP status code (use 0 when not applicable).
 		text (str): Extracted plain text content (may be empty).
@@ -86,8 +86,8 @@ class Result( ):
 		headers (Optional[Dict[str, str]]): Response headers, if available.
 	
 		Returns:
-		-------
-		None
+
+		None: Initializes response fields on the result instance.
 
 	"""
 	url: Optional[ str ]
@@ -100,7 +100,23 @@ class Result( ):
 
 	def __init__( self, response: Response=None, url: str='', status: int=0,
 			text: str='', html: str='', headers: Optional[ Dict[ str, str ] ]=None ) -> None:
-		"""Create a result from a requests response or extracted crawler content."""
+		"""Initialize a result from a response or extracted content.
+
+		Purpose:
+		    Captures a requests response or explicit crawler fields while preserving
+		    the existing response-derived precedence and dictionary representation.
+
+		Args:
+		    response (Response | None): Optional HTTP response.
+		    url (str): Explicit URL when no response is supplied.
+		    status (int): Explicit HTTP status when no response is supplied.
+		    text (str): Extracted text when no response is supplied.
+		    html (str): HTML content when no response is supplied.
+		    headers (Optional[Dict[str, str]]): Explicit HTTP headers.
+
+		Returns:
+		    None: Initializes the result's instance attributes.
+		"""
 		if response is not None:
 			self.response = response
 			self.url = response.url
@@ -123,11 +139,11 @@ class Result( ):
 		"""
 
 			Purpose:
-			--------
+
 			Provide a stable ordering of attributes used by GUIs or inspector tooling.
 	
 			Returns:
-			-------
+
 			list[str]: attribute names in a stable order.
 
 		"""
@@ -145,16 +161,16 @@ class Result( ):
 		"""
 
 			Purpose:
-			--------
+
 			Produce a plain dictionary representation of the Result for serialization
 			or tests. This copies headers to avoid outside mutations.
 	
-			Parameters:
-			----------
-			None
+			Args:
+
+			No arguments.
 	
 			Returns:
-			-------
+
 			Dict[str, Any]: dictionary with keys url, status_code, text, html, headers
 
 		"""
@@ -173,15 +189,15 @@ class Result( ):
 		"""
 
 			Purpose:
-			--------
+
 			Indicate whether the Result includes non-empty HTML content.
 	
-			Parameters:
-			----------
-			None
+			Args:
+
+			No arguments.
 	
 			Returns:
-			-------
+
 			bool: True when html is a non-empty string; otherwise False.
 
 		"""
