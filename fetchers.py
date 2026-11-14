@@ -24245,25 +24245,42 @@ class OpenSky( Fetcher ):
 			)
 			raise exception
 
+	@staticmethod
 	def build_fetch_result( source: str, mode: str, url: str, status: int,
 		data: Any ) -> Dict[ str, Any ]:
-		"""Build the common structured result returned by demographic API fetchers.
+		"""Construct the structured result returned by an API fetcher.
 
 		Purpose:
-			Build the common structured result returned by demographic API fetchers.
+			Packages the source identifier, mode, URL, HTTP status, and response
+			payload without altering the supplied data.
 
 		Args:
-			source (str): source value for the OpenSky operation.
-			mode (str): mode value for the OpenSky operation.
-			url (str): url value for the OpenSky operation.
-			status (int): status value for the OpenSky operation.
-			data (Any): data value for the OpenSky operation.
+			source (str): Nonempty source identifier.
+			mode (str): Nonempty fetcher mode name.
+			url (str): Nonempty request URL.
+			status (int): HTTP status code, including zero for unavailable responses.
+			data (Any): Response payload, including None when unavailable.
 
 		Returns:
-			Dict[ str, Any ]: Provider response or normalized result.
+			Dict[str, Any]: Dictionary containing source, mode, URL, status, and data.
+
+		Raises:
+			Error: Raised when an argument is invalid or result construction fails.
 		"""
-		throw_if( 'source', source )
-		throw_if( 'mode', mode )
-		throw_if( 'url', url )
-		return { 'source': source, 'mode': mode, 'url': url, 'status': status, 'data': data }
+		try:
+			throw_if( 'source', source )
+			throw_if( 'mode', mode )
+			throw_if( 'url', url )
+			throw_if( 'status', status )
+			if type( status ) is not int:
+				raise TypeError( 'status must be an integer.' )
+			return { 'source': source, 'mode': mode, 'url': url, 'status': status, 'data': data }
+
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'fetchers'
+			exception.cause = 'OpenSky'
+			exception.method = 'build_fetch_result( source, mode, url, status, data ) -> Dict[ str, Any ]'
+			Logger( ).write( exception )
+			raise exception from e
 
