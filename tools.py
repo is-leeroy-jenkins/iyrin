@@ -32,48 +32,45 @@ LIVE_WORLD_ENTITY_TYPES: List[ str ] = [ 'Aircraft', 'Military Aircraft', 'Satel
 		'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature', ]
 
 def throw_if( name: str, value: object ) -> None:
-    '''
+    """
 
         Purpose:
-        --------
         Validate that a required value is not empty.
 
-        Parameters:
-        -----------
+        Args:
         name (str): Name of the argument being validated.
         value (object): Value to validate.
 
         Returns:
-        --------
         None
 
-    '''
+    """
     if value is None:
         raise ValueError( f'Argument "{name}" cannot be None.' )
 
     if isinstance( value, str ) and not value.strip( ):
         raise ValueError( f'Argument "{name}" cannot be empty.' )
 
+    if isinstance( value, (list, tuple, dict, set) ) and len( value ) == 0:
+        raise ValueError( f'Argument "{name}" cannot be empty.' )
+
 def calculate_distance_nm( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
-    '''
+    """
 
         Purpose:
-        --------
         Calculate great-circle distance between two coordinates in nautical miles.
 
-        Parameters:
-        -----------
+        Args:
         latitude_a (float): Origin latitude.
         longitude_a (float): Origin longitude.
         latitude_b (float): Destination latitude.
         longitude_b (float): Destination longitude.
 
         Returns:
-        --------
         float: Great-circle distance in nautical miles.
 
-    '''
+    """
     try:
         for argument_name, coordinate, maximum in (
                 ('latitude_a', latitude_a, 90.0),
@@ -105,24 +102,21 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
 
 def calculate_bearing( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
-    '''
+    """
 
         Purpose:
-        --------
         Calculate initial bearing between two coordinates.
 
-        Parameters:
-        -----------
+        Args:
         latitude_a (float): Origin latitude.
         longitude_a (float): Origin longitude.
         latitude_b (float): Destination latitude.
         longitude_b (float): Destination longitude.
 
         Returns:
-        --------
         float: Initial bearing in degrees from true north.
 
-    '''
+    """
     try:
         for argument_name, coordinate, maximum in (
                 ('latitude_a', latitude_a, 90.0),
@@ -151,21 +145,18 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
         raise exception from exc
 
 def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Convert one normalized Live World entity row to a JSON-serializable record.
 
-        Parameters:
-        -----------
+        Args:
         row (pd.Series): Normalized Live World entity row.
 
         Returns:
-        --------
         Dict[str, object]: JSON-serializable entity record.
 
-    '''
+    """
     try:
         throw_if( 'row', row )
         if not isinstance( row, pd.Series ):
@@ -196,17 +187,15 @@ def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
         raise exception from exc
 
 def get_live_world_status( ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return the current Live World layer, refresh, tracking, analysis, and geofence state.
 
         Returns:
-        --------
         Dict[str, object]: Current Live World operational status.
 
-    '''
+    """
     try:
         df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
         counts: Dict[ str, int ] = { }
@@ -237,22 +226,19 @@ def get_live_world_status( ) -> Dict[ str, object ]:
         raise exception from exc
 
 def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return loaded normalized Live World entities for a selected entity type.
 
-        Parameters:
-        -----------
+        Args:
         entity_type (str): Entity type or All.
         limit (int): Maximum number of records to return.
 
         Returns:
-        --------
         List[Dict[str, object]]: Matching normalized entity records.
 
-    '''
+    """
     try:
         throw_if( 'entity_type', entity_type )
         throw_if( 'limit', limit )
@@ -280,23 +266,20 @@ def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str,
         raise exception from exc
 
 def search_live_world_entities( query: str, entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
-    '''
+    """
 
         Purpose:
-        --------
         Search loaded Live World entities by identifier or name.
 
-        Parameters:
-        -----------
+        Args:
         query (str): Case-insensitive identifier/name search text.
         entity_type (str): Entity type or All.
         limit (int): Maximum number of records to return.
 
         Returns:
-        --------
         List[Dict[str, object]]: Matching normalized entity records.
 
-    '''
+    """
     try:
         throw_if( 'query', query )
         throw_if( 'entity_type', entity_type )
@@ -332,14 +315,12 @@ def search_live_world_entities( query: str, entity_type: str, limit: int ) -> Li
 
 def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float,
         entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return the nearest loaded Live World entities to a coordinate within a radius.
 
-        Parameters:
-        -----------
+        Args:
         latitude (float): Search-origin latitude.
         longitude (float): Search-origin longitude.
         radius_nm (float): Maximum search radius in nautical miles.
@@ -347,10 +328,9 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
         limit (int): Maximum number of records to return.
 
         Returns:
-        --------
         List[Dict[str, object]]: Nearest entities with distance and bearing.
 
-    '''
+    """
     try:
         throw_if( 'latitude', latitude )
         throw_if( 'longitude', longitude )
@@ -406,17 +386,15 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
         raise exception from exc
 
 def get_live_world_geofence_status( ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return the current geofence configuration, membership snapshot, and transition events.
 
         Returns:
-        --------
         Dict[str, object]: Current geofence state and event history.
 
-    '''
+    """
     try:
         snapshot = dict( st.session_state.get( 'live_world_geofence_snapshot', { } ) or { } )
         events = list( st.session_state.get( 'live_world_geofence_events', [ ] ) or [ ] )
@@ -441,17 +419,15 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
         raise exception from exc
 
 def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return provider-level Live World refresh status and failure diagnostics.
 
         Returns:
-        --------
         List[Dict[str, object]]: Provider status records.
 
-    '''
+    """
     try:
         statuses = dict( st.session_state.get( 'live_world_source_status', { } ) or { } )
         errors = dict( st.session_state.get( 'live_world_source_errors', { } ) or { } )
@@ -478,17 +454,15 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
         raise exception from exc
 
 def get_live_world_analysis_status( ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return the current Cross-Layer Analysis configuration exposed by the Live World UI.
 
         Returns:
-        --------
         Dict[str, object]: Cross-layer analysis configuration.
 
-    '''
+    """
     try:
         return {
             'Enabled': bool( st.session_state.get( 'live_world_cross_layer_analysis', False ) ),
@@ -508,17 +482,15 @@ def get_live_world_analysis_status( ) -> Dict[ str, object ]:
         raise exception from exc
 
 def get_live_world_history_status( ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return Historical Replay configuration and persisted-history summary statistics.
 
         Returns:
-        --------
         Dict[str, object]: Historical Replay configuration and persistence summary.
 
-    '''
+    """
     try:
         summary = get_live_world_history_summary( )
         return {
@@ -545,24 +517,21 @@ def get_live_world_history_status( ) -> Dict[ str, object ]:
 
 def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         limit: int ) -> List[ Dict[ str, object ] ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return persisted Live World observations through a selected historical snapshot.
 
-        Parameters:
-        -----------
+        Args:
         hours (int): Replay lookback in hours; zero loads all retained history.
         entity_type (str): Entity type or All.
         snapshot (str): Maximum replay timestamp to include.
         limit (int): Maximum observations returned.
 
         Returns:
-        --------
         List[Dict[str, object]]: Historical observations in chronological order.
 
-    '''
+    """
     try:
         throw_if( 'hours', hours )
         throw_if( 'entity_type', entity_type )
@@ -593,17 +562,15 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         raise exception from exc
 
 def get_live_world_tracking_status( ) -> Dict[ str, object ]:
-    '''
+    """
 
         Purpose:
-        --------
         Return the active tracking target and recorded trail history.
 
         Returns:
-        --------
         Dict[str, object]: Current tracking state and trail points.
 
-    '''
+    """
     try:
         history = list( st.session_state.get( 'live_world_tracking_history', [ ] ) or [ ] )
         return {
