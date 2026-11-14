@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import math
+from numbers import Real
 from typing import Dict, List
 
 import numpy as np
@@ -78,7 +79,7 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
                 ('latitude_b', latitude_b, 90.0),
                 ('longitude_b', longitude_b, 180.0)):
             throw_if( argument_name, coordinate )
-            if (type( coordinate ) not in (int, float) or
+            if (not isinstance( coordinate, Real ) or type( coordinate ) is bool or
                     not math.isfinite( coordinate ) or not -maximum <= coordinate <= maximum):
                 raise ValueError( f'{argument_name} must be a finite coordinate in range.' )
         lat_a = math.radians( latitude_a )
@@ -94,7 +95,7 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'calculate_distance_nm'
         Logger( ).write( exception )
@@ -124,7 +125,7 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
                 ('latitude_b', latitude_b, 90.0),
                 ('longitude_b', longitude_b, 180.0)):
             throw_if( argument_name, coordinate )
-            if (type( coordinate ) not in (int, float) or
+            if (not isinstance( coordinate, Real ) or type( coordinate ) is bool or
                     not math.isfinite( coordinate ) or not -maximum <= coordinate <= maximum):
                 raise ValueError( f'{argument_name} must be a finite coordinate in range.' )
         lat_a = math.radians( latitude_a )
@@ -138,7 +139,7 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'calculate_bearing'
         Logger( ).write( exception )
@@ -180,7 +181,7 @@ def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'make_entity_record'
         Logger( ).write( exception )
@@ -219,7 +220,7 @@ def get_live_world_status( ) -> Dict[ str, object ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'get_live_world_status'
         Logger( ).write( exception )
@@ -259,7 +260,7 @@ def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str,
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'list_live_world_entities'
         Logger( ).write( exception )
@@ -307,7 +308,7 @@ def search_live_world_entities( query: str, entity_type: str, limit: int ) -> Li
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'search_live_world_entities'
         Logger( ).write( exception )
@@ -362,8 +363,8 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
         for _, row in df_result.iterrows( ):
             row_latitude = row[ 'Latitude' ]
             row_longitude = row[ 'Longitude' ]
-            if (type( row_latitude ) not in (int, float) or
-                    type( row_longitude ) not in (int, float) or
+            if (not isinstance( row_latitude, Real ) or type( row_latitude ) is bool or
+                    not isinstance( row_longitude, Real ) or type( row_longitude ) is bool or
                     not math.isfinite( row_latitude ) or
                     not math.isfinite( row_longitude ) or
                     not -90 <= row_latitude <= 90 or
@@ -386,7 +387,7 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'find_live_world_nearest'
         Logger( ).write( exception )
@@ -419,7 +420,7 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'get_live_world_geofence_status'
         Logger( ).write( exception )
@@ -454,7 +455,7 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'get_live_world_source_status'
         Logger( ).write( exception )
@@ -482,7 +483,7 @@ def get_live_world_analysis_status( ) -> Dict[ str, object ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'get_live_world_analysis_status'
         Logger( ).write( exception )
@@ -516,7 +517,7 @@ def get_live_world_history_status( ) -> Dict[ str, object ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'get_live_world_history_status'
         Logger( ).write( exception )
@@ -562,7 +563,7 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'list_live_world_history'
         Logger( ).write( exception )
@@ -592,7 +593,7 @@ def get_live_world_tracking_status( ) -> Dict[ str, object ]:
 
     except Exception as exc:
         exception = Error( exc )
-        exception.module = 'iyrin'
+        exception.module = 'tools'
         exception.cause = 'tools'
         exception.method = 'get_live_world_tracking_status'
         Logger( ).write( exception )
