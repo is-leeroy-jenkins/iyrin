@@ -6596,8 +6596,11 @@ class GovData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'sort_field', sort_field )
+			if not isinstance( sort_field, str ):
+				raise TypeError( 'sort_field must be a string.' )
 			self.sort_field = sort_field
-			value = str( self.sort_field or 'score' ).strip( )
+			value = self.sort_field.strip( )
 			allowed = { 'score', 'lastModified' }
 			
 			if value not in allowed:
@@ -6631,8 +6634,11 @@ class GovData( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			throw_if( 'sort_order', sort_order )
+			if not isinstance( sort_order, str ):
+				raise TypeError( 'sort_order must be a string.' )
 			self.sort_order = sort_order
-			value = str( self.sort_order or 'DESC' ).strip( ).upper( )
+			value = self.sort_order.strip( ).upper( )
 			allowed = { 'ASC', 'DESC' }
 			
 			if value not in allowed:
