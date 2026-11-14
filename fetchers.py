@@ -4754,9 +4754,7 @@ class OpenScience( Fetcher ):
 			if self.required is None:
 				self.required = list( self.parameters.keys( ) )
 			return { 'name': self.function.strip( ), 'description': (f'{self.description.strip( )} '
-			                                                         f'This function uses the {
-			                                                         self.tool.strip( )} '
-			                                                         f'service.'),
+			                                                         f'This function uses the {self.tool.strip( )} service.'),
 					'parameters': { 'type': 'object', 'properties': self.parameters,
 							'required': self.required } }
 		
