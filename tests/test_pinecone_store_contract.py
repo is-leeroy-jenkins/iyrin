@@ -14,7 +14,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
 
     @classmethod
     def setUpClass( cls ) -> None:
-    	"""Load production vector-storage source for isolated provider tests."""
+        """Load production vector-storage source for isolated provider tests."""
         cls.vector_source = (ROOT / 'storage.py').read_text(
             encoding='utf-8' )
 
@@ -57,7 +57,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
         return store, sdk, pinecone_module, langchain_module
 
     def test_index_lookup_namespace_and_explicit_ids( self ) -> None:
-    	"""Preserve the index, namespace, and explicit document ID contract."""
+        """Preserve the index, namespace, and explicit document ID contract."""
         store, sdk, pinecone_module, langchain_module = self.create_store( )
         documents = [ SimpleNamespace( page_content='first',
             metadata={ 'source': 'a', 'chunk_id': 'a-001' } ) ]
@@ -75,7 +75,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
             documents=documents, ids=[ 'a-001' ] )
 
     def test_empty_namespace_uses_default_namespace( self ) -> None:
-    	"""Keep the provider default namespace for an empty string."""
+        """Keep the provider default namespace for an empty string."""
         store, sdk, pinecone_module, langchain_module = self.create_store( )
         documents = [ SimpleNamespace( page_content='first',
             metadata={ 'source': 'a' } ) ]
@@ -90,7 +90,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
         self.assertTrue( first_ids[ 0 ].startswith( 'chunk-' ) )
 
     def test_missing_index_prevents_write( self ) -> None:
-    	"""Do not write when the configured Pinecone index is absent."""
+        """Do not write when the configured Pinecone index is absent."""
         store, sdk, pinecone_module, langchain_module = self.create_store(
             index_exists=False )
         documents = [ SimpleNamespace( page_content='first', metadata={ } ) ]
@@ -103,7 +103,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
         langchain_module.PineconeVectorStore.assert_not_called( )
 
     def test_duplicate_ids_do_not_write( self ) -> None:
-    	"""Reject duplicate vector IDs before sending an API request."""
+        """Reject duplicate vector IDs before sending an API request."""
         store, sdk, pinecone_module, langchain_module = self.create_store( )
         documents = [ SimpleNamespace( page_content=str( index ),
             metadata={ 'chunk_id': 'duplicate' } ) for index in range( 2 ) ]
@@ -115,7 +115,7 @@ class PineconeStoreContractTests( unittest.TestCase ):
         langchain_module.PineconeVectorStore.return_value.add_documents.assert_not_called( )
 
     def test_provider_error_is_not_suppressed( self ) -> None:
-    	"""Propagate provider write failures rather than hiding them."""
+        """Propagate provider write failures rather than hiding them."""
         store, sdk, pinecone_module, langchain_module = self.create_store( )
         langchain_module.PineconeVectorStore.return_value.add_documents.side_effect = RuntimeError(
             'remote write failed' )
