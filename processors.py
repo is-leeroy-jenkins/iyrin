@@ -2470,6 +2470,7 @@ class PdfParser( Processor ):
 		lines (list | None): Extracted text lines from the active PDF.
 		pages (list | None): Parsed PDF page structures.
 		strip_headers (Optional[ bool ]): Runtime state used by ``PdfParser`` during processing operations.
+		minimum_repeats (Optional[int]): Minimum count used to detect repeating page artifacts.
 		minimum_length (Optional[ int ]): Runtime state used by ``PdfParser`` during processing operations.
 		extract_tables_enabled (Optional[ bool ]): Runtime state used by ``PdfParser`` during processing
 			operations.
@@ -2479,6 +2480,7 @@ class PdfParser( Processor ):
 	"""
 	strip_headers: Optional[ bool ]
 	minimum_length: Optional[ int ]
+	minimum_repeats: Optional[ int ]
 	extract_tables_enabled: Optional[ bool ]
 	extracted_lines: Optional[ List ]
 	extracted_tables: Optional[ List ]
@@ -2505,6 +2507,7 @@ class PdfParser( Processor ):
 		super( ).__init__( )
 		self.strip_headers = headers
 		self.minimum_length = size
+		self.minimum_repeats = 3
 		self.extract_tables_enabled = tables
 		self.pages = [ ]
 		self.lines = [ ]
@@ -2670,17 +2673,16 @@ class PdfParser( Processor ):
 				type: ``int``. Defaults to ``3``.
 		
 		Returns:
-			List[
-				                                                                             dict
-				                                                                             ] |
-				                                                                             None:
-				                                                                             Result produced by the processing operation.
-		
+			List[Dict] | None: Pages with repeated header and footer blocks removed.
+
 		Raises:
 			Error: Raised when validation or processing fails.
 		"""
 		try:
 			throw_if( 'pages', pages )
+			if type( minimum_repeats ) is not int or minimum_repeats < 1:
+				raise ValueError( 'minimum_repeats must be a positive integer.' )
+			self.minimum_repeats = minimum_repeats
 			
 			def normalize_candidate( value: str ) -> str:
 				"""Normalize a header or footer block before repetition comparison.
@@ -2728,7 +2730,7 @@ class PdfParser( Processor ):
 				return False
 			
 			counts = { }
-			threshold = max( 2, int( minimum_repeats ) )
+			threshold = max( 2, self.minimum_repeats )
 			
 			for page in pages:
 				for block in page.get( 'blocks', [ ] ):
