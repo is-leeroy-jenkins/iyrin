@@ -1559,7 +1559,7 @@ class SQLiteDatabase( ):
 		# Explicitly allow only read-only PRAGMA inspection names. PRAGMA assignments,
 		# parenthesized setters, checkpoints, and other state changes are rejected.
 		if q.startswith( 'pragma' ):
-			pragma_name = re.match( r'^pragma\\s+(?:[a-z_][a-z0-9_]*\\.)?([a-z_][a-z0-9_]*)', q )
+			pragma_name = re.match( r'^pragma\s+(?:[a-z_][a-z0-9_]*\.)?([a-z_][a-z0-9_]*)', q )
 			allowed_pragmas = { 'table_info', 'table_xinfo', 'table_list',
 				'index_list', 'index_info', 'index_xinfo', 'foreign_key_list',
 				'database_list', 'compile_options', 'collation_list' }
