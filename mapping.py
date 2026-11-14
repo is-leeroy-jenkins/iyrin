@@ -102,6 +102,9 @@ def flatten_geocode( result: Dict[ str, Any ] ) -> Dict[ str, Any ]:
 	def comp( kind: str, want_long: bool = False ) -> Optional[ str ]:
 		"""Find an address component by Google component type.
 
+		Purpose:
+			Retrieve a matching Google address component using its documented type.
+
 		Args:
 			kind (str): Google address component type.
 			want_long (bool): Return the long component name when True.
