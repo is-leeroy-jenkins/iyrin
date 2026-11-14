@@ -17,10 +17,36 @@ class VectorPipelineIntegrationTests( unittest.TestCase ):
 
     @classmethod
     def setUpClass( cls ) -> None:
+        import ast
+        import math
+        from types import ModuleType
+        import config as cfg
+        from embedders import EmbeddingFactory, chunk_identifier
         from langchain_core.documents import Document
         from langchain_core.embeddings import Embeddings
-        import pipelines
         from langchain_chroma import Chroma
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from storage import ChromaStore, PineconeStore
+
+        # Isolate the processing functions without executing the Streamlit application.
+        app_path = Path( __file__ ).resolve( ).parents[ 1 ] / 'app.py'
+        module_tree = ast.parse( app_path.read_text( encoding='utf-8' ) )
+        names = { 'throw_if', 'chunk_documents', 'create_embeddings', 'store_documents' }
+        functions = [ node for node in module_tree.body
+            if isinstance( node, ast.FunctionDef ) and node.name in names ]
+        if { node.name for node in functions } != names:
+            raise RuntimeError( 'Consolidated document pipeline functions are missing.' )
+        pipeline_module = ModuleType( 'iyrin_pipeline_contract' )
+        pipeline_module.__dict__.update( {
+            'List': list, 'Document': Document, 'math': math,
+            'cfg': cfg, 'EmbeddingFactory': EmbeddingFactory,
+            'ChromaStore': ChromaStore, 'PineconeStore': PineconeStore,
+            'chunk_identifier': chunk_identifier,
+            'RecursiveCharacterTextSplitter': RecursiveCharacterTextSplitter,
+        } )
+        source_module = ast.Module( body=functions, type_ignores=[ ] )
+        exec( compile( ast.fix_missing_locations( source_module ), str( app_path ), 'exec' ),
+            pipeline_module.__dict__ )
 
         class LocalEmbeddings( Embeddings ):
             def embed_documents( self, texts: list[ str ] ) -> list[ list[ float ] ]:
@@ -32,7 +58,7 @@ class VectorPipelineIntegrationTests( unittest.TestCase ):
 
         cls.Document = Document
         cls.Chroma = Chroma
-        cls.pipelines = pipelines
+        cls.pipelines = pipeline_module
         cls.LocalEmbeddings = LocalEmbeddings
 
     def test_chunk_embed_store_and_reopen( self ) -> None:
