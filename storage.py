@@ -983,13 +983,21 @@ class SQLiteDatabase( ):
 		Returns:
 			List[ Tuple ]: Result of the create schema operation.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		with self.create_connection( ) as conn:
-			return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			with self.create_connection( ) as conn:
+				return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'create_schema( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
 
@@ -1007,74 +1015,82 @@ class SQLiteDatabase( ):
 				pd.DataFrame: DataFrame of plain Python scalar values.
 
 			"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		if limit is not None and (type( limit ) is not int or limit <= 0):
-			raise ValueError( 'limit must be a positive integer when provided.' )
-		if type( offset ) is not int or offset < 0:
-			raise ValueError( 'offset must be a nonnegative integer.' )
-		self.table = table
-		self.limit = limit
-		self.offset = offset
-		query = f'SELECT * FROM "{self.table}"'
-		if self.limit is not None:
-			query += f' LIMIT {self.limit} OFFSET {self.offset}'
-		with self.create_connection( ) as conn:
-			cur = conn.cursor( )
-			cur.execute( query )
-			raw_columns = [ d[ 0 ] for d in (cur.description or [ ]) ]
-			rows = cur.fetchall( )
-		seen: Dict[ str, int ] = { }
-		columns: List[ str ] = [ ]
-		for col in raw_columns:
-			name = str( col )
-			if name not in seen:
-				seen[ name ] = 0
-				columns.append( name )
-			else:
-				seen[ name ] += 1
-				columns.append( f'{name}_{seen[ name ]}' )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			if limit is not None and (type( limit ) is not int or limit <= 0):
+				raise ValueError( 'limit must be a positive integer when provided.' )
+			if type( offset ) is not int or offset < 0:
+				raise ValueError( 'offset must be a nonnegative integer.' )
+			self.table = table
+			self.limit = limit
+			self.offset = offset
+			query = f'SELECT * FROM "{self.table}"'
+			if self.limit is not None:
+				query += f' LIMIT {self.limit} OFFSET {self.offset}'
+			with self.create_connection( ) as conn:
+				cur = conn.cursor( )
+				cur.execute( query )
+				raw_columns = [ d[ 0 ] for d in (cur.description or [ ]) ]
+				rows = cur.fetchall( )
+			seen: Dict[ str, int ] = { }
+			columns: List[ str ] = [ ]
+			for col in raw_columns:
+				name = str( col )
+				if name not in seen:
+					seen[ name ] = 0
+					columns.append( name )
+				else:
+					seen[ name ] += 1
+					columns.append( f'{name}_{seen[ name ]}' )
 		
-		def _scalarize( value: Any ) -> Any:
-			"""Prepare SQLite result values for tabular presentation.
+			def _scalarize( value: Any ) -> Any:
+				"""Prepare SQLite result values for tabular presentation.
 
-			Purpose:
-				Decodes binary values and converts unsupported payloads at the display boundary.
+				Purpose:
+					Decodes binary values and converts unsupported payloads at the display boundary.
 
-			Args:
-				value (Any): Value returned from SQLite.
+				Args:
+					value (Any): Value returned from SQLite.
 
-			Returns:
-				Any: Scalar or serialized representation of the database value.
-			"""
-			if value is None or isinstance( value, (str, int, float, bool) ):
-				return value
-			if isinstance( value, bytes ):
-				try:
-					return value.decode( 'utf-8' )
-				except Exception:
-					return value.hex( )
-			if isinstance( value, (list, tuple, set, dict) ):
-				try:
-					return str( normalize( value ) )
-				except Exception:
-					return str( value )
-			if hasattr( value, 'model_dump' ):
-				try:
-					return str( value.model_dump( ) )
-				except Exception:
-					return str( value )
-			return str( value )
+				Returns:
+					Any: Scalar or serialized representation of the database value.
+				"""
+				if value is None or isinstance( value, (str, int, float, bool) ):
+					return value
+				if isinstance( value, bytes ):
+					try:
+						return value.decode( 'utf-8' )
+					except Exception:
+						return value.hex( )
+				if isinstance( value, (list, tuple, set, dict) ):
+					try:
+						return str( normalize( value ) )
+					except Exception:
+						return str( value )
+				if hasattr( value, 'model_dump' ):
+					try:
+						return str( value.model_dump( ) )
+					except Exception:
+						return str( value )
+				return str( value )
 		
-		normalized_rows: List[ Dict[ str, Any ] ] = [ ]
-		for row in rows:
-			record: Dict[ str, Any ] = { }
-			for idx, col in enumerate( columns ):
-				record[ col ] = _scalarize( row[ idx ] )
-			normalized_rows.append( record )
-		return pd.DataFrame( normalized_rows, columns=columns )
+			normalized_rows: List[ Dict[ str, Any ] ] = [ ]
+			for row in rows:
+				record: Dict[ str, Any ] = { }
+				for idx, col in enumerate( columns ):
+					record[ col ] = _scalarize( row[ idx ] )
+				normalized_rows.append( record )
+			return pd.DataFrame( normalized_rows, columns=columns )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'read_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def render_table( self, df: pd.DataFrame ) -> None:
 		"""
 
@@ -1133,14 +1149,22 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		with self.create_connection( ) as conn:
-			conn.execute( f'DROP TABLE IF EXISTS "{self.table}";' )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			with self.create_connection( ) as conn:
+				conn.execute( f'DROP TABLE IF EXISTS "{self.table}";' )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'drop_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
 		"""
 			Purpose:
@@ -1161,37 +1185,45 @@ class SQLiteDatabase( ):
 		Returns:
 			None: Completes the operation through side effects.
 		"""
-		throw_if( 'table', table )
-		throw_if( 'column', column )
-		if not isinstance( table, str ) or not isinstance( column, str ):
-			raise TypeError( 'table and column must be strings.' )
-		self.table = table
-		self.column = column
-		# ------------------------------------------------------------------
-		# Validate table exists
-		# ------------------------------------------------------------------
-		tables = self.list_tables( )
-		if self.table not in tables:
-			raise ValueError( 'Invalid table name.' )
-		# ------------------------------------------------------------------
-		# Validate column exists
-		# ------------------------------------------------------------------
-		schema = self.create_schema( self.table )
-		valid_columns = [ col[ 1 ] for col in schema ]
-		if self.column not in valid_columns:
-			raise ValueError( 'Invalid column name.' )
-		# ------------------------------------------------------------------
-		# Sanitize index name (identifier only)
-		# ------------------------------------------------------------------
-		safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{self.table}_{self.column}" )
-		# ------------------------------------------------------------------
-		# Create index safely (quote identifiers)
-		# ------------------------------------------------------------------
-		sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{self.table}"("{self.column}");'
-		with self.create_connection( ) as conn:
-			conn.execute( sql )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			throw_if( 'column', column )
+			if not isinstance( table, str ) or not isinstance( column, str ):
+				raise TypeError( 'table and column must be strings.' )
+			self.table = table
+			self.column = column
+			# ------------------------------------------------------------------
+			# Validate table exists
+			# ------------------------------------------------------------------
+			tables = self.list_tables( )
+			if self.table not in tables:
+				raise ValueError( 'Invalid table name.' )
+			# ------------------------------------------------------------------
+			# Validate column exists
+			# ------------------------------------------------------------------
+			schema = self.create_schema( self.table )
+			valid_columns = [ col[ 1 ] for col in schema ]
+			if self.column not in valid_columns:
+				raise ValueError( 'Invalid column name.' )
+			# ------------------------------------------------------------------
+			# Sanitize index name (identifier only)
+			# ------------------------------------------------------------------
+			safe_index_name = re.sub( r"[^0-9a-zA-Z_]+", "_", f"idx_{self.table}_{self.column}" )
+			# ------------------------------------------------------------------
+			# Create index safely (quote identifiers)
+			# ------------------------------------------------------------------
+			sql = f'CREATE INDEX IF NOT EXISTS "{safe_index_name}" ON "{self.table}"("{self.column}");'
+			with self.create_connection( ) as conn:
+				conn.execute( sql )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'create_index( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
 		"""Render advanced DataFrame filters and return the filtered rows.
 
@@ -1386,22 +1418,30 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the convert dataframe operation.
 		"""
-		throw_if( 'table_name', table_name )
-		throw_if( 'df', df )
-		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
-			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
-		self.table_name = table_name
-		self.df_input = df
-		columns = [ ]
-		for col in self.df_input.columns:
-			sql_type = self.get_sqlite_type( self.df_input[ col ].dtype )
-			safe_col = col.replace( ' ', '_' )
-			columns.append( f'{safe_col} {sql_type}' )
-		create_stmt = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({", ".join( columns )});'
-		with self.create_connection( ) as conn:
-			conn.execute( create_stmt )
-			conn.commit( )
+		try:
+			throw_if( 'table_name', table_name )
+			throw_if( 'df', df )
+			if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+				raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+			self.table_name = table_name
+			self.df_input = df
+			columns = [ ]
+			for col in self.df_input.columns:
+				sql_type = self.get_sqlite_type( self.df_input[ col ].dtype )
+				safe_col = col.replace( ' ', '_' )
+				columns.append( f'{safe_col} {sql_type}' )
+			create_stmt = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({", ".join( columns )});'
+			with self.create_connection( ) as conn:
+				conn.execute( create_stmt )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'convert_dataframe( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def insert_data( self, table_name: str, df: pd.DataFrame ):
 		"""Insert a DataFrame's rows into a SQLite table.
 
@@ -1415,20 +1455,28 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the insert data operation.
 		"""
-		throw_if( 'table_name', table_name )
-		throw_if( 'df', df )
-		if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
-			raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
-		self.table_name = table_name
-		self.df_input = df
-		df = self.df_input.copy( )
-		df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
-		placeholders = ', '.join( [ '?' ] * len( df.columns ) )
-		stmt = f'INSERT INTO {self.table_name} VALUES ({placeholders});'
-		with self.create_connection( ) as conn:
-			conn.executemany( stmt, df.values.tolist( ) )
-			conn.commit( )
+		try:
+			throw_if( 'table_name', table_name )
+			throw_if( 'df', df )
+			if not isinstance( table_name, str ) or not isinstance( df, pd.DataFrame ):
+				raise TypeError( 'Expected a table name string and a pandas DataFrame.' )
+			self.table_name = table_name
+			self.df_input = df
+			df = self.df_input.copy( )
+			df.columns = [ c.replace( ' ', '_' ) for c in df.columns ]
+			placeholders = ', '.join( [ '?' ] * len( df.columns ) )
+			stmt = f'INSERT INTO {self.table_name} VALUES ({placeholders});'
+			with self.create_connection( ) as conn:
+				conn.executemany( stmt, df.values.tolist( ) )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'insert_data( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def get_sqlite_type( self, dtype ) -> str:
 		"""
 			Purpose:
@@ -1610,14 +1658,22 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the get indexes operation.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		with self.create_connection( ) as conn:
-			rows = conn.execute( f'PRAGMA index_list("{self.table}");' ).fetchall( )
-			return rows
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			with self.create_connection( ) as conn:
+				rows = conn.execute( f'PRAGMA index_list("{self.table}");' ).fetchall( )
+				return rows
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'get_indexes( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def add_column( self, table: str, column: str, col_type: str ):
 		"""Add a typed column to an existing SQLite table.
 
@@ -1632,18 +1688,26 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the add column operation.
 		"""
-		throw_if( 'table', table )
-		throw_if( 'column', column )
-		throw_if( 'col_type', col_type )
-		if not all( isinstance( item, str ) for item in (table, column, col_type) ):
-			raise TypeError( 'table, column, and col_type must be strings.' )
-		self.table = table
-		self.column = self.create_identifier( column )
-		self.col_type = col_type.upper( )
-		with self.create_connection( ) as conn:
-			conn.execute( f'ALTER TABLE "{self.table}" ADD COLUMN "{self.column}" {self.col_type};' )
-			conn.commit( )
+		try:
+			throw_if( 'table', table )
+			throw_if( 'column', column )
+			throw_if( 'col_type', col_type )
+			if not all( isinstance( item, str ) for item in (table, column, col_type) ):
+				raise TypeError( 'table, column, and col_type must be strings.' )
+			self.table = table
+			self.column = self.create_identifier( column )
+			self.col_type = col_type.upper( )
+			with self.create_connection( ) as conn:
+				conn.execute( f'ALTER TABLE "{self.table}" ADD COLUMN "{self.column}" {self.col_type};' )
+				conn.commit( )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'add_column( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
 		"""
 
@@ -1738,32 +1802,40 @@ class SQLiteDatabase( ):
 		Returns:
 			Any: Result of the create profile table operation.
 		"""
-		throw_if( 'table', table )
-		if not isinstance( table, str ):
-			raise TypeError( 'table must be a string.' )
-		self.table = table
-		df = self.read_table( self.table )
-		profile_rows = [ ]
-		total_rows = len( df )
-		for col in df.columns:
-			series = df[ col ]
-			null_count = series.isna( ).sum( )
-			distinct_count = series.nunique( dropna=True )
-			row = { 'column': col, 'dtype': str( series.dtype ),
-					'null_%': round( (null_count / total_rows) * 100, 2 ) if total_rows else 0,
-					'distinct_%': round( (distinct_count / total_rows) * 100,
-						2 ) if total_rows else 0, }
-			if pd.api.types.is_numeric_dtype( series ):
-				row[ 'min' ] = series.min( )
-				row[ 'max' ] = series.max( )
-				row[ 'mean' ] = series.mean( )
-			else:
-				row[ 'min' ] = None
-				row[ 'max' ] = None
-				row[ 'mean' ] = None
-			profile_rows.append( row )
-		return pd.DataFrame( profile_rows )
+		try:
+			throw_if( 'table', table )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			self.table = table
+			df = self.read_table( self.table )
+			profile_rows = [ ]
+			total_rows = len( df )
+			for col in df.columns:
+				series = df[ col ]
+				null_count = series.isna( ).sum( )
+				distinct_count = series.nunique( dropna=True )
+				row = { 'column': col, 'dtype': str( series.dtype ),
+						'null_%': round( (null_count / total_rows) * 100, 2 ) if total_rows else 0,
+						'distinct_%': round( (distinct_count / total_rows) * 100,
+							2 ) if total_rows else 0, }
+				if pd.api.types.is_numeric_dtype( series ):
+					row[ 'min' ] = series.min( )
+					row[ 'max' ] = series.max( )
+					row[ 'mean' ] = series.mean( )
+				else:
+					row[ 'min' ] = None
+					row[ 'max' ] = None
+					row[ 'mean' ] = None
+				profile_rows.append( row )
+			return pd.DataFrame( profile_rows )
 	
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'Iyrin'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = 'create_profile_table( self, **args )'
+			Logger( ).write( exception )
+			raise exception from e
 	def drop_column( self, table: str, column: str ):
 		"""Remove a column while rebuilding the table and restoring indexes.
 
