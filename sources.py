@@ -61,13 +61,20 @@ def throw_if( name: str, value: object ) -> None:
 		raise ValueError( f'Argument "{name}" cannot be empty!' )
 
 class OpenSkyLive( ):
-	'''
+	"""OpenSkyLive Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve current OpenSky state vectors for a geographic bounding box.
 
-	'''
+	Attributes:
+		client_id (str): OpenSky OAuth client ID.
+		client_secret (str): OpenSky OAuth client secret.
+		timeout (int): Network timeout in seconds.
+		token_url (str): OpenSky OAuth token endpoint.
+		states_url (str): OpenSky aircraft state endpoint.
+		access_token (str): Most recently obtained OAuth access token.
+		response (Response | None): Most recent HTTP response.
+	"""
 	client_id: str
 	client_secret: str
 	timeout: int
@@ -130,10 +137,10 @@ class OpenSkyLive( ):
 			return self.access_token
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'mappy'
-			exception.cause = 'StaticMap'
+			exception.module = 'sources'
+			exception.cause = 'OpenSkyLive'
 			exception.method = 'get_access_token( self ) -> str'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 	def fetch_states( self, latitude: float, longitude: float,
@@ -184,21 +191,24 @@ class OpenSkyLive( ):
 			return self.response.json( ) or { }
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'mappy'
-			exception.cause = 'StaticMap'
+			exception.module = 'sources'
+			exception.cause = 'OpenSkyLive'
 			exception.method = 'bbox( self, west: float, south: float, east: float, north: float )'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 
 class AdsbLolMilitary( ):
-	'''
+	"""AdsbLolMilitary Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve aircraft currently tagged as military by ADSB.lol.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -263,20 +273,26 @@ class AdsbLolMilitary( ):
 			return payload
 		except Exception as e:
 			exception = Error( e )
-			exception.module = 'source'
-			exception.cause = 'SAdsbLolMilitary'
+			exception.module = 'sources'
+			exception.cause = 'AdsbLolMilitary'
 			exception.method = 'fetch_militar( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 class AisStreamLive( ):
-	'''
+	"""AisStreamLive Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve live maritime AIS position reports through the AIS Stream WebSocket API.
 
-	'''
+	Attributes:
+		api_key (str): AIS Stream credential for WebSocket subscriptions.
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		socket (WebSocket | None): Active AIS Stream WebSocket connection.
+		max_retries (int): Maximum reconnect attempts.
+		retry_delay (float): Initial delay between retry attempts, in seconds.
+	"""
 	api_key: str
 	timeout: int
 	url: str
@@ -434,19 +450,21 @@ class AisStreamLive( ):
 			exception.module = 'sources'
 			exception.cause = 'AisStreamLive'
 			exception.method = 'fetch_positions( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 
 class CelesTrakLive( ):
-	'''
+	"""CelesTrakLive Live World provider client.
 
-		Purpose:
-		--------
-		Retrieve current CelesTrak OMM records and propagate them to current Earth-fixed
-		latitude, longitude, and altitude values using SGP4.
+	Purpose:
+		Retrieve current CelesTrak OMM records and propagate them to current Earth-fixed latitude, longitude, and altitude values using SGP4.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -506,7 +524,7 @@ class CelesTrakLive( ):
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
 			exception.method = 'fetch_group( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 	def propagate( self, record: Dict[ str, Any ], when: dt.datetime ) -> Dict[ str, Any ]:
@@ -561,18 +579,25 @@ class CelesTrakLive( ):
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
 			exception.method = 'propagate( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 
 class OverpassClient( ):
-	'''
+	"""OverpassClient Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Provide shared resilient HTTP transport for Iyr OpenStreetMap Overpass providers.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		retries (int): Maximum HTTP retry attempts per endpoint.
+		retry_delay (float): Initial delay between retry attempts, in seconds.
+		url (str): Provider endpoint URL.
+		endpoints (List[ str ]): Ordered Overpass endpoints used for fallback.
+		headers (Dict[ str, str ]): HTTP headers used for provider requests.
+		response (Response | None): Most recent HTTP response.
+	"""
 	timeout: int
 	retries: int
 	retry_delay: float
@@ -672,18 +697,21 @@ class OverpassClient( ):
 			exception.module = 'sources'
 			exception.cause = 'OverpassClient'
 			exception.method = 'execute( self, **args ) -> None'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 class OverpassInfrastructure( OverpassClient ):
-	'''
+	"""OverpassInfrastructure Live World provider client.
 
-		Purpose:
-		--------
-		Retrieve nearby public infrastructure features from OpenStreetMap through the
-		Overpass API using explicit infrastructure categories.
+	Purpose:
+		Retrieve nearby public infrastructure features from OpenStreetMap through the Overpass API using explicit infrastructure categories.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+		category_filters (Dict[ str, List[ str ] ]): OpenStreetMap category names mapped to Overpass filters.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -797,7 +825,7 @@ class OverpassInfrastructure( OverpassClient ):
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
 			exception.method = 'fetch_infrastructure( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 	def classify_infrastructure( self, tags: Dict[ str, Any ] ) -> str:
@@ -836,18 +864,21 @@ class OverpassInfrastructure( OverpassClient ):
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
 			exception.method = 'classify_infrastructure( self, **args ) -> str'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 class OverpassCameras( OverpassClient ):
-	'''
+	"""OverpassCameras Live World provider client.
 
-		Purpose:
-		--------
-		Retrieve nearby public CCTV, surveillance-camera, and webcam features from
-		OpenStreetMap through the Overpass API.
+	Purpose:
+		Retrieve nearby public CCTV, surveillance-camera, and webcam features from OpenStreetMap through the Overpass API.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+		category_filters (Dict[ str, List[ str ] ]): OpenStreetMap category names mapped to Overpass filters.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -957,9 +988,9 @@ class OverpassCameras( OverpassClient ):
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'sources'
-			exception.cause = 'OverpassCamera'
+			exception.cause = 'OverpassCameras'
 			exception.method = 'fetch_cameras( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 	def classify_camera( self, tags: Dict[ str, Any ] ) -> str:
@@ -990,17 +1021,21 @@ class OverpassCameras( OverpassClient ):
 			exception.module = 'sources'
 			exception.cause = 'OverpassCameras'
 			exception.method = 'classify_camera( self, **args ) -> str'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 class OverpassMapLayers( OverpassClient ):
-	'''
+	"""OverpassMapLayers Live World provider client.
 
-		Purpose:
-		--------
+	Purpose:
 		Retrieve contextual public map features from OpenStreetMap through the Overpass API.
 
-	'''
+	Attributes:
+		timeout (int): Network timeout in seconds.
+		url (str): Provider endpoint URL.
+		response (Response | None): Most recent HTTP response.
+		category_filters (Dict[ str, List[ str ] ]): OpenStreetMap category names mapped to Overpass filters.
+	"""
 	timeout: int
 	url: str
 	response: Response | None
@@ -1119,7 +1154,7 @@ class OverpassMapLayers( OverpassClient ):
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
 			exception.method = 'fetch_features( self, **args ) -> Dict[ str, Any ]'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
 	def classify_feature( self, tags: Dict[ str, Any ] ) -> str:
@@ -1161,6 +1196,6 @@ class OverpassMapLayers( OverpassClient ):
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
 			exception.method = 'classify_feature( self, **args ) -> str'
-			Logger.write( exception )
+			Logger( ).write( exception )
 			raise exception
 
