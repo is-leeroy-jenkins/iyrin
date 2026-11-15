@@ -196,6 +196,7 @@ class GeoEntity:
 
 def throw_if( name: str, value: object ) -> None:
 	'''
+		Validate that a required value is not empty.
 
 	Purpose:
 		Validate that a required value is not empty.
@@ -205,7 +206,7 @@ def throw_if( name: str, value: object ) -> None:
 		value (object): Value to validate.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	if value is None:
@@ -218,12 +219,13 @@ def throw_if( name: str, value: object ) -> None:
 
 def initialize_live_world_state( ) -> None:
 	'''
+		Initialize isolated Live World Data state without modifying Iyr's existing mode state.
 
 	Purpose:
 		Initialize isolated Live World Data state without modifying Iyr's existing mode state.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	defaults: Dict[ str, object ] = {
@@ -364,6 +366,7 @@ def initialize_live_world_state( ) -> None:
 
 def get_live_world_layers( ) -> Dict[ str, bool ]:
 	'''
+		Return the enabled state of every implemented Live World Data layer.
 
 	Purpose:
 		Return the enabled state of every implemented Live World Data layer.
@@ -378,13 +381,14 @@ def get_live_world_layers( ) -> Dict[ str, bool ]:
 
 def render_live_world_sidebar( ) -> None:
 	'''
+		Render operational Live World Data controls in an isolated sidebar expander below.
 
 	Purpose:
 		Render operational Live World Data controls in an isolated sidebar expander below
 		Iyr's existing Mode expander.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -683,12 +687,13 @@ def render_live_world_sidebar( ) -> None:
 
 def clear_live_world_data( ) -> None:
 	'''
+		Clear retrieved Live World Data while preserving layer selections and map controls.
 
 	Purpose:
 		Clear retrieved Live World Data while preserving layer selections and map controls.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -739,6 +744,7 @@ def clear_live_world_data( ) -> None:
 def create_live_world_bounding_box( latitude: float, longitude: float,
 		delta: float=2.0 ) -> str:
 	'''
+		Create a NASA FIRMS area-coordinate string centered on the supplied location.
 
 	Purpose:
 		Create a NASA FIRMS area-coordinate string centered on the supplied location.
@@ -768,6 +774,7 @@ def create_live_world_bounding_box( latitude: float, longitude: float,
 
 def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve current OpenSky aircraft state vectors around the Iyr/global location and.
 
 	Purpose:
 		Retrieve current OpenSky aircraft state vectors around the Iyr/global location and
@@ -868,6 +875,7 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 def calculate_live_world_distance_nm( latitude_a: float, longitude_a: float,
 		latitude_b: float, longitude_b: float ) -> float:
 	'''
+		Calculate great-circle distance between two geospatial points in nautical miles.
 
 	Purpose:
 		Calculate great-circle distance between two geospatial points in nautical miles.
@@ -897,6 +905,7 @@ def calculate_live_world_distance_nm( latitude_a: float, longitude_a: float,
 
 def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve ADSB.lol military-tagged aircraft and normalize aircraft within the.
 
 	Purpose:
 		Retrieve ADSB.lol military-tagged aircraft and normalize aircraft within the
@@ -990,6 +999,7 @@ def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.Data
 
 def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve a bounded live AIS Stream vessel sample around the current Iyr location.
 
 	Purpose:
 		Retrieve a bounded live AIS Stream vessel sample around the current Iyr location
@@ -1073,6 +1083,7 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 
 def fetch_live_satellites( ) -> pd.DataFrame:
 	'''
+		Retrieve current CelesTrak OMM records, propagate each orbit to the current UTC time,.
 
 	Purpose:
 		Retrieve current CelesTrak OMM records, propagate each orbit to the current UTC time,
@@ -1132,6 +1143,7 @@ def fetch_live_satellites( ) -> pd.DataFrame:
 
 def fetch_live_earthquakes( ) -> pd.DataFrame:
 	'''
+		Retrieve the selected USGS earthquake feed through Iyr's existing provider and.
 
 	Purpose:
 		Retrieve the selected USGS earthquake feed through Iyr's existing provider and
@@ -1201,6 +1213,7 @@ def fetch_live_earthquakes( ) -> pd.DataFrame:
 
 def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve NASA FIRMS active-fire detections through Iyr's existing Firms provider.
 
 	Purpose:
 		Retrieve NASA FIRMS active-fire detections through Iyr's existing Firms provider
@@ -1286,6 +1299,7 @@ def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 
 def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve public infrastructure features from OpenStreetMap Overpass and normalize.
 
 	Purpose:
 		Retrieve public infrastructure features from OpenStreetMap Overpass and normalize
@@ -1360,6 +1374,7 @@ def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFra
 
 def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve public CCTV, surveillance-camera, and webcam features from OpenStreetMap.
 
 	Purpose:
 		Retrieve public CCTV, surveillance-camera, and webcam features from OpenStreetMap
@@ -1438,6 +1453,7 @@ def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 
 def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Retrieve selected contextual public map features from OpenStreetMap Overpass and.
 
 	Purpose:
 		Retrieve selected contextual public map features from OpenStreetMap Overpass and
@@ -1514,6 +1530,7 @@ def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 
 def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
 	'''
+		Read the first available value from an explicit list of known provider keys.
 
 	Purpose:
 		Read the first available value from an explicit list of known provider keys.
@@ -1536,6 +1553,7 @@ def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
 
 def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 	'''
+		Convert normalized GeoEntity objects into the Live World DataFrame contract.
 
 	Purpose:
 		Convert normalized GeoEntity objects into the Live World DataFrame contract.
@@ -1571,6 +1589,7 @@ def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 
 def get_live_world_tracking_options( ) -> Dict[ str, str ]:
 	'''
+		Return selectable moving entities from the current Live World entity frame.
 
 	Purpose:
 		Return selectable moving entities from the current Live World entity frame.
@@ -1601,6 +1620,7 @@ def get_live_world_tracking_options( ) -> Dict[ str, str ]:
 
 def get_live_world_measurement_options( ) -> Dict[ str, str ]:
 	'''
+		Return selectable measurement endpoints from current location and loaded entities.
 
 	Purpose:
 		Return selectable measurement endpoints from current location and loaded entities.
@@ -1628,6 +1648,7 @@ def get_live_world_measurement_options( ) -> Dict[ str, str ]:
 def resolve_live_world_measurement_point( key: str, latitude: float,
 		longitude: float, endpoint: str ) -> Dict[ str, object ]:
 	'''
+		Resolve one configured measurement endpoint into coordinates and a display label.
 
 	Purpose:
 		Resolve one configured measurement endpoint into coordinates and a display label.
@@ -1679,6 +1700,7 @@ def resolve_live_world_measurement_point( key: str, latitude: float,
 
 def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dict[ str, object ]:
 	'''
+		Calculate distance and initial bearing between the configured measurement endpoints.
 
 	Purpose:
 		Calculate distance and initial bearing between the configured measurement endpoints.
@@ -1716,12 +1738,13 @@ def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dic
 
 def add_live_world_annotation( ) -> None:
 	'''
+		Add one labeled annotation to the in-session Live World annotation collection.
 
 	Purpose:
 		Add one labeled annotation to the in-session Live World annotation collection.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -1741,12 +1764,13 @@ def add_live_world_annotation( ) -> None:
 
 def clear_live_world_annotations( ) -> None:
 	'''
+		Clear all in-session Live World annotations.
 
 	Purpose:
 		Clear all in-session Live World annotations.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -1754,6 +1778,7 @@ def clear_live_world_annotations( ) -> None:
 
 def get_live_world_annotation_frame( ) -> pd.DataFrame:
 	'''
+		Return current Live World annotations as a DataFrame.
 
 	Purpose:
 		Return current Live World annotations as a DataFrame.
@@ -1769,6 +1794,7 @@ def get_live_world_annotation_frame( ) -> pd.DataFrame:
 
 def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
 	'''
+		Return selectable Cross-Layer Analysis origins from current location and loaded entities.
 
 	Purpose:
 		Return selectable Cross-Layer Analysis origins from current location and loaded entities.
@@ -1796,6 +1822,7 @@ def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
 def resolve_live_world_analysis_origin( key: str, latitude: float,
 		longitude: float ) -> Dict[ str, object ]:
 	'''
+		Resolve the configured Cross-Layer Analysis origin into coordinates and a label.
 
 	Purpose:
 		Resolve the configured Cross-Layer Analysis origin into coordinates and a label.
@@ -1844,6 +1871,7 @@ def resolve_live_world_analysis_origin( key: str, latitude: float,
 def calculate_live_world_cross_layer_analysis( latitude: float,
 		longitude: float ) -> pd.DataFrame:
 	'''
+		Rank loaded Live World entities by distance from the configured analysis origin.
 
 	Purpose:
 		Rank loaded Live World entities by distance from the configured analysis origin.
@@ -1909,6 +1937,7 @@ def calculate_live_world_cross_layer_analysis( latitude: float,
 
 def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
 	'''
+		Return selectable Geofencing origins from current location and loaded entities.
 
 	Purpose:
 		Return selectable Geofencing origins from current location and loaded entities.
@@ -1936,6 +1965,7 @@ def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
 def resolve_live_world_geofence_origin( key: str, latitude: float,
 		longitude: float ) -> Dict[ str, object ]:
 	'''
+		Resolve the configured Geofencing origin into coordinates and a display label.
 
 	Purpose:
 		Resolve the configured Geofencing origin into coordinates and a display label.
@@ -1983,6 +2013,7 @@ def resolve_live_world_geofence_origin( key: str, latitude: float,
 
 def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Return loaded Live World entities currently inside the configured circular geofence.
 
 	Purpose:
 		Return loaded Live World entities currently inside the configured circular geofence.
@@ -2044,6 +2075,7 @@ def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.Dat
 
 def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 	'''
+		Record entity entry and exit transitions for the configured geofence after refreshes.
 
 	Purpose:
 		Record entity entry and exit transitions for the configured geofence after refreshes.
@@ -2052,7 +2084,7 @@ def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 		df_geofence (pd.DataFrame): Current entities inside the configured geofence.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -2102,12 +2134,13 @@ def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 
 def clear_live_world_geofence_events( ) -> None:
 	'''
+		Clear Geofencing event history and reset the transition baseline.
 
 	Purpose:
 		Clear Geofencing event history and reset the transition baseline.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -2118,6 +2151,7 @@ def clear_live_world_geofence_events( ) -> None:
 
 def get_live_world_geofence_event_frame( ) -> pd.DataFrame:
 	'''
+		Return current Geofencing transition events as a DataFrame.
 
 	Purpose:
 		Return current Geofencing transition events as a DataFrame.
@@ -2134,6 +2168,7 @@ def get_live_world_geofence_event_frame( ) -> pd.DataFrame:
 
 def get_live_world_history_window_hours( window: str ) -> int:
 	'''
+		Translate the Historical Replay window label into a lookback duration in hours.
 
 	Purpose:
 		Translate the Historical Replay window label into a lookback duration in hours.
@@ -2160,6 +2195,7 @@ def get_live_world_history_window_hours( window: str ) -> int:
 
 def load_live_world_replay_frame( ) -> pd.DataFrame:
 	'''
+		Load Historical Replay observations using the current sidebar configuration.
 
 	Purpose:
 		Load Historical Replay observations using the current sidebar configuration.
@@ -2182,12 +2218,13 @@ def load_live_world_replay_frame( ) -> pd.DataFrame:
 
 def clear_live_world_tracking( ) -> None:
 	'''
+		Clear the current tracking trail without changing the selected tracked entity.
 
 	Purpose:
 		Clear the current tracking trail without changing the selected tracked entity.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -2196,6 +2233,7 @@ def clear_live_world_tracking( ) -> None:
 
 def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 	'''
+		Append the selected moving entity's newest position to its in-session trail.
 
 	Purpose:
 		Append the selected moving entity's newest position to its in-session trail.
@@ -2204,7 +2242,7 @@ def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 		df_entities (pd.DataFrame): Current normalized Live World entity records.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -2257,6 +2295,7 @@ def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 
 def get_live_world_tracking_frame( ) -> pd.DataFrame:
 	'''
+		Return the current tracking trail as a DataFrame for rendering and inspection.
 
 	Purpose:
 		Return the current tracking trail as a DataFrame for rendering and inspection.
@@ -2274,6 +2313,7 @@ def get_live_world_tracking_frame( ) -> pd.DataFrame:
 def update_live_world_source_state( source_key: str, status: str, error: str='',
 		stale: bool=False, attempted_at: str='', successful_at: str='' ) -> None:
 	'''
+		Update the operational state for one Live World provider without changing any.
 
 	Purpose:
 		Update the operational state for one Live World provider without changing any
@@ -2288,7 +2328,7 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 		successful_at (str): UTC timestamp for the most recent successful refresh.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -2318,6 +2358,7 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 def refresh_live_world_source( source_key: str,
 		fetcher: Callable[ [ ], pd.DataFrame ] ) -> pd.DataFrame:
 	'''
+		Refresh one enabled Live World provider while isolating provider failures from.
 
 	Purpose:
 		Refresh one enabled Live World provider while isolating provider failures from
@@ -2369,6 +2410,7 @@ def refresh_live_world_source( source_key: str,
 
 def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
+		Refresh every enabled implemented Live World layer independently and persist the.
 
 	Purpose:
 		Refresh every enabled implemented Live World layer independently and persist the
@@ -2454,6 +2496,7 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 
 def render_live_world_map( latitude: float, longitude: float ) -> None:
 	'''
+		Render normalized Live World entities on an operational PyDeck map with metrics,.
 
 	Purpose:
 		Render normalized Live World entities on an operational PyDeck map with metrics,
@@ -2464,7 +2507,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 		longitude (float): Current Iyr/global longitude used for initial map centering.
 
 	Returns:
-		None
+		None: This operation has no return value.
 
 	'''
 	initialize_live_world_state( )
@@ -3118,6 +3161,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 
 def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> float:
 	'''
+		Read a numeric value from a GeoEntity metadata dictionary for map sizing.
 
 	Purpose:
 		Read a numeric value from a GeoEntity metadata dictionary for map sizing.
@@ -3141,6 +3185,7 @@ def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> flo
 
 def make_live_world_display_frame( df_frame: pd.DataFrame ) -> pd.DataFrame:
 	'''
+		Create a Streamlit-safe display copy of Live World entity data.
 
 	Purpose:
 		Create a Streamlit-safe display copy of Live World entity data.
