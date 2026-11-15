@@ -391,7 +391,7 @@ if st.session_state.opensky_api_credentials == '':
 		os.environ[ 'OPENSKY_API_CREDENTIALS' ] = default
 
 if st.session_state.purpleair_api_key == '':
-	default = getattr( cfg, 'PURPLEAIR_API_KEY', '' )
+	default = cfg.PURPLEAIR_API_KEY
 	if default:
 		st.session_state.purpleair_api_key = default
 		os.environ[ 'PURPLEAIR_API_KEY' ] = default
@@ -596,7 +596,7 @@ def init_env_state( key: str, config_name: str, env_name: str ) -> None:
 	"""
 	init_state( key, '' )
 	if st.session_state.get( key, '' ) == '':
-		default = getattr( cfg, config_name, '' )
+		default = vars( cfg ).get( config_name, '' )
 		if default:
 			st.session_state[ key ] = default
 			os.environ[ env_name ] = default
@@ -7412,7 +7412,7 @@ elif mode == 'Astronomical Data':
 								complete_entry_only=bool( space_complete_entry_only ),
 								speed=int( space_speed ), half_angle=int( space_half_angle ),
 								keyword=space_keyword,
-								api_key=getattr( cfg, 'NASA_API_KEY', None ) )
+								api_key=cfg.NASA_API_KEY )
 							
 							st.session_state[ 'astro_last_source' ] = 'Space Weather'
 							st.session_state[ 'astro_last_result' ] = result or { }
@@ -10473,7 +10473,7 @@ elif mode == 'Artificial Intelligence':
 			
 			with p_row1[ 0 ]:
 				_chat_models = (
-						cfg.GPT_MODELS if hasattr( cfg, 'GPT_MODELS' ) and cfg.GPT_MODELS else [
+						cfg.GPT_MODELS if cfg.GPT_MODELS else [
 								'gpt-5.4', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1' ])
 				
 				chat_model = _model_selector( key_prefix='chat', label='Model',
@@ -11467,8 +11467,7 @@ elif mode == 'Artificial Intelligence':
 			p_row2 = st.columns( 2 )
 			p_row3 = st.columns( 2 )
 			with p_row1[ 0 ]:
-				_mistral_models = (cfg.MISTRAL_MODELS if hasattr( cfg,
-					'MISTRAL_MODELS' ) and cfg.MISTRAL_MODELS else [ 'mistral-large-latest',
+				_mistral_models = (cfg.MISTRAL_MODELS if cfg.MISTRAL_MODELS else [ 'mistral-large-latest',
 				                                                     'mistral-medium-latest',
 				                                                     'mistral-small-latest',
 				                                                     'open-mistral-7b',
@@ -11679,16 +11678,16 @@ elif mode == 'Data Management':
 						sheets = pd.read_excel( uploaded_file, sheet_name=None )
 						with create_connection( ) as conn:
 							conn.execute( 'BEGIN' )
-							for sheet_name, df in sheets.items( ):
+							for sheet_name, df_sheet in sheets.items( ):
 								table_name = create_identifier( sheet_name )
 								if overwrite:
 									conn.execute( f'DROP TABLE IF EXISTS "{table_name}"' )
 							
 								# --- Create Table ---
 								columns = [ ]
-								df.columns = [ create_identifier( c ) for c in df.columns ]
-								for col in df.columns:
-									sql_type = get_sqlite_type( df[ col ].dtype )
+								df_sheet.columns = [ create_identifier( c ) for c in df_sheet.columns ]
+								for col in df_sheet.columns:
+									sql_type = get_sqlite_type( df_sheet[ col ].dtype )
 									columns.append( f'"{col}" {sql_type}' )
 							
 								create_stmt = ( f'CREATE TABLE "{table_name}" '
@@ -11697,13 +11696,13 @@ elif mode == 'Data Management':
 								conn.execute( create_stmt )
 							
 								# --- Insert Data ---
-								placeholders = ", ".join( [ "?" ] * len( df.columns ) )
+								placeholders = ", ".join( [ "?" ] * len( df_sheet.columns ) )
 								insert_stmt = (
 										f'INSERT INTO "{table_name}" '
 										f'VALUES ({placeholders});' )
 							
 								conn.executemany( insert_stmt,
-									df.where( pd.notnull( df ), None ).values.tolist( ) )
+									df_sheet.where( pd.notnull( df_sheet ), None ).values.tolist( ) )
 						
 							conn.commit( )
 					
@@ -11712,7 +11711,7 @@ elif mode == 'Data Management':
 					except Exception as e:
 						try:
 							conn.rollback( )
-						except:
+						except Exception:
 							pass
 						st.error( f'Import failed — transaction rolled back.\n\n{e}' )
 		
@@ -11727,8 +11726,8 @@ elif mode == 'Data Management':
 				
 					blue_divider( )
 				
-					df = read_table( table )
-					st.data_editor( df, key='dm_browse_key' )
+					df_browse = read_table( table )
+					st.data_editor( df_browse, key='dm_browse_key' )
 				else:
 					st.info( 'No tables available.' )
 		
@@ -11747,13 +11746,13 @@ elif mode == 'Data Management':
 					with crud_header_c1:
 						table = st.selectbox( 'Select Table', tables, key='crud_table' )
 				
-					df = read_table( table )
+					df_crud = read_table( table )
 					schema = create_schema( table )
 				
 					type_map = { col[ 1 ]: col[ 2 ].upper( ) for col in schema if col[ 1 ] != 'rowid' }
 				
 					with crud_header_c2:
-						st.metric( 'Rows', len( df.index ) )
+						st.metric( 'Rows', len( df_crud.index ) )
 				
 					with crud_header_c3:
 						st.metric( 'Columns', len( type_map ) )
@@ -11862,7 +11861,7 @@ elif mode == 'Data Management':
 					# ------------------------------------------------------------------
 					with preview_col:
 						st.markdown( '##### Current Data Preview' )
-						st.data_editor( df.head( 25 ), key=f'dm_crud_preview_{table}',
+						st.data_editor( df_crud.head( 25 ), key=f'dm_crud_preview_{table}',
 							use_container_width=True, disabled=True )
 		
 			# ------------------------------------------------------------------------------
@@ -11896,19 +11895,19 @@ elif mode == 'Data Management':
 					tbl_c1, tbl_c2, tbl_c3 = st.columns( [ 0.25, 0.25, 0.5 ], border=True )
 					with tbl_c1:
 						table = st.selectbox( 'Select Table', tables, key='filter_table' )
-						df = read_table( table )
+						df_filter = read_table( table )
 					
 					with tbl_c2:
-						column = st.selectbox( 'Select Field', df.columns, key='selected_column' )
+						column = st.selectbox( 'Select Field', df_filter.columns, key='selected_column' )
 					
 					with tbl_c3:
 						value = st.text_input( 'Contains', placeholder='Enter Text for Lookup' )
 						if value:
-							df = df[ df[ column ].astype( str ).str.contains( value ) ]
+							df_filter = df_filter[ df_filter[ column ].astype( str ).str.contains( value ) ]
 				
 					blue_divider( )
 				
-					st.data_editor( df, key='dm_filter_key' )
+					st.data_editor( df_filter, key='dm_filter_key' )
 		
 			# ------------------------------------------------------------------------------
 			# AGGREGATE
@@ -11920,8 +11919,8 @@ elif mode == 'Data Management':
 					agg_c1, agg_c2, agg_c3, agg_c4 = st.columns( [ 0.2, 0.2, 0.2, 0.4 ], border=True )
 					with agg_c1:
 						table = st.selectbox( 'Table', tables, key='agg_table' )
-						df = read_table( table )
-						numeric_cols = df.select_dtypes( include=[ 'number' ] ).columns.tolist( )
+						df_aggregate = read_table( table )
+						numeric_cols = df_aggregate.select_dtypes( include=[ 'number' ] ).columns.tolist( )
 						if not numeric_cols:
 							with agg_c2:
 								st.info( 'No numeric columns available.' )
@@ -11932,13 +11931,13 @@ elif mode == 'Data Management':
 								agg = st.selectbox( 'Function', [ 'SUM', 'AVG', 'COUNT' ] )
 							with agg_c4:
 								if agg == 'SUM':
-									st.metric( 'Result', df[ col ].sum( ), width='stretch',
+									st.metric( 'Result', df_aggregate[ col ].sum( ), width='stretch',
 										format='accounting' )
 								elif agg == 'AVG':
-									st.metric( 'Result', df[ col ].mean( ), width='stretch',
+									st.metric( 'Result', df_aggregate[ col ].mean( ), width='stretch',
 										format='accounting' )
 								elif agg == 'COUNT':
-									st.metric( 'Result', df[ col ].count( ), width='stretch',
+									st.metric( 'Result', df_aggregate[ col ].count( ), width='stretch',
 										format='accounting' )
 		
 			# ------------------------------------------------------------------------------
@@ -11949,8 +11948,8 @@ elif mode == 'Data Management':
 				tables = list_tables( )
 				if tables:
 					table = st.selectbox( 'Table', tables, key='viz_table' )
-					df = read_table( table )
-					create_visualization( df )
+					df_visual = read_table( table )
+					create_visualization( df_visual )
 		
 			# ------------------------------------------------------------------------------
 			# GEOCODE
@@ -12141,8 +12140,8 @@ elif mode == 'Data Management':
 							st.session_state.dm_confirm_drop = False
 							st.rerun( )
 				
-					df = read_table( table )
-					col = st.selectbox( 'Create Index On', df.columns, key='df_key' )
+					df_index = read_table( table )
+					col = st.selectbox( 'Create Index On', df_index.columns, key='df_key' )
 				
 					if st.button( 'Create Index' ):
 						create_index( table, col )
