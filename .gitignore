@@ -69,6 +69,11 @@ instance/
 # Scrapy stuff:
 .scrapy
 
+# SQLite temporary files
+*.db-wal
+*.db-shm
+*.db-journal
+
 # Sphinx documentation
 docs/_build/
 
@@ -162,3 +167,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+
+# SQLite transaction journals
+*.db-wal
+*.db-shm
+*.db-journal
