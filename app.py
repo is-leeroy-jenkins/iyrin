@@ -1410,13 +1410,19 @@ def get_reports_map_fields( table: str ) -> List[ str ]:
 	"""
 	throw_if( 'table', table )
 	fields: Dict[ str, List[ str ] ] = {
+		'UAP': [ 'ID', 'Year', 'CountryName', 'Country', 'State', 'Shape', 'CalendarDate',
+			'Type', 'Agency', 'City', 'Latitude', 'Longitude', 'Month', 'Day', 'Summary' ],
 		'UAP Sightings': [ 'Year', 'Country', 'State', 'Shape', 'CalendarDate',
 			'City', 'Latitude', 'Longitude', 'Month', 'Day', 'Summary' ],
 		'Observations': [ 'ID', 'Year', 'CountryName', 'State', 'Shape',
 			'Type', 'Agency', 'Month', 'Day', 'City', 'Latitude', 'Longitude', 'Summary' ],
 		'Airports': [ 'ID', 'Name', 'Identifier', 'Elevation', 'City', 'State',
 			'Latitude', 'Longitude' ],
+		'Military': [ 'ID', 'Name', 'StateCode', 'Component',
+			'Latitude', 'Longitude' ],
 		'Military Installations': [ 'ID', 'Name', 'StateCode', 'Component',
+			'Latitude', 'Longitude' ],
+		'Pollution': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
 			'Latitude', 'Longitude' ],
 		'Pollution Sites': [ 'SuperfundSitesId', 'Name', 'City', 'State',
 			'Latitude', 'Longitude' ],
@@ -1518,6 +1524,13 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 		st.subheader( active_source )
 		
 		profiles: Dict[ str, Dict[ str, List[ str ] ] ] = {
+			'UAP': {
+				'filters': [ 'Year', 'CountryName', 'Country', 'State', 'Shape', 'Type', 'Agency' ],
+				'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
+					'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ],
+				'display': [ 'ID', 'Year', 'Month', 'Day', 'CalendarDate', 'City', 'State',
+					'CountryName', 'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ],
+			},
 			'UAP Sightings': {
 				'filters': [ 'Year', 'Country', 'State', 'Shape' ],
 				'tooltip': [ 'CalendarDate', 'City', 'State', 'Country', 'Latitude', 'Longitude',
@@ -1549,12 +1562,24 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				'tooltip': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
 				'display': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
 			},
+			'Pollution': {
+				'filters': [ 'Name', 'City', 'State' ],
+				'tooltip': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
+					'Latitude', 'Longitude' ],
+				'display': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
+					'Latitude', 'Longitude' ],
+			},
 			'Pollution Sites': {
 				'filters': [ 'Name', 'City', 'State' ],
 				'tooltip': [ 'SuperfundSitesId', 'Name', 'City', 'State',
 					'Latitude', 'Longitude' ],
 				'display': [ 'SuperfundSitesId', 'Name', 'City', 'State',
 					'Latitude', 'Longitude' ],
+			},
+			'Military': {
+				'filters': [ 'StateCode', 'Component', 'Name' ],
+				'tooltip': [ 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
+				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
 			},
 			'Military Installations': {
 				'filters': [ 'StateCode', 'Component', 'Name' ],
