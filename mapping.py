@@ -2204,6 +2204,3 @@ class StaticMap( ):
 			Logger( ).write( exception )
 			raise exception
 
-# ------- Legacy Map Export
-
-Maps = Map
