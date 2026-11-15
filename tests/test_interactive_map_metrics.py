@@ -190,6 +190,7 @@ class SelectedColumnDatabaseTests( unittest.TestCase ):
         exec( compile( module, str( ROOT / 'storage.py' ), 'exec' ), namespace )
         self.reader = namespace[ 'Reader' ]( )
         self.reader.create_connection = lambda: self.connection
+        self.reader.create_read_connection = lambda: self.connection
         self.reader.list_tables = lambda: [ 'Military Installations' ]
         self.reader.create_schema = lambda table: self.connection.execute(
             'PRAGMA table_info("Military Installations")' ).fetchall( )
