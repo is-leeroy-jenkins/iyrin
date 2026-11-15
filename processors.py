@@ -2005,7 +2005,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'tokenize_sentences( self, text: str ) -> str'
+			exception.method = 'sentence_tokenizer( self, text: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2038,7 +2038,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'stemmer( self, text: str ) -> str'
+			exception.method = 'word_stemmer( self, text: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2071,7 +2071,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'lemmatizer( self, text: str ) -> str'
+			exception.method = 'word_lemmatizer( self, text: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2183,7 +2183,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'chunk_sentences( self, text: str, max: int=10 ) -> DataFrame'
+			exception.method = 'chunk_words( self, text: str, max: int=10 ) -> DataFrame'
 			Logger( ).write( exception )
 			raise exception
 	
