@@ -205,7 +205,7 @@ class BaseCache( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'BaseCache'
-			exception.method = "def contains( self, key: str ) -> bool"
+			exception.method = "contains( self, key: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -233,7 +233,7 @@ class BaseCache( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'BaseCache'
-			exception.method = "def namespace_key( self, namespace: str, key: str ) -> str"
+			exception.method = "namespace_key( self, namespace: str, key: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -298,7 +298,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def now( self ) -> float"
+			exception.method = "now( self ) -> float"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -365,7 +365,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def is_expired( self, record: Dict[ str, Any ] ) -> bool"
+			exception.method = "is_expired( self, record: Dict[ str, Any ] ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -402,7 +402,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]"
+			exception.method = "get( self, key: str ) -> Optional[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -432,7 +432,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None"
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -458,7 +458,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def delete( self, key: str ) -> None"
+			exception.method = "delete( self, key: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -489,7 +489,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def clear( self, namespace: Optional[ str ] = None ) -> None"
+			exception.method = "clear( self, namespace: Optional[ str ] = None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -513,7 +513,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def contains( self, key: str ) -> bool"
+			exception.method = "contains( self, key: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -539,7 +539,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "def stats( self ) -> Dict[ str, Any ]"
+			exception.method = "stats( self ) -> Dict[ str, Any ]"
 			Logger( ).write( exception )
 			raise exception
 
@@ -601,7 +601,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def initialize( self ) -> None"
+			exception.method = "initialize( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -632,7 +632,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def migrate( self ) -> None"
+			exception.method = "migrate( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -652,7 +652,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def now( self ) -> float"
+			exception.method = "now( self ) -> float"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -692,7 +692,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]"
+			exception.method = "get( self, key: str ) -> Optional[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -731,7 +731,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None"
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -756,7 +756,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def delete( self, key: str ) -> None"
+			exception.method = "delete( self, key: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -785,7 +785,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def clear( self, namespace: Optional[ str ]=None ) -> None"
+			exception.method = "clear( self, namespace: Optional[ str ]=None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -809,7 +809,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def contains( self, key: str ) -> bool"
+			exception.method = "contains( self, key: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -837,7 +837,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def purge_expired( self ) -> int"
+			exception.method = "purge_expired( self ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -864,7 +864,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def stats( self ) -> Dict[ str, Any ]"
+			exception.method = "stats( self ) -> Dict[ str, Any ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -884,7 +884,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "def close( self ) -> None"
+			exception.method = "close( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -974,7 +974,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def create_schema( self, table: str ) -> List[ Tuple ]"
+			exception.method = "create_schema( self, table: str ) -> List[ Tuple ]"
 			Logger( ).write( exception )
 			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
@@ -1146,7 +1146,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def drop_table( self, table: str ) -> None"
+			exception.method = "drop_table( self, table: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
@@ -1206,7 +1206,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def create_index( self, table: str, column: str ) -> None"
+			exception.method = "create_index( self, table: str, column: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
@@ -1433,7 +1433,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None"
+			exception.method = "convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def insert_data( self, table_name: str, df: pd.DataFrame ) -> None:
@@ -1468,7 +1468,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def insert_data( self, table_name: str, df: pd.DataFrame ) -> None"
+			exception.method = "insert_data( self, table_name: str, df: pd.DataFrame ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def get_sqlite_type( self, dtype: Any ) -> str:
@@ -1681,7 +1681,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def get_indexes( self, table: str ) -> List[ Tuple ]"
+			exception.method = "get_indexes( self, table: str ) -> List[ Tuple ]"
 			Logger( ).write( exception )
 			raise exception from e
 	def add_column( self, table: str, column: str, col_type: str ) -> None:
@@ -1715,7 +1715,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def add_column( self, table: str, column: str, col_type: str ) -> None"
+			exception.method = "add_column( self, table: str, column: str, col_type: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
@@ -1806,7 +1806,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None"
+			exception.method = "rename_column( self, table_name: str, old_name: str, new_name: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_profile_table( self, table: str ) -> pd.DataFrame:
@@ -1852,7 +1852,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def create_profile_table( self, table: str ) -> pd.DataFrame"
+			exception.method = "create_profile_table( self, table: str ) -> pd.DataFrame"
 			Logger( ).write( exception )
 			raise exception from e
 	def drop_column( self, table: str, column: str ) -> None:
@@ -1933,7 +1933,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def drop_column( self, table: str, column: str ) -> None"
+			exception.method = "drop_column( self, table: str, column: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_table( self, old_name: str, new_name: str ) -> None:
@@ -2000,7 +2000,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "def rename_table( self, old_name: str, new_name: str ) -> None"
+			exception.method = "rename_table( self, old_name: str, new_name: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 class ChromaStore( ):
@@ -2077,7 +2077,7 @@ class ChromaStore( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'ChromaStore'
-			exception.method = "def create( self, documents: List[ Document ], embedder: Embeddings, collection_name: str, persist_directory: str ) -> Chroma"
+			exception.method = "create( self, documents: List[ Document ], embedder: Embeddings, collection_name: str, persist_directory: str ) -> Chroma"
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -2174,7 +2174,7 @@ class PineconeStore( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'PineconeStore'
-			exception.method = "def create( self, documents: List[ Document ], embedder: Embeddings, index_name: str, namespace: str, api_key: str ) -> Any"
+			exception.method = "create( self, documents: List[ Document ], embedder: Embeddings, index_name: str, namespace: str, api_key: str ) -> Any"
 			Logger( ).write( exception )
 			raise exception from e
 
