@@ -80,6 +80,7 @@ create_connection = sqlite_database.create_connection
 list_tables = sqlite_database.list_tables
 create_schema = sqlite_database.create_schema
 read_table = sqlite_database.read_table
+create_read_connection = sqlite_database.create_read_connection
 read_selected_columns = sqlite_database.read_selected_columns
 render_table = sqlite_database.render_table
 make_display_safe = sqlite_database.make_display_safe
@@ -3361,7 +3362,7 @@ with st.sidebar:
 		db_version = db_path.stat( ).st_mtime_ns if db_path.exists( ) else None
 		if source in ( 'Default', 'Database' ):
 			try:
-				with sqlite3.connect( cfg.DB_PATH ) as connection:
+				with create_read_connection( ) as connection:
 					df_tables = pd.read_sql_query( """
                                                SELECT name
                                                FROM sqlite_master
@@ -4401,15 +4402,14 @@ if mode == 'Local Data':
 						
 						documents = [ ]
 						if load_mode == 'Tabular + SQLite':
-							sqlite_path = os.path.join( 'stores', 'sqlite', 'data.db' )
-							os.makedirs( os.path.dirname( sqlite_path ), exist_ok=True )
+							sqlite_path = cfg.DB_PATH
 							if sheet_name.strip( ):
 								dfs = { sheet_name: pd.read_excel( excel_path,
 									sheet_name=sheet_name, ) }
 							else:
 								dfs = pd.read_excel( excel_path, sheet_name=None, )
 							
-							conn = sqlite3.connect( sqlite_path )
+							conn = create_connection( )
 							try:
 								for sheet, df in dfs.items( ):
 									if df.empty:
