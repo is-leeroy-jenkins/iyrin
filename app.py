@@ -6364,44 +6364,19 @@ elif mode == 'Environmental Data':
 			# --------- UV INDEX
 			with st.expander( '☀️ UV Index', expanded=False ):
 				st.badge( label='About API', color='blue', help=cfg.AIR_NOW )
-				uv_mode = st.selectbox(
-					'Mode',
-					options=[
-							'Daily by ZIP',
-							'Daily by City / State',
-							'Hourly by ZIP',
-							'Hourly by City / State'
-					],
-					key='env_uv_mode' )
-
-				uv_timeout = st.number_input(
-					'Timeout',
-					min_value=1,
-					max_value=60,
-					value=20,
-					step=1,
-					key='env_uv_timeout' )
-
+				uv_mode = st.selectbox( 'Mode', options=[ 'Daily by ZIP', 'Daily by City / State',
+					'Hourly by ZIP', 'Hourly by City / State' ], key='env_uv_mode' )
+				uv_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='env_uv_timeout' )
 				if 'ZIP' in uv_mode:
-					uv_zip = st.text_input(
-						'ZIP Code',
-						value='20001',
-						key='env_uv_zip' )
-
+					uv_zip = st.text_input( 'ZIP Code', value='20001', key='env_uv_zip' )
 					uv_city = ''
 					uv_state = ''
-
+				
 				else:
 					uv_zip = ''
-					uv_city = st.text_input(
-						'City',
-						value='Washington',
-						key='env_uv_city' )
-
-					uv_state = st.text_input(
-						'State',
-						value='DC',
-						key='env_uv_state' )
+					uv_city = st.text_input( 'City', value='Washington', key='env_uv_city' )
+					uv_state = st.text_input( 'State', value='DC', key='env_uv_state' )
 
 				uv_btn_c1, uv_btn_c2 = st.columns( 2 )
 
@@ -6444,10 +6419,8 @@ elif mode == 'Environmental Data':
 									st.warning( 'Enter both city and state.' )
 									result = None
 								else:
-									result = service.fetch_hourly_city_state(
-										city=uv_city,
-										state=uv_state,
-										time=int( uv_timeout ) )
+									result = service.fetch_hourly_city_state( city=uv_city,
+										state=uv_state, time=int( uv_timeout ) )
 
 							if result is not None:
 								st.session_state[ 'env_last_source' ] = 'UV Index'
@@ -6468,7 +6441,8 @@ elif mode == 'Environmental Data':
 						st.session_state[ 'env_last_longitude' ] = None
 
 				st.divider( )
-				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'UV Index', 'env_uv_index' )
+				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source',
+					'UV Index', 'env_uv_index' )
 
 			# --------- OPENAQ
 			with st.expander( '🧪 OpenAQ', expanded=False ):
@@ -9785,13 +9759,10 @@ elif mode == 'Public Health':
 	with right:
 		active_source = st.session_state.get( 'demographic_active_source', '' )
 		display_names: Dict[ str, str ] = { 'u_s_census_bureau': 'U.S. Census Bureau',
-		                                    'cdc_socrata': 'CDC Socrata',
-		                                    'u_s_health': 'U.S. Health', 'who_global': 'WHO Global',
-		                                    'united_nations': 'United Nations',
-		                                    'world_population': 'World Population',
-		                                    'cdc_wonder': 'CDC Wonder',
-		                                    'pub_med_search': 'Pub Med Search',
-		                                    'open_city_data': 'Open City Data', }
+			'cdc_socrata': 'CDC Socrata', 'u_s_health': 'U.S. Health', 'who_global': 'WHO Global',
+			'united_nations': 'United Nations', 'world_population': 'World Population',
+			'cdc_wonder': 'CDC Wonder', 'pub_med_search': 'Pub Med Search',
+			'open_city_data': 'Open City Data', }
 		if active_source:
 			st.caption( f"Active Source: {display_names.get( active_source, active_source )}" )
 		
@@ -10199,7 +10170,8 @@ elif mode == 'Public Health':
 			if wonder_submit:
 				try:
 					selected_dataset_id = (
-							wonder_custom_dataset_id if wonder_dataset_choice == 'Other' else wonder_dataset_choice)
+						wonder_custom_dataset_id if wonder_dataset_choice == 'Other' else
+						wonder_dataset_choice)
 					clean_dataset_id = _validate_wonder_dataset_id( selected_dataset_id )
 					
 					if wonder_mode == 'query_xml':
@@ -10213,7 +10185,6 @@ elif mode == 'Public Health':
 					
 					st.session_state[ 'wonder_dataset_id' ] = clean_dataset_id
 					st.session_state[ 'wonder_results' ] = result or { }
-					
 					if (wonder_mode == 'metadata_template' and isinstance( result,
 						dict ) and isinstance( result.get( 'data', { } ), dict )):
 						template_xml = result.get( 'data', { } ).get( 'request_xml', '' )
@@ -10229,14 +10200,13 @@ elif mode == 'Public Health':
 				st.text( 'No results.' )
 			else:
 				render_result_metadata( result )
-				
 				if result.get( 'mode', '' ) == 'metadata_template':
 					payload = result.get( 'data', { } ) if isinstance( result, dict ) else { }
 					
 					if isinstance( payload, dict ):
-						render_summary_kv( '#### Template Summary',
-							{ 'DatasetId': payload.get( 'dataset_id', '' ),
-									'Notes': payload.get( 'notes', '' ), } )
+						render_summary_kv( '#### Template Summary', {
+							'DatasetId': payload.get( 'dataset_id', '' ),
+							'Notes': payload.get( 'notes', '' ), } )
 						
 						template_xml = str( payload.get( 'request_xml', '' ) )
 						if template_xml:
@@ -10250,8 +10220,7 @@ elif mode == 'Public Health':
 					if isinstance( payload, dict ):
 						xml_text = str( payload.get( 'xml', '' ) )
 						
-						render_summary_kv( '#### Response Summary',
-							{ 'DatasetId': st.session_state.get( 'wonder_dataset_id', '' ),
+						render_summary_kv( '#### Response Summary', { 'DatasetId': st.session_state.get( 'wonder_dataset_id', '' ),
 									'Characters': len( xml_text ),
 									'HasXml': bool( xml_text.strip( ) ), } )
 						
@@ -10441,17 +10410,18 @@ elif mode == 'Public Health':
 				render_fallback_raw( result )
 		
 		demographic_result_keys = { 'u_s_census_bureau': 'census_results',
-				'cdc_socrata': 'socrata_results', 'u_s_health': 'healthdata_results',
-				'who_global': 'who_results', 'united_nations': 'un_results',
-				'world_population': 'worldpop_results', 'cdc_wonder': 'wonder_results',
-				'pub_med_search': 'pubmed_results', 'open_city_data': 'open_city_results', }
+			'cdc_socrata': 'socrata_results', 'u_s_health': 'healthdata_results',
+			'who_global': 'who_results', 'united_nations': 'un_results',
+			'world_population': 'worldpop_results', 'cdc_wonder': 'wonder_results',
+			'pub_med_search': 'pubmed_results', 'open_city_data': 'open_city_results', }
+		
 		if active_source in demographic_result_keys:
 			sync_mode_document( 'demographic', demographic_result_keys[ active_source ],
 				'demographic_active_source' )
 		render_mode_document_tabs( 'demographic', '📄 Loaded' )
 		
 # ==============================================================================
-# TEXT GENERATION MODE
+# AI MODE
 # ==============================================================================
 elif mode == 'Artificial Intelligence':
 	st.subheader( '🧠  Generative AI' )
@@ -10789,7 +10759,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---- Expander Groq
+		# ---- Expander Grok
 		with st.expander( label='Grok', expanded=False ):
 			GROK_REASONING_EFFORTS = [ 'none', 'low', 'medium', 'high' ]
 			

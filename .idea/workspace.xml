@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f430359c-24d3-4e3f-b230-7043fd529607" name="Changes" comment="updates" />
+    <list default="true" id="f430359c-24d3-4e3f-b230-7043fd529607" name="Changes" comment="updates">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,6 +17,7 @@
     <fileColor scope="Project Files" color="Green" />
   </component>
   <component name="Git.Settings">
+    <option name="INCOMING_COMMITS_CHECK_STRATEGY" value="FETCH" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -48,23 +52,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2517388875141797" />
-      <entry key="MS500" value="1.758909626487027" />
-      <entry key="S2" value="1.933356412171822" />
-      <entry key="S5" value="1.9727897953659088" />
-      <entry key="S10" value="1.9863010673044559" />
-      <entry key="S30" value="1.9954127039728833" />
-      <entry key="S60" value="1.9980344261652467" />
-      <entry key="M2" value="2.0385308925331715" />
-      <entry key="M5" value="2.717679580653911" />
-      <entry key="M10" value="3.892790353689303" />
-      <entry key="M15" value="4.616003581954924" />
-      <entry key="M30" value="5.616258922830478" />
-      <entry key="H1" value="6.25210277190248" />
-      <entry key="H2" value="6.6224750354281285" />
-      <entry key="H4" value="7.810676700464839" />
-      <entry key="D1" value="93.80945659542567" />
-      <entry key="W1" value="206.86457367215243" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000631781092" />
+      <entry key="S2" value="1.0158541022903262" />
+      <entry key="S5" value="1.1905709339505435" />
+      <entry key="S10" value="1.4365443092637258" />
+      <entry key="S30" value="1.758594070468865" />
+      <entry key="S60" value="1.8709730595540055" />
+      <entry key="M2" value="1.9332593742116955" />
+      <entry key="M5" value="1.9727493800537985" />
+      <entry key="M10" value="1.9867589114223771" />
+      <entry key="M15" value="2.0022419387224373" />
+      <entry key="M30" value="2.274623570644086" />
+      <entry key="H1" value="3.3917365749919006" />
+      <entry key="H2" value="5.125967837353129" />
+      <entry key="H4" value="7.366660144163131" />
+      <entry key="D1" value="90.1231095575025" />
+      <entry key="W1" value="207.02490397877696" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -74,35 +78,35 @@
       <entry key="S10" value="0.0" />
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
-      <entry key="M2" value="2.8981185143339598E-210" />
-      <entry key="M5" value="1.530546246145428E-84" />
-      <entry key="M10" value="1.237152474897668E-42" />
-      <entry key="M15" value="1.1524324684155784E-28" />
-      <entry key="M30" value="1.0735141122800908E-14" />
-      <entry key="H1" value="1.0364831817790653E-7" />
-      <entry key="H2" value="3.3491388790439074E-4" />
-      <entry key="H4" value="0.025883892464446494" />
-      <entry key="D1" value="2.215476263950425" />
-      <entry key="W1" value="5.195688744505015" />
+      <entry key="M2" value="8.119993039695418E-230" />
+      <entry key="M5" value="2.311118759575147E-92" />
+      <entry key="M10" value="1.5202364156851208E-46" />
+      <entry key="M15" value="2.8484422633665846E-31" />
+      <entry key="M30" value="5.337080159786934E-16" />
+      <entry key="H1" value="2.311054798585769E-8" />
+      <entry key="H2" value="1.5814561292381706E-4" />
+      <entry key="H4" value="0.017786544482511327" />
+      <entry key="D1" value="2.081185385182763" />
+      <entry key="W1" value="5.149483250038298" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.25217895121662637" />
-      <entry key="MS500" value="0.9720683494290161" />
-      <entry key="S2" value="1.6128350029785505" />
-      <entry key="S5" value="1.8295717501344784" />
-      <entry key="S10" value="1.9119262369971182" />
-      <entry key="S30" value="1.9699797417214444" />
-      <entry key="S60" value="1.9852341519037058" />
-      <entry key="M2" value="2.0319811152138736" />
-      <entry key="M5" value="2.7140845510650444" />
-      <entry key="M10" value="3.890118451984978" />
-      <entry key="M15" value="4.613857857387137" />
-      <entry key="M30" value="5.614931781890449" />
-      <entry key="H1" value="6.251357960374368" />
-      <entry key="H2" value="6.62241292326185" />
-      <entry key="H4" value="7.836295490540659" />
-      <entry key="D1" value="96.02414700409265" />
-      <entry key="W1" value="212.0600157087776" />
+      <entry key="MS100" value="2.391162835905581E-4" />
+      <entry key="MS500" value="0.1886782504463513" />
+      <entry key="S2" value="0.6672041523721124" />
+      <entry key="S5" value="0.9923284530575178" />
+      <entry key="S10" value="1.3020110070866495" />
+      <entry key="S30" value="1.698180978251861" />
+      <entry key="S60" value="1.8380162564285272" />
+      <entry key="M2" value="1.9160150092104289" />
+      <entry key="M5" value="1.9656568345072276" />
+      <entry key="M10" value="1.983178888021492" />
+      <entry key="M15" value="1.9998426722797438" />
+      <entry key="M30" value="2.2733568410912444" />
+      <entry key="H1" value="3.3909691836177216" />
+      <entry key="H2" value="5.1256376112567175" />
+      <entry key="H4" value="7.3841140114740735" />
+      <entry key="D1" value="92.20353162909572" />
+      <entry key="W1" value="212.17413913002548" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -116,27 +120,28 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/terry/source/repos/iyrin&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.pycharm.community.ide.impl.configuration.interpreter.PyAllInterpretersConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "git.auto.fetch.suggestion.counter": "1",
+    "last_opened_file_path": "C:/Users/terry/source/repos/iyrin",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.interpreter.PyAllInterpretersConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\terry\source\repos\iyrin" />
@@ -192,14 +197,6 @@
       <workItem from="1794618239186" duration="21150000" />
       <workItem from="1794707207335" duration="1416000" />
       <workItem from="1794749470157" duration="5073000" />
-    </task>
-    <task id="LOCAL-00094" summary="updates">
-      <option name="closed" value="true" />
-      <created>1793400045721</created>
-      <option name="number" value="00094" />
-      <option name="presentableId" value="LOCAL-00094" />
-      <option name="project" value="LOCAL" />
-      <updated>1793400045721</updated>
     </task>
     <task id="LOCAL-00095" summary="updates">
       <option name="closed" value="true" />
@@ -585,7 +582,15 @@
       <option name="project" value="LOCAL" />
       <updated>1794712351089</updated>
     </task>
-    <option name="localTasksCounter" value="143" />
+    <task id="LOCAL-00143" summary="updates">
+      <option name="closed" value="true" />
+      <created>1794771555921</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1794771555921</updated>
+    </task>
+    <option name="localTasksCounter" value="144" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
