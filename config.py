@@ -51,7 +51,7 @@ BLUE_DIVIDER = "<div style='height:1.5px;align:left;background:#0078FC;margin:20
 APP_TITLE = 'Iyrin'
 APP_SUBTITLE = 'Geospatial Toolkit'
 DB_PATH = 'stores/sqlite/data.db'
-DEFAULT_DATA = r'UAP Sightings'
+DEFAULT_DATA = r'UAP'
 BASE_DIR = Path( __file__ ).resolve( ).parent
 FAVICON = r'resources/images/favicon.ico'
 LOGO = r'resources/images/iyrin-logo.png'
