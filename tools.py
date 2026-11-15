@@ -34,6 +34,7 @@ LIVE_WORLD_ENTITY_TYPES: List[ str ] = [ 'Aircraft', 'Military Aircraft', 'Satel
 
 def throw_if( name: str, value: object ) -> None:
     """
+    	Validate that a required value is not empty.
 
         Purpose:
         Validate that a required value is not empty.
@@ -43,7 +44,7 @@ def throw_if( name: str, value: object ) -> None:
         value (object): Value to validate.
 
         Returns:
-        None
+        None: This operation has no return value.
 
     """
     if value is None:
@@ -58,6 +59,7 @@ def throw_if( name: str, value: object ) -> None:
 def calculate_distance_nm( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
     """
+    	Calculate great-circle distance between two coordinates in nautical miles.
 
         Purpose:
         Calculate great-circle distance between two coordinates in nautical miles.
@@ -104,6 +106,7 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
 def calculate_bearing( latitude_a: float, longitude_a: float,
         latitude_b: float, longitude_b: float ) -> float:
     """
+    	Calculate initial bearing between two coordinates.
 
         Purpose:
         Calculate initial bearing between two coordinates.
@@ -147,6 +150,7 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
 
 def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
     """
+    	Convert one normalized Live World entity row to a JSON-serializable record.
 
         Purpose:
         Convert one normalized Live World entity row to a JSON-serializable record.
@@ -189,6 +193,7 @@ def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
 
 def get_live_world_status( ) -> Dict[ str, object ]:
     """
+    	Return the current Live World layer, refresh, tracking, analysis, and geofence state.
 
         Purpose:
         Return the current Live World layer, refresh, tracking, analysis, and geofence state.
@@ -228,6 +233,7 @@ def get_live_world_status( ) -> Dict[ str, object ]:
 
 def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     """
+    	Return loaded normalized Live World entities for a selected entity type.
 
         Purpose:
         Return loaded normalized Live World entities for a selected entity type.
@@ -268,6 +274,7 @@ def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str,
 
 def search_live_world_entities( query: str, entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     """
+    	Search loaded Live World entities by identifier or name.
 
         Purpose:
         Search loaded Live World entities by identifier or name.
@@ -317,6 +324,7 @@ def search_live_world_entities( query: str, entity_type: str, limit: int ) -> Li
 def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float,
         entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]:
     """
+    	Return the nearest loaded Live World entities to a coordinate within a radius.
 
         Purpose:
         Return the nearest loaded Live World entities to a coordinate within a radius.
@@ -395,6 +403,7 @@ def find_live_world_nearest( latitude: float, longitude: float, radius_nm: float
 
 def get_live_world_geofence_status( ) -> Dict[ str, object ]:
     """
+    	Return the current geofence configuration, membership snapshot, and transition events.
 
         Purpose:
         Return the current geofence configuration, membership snapshot, and transition events.
@@ -428,6 +437,7 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
 
 def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
     """
+    	Return provider-level Live World refresh status and failure diagnostics.
 
         Purpose:
         Return provider-level Live World refresh status and failure diagnostics.
@@ -463,6 +473,7 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
 
 def get_live_world_analysis_status( ) -> Dict[ str, object ]:
     """
+    	Return the current Cross-Layer Analysis configuration exposed by the Live World UI.
 
         Purpose:
         Return the current Cross-Layer Analysis configuration exposed by the Live World UI.
@@ -491,6 +502,7 @@ def get_live_world_analysis_status( ) -> Dict[ str, object ]:
 
 def get_live_world_history_status( ) -> Dict[ str, object ]:
     """
+    	Return Historical Replay configuration and persisted-history summary statistics.
 
         Purpose:
         Return Historical Replay configuration and persisted-history summary statistics.
@@ -526,6 +538,7 @@ def get_live_world_history_status( ) -> Dict[ str, object ]:
 def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         limit: int ) -> List[ Dict[ str, object ] ]:
     """
+    	Return persisted Live World observations through a selected historical snapshot.
 
         Purpose:
         Return persisted Live World observations through a selected historical snapshot.
@@ -571,6 +584,7 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
 
 def get_live_world_tracking_status( ) -> Dict[ str, object ]:
     """
+    	Return the active tracking target and recorded trail history.
 
         Purpose:
         Return the active tracking target and recorded trail history.
