@@ -60,6 +60,7 @@ from langchain_core.embeddings import Embeddings
 
 def throw_if( name: str, value: object ) -> None:
 	"""
+		Validate that a required value is not empty.
 
 	Purpose:
 		Validate that a required value is not empty.
@@ -210,6 +211,7 @@ class BaseCache( ):
 	
 	def namespace_key( self, namespace: str, key: str ) -> str:
 		"""
+			Create a cache key prefixed by a namespace.
 
 		Purpose:
 			Create a cache key prefixed by a namespace.
@@ -282,6 +284,7 @@ class InMemoryCache( BaseCache ):
 	
 	def now( self ) -> float:
 		"""
+			Return the current Unix timestamp.
 
 		Purpose:
 			Return the current Unix timestamp.
@@ -302,6 +305,7 @@ class InMemoryCache( BaseCache ):
 	def make_record( self, key: str, value: Dict[ str, Any ],
 			ttl: Optional[ int ] = None ) -> Dict[ str, Any ]:
 		"""
+			Create a cache metadata record for the supplied key and value.
 
 		Purpose:
 			Create a cache metadata record for the supplied key and value.
@@ -338,6 +342,7 @@ class InMemoryCache( BaseCache ):
 	
 	def is_expired( self, record: Dict[ str, Any ] ) -> bool:
 		"""
+			Determine whether an in-memory cache record has expired.
 
 		Purpose:
 			Determine whether an in-memory cache record has expired.
@@ -366,6 +371,7 @@ class InMemoryCache( BaseCache ):
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
+			Return a cached value by key when present and not expired.
 
 		Purpose:
 			Return a cached value by key when present and not expired.
@@ -402,6 +408,7 @@ class InMemoryCache( BaseCache ):
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
 		"""
+			Set a cache value by key.
 
 		Purpose:
 			Set a cache value by key.
@@ -431,6 +438,7 @@ class InMemoryCache( BaseCache ):
 	
 	def delete( self, key: str ) -> None:
 		"""
+			Delete a cache entry by key.
 
 		Purpose:
 			Delete a cache entry by key.
@@ -456,6 +464,7 @@ class InMemoryCache( BaseCache ):
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
 		"""
+			Clear all cache entries or only entries under a namespace prefix.
 
 		Purpose:
 			Clear all cache entries or only entries under a namespace prefix.
@@ -486,6 +495,7 @@ class InMemoryCache( BaseCache ):
 	
 	def contains( self, key: str ) -> bool:
 		"""
+			Determine whether a cache key exists and is not expired.
 
 		Purpose:
 			Determine whether a cache key exists and is not expired.
@@ -509,6 +519,7 @@ class InMemoryCache( BaseCache ):
 	
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
+			Return cache diagnostics.
 
 		Purpose:
 			Return cache diagnostics.
@@ -566,6 +577,7 @@ class SQLiteCache( BaseCache ):
 	
 	def initialize( self ) -> None:
 		"""
+			Create the SQLite cache table when it does not already exist.
 
 		Purpose:
 			Create the SQLite cache table when it does not already exist.
@@ -595,6 +607,7 @@ class SQLiteCache( BaseCache ):
 	
 	def migrate( self ) -> None:
 		"""
+			Add metadata columns to older kv tables that only contain k and v.
 
 		Purpose:
 			Add metadata columns to older kv tables that only contain k and v.
@@ -625,6 +638,7 @@ class SQLiteCache( BaseCache ):
 	
 	def now( self ) -> float:
 		"""
+			Return the current Unix timestamp.
 
 		Purpose:
 			Return the current Unix timestamp.
@@ -644,6 +658,7 @@ class SQLiteCache( BaseCache ):
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
+			Return a cached value by key when present and not expired.
 
 		Purpose:
 			Return a cached value by key when present and not expired.
@@ -683,6 +698,7 @@ class SQLiteCache( BaseCache ):
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:
 		"""
+			Set a cache value by key.
 
 		Purpose:
 			Set a cache value by key.
@@ -721,6 +737,7 @@ class SQLiteCache( BaseCache ):
 	
 	def delete( self, key: str ) -> None:
 		"""
+			Delete a cache entry by key.
 
 		Purpose:
 			Delete a cache entry by key.
@@ -745,6 +762,7 @@ class SQLiteCache( BaseCache ):
 	
 	def clear( self, namespace: Optional[ str ]=None ) -> None:
 		"""
+			Clear all cache entries or only entries under a namespace prefix.
 
 		Purpose:
 			Clear all cache entries or only entries under a namespace prefix.
@@ -773,6 +791,7 @@ class SQLiteCache( BaseCache ):
 	
 	def contains( self, key: str ) -> bool:
 		"""
+			Determine whether a cache key exists and is not expired.
 
 		Purpose:
 			Determine whether a cache key exists and is not expired.
@@ -796,6 +815,7 @@ class SQLiteCache( BaseCache ):
 	
 	def purge_expired( self ) -> int:
 		"""
+			Delete expired cache entries.
 
 		Purpose:
 			Delete expired cache entries.
@@ -823,6 +843,7 @@ class SQLiteCache( BaseCache ):
 	
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
+			Return SQLite cache diagnostics.
 
 		Purpose:
 			Return SQLite cache diagnostics.
@@ -849,6 +870,7 @@ class SQLiteCache( BaseCache ):
 	
 	def close( self ) -> None:
 		"""
+			Close the SQLite connection.
 
 		Purpose:
 			Close the SQLite connection.
@@ -957,6 +979,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
+			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
 		Purpose:
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
@@ -1050,6 +1073,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def render_table( self, df: pd.DataFrame | None ) -> None:
 		"""
+			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe.
 
 		Purpose:
 			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
@@ -1098,6 +1122,7 @@ class SQLiteDatabase( ):
 	
 	def drop_table( self, table: str ) -> None:
 		"""
+			Safely drop a table if it exists.
 
 		Purpose:
 			Safely drop a table if it exists.
@@ -1126,6 +1151,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
 		"""
+			Create a safe SQLite index on a specified table column.
 
 		Purpose:
 			Create a safe SQLite index on a specified table column.
@@ -1259,6 +1285,7 @@ class SQLiteDatabase( ):
 	
 	def create_visualization( self, df: pd.DataFrame ) -> None:
 		"""
+			Render data visualizations without passing pandas objects directly into.
 
 		Purpose:
 			Render data visualizations without passing pandas objects directly into
@@ -1446,6 +1473,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def get_sqlite_type( self, dtype: Any ) -> str:
 		"""
+			Map a pandas dtype to an appropriate SQLite column type.
 
 		Purpose:
 			Map a pandas dtype to an appropriate SQLite column type.
@@ -1489,6 +1517,7 @@ class SQLiteDatabase( ):
 	
 	def create_custom_table( self, table_name: str, columns: list ) -> None:
 		"""
+			Create a custom SQLite table from column definitions.
 
 		Purpose:
 			Create a custom SQLite table from column definitions.
@@ -1537,6 +1566,7 @@ class SQLiteDatabase( ):
 	
 	def is_safe_query( self, query: str ) -> bool:
 		"""
+			Determine whether a SQL query is read-only and safe to execute.
 
 		Purpose:
 			Determine whether a SQL query is read-only and safe to execute.
@@ -1601,6 +1631,7 @@ class SQLiteDatabase( ):
 	
 	def create_identifier( self, name: str ) -> str:
 		"""
+			Sanitize a string into a safe SQLite identifier.
 
 		Purpose:
 			Sanitize a string into a safe SQLite identifier.
@@ -1689,6 +1720,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
 		"""
+			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename.
 
 		Purpose:
 			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
@@ -1906,6 +1938,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def rename_table( self, old_name: str, new_name: str ) -> None:
 		"""
+			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,.
 
 		Purpose:
 			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
