@@ -1,24 +1,9 @@
-# Geoscience Data
+# Geoscience Data — Former Combined Mode
 
-Geoscience Data combines geographic, weather, climate, environmental, water, fire, and earth-science retrieval.
+The former combined **Geoscience Data** mode has been reorganized into three standalone Pipelines modes, matching the presentation and navigation of **Astronomical Data**:
 
-## Weather & Climate
+- [Weather Data](weather-data.md) — meteorology, climate, historical weather, and tides
+- [Environmental Data](environmental-data.md) — air quality, UV, environmental facilities, fires, and natural events
+- [Geological Data](geological-data.md) — earthquakes, water monitoring, topography, and earth-science catalogs
 
-- Google Weather.
-- Open-Meteo.
-- Historical weather.
-- NOAA climate data.
-- NOAA Tides & Currents.
-
-## Environmental & Earth Science
-
-- EPA AirNow.
-- OpenAQ.
-- PurpleAir.
-- EPA Envirofacts.
-- EPA UV Index.
-- NASA FIRMS.
-- NASA EONET.
-- USGS Water Data.
-- USGS Earthquakes.
-- USGS National Map.
+All existing sources, inputs, result panels, clear actions, and document-processing controls remain in their respective modes. The sidebar no longer includes **Geoscience Data** as a combined mode.
