@@ -90,7 +90,9 @@ nav:
       - Interactive Map: user-guide/interactive-map.md
       - Site Crawler: user-guide/site-crawler.md
       - Document Data: user-guide/document-data.md
-      - Geoscience Data: user-guide/geoscience-data.md
+      - Weather Data: user-guide/weather-data.md
+      - Environmental Data: user-guide/environmental-data.md
+      - Geological Data: user-guide/geological-data.md
       - Astronomical Data: user-guide/astronomical-data.md
       - Celestial Map: user-guide/celestial-map.md
       - Public Health: user-guide/public-health.md
