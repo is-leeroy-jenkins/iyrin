@@ -5762,1697 +5762,1697 @@ if mode == 'Local Data':
 		render_loading_tabs( )
 
 # ==============================================================================
-# GEOSCIENCE DATA MODE
+# WEATHER DATA MODE
 # ==============================================================================
-elif mode == 'Geoscience Data':
-	with st.expander( 'Geoscience Data', expanded=True ):
-		
-		# ----------- Weather Expander
-		with st.expander( 'Weather', expanded=True ):
-			left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
-			with center:
-				st.subheader( 'Weather Data' )
+elif mode == 'Weather Data':
+	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	with center:
+		st.subheader( 'Weather Data' )
+		st.divider( )
+		global_location = get_global_location_default( )
+		global_latitude = get_global_latitude_default( )
+		global_longitude = get_global_longitude_default( )
+		location_c1, location_c2, location_c3 = st.columns( 3, border=True )
+		location_c1.metric( 'Location', global_location )
+		location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
+		location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
+
+		blue_divider( )
+		weather_c1, weather_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
+		with weather_c1:
+
+			# --------- GOOGLE WEATHER
+			with st.expander( '🌦️ Google Weather', expanded=True ):
+				st.badge( label='About API', color='blue', help=cfg.GOOGLE_WEATHER )
+				google_address = st.text_input( 'Address or Location', value=global_location,
+					key='weather_google_address' )
+
+				google_product = st.selectbox( 'Product',
+					options=[ 'Current Conditions', 'Hourly Forecast', 'Daily Forecast', 'Alerts' ],
+					key='weather_google_product' )
+
+				google_units = st.selectbox( 'Units System', options=[ 'METRIC', 'IMPERIAL' ],
+					key='weather_google_units' )
+
+				google_language = st.text_input( 'Language Code', value='en',
+					key='weather_google_language' )
+
+				if google_product == 'Hourly Forecast':
+					google_hours = st.number_input( 'Hours', min_value=1, max_value=240,
+						value=24, step=1, key='weather_google_hours' )
+				else:
+					google_hours = 24
+
+				if google_product == 'Daily Forecast':
+					google_days = st.number_input( 'Days', min_value=1, max_value=10, value=5,
+						step=1, key='weather_google_days' )
+				else:
+					google_days = 5
+
+				google_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
+					value=10, step=1, key='weather_google_timeout' )
+
+				google_btn_c1, google_btn_c2 = st.columns( 2 )
+				with google_btn_c1:
+					if st.button( label='Run', icon='🏃', key='weather_google_run',
+							use_container_width=True ):
+						if not google_address:
+							st.warning( 'Enter an address or location.' )
+						else:
+							try:
+								weather = GoogleWeather( )
+
+								if google_product == 'Current Conditions':
+									result = weather.fetch_current( address=google_address,
+										units_system=google_units, language_code=google_language,
+										time=int( google_timeout ) )
+
+								elif google_product == 'Hourly Forecast':
+									result = weather.fetch_hourly_forecast( address=google_address,
+										hours=int( google_hours ), units_system=google_units,
+										language_code=google_language, time=int( google_timeout ) )
+
+								elif google_product == 'Daily Forecast':
+									result = weather.fetch_daily_forecast( address=google_address,
+										days=int( google_days ), units_system=google_units,
+										language_code=google_language, time=int( google_timeout ) )
+
+								else:
+									result = weather.fetch_alerts( address=google_address,
+										language_code=google_language, time=int( google_timeout ) )
+
+								weather_latitude = getattr( weather, 'latitude', None )
+								weather_longitude = getattr( weather, 'longitude', None )
+
+								st.session_state[ 'weather_last_source' ] = 'Google Weather'
+								st.session_state[ 'weather_last_result' ] = result or { }
+								st.session_state[ 'weather_last_latitude' ] = weather_latitude
+								st.session_state[ 'weather_last_longitude' ] = weather_longitude
+
+								set_global_coordinates_from_result(
+									weather_latitude,
+									weather_longitude,
+									location=google_address,
+									description='Google Weather result' )
+
+								st.success( 'Google Weather request completed.' )
+
+							except Exception as ex:
+								st.error( f'Google Weather request failed: {ex}' )
+
+				with google_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='weather_google_clear',
+							use_container_width=True ):
+						if st.session_state.get( 'weather_last_source' ) == 'Google Weather':
+							initialize_mode_document_state( 'weather' )
+							for key, value in {
+								'weather_documents': [ ], 'weather_chunks': [ ],
+								'weather_embeddings': [ ], 'weather_embedder': None,
+								'weather_vector_store': None,
+								'weather_document_signature': '',
+								'weather_chunk_size_used': 0,
+								'weather_chunk_overlap_used': 0,
+								'weather_embedding_provider_used': '',
+								'weather_embedding_model_used': '',
+								'weather_embedding_model_path_used': '',
+							}.items( ):
+								st.session_state[ key ] = value
+							st.session_state[ 'weather_last_source' ] = ''
+							st.session_state[ 'weather_last_result' ] = { }
+							st.session_state[ 'weather_last_latitude' ] = None
+							st.session_state[ 'weather_last_longitude' ] = None
+
 				st.divider( )
-				global_location = get_global_location_default( )
-				global_latitude = get_global_latitude_default( )
-				global_longitude = get_global_longitude_default( )
-				location_c1, location_c2, location_c3 = st.columns( 3, border=True )
-				location_c1.metric( 'Location', global_location )
-				location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
-				location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
-				
-				blue_divider( )
-				weather_c1, weather_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
-				with weather_c1:
-					
-					# --------- GOOGLE WEATHER
-					with st.expander( '🌦️ Google Weather', expanded=True ):
-						st.badge( label='About API', color='blue', help=cfg.GOOGLE_WEATHER )
-						google_address = st.text_input( 'Address or Location', value=global_location,
-							key='weather_google_address' )
-						
-						google_product = st.selectbox( 'Product',
-							options=[ 'Current Conditions', 'Hourly Forecast', 'Daily Forecast', 'Alerts' ],
-							key='weather_google_product' )
-						
-						google_units = st.selectbox( 'Units System', options=[ 'METRIC', 'IMPERIAL' ],
-							key='weather_google_units' )
-						
-						google_language = st.text_input( 'Language Code', value='en',
-							key='weather_google_language' )
-						
-						if google_product == 'Hourly Forecast':
-							google_hours = st.number_input( 'Hours', min_value=1, max_value=240,
-								value=24, step=1, key='weather_google_hours' )
+				render_source_processing_controls( 'weather', 'weather_last_result',
+					'weather_last_source', 'Google Weather', 'weather_google_weather' )
+
+			# --------- OPENWEATHER / OPEN-METEO\
+			with st.expander( '🌤️ OpenWeather / Open-Meteo', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.OPEN_WEATHER )
+				open_location = st.text_input( 'Location', value=global_location,
+					key='weather_open_location' )
+
+				open_mode = st.selectbox( 'Mode', options=[ 'current', 'hourly', 'daily' ],
+					key='weather_open_mode' )
+
+				open_zone = st.text_input( 'Timezone',
+					value='auto',
+					key='weather_open_zone' )
+
+				open_forecast_days = st.number_input( 'Forecast Days', min_value=1,
+					max_value=16, value=7, step=1,
+					key='weather_open_forecast_days' )
+
+				open_past_days = st.number_input( 'Past Days', min_value=0, max_value=92,
+					value=0, step=1, key='weather_open_past_days' )
+
+				open_count = st.number_input( 'Geocoding Result Count', min_value=1, max_value=100,
+					value=10, step=1, key='weather_open_count' )
+
+				open_btn_c1, open_btn_c2 = st.columns( 2 )
+				with open_btn_c1:
+					if st.button( label='Run', icon='🏃', key='weather_open_run',
+							use_container_width=True ):
+						if not open_location:
+							st.warning( 'Enter a location.' )
 						else:
-							google_hours = 24
-						
-						if google_product == 'Daily Forecast':
-							google_days = st.number_input( 'Days', min_value=1, max_value=10, value=5,
-								step=1, key='weather_google_days' )
+							try:
+								weather = OpenWeather( )
+
+								result = weather.fetch( location=open_location, mode=open_mode,
+									zone=open_zone, forecast_days=int( open_forecast_days ),
+									past_days=int( open_past_days ),
+									count=int( open_count ) )
+
+								weather_latitude = getattr( weather, 'latitude', None )
+								weather_longitude = getattr( weather, 'longitude', None )
+
+								st.session_state[
+									'weather_last_source' ] = 'OpenWeather / Open-Meteo'
+								st.session_state[ 'weather_last_result' ] = result or { }
+								st.session_state[ 'weather_last_latitude' ] = weather_latitude
+								st.session_state[ 'weather_last_longitude' ] = weather_longitude
+
+								set_global_coordinates_from_result( weather_latitude,
+									weather_longitude, location=open_location,
+									description='OpenWeather / Open-Meteo result' )
+
+								st.success( 'OpenWeather request completed.' )
+
+							except Exception as ex:
+								st.error( f'OpenWeather request failed: {ex}' )
+
+				with open_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='weather_open_clear',
+							use_container_width=True ):
+						st.session_state[ 'weather_last_source' ] = ''
+						st.session_state[ 'weather_last_result' ] = { }
+						st.session_state[ 'weather_last_latitude' ] = None
+						st.session_state[ 'weather_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'weather', 'weather_last_result',
+					'weather_last_source', 'OpenWeather / Open-Meteo',
+					'weather_openweather_open_meteo' )
+
+			# --------- HISTORICAL WEATHER
+			with st.expander( '🕰️ Historical Weather', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.HISTORICAL_WEATHER )
+				historical_location = st.text_input( 'Location', value=global_location,
+					key='weather_historical_location' )
+
+				historical_date = st.date_input( 'Historical Date',
+					value=dt.date.today( ) - dt.timedelta( days=7 ),
+					key='weather_historical_date' )
+
+				historical_zone = st.text_input( 'Timezone', value='auto',
+					key='weather_historical_zone' )
+
+				historical_count = st.number_input( 'Geocoding Result Count', min_value=1,
+					max_value=100, value=10, step=1, key='weather_historical_count' )
+
+				historical_btn_c1, historical_btn_c2 = st.columns( 2 )
+				with historical_btn_c1:
+					if st.button( label='Run', icon='🏃', key='weather_historical_run',
+							use_container_width=True ):
+						if not historical_location:
+							st.warning( 'Enter a location.' )
 						else:
-							google_days = 5
-						
-						google_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
-							value=10, step=1, key='weather_google_timeout' )
-						
-						google_btn_c1, google_btn_c2 = st.columns( 2 )
-						with google_btn_c1:
-							if st.button( label='Run', icon='🏃', key='weather_google_run',
-									use_container_width=True ):
-								if not google_address:
-									st.warning( 'Enter an address or location.' )
-								else:
-									try:
-										weather = GoogleWeather( )
-										
-										if google_product == 'Current Conditions':
-											result = weather.fetch_current( address=google_address,
-												units_system=google_units, language_code=google_language,
-												time=int( google_timeout ) )
-										
-										elif google_product == 'Hourly Forecast':
-											result = weather.fetch_hourly_forecast( address=google_address,
-												hours=int( google_hours ), units_system=google_units,
-												language_code=google_language, time=int( google_timeout ) )
-										
-										elif google_product == 'Daily Forecast':
-											result = weather.fetch_daily_forecast( address=google_address,
-												days=int( google_days ), units_system=google_units,
-												language_code=google_language, time=int( google_timeout ) )
-										
-										else:
-											result = weather.fetch_alerts( address=google_address,
-												language_code=google_language, time=int( google_timeout ) )
-										
-										weather_latitude = getattr( weather, 'latitude', None )
-										weather_longitude = getattr( weather, 'longitude', None )
-										
-										st.session_state[ 'weather_last_source' ] = 'Google Weather'
-										st.session_state[ 'weather_last_result' ] = result or { }
-										st.session_state[ 'weather_last_latitude' ] = weather_latitude
-										st.session_state[ 'weather_last_longitude' ] = weather_longitude
-										
-										set_global_coordinates_from_result(
-											weather_latitude,
-											weather_longitude,
-											location=google_address,
-											description='Google Weather result' )
-										
-										st.success( 'Google Weather request completed.' )
-									
-									except Exception as ex:
-										st.error( f'Google Weather request failed: {ex}' )
-						
-						with google_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='weather_google_clear',
-									use_container_width=True ):
-								if st.session_state.get( 'weather_last_source' ) == 'Google Weather':
-									initialize_mode_document_state( 'weather' )
-									for key, value in {
-										'weather_documents': [ ], 'weather_chunks': [ ],
-										'weather_embeddings': [ ], 'weather_embedder': None,
-										'weather_vector_store': None,
-										'weather_document_signature': '',
-										'weather_chunk_size_used': 0,
-										'weather_chunk_overlap_used': 0,
-										'weather_embedding_provider_used': '',
-										'weather_embedding_model_used': '',
-										'weather_embedding_model_path_used': '',
-									}.items( ):
-										st.session_state[ key ] = value
-									st.session_state[ 'weather_last_source' ] = ''
-									st.session_state[ 'weather_last_result' ] = { }
-									st.session_state[ 'weather_last_latitude' ] = None
-									st.session_state[ 'weather_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'weather', 'weather_last_result',
-							'weather_last_source', 'Google Weather', 'weather_google_weather' )
-				
-					# --------- OPENWEATHER / OPEN-METEO\
-					with st.expander( '🌤️ OpenWeather / Open-Meteo', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.OPEN_WEATHER )
-						open_location = st.text_input( 'Location', value=global_location,
-							key='weather_open_location' )
-						
-						open_mode = st.selectbox( 'Mode', options=[ 'current', 'hourly', 'daily' ],
-							key='weather_open_mode' )
-						
-						open_zone = st.text_input( 'Timezone',
-							value='auto',
-							key='weather_open_zone' )
-						
-						open_forecast_days = st.number_input( 'Forecast Days', min_value=1,
-							max_value=16, value=7, step=1,
-							key='weather_open_forecast_days' )
-						
-						open_past_days = st.number_input( 'Past Days', min_value=0, max_value=92,
-							value=0, step=1, key='weather_open_past_days' )
-						
-						open_count = st.number_input( 'Geocoding Result Count', min_value=1, max_value=100,
-							value=10, step=1, key='weather_open_count' )
-						
-						open_btn_c1, open_btn_c2 = st.columns( 2 )
-						with open_btn_c1:
-							if st.button( label='Run', icon='🏃', key='weather_open_run',
-									use_container_width=True ):
-								if not open_location:
-									st.warning( 'Enter a location.' )
-								else:
-									try:
-										weather = OpenWeather( )
-										
-										result = weather.fetch( location=open_location, mode=open_mode,
-											zone=open_zone, forecast_days=int( open_forecast_days ),
-											past_days=int( open_past_days ),
-											count=int( open_count ) )
-										
-										weather_latitude = getattr( weather, 'latitude', None )
-										weather_longitude = getattr( weather, 'longitude', None )
-										
-										st.session_state[
-											'weather_last_source' ] = 'OpenWeather / Open-Meteo'
-										st.session_state[ 'weather_last_result' ] = result or { }
-										st.session_state[ 'weather_last_latitude' ] = weather_latitude
-										st.session_state[ 'weather_last_longitude' ] = weather_longitude
-										
-										set_global_coordinates_from_result( weather_latitude,
-											weather_longitude, location=open_location,
-											description='OpenWeather / Open-Meteo result' )
-										
-										st.success( 'OpenWeather request completed.' )
-									
-									except Exception as ex:
-										st.error( f'OpenWeather request failed: {ex}' )
-						
-						with open_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='weather_open_clear',
-									use_container_width=True ):
-								st.session_state[ 'weather_last_source' ] = ''
-								st.session_state[ 'weather_last_result' ] = { }
-								st.session_state[ 'weather_last_latitude' ] = None
-								st.session_state[ 'weather_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'weather', 'weather_last_result',
-							'weather_last_source', 'OpenWeather / Open-Meteo',
-							'weather_openweather_open_meteo' )
-						
-					# --------- HISTORICAL WEATHER
-					with st.expander( '🕰️ Historical Weather', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.HISTORICAL_WEATHER )
-						historical_location = st.text_input( 'Location', value=global_location,
-							key='weather_historical_location' )
-						
-						historical_date = st.date_input( 'Historical Date',
-							value=dt.date.today( ) - dt.timedelta( days=7 ),
-							key='weather_historical_date' )
-						
-						historical_zone = st.text_input( 'Timezone', value='auto',
-							key='weather_historical_zone' )
-						
-						historical_count = st.number_input( 'Geocoding Result Count', min_value=1,
-							max_value=100, value=10, step=1, key='weather_historical_count' )
-						
-						historical_btn_c1, historical_btn_c2 = st.columns( 2 )
-						with historical_btn_c1:
-							if st.button( label='Run', icon='🏃', key='weather_historical_run',
-									use_container_width=True ):
-								if not historical_location:
-									st.warning( 'Enter a location.' )
-								else:
-									try:
-										weather = HistoricalWeather( )
-										
-										result = weather.fetch( location=historical_location,
-											date=historical_date, zone=historical_zone,
-											count=int( historical_count ) )
-										
-										weather_latitude = getattr( weather, 'latitude', None )
-										weather_longitude = getattr( weather, 'longitude', None )
-										
-										st.session_state[ 'weather_last_source' ] = 'Historical Weather'
-										st.session_state[ 'weather_last_result' ] = result or { }
-										st.session_state[ 'weather_last_latitude' ] = weather_latitude
-										st.session_state[ 'weather_last_longitude' ] = weather_longitude
-										
-										set_global_coordinates_from_result( weather_latitude,
-											weather_longitude, location=historical_location,
-											description='Historical Weather result' )
-										
-										st.success( 'Historical Weather request completed.' )
-									
-									except Exception as ex:
-										st.error( f'Historical Weather request failed: {ex}' )
-						
-						with historical_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='weather_historical_clear',
-									use_container_width=True ):
-								st.session_state[ 'weather_last_source' ] = ''
-								st.session_state[ 'weather_last_result' ] = { }
-								st.session_state[ 'weather_last_latitude' ] = None
-								st.session_state[ 'weather_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'weather', 'weather_last_result',
-							'weather_last_source', 'Historical Weather', 'weather_historical_weather' )
-						
-					# --------- CLIMATE DATA
-					with st.expander( '🌡️ Climate Data', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.NOAA_CLIMATE_DATA )
-						climate_mode = st.selectbox( 'Mode',
-							options=[ 'datasets', 'data' ],
-							key='weather_climate_mode' )
-						
-						climate_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
-							step=1, key='weather_climate_timeout' )
-						
-						if climate_mode == 'datasets':
-							climate_keyword = st.text_input( 'Keyword', value='daily',
-								key='weather_climate_keyword' )
-							
-							climate_start_date_value = st.date_input( 'Start Date',
-								value=dt.date.today( ) - dt.timedelta( days=365 ),
-								key='weather_climate_dataset_start_date' )
-							
-							climate_end_date_value = st.date_input( 'End Date', value=dt.date.today( ),
-								key='weather_climate_dataset_end_date' )
-							
-							climate_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
-								value=25,
-								step=1, key='weather_climate_dataset_limit' )
-							
-							climate_offset = st.number_input( 'Offset', min_value=0, max_value=100000,
-								value=0, step=1, key='weather_climate_dataset_offset' )
-							
-							climate_dataset = ''
-							climate_stations = ''
-							climate_data_types = ''
-						
-						else:
-							climate_dataset = st.text_input( 'Dataset', value='daily-summaries',
-								help='Example: daily-summaries', key='weather_climate_dataset' )
-							
-							climate_data_c1, climate_data_c2 = st.columns( 2 )
-							with climate_data_c1:
-								climate_start_date_value = st.date_input( 'Start Date',
-									value=dt.date.today( ) - dt.timedelta( days=30 ),
-									key='weather_climate_data_start_date' )
-							
-							with climate_data_c2:
-								climate_end_date_value = st.date_input( 'End Date', value=dt.date.today( ),
-									key='weather_climate_data_end_date' )
-							
-							climate_stations = st.text_input( 'Stations', value='',
-								help='Optional comma-separated station identifiers.',
-								key='weather_climate_stations' )
-							
-							climate_data_types = st.text_input( 'Data Types', value='',
-								help='Optional comma-separated data type identifiers.',
-								key='weather_climate_data_types' )
-							
-							climate_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
-								value=25,
-								step=1, key='weather_climate_data_limit' )
-							
-							climate_offset = 0
-							climate_keyword = ''
-						
-						climate_btn_c1, climate_btn_c2 = st.columns( 2 )
-						with climate_btn_c1:
-							if st.button( label='Run', icon='🏃', key='weather_climate_run',
-									use_container_width=True ):
-								try:
-									service = ClimateData( )
-									
-									if climate_mode == 'datasets':
-										result = service.fetch_datasets( keyword=climate_keyword,
-											start_date=climate_start_date_value.isoformat( ),
-											end_date=climate_end_date_value.isoformat( ),
-											limit=int( climate_limit ), offset=int( climate_offset ),
-											time=int( climate_timeout ) )
-									
-									else:
-										if not climate_dataset:
-											st.warning( 'Enter a dataset identifier.' )
-											result = None
-										else:
-											result = service.fetch_data( dataset=climate_dataset,
-												start_date=climate_start_date_value.isoformat( ),
-												end_date=climate_end_date_value.isoformat( ),
-												stations=climate_stations, data_types=climate_data_types,
-												limit=int( climate_limit ), time=int( climate_timeout ) )
-									
-									if result is not None:
-										st.session_state[ 'weather_last_source' ] = 'Climate Data'
-										st.session_state[ 'weather_last_result' ] = result or { }
-										st.session_state[ 'weather_last_latitude' ] = None
-										st.session_state[ 'weather_last_longitude' ] = None
-										st.success( 'Climate Data request completed.' )
-								
-								except Exception as ex:
-									st.error( f'Climate Data request failed: {ex}' )
-						
-						with climate_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='weather_climate_clear',
-									use_container_width=True ):
-								
-								st.session_state[ 'weather_last_source' ] = ''
-								st.session_state[ 'weather_last_result' ] = { }
-								st.session_state[ 'weather_last_latitude' ] = None
-								st.session_state[ 'weather_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'weather', 'weather_last_result',
-							'weather_last_source', 'Climate Data', 'weather_climate_data' )
-					
-					# --------- TIDES AND CURRENTS
-					with st.expander( '🌊 Tides & Currents', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.NOAA_TIDES_CURRENTS )
-						tides_mode = st.selectbox( 'Mode',
-							options=[ 'station', 'water-level', 'tide-predictions' ],
-							key='weather_tides_mode' )
-						
-						tides_station_id = st.text_input( 'Station ID', value='8594900',
-							help='Example NOAA station: 8594900', key='weather_tides_station_id' )
-						
-						tides_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
-							step=1, key='weather_tides_timeout' )
-						
-						if tides_mode == 'station':
-							tides_begin_date = ''
-							tides_end_date = ''
-							tides_datum = 'MLLW'
-							tides_units = 'metric'
-							tides_time_zone = 'gmt'
-							tides_interval = 'hilo'
-						
-						else:
-							tides_date_c1, tides_date_c2 = st.columns( 2 )
-							with tides_date_c1:
-								tides_begin = st.date_input( 'Begin Date',
-									value=dt.date.today( ) - dt.timedelta( days=1 ),
-									key='weather_tides_begin_date' )
-							
-							with tides_date_c2:
-								tides_end = st.date_input( 'End Date', value=dt.date.today( ),
-									key='weather_tides_end_date' )
-							
-							tides_begin_date = tides_begin.strftime( '%Y%m%d' )
-							tides_end_date = tides_end.strftime( '%Y%m%d' )
-							
-							tides_datum = st.selectbox(
-								'Datum',
-								options=[ 'MLLW', 'MLW', 'MSL', 'MHW', 'MHHW', 'NAVD' ],
-								key='weather_tides_datum' )
-							
-							tides_units = st.selectbox( 'Units', options=[ 'metric', 'english' ],
-								key='weather_tides_units' )
-							
-							tides_time_zone = st.selectbox( 'Time Zone',
-								options=[ 'gmt', 'lst', 'lst_ldt' ], key='weather_tides_time_zone' )
-							
-							if tides_mode == 'tide-predictions':
-								tides_interval = st.selectbox( 'Interval', options=[ 'hilo', 'h' ],
-									key='weather_tides_interval' )
+							try:
+								weather = HistoricalWeather( )
+
+								result = weather.fetch( location=historical_location,
+									date=historical_date, zone=historical_zone,
+									count=int( historical_count ) )
+
+								weather_latitude = getattr( weather, 'latitude', None )
+								weather_longitude = getattr( weather, 'longitude', None )
+
+								st.session_state[ 'weather_last_source' ] = 'Historical Weather'
+								st.session_state[ 'weather_last_result' ] = result or { }
+								st.session_state[ 'weather_last_latitude' ] = weather_latitude
+								st.session_state[ 'weather_last_longitude' ] = weather_longitude
+
+								set_global_coordinates_from_result( weather_latitude,
+									weather_longitude, location=historical_location,
+									description='Historical Weather result' )
+
+								st.success( 'Historical Weather request completed.' )
+
+							except Exception as ex:
+								st.error( f'Historical Weather request failed: {ex}' )
+
+				with historical_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='weather_historical_clear',
+							use_container_width=True ):
+						st.session_state[ 'weather_last_source' ] = ''
+						st.session_state[ 'weather_last_result' ] = { }
+						st.session_state[ 'weather_last_latitude' ] = None
+						st.session_state[ 'weather_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'weather', 'weather_last_result',
+					'weather_last_source', 'Historical Weather', 'weather_historical_weather' )
+
+			# --------- CLIMATE DATA
+			with st.expander( '🌡️ Climate Data', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.NOAA_CLIMATE_DATA )
+				climate_mode = st.selectbox( 'Mode',
+					options=[ 'datasets', 'data' ],
+					key='weather_climate_mode' )
+
+				climate_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='weather_climate_timeout' )
+
+				if climate_mode == 'datasets':
+					climate_keyword = st.text_input( 'Keyword', value='daily',
+						key='weather_climate_keyword' )
+
+					climate_start_date_value = st.date_input( 'Start Date',
+						value=dt.date.today( ) - dt.timedelta( days=365 ),
+						key='weather_climate_dataset_start_date' )
+
+					climate_end_date_value = st.date_input( 'End Date', value=dt.date.today( ),
+						key='weather_climate_dataset_end_date' )
+
+					climate_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
+						value=25,
+						step=1, key='weather_climate_dataset_limit' )
+
+					climate_offset = st.number_input( 'Offset', min_value=0, max_value=100000,
+						value=0, step=1, key='weather_climate_dataset_offset' )
+
+					climate_dataset = ''
+					climate_stations = ''
+					climate_data_types = ''
+
+				else:
+					climate_dataset = st.text_input( 'Dataset', value='daily-summaries',
+						help='Example: daily-summaries', key='weather_climate_dataset' )
+
+					climate_data_c1, climate_data_c2 = st.columns( 2 )
+					with climate_data_c1:
+						climate_start_date_value = st.date_input( 'Start Date',
+							value=dt.date.today( ) - dt.timedelta( days=30 ),
+							key='weather_climate_data_start_date' )
+
+					with climate_data_c2:
+						climate_end_date_value = st.date_input( 'End Date', value=dt.date.today( ),
+							key='weather_climate_data_end_date' )
+
+					climate_stations = st.text_input( 'Stations', value='',
+						help='Optional comma-separated station identifiers.',
+						key='weather_climate_stations' )
+
+					climate_data_types = st.text_input( 'Data Types', value='',
+						help='Optional comma-separated data type identifiers.',
+						key='weather_climate_data_types' )
+
+					climate_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
+						value=25,
+						step=1, key='weather_climate_data_limit' )
+
+					climate_offset = 0
+					climate_keyword = ''
+
+				climate_btn_c1, climate_btn_c2 = st.columns( 2 )
+				with climate_btn_c1:
+					if st.button( label='Run', icon='🏃', key='weather_climate_run',
+							use_container_width=True ):
+						try:
+							service = ClimateData( )
+
+							if climate_mode == 'datasets':
+								result = service.fetch_datasets( keyword=climate_keyword,
+									start_date=climate_start_date_value.isoformat( ),
+									end_date=climate_end_date_value.isoformat( ),
+									limit=int( climate_limit ), offset=int( climate_offset ),
+									time=int( climate_timeout ) )
+
 							else:
-								tides_interval = 'hilo'
-						
-						tides_btn_c1, tides_btn_c2 = st.columns( 2 )
-						with tides_btn_c1:
-							if st.button( label='Run', icon='🏃', key='weather_tides_run',
-									use_container_width=True ):
-								try:
-									service = TidesAndCurrents( )
-									
-									result = service.fetch( mode=tides_mode, station_id=tides_station_id,
-										begin_date=tides_begin_date, end_date=tides_end_date,
-										datum=tides_datum, units=tides_units, time_zone=tides_time_zone,
-										interval=tides_interval, time=int( tides_timeout ) )
-									
-									st.session_state[ 'weather_last_source' ] = 'Tides & Currents'
-									st.session_state[ 'weather_last_result' ] = result or { }
-									st.session_state[ 'weather_last_latitude' ] = None
-									st.session_state[ 'weather_last_longitude' ] = None
-									st.success( 'Tides & Currents request completed.' )
-								
-								except Exception as ex:
-									st.error( f'Tides & Currents request failed: {ex}' )
-						
-						with tides_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='weather_tides_clear',
-									use_container_width=True ):
-								st.session_state[ 'weather_last_source' ] = ''
-								st.session_state[ 'weather_last_result' ] = { }
-								st.session_state[ 'weather_last_latitude' ] = None
-								st.session_state[ 'weather_last_longitude' ] = None
-				
-						st.divider( )
-						render_source_processing_controls( 'weather', 'weather_last_result',
-							'weather_last_source', 'Tides & Currents', 'weather_tides_currents' )
-						
-				with weather_c2:
-					render_mode_document_tabs( 'weather', '📄 Loaded' )
-		
-		# ----------- Environmental Expander
-		with st.expander( 'Environmental', expanded=False ):
-			left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
-			with center:
-				st.subheader( 'Environmental Data' )
-				st.divider( )
-				global_location = get_global_location_default( )
-				global_zipcode = get_global_zipcode_default( )
-				global_latitude = get_global_latitude_default( )
-				global_longitude = get_global_longitude_default( )
-				global_box = create_bounding_box_from_center( global_latitude, global_longitude )
-				location_c1, location_c2, location_c3, location_c4 = st.columns( 4, border=True )
-				location_c1.metric( 'Location', global_location )
-				location_c2.metric( 'ZIP Code', global_zipcode )
-				location_c3.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
-				location_c4.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
-				
-				blue_divider( )
-				enviro_c1, enviro_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
-				with enviro_c1:
-					
-					# --------- AIRNOW AIR QUALITY
-					with st.expander( '🌫️ AirNow Air Quality', expanded=True ):
-						st.caption( 'API', help=cfg.AIR_NOW )
-						airnow_mode = st.selectbox( 'Mode',
-							options=[ 'Current by ZIP', 'Current by Coordinates', 'Forecast by ZIP',
-									'Forecast by Coordinates' ], key='env_airnow_mode' )
-						
-						airnow_distance = st.number_input( 'Distance', min_value=0, max_value=250,
-							value=25, step=1, key='input_env_airnow_distance' )
-						
-						airnow_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
-							value=20, step=1, key='input_env_airnow_timeout' )
-						
-						if 'ZIP' in airnow_mode:
-							airnow_zip = st.text_input( 'ZIP Code', value=global_zipcode,
-								key='input_env_airnow_zip' )
-							
-							airnow_latitude = None
-							airnow_longitude = None
-						
-						else:
-							airnow_zip = ''
-							
-							airnow_coord_c1, airnow_coord_c2 = st.columns( 2 )
-							
-							with airnow_coord_c1:
-								airnow_latitude = st.number_input(
-									'Latitude',
-									value=float( global_latitude ),
-									format='%.6f',
-									key='input_env_airnow_latitude' )
-							
-							with airnow_coord_c2:
-								airnow_longitude = st.number_input(
-									'Longitude',
-									value=float( global_longitude ),
-									format='%.6f',
-									key='input_env_airnow_longitude' )
-						
-						if 'Forecast' in airnow_mode:
-							airnow_date = st.date_input(
-								'Forecast Date',
-								value=dt.date.today( ),
-								key='input_env_airnow_date' )
-						else:
-							airnow_date = None
-						
-						airnow_btn_c1, airnow_btn_c2 = st.columns( 2 )
-						
-						with airnow_btn_c1:
-							if st.button( label='Run', icon='🏃', key='input_env_airnow_run',
-									use_container_width=True ):
-								try:
-									service = AirNow( )
+								if not climate_dataset:
+									st.warning( 'Enter a dataset identifier.' )
 									result = None
-									
-									if airnow_mode == 'Current by ZIP':
-										if not airnow_zip:
-											st.warning( 'Enter a ZIP code.' )
-										else:
-											result = service.fetch_current_zip(
-												zip_code=airnow_zip,
-												distance=int( airnow_distance ),
-												time=int( airnow_timeout ) )
-									
-									elif airnow_mode == 'Current by Coordinates':
-										if not has_valid_coordinates( airnow_latitude, airnow_longitude ):
-											st.warning( 'Provide valid coordinates.' )
-										else:
-											result = service.fetch_current_latlon(
-												latitude=float( airnow_latitude ),
-												longitude=float( airnow_longitude ),
-												distance=int( airnow_distance ),
-												time=int( airnow_timeout ) )
-									
-									elif airnow_mode == 'Forecast by ZIP':
-										if not airnow_zip:
-											st.warning( 'Enter a ZIP code.' )
-										else:
-											result = service.fetch_forecast_zip(
-												zip_code=airnow_zip,
-												date=airnow_date.isoformat( ),
-												distance=int( airnow_distance ),
-												time=int( airnow_timeout ) )
-									
-									else:
-										if not has_valid_coordinates( airnow_latitude, airnow_longitude ):
-											st.warning( 'Provide valid coordinates.' )
-										else:
-											result = service.fetch_forecast_latlon(
-												latitude=float( airnow_latitude ),
-												longitude=float( airnow_longitude ),
-												date=airnow_date.isoformat( ),
-												distance=int( airnow_distance ),
-												time=int( airnow_timeout ) )
-									
-									if result is not None:
-										st.session_state[ 'env_last_source' ] = 'AirNow'
-										st.session_state[ 'env_last_result' ] = result or { }
-										st.session_state[ 'env_last_latitude' ] = airnow_latitude
-										st.session_state[ 'env_last_longitude' ] = airnow_longitude
-										
-										set_global_coordinates_from_result(
-											airnow_latitude,
-											airnow_longitude,
-											location=global_location,
-											description='AirNow coordinate result' )
-										
-										if airnow_zip:
-											st.session_state[ 'zipcode' ] = str( airnow_zip ).strip( )
-										
-										st.success( 'AirNow request completed.' )
-								
-								except Exception as ex:
-									st.error( f'AirNow request failed: {ex}' )
-						
-						with airnow_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='env_airnow_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'AirNow', 'env_airnow' )
-					
-					# --------- UV INDEX
-					with st.expander( '☀️ UV Index', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.AIR_NOW )
-						uv_mode = st.selectbox(
-							'Mode',
-							options=[
-									'Daily by ZIP',
-									'Daily by City / State',
-									'Hourly by ZIP',
-									'Hourly by City / State'
-							],
-							key='env_uv_mode' )
-						
-						uv_timeout = st.number_input(
-							'Timeout',
-							min_value=1,
-							max_value=60,
-							value=20,
-							step=1,
-							key='env_uv_timeout' )
-						
-						if 'ZIP' in uv_mode:
-							uv_zip = st.text_input(
-								'ZIP Code',
-								value='20001',
-								key='env_uv_zip' )
-							
-							uv_city = ''
-							uv_state = ''
-						
-						else:
-							uv_zip = ''
-							uv_city = st.text_input(
-								'City',
-								value='Washington',
-								key='env_uv_city' )
-							
-							uv_state = st.text_input(
-								'State',
-								value='DC',
-								key='env_uv_state' )
-						
-						uv_btn_c1, uv_btn_c2 = st.columns( 2 )
-						
-						with uv_btn_c1:
-							if st.button( label='Run', icon='🏃', key='env_uv_run',
-									use_container_width=True ):
-								try:
-									service = UvIndex( )
-									
-									if uv_mode == 'Daily by ZIP':
-										if not uv_zip:
-											st.warning( 'Enter a ZIP code.' )
-											result = None
-										else:
-											result = service.fetch_daily_zip(
-												zip_code=uv_zip,
-												time=int( uv_timeout ) )
-									
-									elif uv_mode == 'Daily by City / State':
-										if not uv_city or not uv_state:
-											st.warning( 'Enter both city and state.' )
-											result = None
-										else:
-											result = service.fetch_daily_city_state(
-												city=uv_city,
-												state=uv_state,
-												time=int( uv_timeout ) )
-									
-									elif uv_mode == 'Hourly by ZIP':
-										if not uv_zip:
-											st.warning( 'Enter a ZIP code.' )
-											result = None
-										else:
-											result = service.fetch_hourly_zip(
-												zip_code=uv_zip,
-												time=int( uv_timeout ) )
-									
-									else:
-										if not uv_city or not uv_state:
-											st.warning( 'Enter both city and state.' )
-											result = None
-										else:
-											result = service.fetch_hourly_city_state(
-												city=uv_city,
-												state=uv_state,
-												time=int( uv_timeout ) )
-									
-									if result is not None:
-										st.session_state[ 'env_last_source' ] = 'UV Index'
-										st.session_state[ 'env_last_result' ] = result or { }
-										st.session_state[ 'env_last_latitude' ] = None
-										st.session_state[ 'env_last_longitude' ] = None
-										st.success( 'UV Index request completed.' )
-								
-								except Exception as ex:
-									st.error( f'UV Index request failed: {ex}' )
-						
-						with uv_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='env_uv_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'UV Index', 'env_uv_index' )
-					
-					# --------- OPENAQ
-					with st.expander( '🧪 OpenAQ', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.OPEN_AQ )
-						openaq_mode = st.selectbox( 'Mode',
-							options=[ 'Locations', 'Latest Measurements' ], key='sb_openaq_mode' )
-						
-						openaq_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
-							value=20, step=1, key='ib_env_openaq_timeout' )
-						
-						if openaq_mode == 'Locations':
-							openaq_country_id = st.number_input( 'Country ID', min_value=0,
-								value=0, step=1, key='in_env_openaq_country_id' )
-							
-							openaq_coordinates = st.text_input( 'Coordinates',
-								value=f'{global_latitude:.6f},{global_longitude:.6f}',
-								help='OpenAQ expects a latitude,longitude string.',
-								key='env_openaq_coordinates' )
-							
-							openaq_radius = st.number_input( 'Radius', min_value=1,
-								max_value=100000, value=25000, step=1000, key='env_openaq_radius' )
-							
-							openaq_providers_id = st.text_input( 'Providers ID',
-								value='', key='env_openaq_providers_id' )
-							
-							openaq_parameters_id = st.text_input( 'Parameters ID', value='',
-								key='env_openaq_parameters_id' )
-							
-							openaq_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
-								value=25, step=1, key='env_openaq_limit' )
-							
-							openaq_page = st.number_input( 'Page', min_value=1, max_value=10000,
-								value=1, step=1, key='env_openaq_page' )
-							
-							openaq_location_id = None
-						
-						else:
-							openaq_country_id = 0
-							openaq_coordinates = ''
-							openaq_radius = 25000
-							openaq_providers_id = ''
-							openaq_parameters_id = ''
-							openaq_limit = 25
-							openaq_page = 1
-							
-							openaq_location_id = st.number_input( 'Location ID', min_value=1,
-								value=1, step=1, key='env_openaq_location_id' )
-						
-						openaq_btn_c1, openaq_btn_c2 = st.columns( 2 )
-						with openaq_btn_c1:
-							if st.button( label='Run', icon='🏃', key='env_openaq_run',
-									use_container_width=True ):
-								try:
-									service = OpenAQ( )
-									if openaq_mode == 'Locations':
-										country_id_value = None
-										if int( openaq_country_id ) > 0:
-											country_id_value = int( openaq_country_id )
-										
-										result = service.fetch_locations(
-											country_id=country_id_value,
-											coordinates=openaq_coordinates,
-											radius=int( openaq_radius ),
-											providers_id=openaq_providers_id,
-											parameters_id=openaq_parameters_id,
-											limit=int( openaq_limit ),
-											page=int( openaq_page ),
-											time=int( openaq_timeout ) )
-										
-										lat_value = None
-										lng_value = None
-										
-										try:
-											parts = [ p.strip( ) for p in openaq_coordinates.split( ',' ) ]
-											if len( parts ) == 2:
-												lat_value = float( parts[ 0 ] )
-												lng_value = float( parts[ 1 ] )
-										except Exception:
-											lat_value = None
-											lng_value = None
-									
-									else:
-										result = service.fetch_latest(
-											location_id=int( openaq_location_id ),
-											time=int( openaq_timeout ) )
-										
-										lat_value = None
-										lng_value = None
-									
-									st.session_state[ 'env_last_source' ] = 'OpenAQ'
-									st.session_state[ 'env_last_result' ] = result or { }
-									st.session_state[ 'env_last_latitude' ] = lat_value
-									st.session_state[ 'env_last_longitude' ] = lng_value
-									
-									set_global_coordinates_from_result( lat_value, lng_value,
-										location=global_location, description='OpenAQ result' )
-									
-									st.success( 'OpenAQ request completed.' )
-								
-								except Exception as ex:
-									st.error( f'OpenAQ request failed: {ex}' )
-						
-						with openaq_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='env_openaq_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result',
-							'env_last_source', 'OpenAQ', 'env_openaq' )
-					
-					# --------- PURPLEAIR SENSORS
-					with st.expander( '🟣 PurpleAir Sensors', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.PURPLE_AIR )
-						purple_mode = st.selectbox( 'Mode',
-							options=[ 'Sensors by Bounding Box', 'Single Sensor' ],
-							key='env_purple_mode' )
-						
-						purple_timeout = st.number_input( 'Timeout', min_value=1,
-							max_value=60, value=20, step=1,
-							key='env_purple_timeout' )
-						
-						if purple_mode == 'Sensors by Bounding Box':
-							st.caption( 'Centered on the global latitude and longitude.' )
-							purple_box_c1, purple_box_c2 = st.columns( 2 )
-							with purple_box_c1:
-								purple_nwlng = st.number_input( 'NW Longitude',
-									value=float( global_box[ 'nw_lng' ] ),
-									format='%.6f', key='env_purple_nwlng' )
-								
-								purple_nwlat = st.number_input( 'NW Latitude',
-									value=float( global_box[ 'nw_lat' ] ),
-									format='%.6f', key='env_purple_nwlat' )
-							
-							with purple_box_c2:
-								purple_selng = st.number_input( 'SE Longitude',
-									value=float( global_box[ 'se_lng' ] ),
-									format='%.6f', key='env_purple_selng' )
-								
-								purple_selat = st.number_input( 'SE Latitude',
-									value=float( global_box[ 'se_lat' ] ),
-									format='%.6f', key='env_purple_selat' )
-							
-							purple_location_type = st.number_input( 'Location Type',
-								min_value=0, max_value=1, value=0,
-								step=1, help='Public outdoor sensors are commonly 0.',
-								key='env_purple_location_type' )
-							
-							purple_max_age = st.number_input( 'Max Age', min_value=0,
-								max_value=10080, value=0, step=10,
-								help='Maximum sensor age in minutes. 0 keeps the default behavior.',
-								key='env_purple_max_age' )
-							
-							purple_modified_since = st.number_input( 'Modified Since',
-								min_value=0, max_value=4102444800,
-								value=0, step=1,
-								help='UNIX timestamp filter. 0 disables the filter.',
-								key='env_purple_modified_since' )
-							
-							purple_sensor_index = 0
-							purple_center_latitude = (float( purple_nwlat ) + float( purple_selat )) / 2.0
-							purple_center_longitude = (float( purple_nwlng ) + float( purple_selng )) / 2.0
-						
-						else:
-							purple_nwlng = 0.0
-							purple_nwlat = 0.0
-							purple_selng = 0.0
-							purple_selat = 0.0
-							purple_location_type = 0
-							purple_max_age = 0
-							purple_modified_since = 0
-							purple_center_latitude = None
-							purple_center_longitude = None
-							
-							purple_sensor_index = st.number_input( 'Sensor Index', min_value=1,
-								value=1, step=1, key='env_purple_sensor_index' )
-						
-						purple_btn_c1, purple_btn_c2 = st.columns( 2 )
-						with purple_btn_c1:
-							if st.button( label='Run', icon='🏃', key='env_purple_run',
-									use_container_width=True ):
-								try:
-									service = PurpleAir( )
-									if purple_mode == 'Sensors by Bounding Box':
-										result = service.fetch_sensors(
-											nwlng=float( purple_nwlng ),
-											nwlat=float( purple_nwlat ),
-											selng=float( purple_selng ),
-											selat=float( purple_selat ),
-											location_type=int( purple_location_type ),
-											max_age=int( purple_max_age ),
-											modified_since=int( purple_modified_since ),
-											time=int( purple_timeout ) )
-									
-									else:
-										result = service.fetch_sensor(
-											sensor_index=int( purple_sensor_index ),
-											time=int( purple_timeout ) )
-									
-									st.session_state[ 'env_last_source' ] = 'PurpleAir'
-									st.session_state[ 'env_last_result' ] = result or { }
-									st.session_state[ 'env_last_latitude' ] = purple_center_latitude
-									st.session_state[ 'env_last_longitude' ] = purple_center_longitude
-									
-									set_global_coordinates_from_result( purple_center_latitude,
-										purple_center_longitude, location=global_location,
-										description='PurpleAir bounding-box center' )
-									
-									st.success( 'PurpleAir request completed.' )
-								
-								except Exception as ex:
-									st.error( f'PurpleAir request failed: {ex}' )
-						
-						with purple_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='env_purple_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result',
-							'env_last_source', 'PurpleAir', 'env_purpleair' )
-					
-					# --------- ENVIROFACTS
-					with st.expander( '🏭 EPA EnviroFacts Facilities', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.EPA_ENVIROFACTS )
-						envirofacts_table = st.selectbox( 'Table',
-							options=[ 'TRI_FACILITY', 'TRI_RELEASE', 'EF_W_EMISSIONS_SOURCE_GHG' ],
-							key='env_envirofacts_table' )
-						
-						envirofacts_state = st.text_input( 'State Code', value='',
-							help='Optional two-letter state filter.', key='env_envirofacts_state' )
-						
-						envirofacts_facility = st.text_input( 'Facility Name', value='',
-							help='Optional facility-name prefix filter.', key='env_envirofacts_facility' )
-						
-						envirofacts_limit = st.number_input( 'Limit', min_value=1, max_value=500, value=25,
-							step=1, key='env_envirofacts_limit' )
-						
-						envirofacts_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
-							value=20, step=1, key='env_envirofacts_timeout' )
-						
-						envirofacts_btn_c1, envirofacts_btn_c2 = st.columns( 2 )
-						
-						with envirofacts_btn_c1:
-							if st.button( label='Run', icon='🏃', key='env_envirofacts_run',
-									use_container_width=True ):
-								try:
-									service = EnviroFacts( )
-									result = service.fetch(
-										table_name=envirofacts_table,
-										state_code=envirofacts_state,
-										facility_name=envirofacts_facility,
-										limit=int( envirofacts_limit ),
-										time=int( envirofacts_timeout ) )
-									
-									st.session_state[ 'env_last_source' ] = 'EnviroFacts'
-									st.session_state[ 'env_last_result' ] = result or { }
-									st.session_state[ 'env_last_latitude' ] = None
-									st.session_state[ 'env_last_longitude' ] = None
-									st.success( 'EnviroFacts request completed.' )
-								
-								except Exception as ex:
-									st.error( f'EnviroFacts request failed: {ex}' )
-						
-						with envirofacts_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='env_envirofacts_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'EnviroFacts', 'env_envirofacts' )
-					
-					# --------- FIRMS FIRE / THERMAL ANOMALIES
-					with st.expander( '🔥 NASA FIRMS', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.NASA_FIRMS )
-						firms_source = st.selectbox( 'Source',
-							options=[ 'MODIS_NRT', 'MODIS_SP', 'VIIRS_SNPP_NRT', 'VIIRS_SNPP_SP',
-									'VIIRS_NOAA20_NRT', 'VIIRS_NOAA20_SP', 'VIIRS_NOAA21_NRT',
-									'LANDSAT_NRT' ], key='env_firms_source' )
-						
-						firms_area_mode = st.selectbox( 'Area Mode', options=[ 'World', 'Bounding Box' ],
-							key='env_firms_area_mode' )
-						
-						firms_day_range = st.number_input( 'Day Range', min_value=1, max_value=5, value=1,
-							step=1, key='env_firms_day_range' )
-						
-						firms_use_date = st.checkbox( 'Use Start Date', value=False,
-							key='env_firms_use_date' )
-						
-						if firms_use_date:
-							firms_date_value = st.date_input( 'Date', value=dt.date.today( ),
-								key='env_firms_date' )
-							firms_date = firms_date_value.isoformat( )
-						else:
-							firms_date = ''
-						
-						firms_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
-							step=1, key='env_firms_timeout' )
-						
-						if firms_area_mode == 'World':
-							firms_area_coordinates = 'world'
-							firms_center_latitude = None
-							firms_center_longitude = None
-							
-							st.info(
-								'World mode does not update global latitude and longitude because it '
-								'does not represent a single geographic center.' )
-						
-						else:
-							st.caption(
-								'Bounding box defaults are centered on the global latitude and longitude.' )
-							
-							firms_box_c1, firms_box_c2 = st.columns( 2 )
-							
-							with firms_box_c1:
-								firms_west = st.number_input( 'West',
-									value=float( global_box[ 'west' ] ),
-									format='%.6f', key='env_firms_west' )
-								
-								firms_south = st.number_input( 'South',
-									value=float( global_box[ 'south' ] ),
-									format='%.6f', key='env_firms_south' )
-							
-							with firms_box_c2:
-								firms_east = st.number_input( 'East',
-									value=float( global_box[ 'east' ] ),
-									format='%.6f', key='env_firms_east' )
-								
-								firms_north = st.number_input( 'North',
-									value=float( global_box[ 'north' ] ),
-									format='%.6f', key='env_firms_north' )
-							
-							firms_area_coordinates = (
-									f'{float( firms_west )},{float( firms_south )},'
-									f'{float( firms_east )},{float( firms_north )}'
-							)
-							
-							firms_center_latitude = (float( firms_south ) + float( firms_north )) / 2.0
-							firms_center_longitude = (float( firms_west ) + float( firms_east )) / 2.0
-						
-						firms_btn_c1, firms_btn_c2 = st.columns( 2 )
-						with firms_btn_c1:
-							if st.button( label='Run', icon='🏃', key='btn_env_firms_run',
-									use_container_width=True ):
-								try:
-									service = Firms( )
-									result = service.fetch_area( source=firms_source,
-										area_coordinates=firms_area_coordinates,
-										day_range=int( firms_day_range ),
-										date=firms_date, time=int( firms_timeout ) )
-									
-									st.session_state[ 'env_last_source' ] = 'FIRMS'
-									st.session_state[ 'env_last_result' ] = result or { }
-									st.session_state[ 'env_last_latitude' ] = firms_center_latitude
-									st.session_state[ 'env_last_longitude' ] = firms_center_longitude
-									set_global_coordinates_from_result( firms_center_latitude,
-										firms_center_longitude, location=global_location,
-										description='FIRMS bounding-box center' )
-									
-									st.success( 'FIRMS request completed.' )
-								
-								except Exception as ex:
-									st.error( f'FIRMS request failed: {ex}' )
-						
-						with firms_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='btn_env_firms_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-					
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result',
-							'env_last_source', 'FIRMS', 'env_firms' )
-					
-					# --------- EONET NATURAL EVENTS
-					with st.expander( '🌎 NASA Earth Observatory Natural Events', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.NASA_EONET )
-						eonet_mode = st.selectbox( 'Mode', options=[ 'events', 'categories' ],
-							key='env_eonet_mode' )
-						
-						eonet_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
-							step=1, key='env_eonet_timeout' )
-						
-						if eonet_mode == 'events':
-							eonet_source = st.text_input( 'Source', value='',
-								help='Optional EONET source identifier or comma-separated identifiers.',
-								key='env_eonet_source' )
-							
-							eonet_category = st.text_input( 'Category', value='',
-								help='Optional EONET category identifier or comma-separated identifiers.',
-								key='env_eonet_category' )
-							
-							eonet_status = st.selectbox( 'Status', options=[ 'open', 'closed', 'all' ],
-								key='env_eonet_status' )
-							
-							eonet_limit = st.number_input( 'Limit', min_value=1, max_value=500, value=25,
-								step=1, key='env_eonet_limit' )
-							
-							eonet_days = st.number_input( 'Days', min_value=1, max_value=3650, value=30,
-								step=1, key='env_eonet_days' )
-							
-							eonet_use_dates = st.checkbox( 'Use Start / End Dates', value=False,
-								key='env_eonet_use_dates' )
-							
-							if eonet_use_dates:
-								eonet_date_c1, eonet_date_c2 = st.columns( 2 )
-								
-								with eonet_date_c1:
-									eonet_start_value = st.date_input( 'Start Date',
-										value=dt.date.today( ) - dt.timedelta( days=30 ),
-										key='env_eonet_start_date' )
-								
-								with eonet_date_c2:
-									eonet_end_value = st.date_input( 'End Date', value=dt.date.today( ),
-										key='env_eonet_end_date' )
-								
-								eonet_start_date = eonet_start_value.isoformat( )
-								eonet_end_date = eonet_end_value.isoformat( )
-							
-							else:
-								eonet_start_date = ''
-								eonet_end_date = ''
-							
-							eonet_use_bbox = st.checkbox( 'Use Bounding Box', value=False,
-								key='env_eonet_use_bbox' )
-							
-							if eonet_use_bbox:
-								st.caption( 'Defaults are on the global latitude and longitude.' )
-								eonet_box_c1, eonet_box_c2 = st.columns( 2 )
-								with eonet_box_c1:
-									eonet_min_lon = st.number_input( 'Min Longitude',
-										value=float( global_box[ 'west' ] ),
-										format='%.6f', key='env_eonet_min_lon' )
-									
-									eonet_max_lat = st.number_input( 'Max Latitude',
-										value=float( global_box[ 'north' ] ),
-										format='%.6f', key='env_eonet_max_lat' )
-								
-								with eonet_box_c2:
-									eonet_max_lon = st.number_input( 'Max Longitude',
-										value=float( global_box[ 'east' ] ),
-										format='%.6f', key='env_eonet_max_lon' )
-									
-									eonet_min_lat = st.number_input( 'Min Latitude',
-										value=float( global_box[ 'south' ] ),
-										format='%.6f', key='env_eonet_min_lat' )
-								
-								eonet_bbox = ( f'{float( eonet_min_lon )},{float( eonet_max_lat )},'
-										f'{float( eonet_max_lon )},{float( eonet_min_lat )}' )
-								
-								eonet_center_latitude = ( float( eonet_min_lat ) + float(
-									                        eonet_max_lat ) ) / 2.0
-								
-								eonet_center_longitude = ( float( eonet_min_lon ) + float(
-									                         eonet_max_lon ) ) / 2.0
-							
-							else:
-								eonet_bbox = ''
-								eonet_center_latitude = None
-								eonet_center_longitude = None
-						
-						else:
-							eonet_source = ''
-							eonet_category = ''
-							eonet_status = 'open'
-							eonet_limit = 25
-							eonet_days = 30
-							eonet_start_date = ''
-							eonet_end_date = ''
-							eonet_bbox = ''
-							eonet_center_latitude = None
-							eonet_center_longitude = None
-						
-						eonet_btn_c1, eonet_btn_c2 = st.columns( 2 )
-						with eonet_btn_c1:
-							if st.button( label='Run', icon='🏃', key='env_eonet_run',
-									use_container_width=True ):
-								try:
-									service = EoNet( )
-									result = service.fetch( mode=eonet_mode, source=eonet_source,
-										category=eonet_category, status=eonet_status,
-										limit=int( eonet_limit ), days=int( eonet_days ),
-										start_date=eonet_start_date, end_date=eonet_end_date,
-										bbox=eonet_bbox, time=int( eonet_timeout ) )
-									
-									st.session_state[ 'env_last_source' ] = 'EONET'
-									st.session_state[ 'env_last_result' ] = result or { }
-									st.session_state[ 'env_last_latitude' ] = eonet_center_latitude
-									st.session_state[ 'env_last_longitude' ] = eonet_center_longitude
-									
-									set_global_coordinates_from_result( eonet_center_latitude,
-										eonet_center_longitude, location=global_location,
-										description='EONET bounding-box center' )
-									
-									st.success( 'EONET request completed.' )
-								
-								except Exception as ex:
-									st.error( f'EONET request failed: {ex}' )
-						
-						with eonet_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='env_eonet_clear',
-									use_container_width=True ):
-								st.session_state[ 'env_last_source' ] = ''
-								st.session_state[ 'env_last_result' ] = { }
-								st.session_state[ 'env_last_latitude' ] = None
-								st.session_state[ 'env_last_longitude' ] = None
-				
-						st.divider( )
-						render_source_processing_controls( 'env', 'env_last_result',
-							'env_last_source', 'EONET', 'env_eonet' )
-				
-				with enviro_c2:
-					render_mode_document_tabs( 'env', '📄 Loaded' )
-		
-		# ----------- Geological Expander
-		with st.expander( 'Geological', expanded=False ):
-			left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
-			with center:
-				st.subheader( 'Geological Data' )
+								else:
+									result = service.fetch_data( dataset=climate_dataset,
+										start_date=climate_start_date_value.isoformat( ),
+										end_date=climate_end_date_value.isoformat( ),
+										stations=climate_stations, data_types=climate_data_types,
+										limit=int( climate_limit ), time=int( climate_timeout ) )
+
+							if result is not None:
+								st.session_state[ 'weather_last_source' ] = 'Climate Data'
+								st.session_state[ 'weather_last_result' ] = result or { }
+								st.session_state[ 'weather_last_latitude' ] = None
+								st.session_state[ 'weather_last_longitude' ] = None
+								st.success( 'Climate Data request completed.' )
+
+						except Exception as ex:
+							st.error( f'Climate Data request failed: {ex}' )
+
+				with climate_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='weather_climate_clear',
+							use_container_width=True ):
+
+						st.session_state[ 'weather_last_source' ] = ''
+						st.session_state[ 'weather_last_result' ] = { }
+						st.session_state[ 'weather_last_latitude' ] = None
+						st.session_state[ 'weather_last_longitude' ] = None
+
 				st.divider( )
-				global_location = get_global_location_default( )
-				global_latitude = get_global_latitude_default( )
-				global_longitude = get_global_longitude_default( )
-				global_box = create_bounding_box_from_center( global_latitude, global_longitude )
-				location_c1, location_c2, location_c3 = st.columns( 3, border=True )
-				location_c1.metric( 'Location', global_location )
-				location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
-				location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
-				blue_divider( )
-				geo_c1, geo_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
-				with geo_c1:
-					
-					# --------- USGS EARTHQUAKES
-					with st.expander( '🌎 USGS Earthquakes', expanded=True ):
-						st.badge( label='About API', color='blue', help=cfg.USGS_EARTHQUAKES )
-						quake_mode = st.selectbox( 'Mode', options=[ 'feed', 'search' ],
-							key='geo_quake_mode' )
-						
-						quake_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
-							value=20, step=1, key='geo_quake_timeout' )
-						
-						if quake_mode == 'feed':
-							quake_feed = st.selectbox( 'Feed',
-								options=[ 'all_hour.geojson', 'all_day.geojson', 'all_week.geojson',
-										'all_month.geojson', '1.0_hour.geojson', '1.0_day.geojson',
-										'1.0_week.geojson', '1.0_month.geojson', '2.5_hour.geojson',
-										'2.5_day.geojson', '2.5_week.geojson', '2.5_month.geojson',
-										'4.5_hour.geojson', '4.5_day.geojson', '4.5_week.geojson',
-										'4.5_month.geojson', 'significant_hour.geojson',
-										'significant_day.geojson', 'significant_week.geojson',
-										'significant_month.geojson' ], key='geo_quake_feed' )
-							
-							quake_start_date = ''
-							quake_end_date = ''
-							quake_min_magnitude = 1.0
-							quake_max_magnitude = 10.0
-							quake_limit = 25
-							quake_order_by = 'time'
-							quake_event_type = 'earthquake'
-							quake_use_location = False
-							quake_latitude = None
-							quake_longitude = None
-							quake_radius = None
-						
-						else:
-							quake_feed = 'all_day.geojson'
-							search_c1, search_c2 = st.columns( 2 )
-							
-							with search_c1:
-								quake_start = st.date_input( 'Start Date',
-									value=dt.date.today( ) - dt.timedelta( days=7 ),
-									key='geo_quake_start_date' )
-							
-							with search_c2:
-								quake_end = st.date_input( 'End Date', value=dt.date.today( ),
-									key='geo_quake_end_date' )
-							
-							quake_start_date = quake_start.isoformat( )
-							quake_end_date = quake_end.isoformat( )
-							
-							mag_c1, mag_c2 = st.columns( 2 )
-							with mag_c1:
-								quake_min_magnitude = st.number_input( 'Minimum Magnitude', min_value=0.0,
-									max_value=10.0, value=1.0, step=0.1,
-									format='%.1f', key='geo_quake_min_magnitude' )
-							
-							with mag_c2:
-								quake_max_magnitude = st.number_input( 'Maximum Magnitude', min_value=0.0,
-									max_value=10.0, value=10.0, step=0.1,
-									format='%.1f', key='geo_quake_max_magnitude' )
-							
-							quake_limit = st.number_input( 'Limit', min_value=1, max_value=20000, value=25,
-								step=1, key='geo_quake_limit' )
-							
-							quake_order_by = st.selectbox( 'Order By',
-								options=[ 'time', 'time-asc', 'magnitude', 'magnitude-asc' ],
-								key='geo_quake_order_by' )
-							
-							quake_event_type = st.text_input( 'Event Type', value='earthquake',
-								key='geo_quake_event_type' )
-							
-							quake_use_location = st.checkbox( 'Use Location Radius Filter',
-								value=False, key='geo_quake_use_location' )
-							
-							if quake_use_location:
-								loc_c1, loc_c2 = st.columns( 2 )
-								
-								with loc_c1:
-									quake_latitude = st.number_input( 'Latitude',
-										value=float( global_latitude ), format='%.6f',
-										key='geo_quake_latitude' )
-								
-								with loc_c2:
-									quake_longitude = st.number_input( 'Longitude',
-										value=float( global_longitude ), format='%.6f',
-										key='geo_quake_longitude' )
-								
-								quake_radius = st.number_input( 'Maximum Radius KM', min_value=1.0,
-									max_value=20000.0,
-									value=float( st.session_state.get( 'radius', 500.0 ) or 500.0 ),
-									step=10.0, format='%.1f', key='geo_quake_radius' )
-							
+				render_source_processing_controls( 'weather', 'weather_last_result',
+					'weather_last_source', 'Climate Data', 'weather_climate_data' )
+
+			# --------- TIDES AND CURRENTS
+			with st.expander( '🌊 Tides & Currents', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.NOAA_TIDES_CURRENTS )
+				tides_mode = st.selectbox( 'Mode',
+					options=[ 'station', 'water-level', 'tide-predictions' ],
+					key='weather_tides_mode' )
+
+				tides_station_id = st.text_input( 'Station ID', value='8594900',
+					help='Example NOAA station: 8594900', key='weather_tides_station_id' )
+
+				tides_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='weather_tides_timeout' )
+
+				if tides_mode == 'station':
+					tides_begin_date = ''
+					tides_end_date = ''
+					tides_datum = 'MLLW'
+					tides_units = 'metric'
+					tides_time_zone = 'gmt'
+					tides_interval = 'hilo'
+
+				else:
+					tides_date_c1, tides_date_c2 = st.columns( 2 )
+					with tides_date_c1:
+						tides_begin = st.date_input( 'Begin Date',
+							value=dt.date.today( ) - dt.timedelta( days=1 ),
+							key='weather_tides_begin_date' )
+
+					with tides_date_c2:
+						tides_end = st.date_input( 'End Date', value=dt.date.today( ),
+							key='weather_tides_end_date' )
+
+					tides_begin_date = tides_begin.strftime( '%Y%m%d' )
+					tides_end_date = tides_end.strftime( '%Y%m%d' )
+
+					tides_datum = st.selectbox(
+						'Datum',
+						options=[ 'MLLW', 'MLW', 'MSL', 'MHW', 'MHHW', 'NAVD' ],
+						key='weather_tides_datum' )
+
+					tides_units = st.selectbox( 'Units', options=[ 'metric', 'english' ],
+						key='weather_tides_units' )
+
+					tides_time_zone = st.selectbox( 'Time Zone',
+						options=[ 'gmt', 'lst', 'lst_ldt' ], key='weather_tides_time_zone' )
+
+					if tides_mode == 'tide-predictions':
+						tides_interval = st.selectbox( 'Interval', options=[ 'hilo', 'h' ],
+							key='weather_tides_interval' )
+					else:
+						tides_interval = 'hilo'
+
+				tides_btn_c1, tides_btn_c2 = st.columns( 2 )
+				with tides_btn_c1:
+					if st.button( label='Run', icon='🏃', key='weather_tides_run',
+							use_container_width=True ):
+						try:
+							service = TidesAndCurrents( )
+
+							result = service.fetch( mode=tides_mode, station_id=tides_station_id,
+								begin_date=tides_begin_date, end_date=tides_end_date,
+								datum=tides_datum, units=tides_units, time_zone=tides_time_zone,
+								interval=tides_interval, time=int( tides_timeout ) )
+
+							st.session_state[ 'weather_last_source' ] = 'Tides & Currents'
+							st.session_state[ 'weather_last_result' ] = result or { }
+							st.session_state[ 'weather_last_latitude' ] = None
+							st.session_state[ 'weather_last_longitude' ] = None
+							st.success( 'Tides & Currents request completed.' )
+
+						except Exception as ex:
+							st.error( f'Tides & Currents request failed: {ex}' )
+
+				with tides_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='weather_tides_clear',
+							use_container_width=True ):
+						st.session_state[ 'weather_last_source' ] = ''
+						st.session_state[ 'weather_last_result' ] = { }
+						st.session_state[ 'weather_last_latitude' ] = None
+						st.session_state[ 'weather_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'weather', 'weather_last_result',
+					'weather_last_source', 'Tides & Currents', 'weather_tides_currents' )
+
+		with weather_c2:
+			render_mode_document_tabs( 'weather', '📄 Loaded' )
+
+# ==============================================================================
+# ENVIRONMENTAL DATA MODE
+# ==============================================================================
+elif mode == 'Environmental Data':
+	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	with center:
+		st.subheader( 'Environmental Data' )
+		st.divider( )
+		global_location = get_global_location_default( )
+		global_zipcode = get_global_zipcode_default( )
+		global_latitude = get_global_latitude_default( )
+		global_longitude = get_global_longitude_default( )
+		global_box = create_bounding_box_from_center( global_latitude, global_longitude )
+		location_c1, location_c2, location_c3, location_c4 = st.columns( 4, border=True )
+		location_c1.metric( 'Location', global_location )
+		location_c2.metric( 'ZIP Code', global_zipcode )
+		location_c3.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
+		location_c4.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
+
+		blue_divider( )
+		enviro_c1, enviro_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
+		with enviro_c1:
+
+			# --------- AIRNOW AIR QUALITY
+			with st.expander( '🌫️ AirNow Air Quality', expanded=True ):
+				st.caption( 'API', help=cfg.AIR_NOW )
+				airnow_mode = st.selectbox( 'Mode',
+					options=[ 'Current by ZIP', 'Current by Coordinates', 'Forecast by ZIP',
+							'Forecast by Coordinates' ], key='env_airnow_mode' )
+
+				airnow_distance = st.number_input( 'Distance', min_value=0, max_value=250,
+					value=25, step=1, key='input_env_airnow_distance' )
+
+				airnow_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
+					value=20, step=1, key='input_env_airnow_timeout' )
+
+				if 'ZIP' in airnow_mode:
+					airnow_zip = st.text_input( 'ZIP Code', value=global_zipcode,
+						key='input_env_airnow_zip' )
+
+					airnow_latitude = None
+					airnow_longitude = None
+
+				else:
+					airnow_zip = ''
+
+					airnow_coord_c1, airnow_coord_c2 = st.columns( 2 )
+
+					with airnow_coord_c1:
+						airnow_latitude = st.number_input(
+							'Latitude',
+							value=float( global_latitude ),
+							format='%.6f',
+							key='input_env_airnow_latitude' )
+
+					with airnow_coord_c2:
+						airnow_longitude = st.number_input(
+							'Longitude',
+							value=float( global_longitude ),
+							format='%.6f',
+							key='input_env_airnow_longitude' )
+
+				if 'Forecast' in airnow_mode:
+					airnow_date = st.date_input(
+						'Forecast Date',
+						value=dt.date.today( ),
+						key='input_env_airnow_date' )
+				else:
+					airnow_date = None
+
+				airnow_btn_c1, airnow_btn_c2 = st.columns( 2 )
+
+				with airnow_btn_c1:
+					if st.button( label='Run', icon='🏃', key='input_env_airnow_run',
+							use_container_width=True ):
+						try:
+							service = AirNow( )
+							result = None
+
+							if airnow_mode == 'Current by ZIP':
+								if not airnow_zip:
+									st.warning( 'Enter a ZIP code.' )
+								else:
+									result = service.fetch_current_zip(
+										zip_code=airnow_zip,
+										distance=int( airnow_distance ),
+										time=int( airnow_timeout ) )
+
+							elif airnow_mode == 'Current by Coordinates':
+								if not has_valid_coordinates( airnow_latitude, airnow_longitude ):
+									st.warning( 'Provide valid coordinates.' )
+								else:
+									result = service.fetch_current_latlon(
+										latitude=float( airnow_latitude ),
+										longitude=float( airnow_longitude ),
+										distance=int( airnow_distance ),
+										time=int( airnow_timeout ) )
+
+							elif airnow_mode == 'Forecast by ZIP':
+								if not airnow_zip:
+									st.warning( 'Enter a ZIP code.' )
+								else:
+									result = service.fetch_forecast_zip(
+										zip_code=airnow_zip,
+										date=airnow_date.isoformat( ),
+										distance=int( airnow_distance ),
+										time=int( airnow_timeout ) )
+
 							else:
-								quake_latitude = None
-								quake_longitude = None
-								quake_radius = None
-						
-						quake_btn_c1, quake_btn_c2 = st.columns( 2 )
-						with quake_btn_c1:
-							if st.button( label='Run', icon='🏃', key='geo_quake_run',
-									use_container_width=True ):
-								try:
-									service = USGSEarthquakes( )
-									result = service.fetch( mode=quake_mode, feed=quake_feed,
-										start_date=quake_start_date, end_date=quake_end_date,
-										min_magnitude=float( quake_min_magnitude ),
-										max_magnitude=float( quake_max_magnitude ),
-										limit=int( quake_limit ), order_by=quake_order_by,
-										event_type=quake_event_type, latitude=quake_latitude,
-										longitude=quake_longitude, max_radius_km=quake_radius,
-										time=int( quake_timeout ) )
-									
-									st.session_state[ 'geo_last_source' ] = 'USGS Earthquakes'
-									st.session_state[ 'geo_last_result' ] = result or { }
-									st.session_state[ 'geo_last_latitude' ] = quake_latitude
-									st.session_state[ 'geo_last_longitude' ] = quake_longitude
-									
-									if quake_radius is not None:
-										st.session_state[ 'radius' ] = float( quake_radius )
-									
-									set_global_coordinates_from_result( quake_latitude, quake_longitude,
-										location=global_location,
-										description='USGS Earthquake search center' )
-									
-									st.success( 'USGS Earthquake request completed.' )
-								
-								except Exception as ex:
-									st.error( f'USGS Earthquake request failed: {ex}' )
-						
-						with quake_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='geo_quake_clear',
-									use_container_width=True ):
-								st.session_state[ 'geo_last_source' ] = ''
-								st.session_state[ 'geo_last_result' ] = { }
-								st.session_state[ 'geo_last_latitude' ] = None
-								st.session_state[ 'geo_last_longitude' ] = None
-								st.session_state[ 'geo_last_image_path' ] = ''
-					
-						st.divider( )
-						render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
-							'USGS Earthquakes', 'geo_usgs_earthquakes' )
-						
-					# --------- GLOBAL IMAGERY
-					with st.expander( '🛰️ Global Imagery', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.NASA_GLOBAL_IMAGERY )
-						st.caption( 'Uses the original GlobalImagery fetcher. The current fetch_map_services() '
-							'writes the default NASA GIBS image to python-examples.' )
-						
-						imagery_product = st.selectbox( 'Product',
-							options=[ 'NASA GIBS EPSG:4326 Default Map Service' ],
-							key='geo_imagery_product' )
-						
-						imagery_btn_c1, imagery_btn_c2 = st.columns( 2 )
-						with imagery_btn_c1:
-							if st.button( label='Run', icon='🏃', key='geo_imagery_run',
-									use_container_width=True ):
-								
-								try:
-									Path( 'python-examples' ).mkdir( parents=True, exist_ok=True )
-									service = GlobalImagery( )
-									result = service.fetch_map_services( )
-									
-									image_path = ( 'python-examples/'
-											'MODIS_Terra_CorrectedReflectance_TrueColor.png' )
-									
-									st.session_state[ 'geo_last_source' ] = 'Global Imagery'
-									st.session_state[ 'geo_last_result' ] = { 'mode': 'fetch_map_services',
-											'product': imagery_product, 'image_path': image_path,
-											'result': str( result ) }
-									
-									st.session_state[ 'geo_last_latitude' ] = None
-									st.session_state[ 'geo_last_longitude' ] = None
-									st.session_state[ 'geo_last_image_path' ] = image_path
-									st.success( 'Global Imagery request completed.' )
-								
-								except Exception as ex:
-									st.error( f'Global Imagery request failed: {ex}' )
-						
-						with imagery_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='geo_imagery_clear',
-									use_container_width=True ):
-								st.session_state[ 'geo_last_source' ] = ''
-								st.session_state[ 'geo_last_result' ] = { }
-								st.session_state[ 'geo_last_latitude' ] = None
-								st.session_state[ 'geo_last_longitude' ] = None
-								st.session_state[ 'geo_last_image_path' ] = ''
-					
-						st.divider( )
-						render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
-							'Global Imagery', 'geo_global_imagery' )
-					
-					# --------- USGS WATER DATA
-					with st.expander( '💧 USGS Water Data', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.USGS_WATER )
-						water_mode = st.selectbox( 'Mode',
-							options=[ 'monitoring-locations', 'time-series-metadata', 'latest-continuous',
-									'latest-daily' ], key='geo_water_mode' )
-						
-						water_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
-							step=1, key='geo_water_timeout' )
-						
-						water_limit = st.number_input( 'Limit', min_value=1, max_value=1000, value=25,
-							step=1, key='geo_water_limit' )
-						
-						if water_mode == 'monitoring-locations':
-							water_monitoring_location_id = st.text_input( 'Monitoring Location ID',
-								value='', help='Optional. Example: USGS-01491000',
-								key='geo_water_monitoring_location_id' )
-							
-							water_state_code = st.text_input( 'State Code', value='',
-								help='Optional state filter.', key='geo_water_state_code' )
-							
-							water_county_code = st.text_input( 'County Code', value='',
-								help='Optional county filter.', key='geo_water_county_code' )
-							
-							water_site_type = st.text_input( 'Site Type', value='',
-								help='Optional site type filter.', key='geo_water_site_type' )
-							
-							water_parameter_code = ''
-						
-						else:
-							water_monitoring_location_id = st.text_input( 'Monitoring Location ID',
-								value='USGS-01491000', help='Example: USGS-01491000',
-								key='geo_water_monitoring_location_id_value' )
-							
-							water_parameter_code = st.text_input( 'Parameter Code', value='',
-								help='Optional USGS parameter code.', key='geo_water_parameter_code' )
-							
-							water_state_code = ''
-							water_county_code = ''
-							water_site_type = ''
-						
-						water_btn_c1, water_btn_c2 = st.columns( 2 )
-						with water_btn_c1:
-							if st.button( label='Run', icon='🏃', key='geo_water_run',
-									use_container_width=True ):
-								try:
-									service = USGSWaterData( )
-									result = service.fetch(
-										mode=water_mode,
-										monitoring_location_id=water_monitoring_location_id,
-										state_code=water_state_code,
-										county_code=water_county_code,
-										site_type=water_site_type,
-										parameter_code=water_parameter_code,
-										limit=int( water_limit ),
-										time=int( water_timeout ) )
-									
-									st.session_state[ 'geo_last_source' ] = 'USGS Water Data'
-									st.session_state[ 'geo_last_result' ] = result or { }
-									st.session_state[ 'geo_last_latitude' ] = None
-									st.session_state[ 'geo_last_longitude' ] = None
-									st.session_state[ 'geo_last_image_path' ] = ''
-									st.success( 'USGS Water Data request completed.' )
-								
-								except Exception as ex:
-									st.error( f'USGS Water Data request failed: {ex}' )
-						
-						with water_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='geo_water_clear',
-									use_container_width=True ):
-								st.session_state[ 'geo_last_source' ] = ''
-								st.session_state[ 'geo_last_result' ] = { }
-								st.session_state[ 'geo_last_latitude' ] = None
-								st.session_state[ 'geo_last_longitude' ] = None
-								st.session_state[ 'geo_last_image_path' ] = ''
-					
-						st.divider( )
-						render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source', 'USGS Water Data', 'geo_usgs_water_data' )
-					
-					# --------- USGS THE NATIONAL MAP
-					with st.expander( '🗺️ USGS The National Map', expanded=False ):
-						st.badge( label='About API', color='blue', help=cfg.USGS_NATIONAL_MAP )
-						tnm_mode = st.selectbox( 'Mode', options=[ 'datasets', 'products' ],
-							key='geo_tnm_mode' )
-						
-						tnm_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
-							step=1, key='geo_tnm_timeout' )
-						
-						if tnm_mode == 'datasets':
-							tnm_dataset = ''
-							tnm_query = ''
-							tnm_bbox = ''
-							tnm_prod_formats = ''
-							tnm_max_items = 25
-							tnm_offset = 0
-							tnm_center_latitude = None
-							tnm_center_longitude = None
-							
-							st.caption( 'Datasets mode lists does not use global coordinates.' )
-						
-						else:
-							tnm_dataset = st.text_input( 'Dataset', value='',
-								help='Optional TNM dataset filter.', key='geo_tnm_dataset' )
-							
-							tnm_query = st.text_input( 'Search Query', value='',
-								help='Optional free-text product search.', key='geo_tnm_query' )
-							
-							tnm_prod_formats = st.text_input( 'Product Formats', value='',
-								help='Optional format filter such as GeoTIFF, IMG, LAS, or LAZ.',
-								key='geo_tnm_prod_formats' )
-							
-							tnm_use_bbox = st.checkbox( 'Use Bounding Box', value=False,
-								key='geo_tnm_use_bbox' )
-							
-							if tnm_use_bbox:
-								st.caption(
-									'Bounding box defaults are centered on the global latitude and '
-									'longitude.' )
-								
-								tnm_box_c1, tnm_box_c2 = st.columns( 2 )
-								with tnm_box_c1:
-									tnm_min_x = st.number_input( 'Min X / West Longitude',
-										value=float( global_box[ 'west' ] ), format='%.6f',
-										key='geo_tnm_min_x' )
-									
-									tnm_min_y = st.number_input( 'Min Y / South Latitude',
-										value=float( global_box[ 'south' ] ), format='%.6f',
-										key='geo_tnm_min_y' )
-								
-								with tnm_box_c2:
-									tnm_max_x = st.number_input( 'Max X / East Longitude',
-										value=float( global_box[ 'east' ] ), format='%.6f',
-										key='geo_tnm_max_x' )
-									
-									tnm_max_y = st.number_input( 'Max Y / North Latitude',
-										value=float( global_box[ 'north' ] ), format='%.6f',
-										key='geo_tnm_max_y' )
-								
-								tnm_bbox = (f'{float( tnm_min_x )},{float( tnm_min_y )},'
-								            f'{float( tnm_max_x )},{float( tnm_max_y )}')
-								
-								tnm_center_latitude = (float( tnm_min_y ) + float( tnm_max_y )) / 2.0
-								tnm_center_longitude = (float( tnm_min_x ) + float( tnm_max_x )) / 2.0
-							
+								if not has_valid_coordinates( airnow_latitude, airnow_longitude ):
+									st.warning( 'Provide valid coordinates.' )
+								else:
+									result = service.fetch_forecast_latlon(
+										latitude=float( airnow_latitude ),
+										longitude=float( airnow_longitude ),
+										date=airnow_date.isoformat( ),
+										distance=int( airnow_distance ),
+										time=int( airnow_timeout ) )
+
+							if result is not None:
+								st.session_state[ 'env_last_source' ] = 'AirNow'
+								st.session_state[ 'env_last_result' ] = result or { }
+								st.session_state[ 'env_last_latitude' ] = airnow_latitude
+								st.session_state[ 'env_last_longitude' ] = airnow_longitude
+
+								set_global_coordinates_from_result(
+									airnow_latitude,
+									airnow_longitude,
+									location=global_location,
+									description='AirNow coordinate result' )
+
+								if airnow_zip:
+									st.session_state[ 'zipcode' ] = str( airnow_zip ).strip( )
+
+								st.success( 'AirNow request completed.' )
+
+						except Exception as ex:
+							st.error( f'AirNow request failed: {ex}' )
+
+				with airnow_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='env_airnow_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'AirNow', 'env_airnow' )
+
+			# --------- UV INDEX
+			with st.expander( '☀️ UV Index', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.AIR_NOW )
+				uv_mode = st.selectbox(
+					'Mode',
+					options=[
+							'Daily by ZIP',
+							'Daily by City / State',
+							'Hourly by ZIP',
+							'Hourly by City / State'
+					],
+					key='env_uv_mode' )
+
+				uv_timeout = st.number_input(
+					'Timeout',
+					min_value=1,
+					max_value=60,
+					value=20,
+					step=1,
+					key='env_uv_timeout' )
+
+				if 'ZIP' in uv_mode:
+					uv_zip = st.text_input(
+						'ZIP Code',
+						value='20001',
+						key='env_uv_zip' )
+
+					uv_city = ''
+					uv_state = ''
+
+				else:
+					uv_zip = ''
+					uv_city = st.text_input(
+						'City',
+						value='Washington',
+						key='env_uv_city' )
+
+					uv_state = st.text_input(
+						'State',
+						value='DC',
+						key='env_uv_state' )
+
+				uv_btn_c1, uv_btn_c2 = st.columns( 2 )
+
+				with uv_btn_c1:
+					if st.button( label='Run', icon='🏃', key='env_uv_run',
+							use_container_width=True ):
+						try:
+							service = UvIndex( )
+
+							if uv_mode == 'Daily by ZIP':
+								if not uv_zip:
+									st.warning( 'Enter a ZIP code.' )
+									result = None
+								else:
+									result = service.fetch_daily_zip(
+										zip_code=uv_zip,
+										time=int( uv_timeout ) )
+
+							elif uv_mode == 'Daily by City / State':
+								if not uv_city or not uv_state:
+									st.warning( 'Enter both city and state.' )
+									result = None
+								else:
+									result = service.fetch_daily_city_state(
+										city=uv_city,
+										state=uv_state,
+										time=int( uv_timeout ) )
+
+							elif uv_mode == 'Hourly by ZIP':
+								if not uv_zip:
+									st.warning( 'Enter a ZIP code.' )
+									result = None
+								else:
+									result = service.fetch_hourly_zip(
+										zip_code=uv_zip,
+										time=int( uv_timeout ) )
+
 							else:
-								tnm_bbox = ''
-								tnm_center_latitude = None
-								tnm_center_longitude = None
-							
-							tnm_max_items = st.number_input( 'Max Items', min_value=1, max_value=1000,
-								value=25, step=1, key='geo_tnm_max_items' )
-							
-							tnm_offset = st.number_input( 'Offset', min_value=0, max_value=100000, value=0,
-								step=1, key='geo_tnm_offset' )
-						
-						tnm_btn_c1, tnm_btn_c2 = st.columns( 2 )
-						with tnm_btn_c1:
-							if st.button( label='Run', icon='🏃', key='geo_tnm_run',
-									use_container_width=True ):
-								
+								if not uv_city or not uv_state:
+									st.warning( 'Enter both city and state.' )
+									result = None
+								else:
+									result = service.fetch_hourly_city_state(
+										city=uv_city,
+										state=uv_state,
+										time=int( uv_timeout ) )
+
+							if result is not None:
+								st.session_state[ 'env_last_source' ] = 'UV Index'
+								st.session_state[ 'env_last_result' ] = result or { }
+								st.session_state[ 'env_last_latitude' ] = None
+								st.session_state[ 'env_last_longitude' ] = None
+								st.success( 'UV Index request completed.' )
+
+						except Exception as ex:
+							st.error( f'UV Index request failed: {ex}' )
+
+				with uv_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='env_uv_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'UV Index', 'env_uv_index' )
+
+			# --------- OPENAQ
+			with st.expander( '🧪 OpenAQ', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.OPEN_AQ )
+				openaq_mode = st.selectbox( 'Mode',
+					options=[ 'Locations', 'Latest Measurements' ], key='sb_openaq_mode' )
+
+				openaq_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
+					value=20, step=1, key='ib_env_openaq_timeout' )
+
+				if openaq_mode == 'Locations':
+					openaq_country_id = st.number_input( 'Country ID', min_value=0,
+						value=0, step=1, key='in_env_openaq_country_id' )
+
+					openaq_coordinates = st.text_input( 'Coordinates',
+						value=f'{global_latitude:.6f},{global_longitude:.6f}',
+						help='OpenAQ expects a latitude,longitude string.',
+						key='env_openaq_coordinates' )
+
+					openaq_radius = st.number_input( 'Radius', min_value=1,
+						max_value=100000, value=25000, step=1000, key='env_openaq_radius' )
+
+					openaq_providers_id = st.text_input( 'Providers ID',
+						value='', key='env_openaq_providers_id' )
+
+					openaq_parameters_id = st.text_input( 'Parameters ID', value='',
+						key='env_openaq_parameters_id' )
+
+					openaq_limit = st.number_input( 'Limit', min_value=1, max_value=1000,
+						value=25, step=1, key='env_openaq_limit' )
+
+					openaq_page = st.number_input( 'Page', min_value=1, max_value=10000,
+						value=1, step=1, key='env_openaq_page' )
+
+					openaq_location_id = None
+
+				else:
+					openaq_country_id = 0
+					openaq_coordinates = ''
+					openaq_radius = 25000
+					openaq_providers_id = ''
+					openaq_parameters_id = ''
+					openaq_limit = 25
+					openaq_page = 1
+
+					openaq_location_id = st.number_input( 'Location ID', min_value=1,
+						value=1, step=1, key='env_openaq_location_id' )
+
+				openaq_btn_c1, openaq_btn_c2 = st.columns( 2 )
+				with openaq_btn_c1:
+					if st.button( label='Run', icon='🏃', key='env_openaq_run',
+							use_container_width=True ):
+						try:
+							service = OpenAQ( )
+							if openaq_mode == 'Locations':
+								country_id_value = None
+								if int( openaq_country_id ) > 0:
+									country_id_value = int( openaq_country_id )
+
+								result = service.fetch_locations(
+									country_id=country_id_value,
+									coordinates=openaq_coordinates,
+									radius=int( openaq_radius ),
+									providers_id=openaq_providers_id,
+									parameters_id=openaq_parameters_id,
+									limit=int( openaq_limit ),
+									page=int( openaq_page ),
+									time=int( openaq_timeout ) )
+
+								lat_value = None
+								lng_value = None
+
 								try:
-									service = USGSTheNationalMap( )
-									result = service.fetch( mode=tnm_mode, dataset=tnm_dataset, q=tnm_query,
-										bbox=tnm_bbox, prod_formats=tnm_prod_formats,
-										max_items=int( tnm_max_items ), offset=int( tnm_offset ),
-										time=int( tnm_timeout ) )
-									
-									st.session_state[ 'geo_last_source' ] = 'USGS The National Map'
-									st.session_state[ 'geo_last_result' ] = result or { }
-									st.session_state[ 'geo_last_latitude' ] = tnm_center_latitude
-									st.session_state[ 'geo_last_longitude' ] = tnm_center_longitude
-									st.session_state[ 'geo_last_image_path' ] = ''
-									
-									set_global_coordinates_from_result( tnm_center_latitude,
-										tnm_center_longitude, location=global_location,
-										description='USGS The National Map bounding-box center' )
-									
-									st.success( 'USGS The National Map request completed.' )
-								
-								except Exception as ex:
-									st.error( f'USGS The National Map request failed: {ex}' )
-						
-						with tnm_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='geo_tnm_clear',
-									use_container_width=True ):
-								st.session_state[ 'geo_last_source' ] = ''
-								st.session_state[ 'geo_last_result' ] = { }
-								st.session_state[ 'geo_last_latitude' ] = None
-								st.session_state[ 'geo_last_longitude' ] = None
-								st.session_state[ 'geo_last_image_path' ] = ''
-				
-						st.divider( )
-						render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
-							'USGS The National Map', 'geo_usgs_the_national_map' )
-				
-					# --------- USGS SCIENCEBASE
-					with st.expander( '🧭 USGS ScienceBase', expanded=False ):
-						sciencebase_mode = st.selectbox( 'Mode', options=[ 'items', 'item' ],
-							key='geo_sciencebase_mode' )
-						sciencebase_timeout = st.slider( 'Timeout', min_value=1, max_value=60, value=20,
-							key='geo_sciencebase_timeout' )
-						sciencebase_query = ''
-						sciencebase_item_id = ''
-						sciencebase_max_items = 25
-						sciencebase_offset = 0
-						sciencebase_fields = ''
-						if sciencebase_mode == 'items':
-							sciencebase_c1, sciencebase_c2 = st.columns( 2 )
-							with sciencebase_c1:
-								sciencebase_query = st.text_input( 'Query', key='geo_sciencebase_query' )
-								sciencebase_max_items = st.slider( 'Maximum Items', min_value=1,
-									max_value=500, value=25, key='geo_sciencebase_max_items' )
-							with sciencebase_c2:
-								sciencebase_fields = st.text_input( 'Fields',
-									placeholder='Optional comma-separated fields', key='geo_sciencebase_fields' )
-								sciencebase_offset = st.number_input( 'Offset', min_value=0, value=0, step=1,
-									key='geo_sciencebase_offset' )
-						else:
-							sciencebase_item_id = st.text_input( 'Item ID', key='geo_sciencebase_item_id' )
-						sciencebase_btn_c1, sciencebase_btn_c2 = st.columns( 2 )
-						with sciencebase_btn_c1:
-							if st.button( label='Run', icon='🏃', key='geo_sciencebase_run',
-									use_container_width=True ):
-								try:
-									service = USGSScienceBase( )
-									result = service.fetch( mode=sciencebase_mode, q=sciencebase_query,
-										item_id=sciencebase_item_id, max_items=int( sciencebase_max_items ),
-										offset=int( sciencebase_offset ), fields=sciencebase_fields,
-										time=int( sciencebase_timeout ) )
-									st.session_state[ 'geo_last_source' ] = 'USGS ScienceBase'
-									st.session_state[ 'geo_last_result' ] = result or { }
-									st.session_state[ 'geo_last_latitude' ] = None
-									st.session_state[ 'geo_last_longitude' ] = None
-									st.session_state[ 'geo_last_image_path' ] = ''
-									st.success( 'USGS ScienceBase request completed.' )
-								except Exception as ex:
-									st.error( f'USGS ScienceBase request failed: {ex}' )
-						with sciencebase_btn_c2:
-							if st.button( label='Clear', icon='🧹', key='geo_sciencebase_clear',
-									use_container_width=True ):
-								st.session_state[ 'geo_last_source' ] = ''
-								st.session_state[ 'geo_last_result' ] = { }
-								st.session_state[ 'geo_last_latitude' ] = None
-								st.session_state[ 'geo_last_longitude' ] = None
-								st.session_state[ 'geo_last_image_path' ] = ''
-						st.divider( )
-						render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
-							'USGS ScienceBase', 'geo_usgs_sciencebase' )
-				with geo_c2:
-					render_mode_document_tabs( 'geo', '📄 Loaded' )
+									parts = [ p.strip( ) for p in openaq_coordinates.split( ',' ) ]
+									if len( parts ) == 2:
+										lat_value = float( parts[ 0 ] )
+										lng_value = float( parts[ 1 ] )
+								except Exception:
+									lat_value = None
+									lng_value = None
+
+							else:
+								result = service.fetch_latest(
+									location_id=int( openaq_location_id ),
+									time=int( openaq_timeout ) )
+
+								lat_value = None
+								lng_value = None
+
+							st.session_state[ 'env_last_source' ] = 'OpenAQ'
+							st.session_state[ 'env_last_result' ] = result or { }
+							st.session_state[ 'env_last_latitude' ] = lat_value
+							st.session_state[ 'env_last_longitude' ] = lng_value
+
+							set_global_coordinates_from_result( lat_value, lng_value,
+								location=global_location, description='OpenAQ result' )
+
+							st.success( 'OpenAQ request completed.' )
+
+						except Exception as ex:
+							st.error( f'OpenAQ request failed: {ex}' )
+
+				with openaq_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='env_openaq_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result',
+					'env_last_source', 'OpenAQ', 'env_openaq' )
+
+			# --------- PURPLEAIR SENSORS
+			with st.expander( '🟣 PurpleAir Sensors', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.PURPLE_AIR )
+				purple_mode = st.selectbox( 'Mode',
+					options=[ 'Sensors by Bounding Box', 'Single Sensor' ],
+					key='env_purple_mode' )
+
+				purple_timeout = st.number_input( 'Timeout', min_value=1,
+					max_value=60, value=20, step=1,
+					key='env_purple_timeout' )
+
+				if purple_mode == 'Sensors by Bounding Box':
+					st.caption( 'Centered on the global latitude and longitude.' )
+					purple_box_c1, purple_box_c2 = st.columns( 2 )
+					with purple_box_c1:
+						purple_nwlng = st.number_input( 'NW Longitude',
+							value=float( global_box[ 'nw_lng' ] ),
+							format='%.6f', key='env_purple_nwlng' )
+
+						purple_nwlat = st.number_input( 'NW Latitude',
+							value=float( global_box[ 'nw_lat' ] ),
+							format='%.6f', key='env_purple_nwlat' )
+
+					with purple_box_c2:
+						purple_selng = st.number_input( 'SE Longitude',
+							value=float( global_box[ 'se_lng' ] ),
+							format='%.6f', key='env_purple_selng' )
+
+						purple_selat = st.number_input( 'SE Latitude',
+							value=float( global_box[ 'se_lat' ] ),
+							format='%.6f', key='env_purple_selat' )
+
+					purple_location_type = st.number_input( 'Location Type',
+						min_value=0, max_value=1, value=0,
+						step=1, help='Public outdoor sensors are commonly 0.',
+						key='env_purple_location_type' )
+
+					purple_max_age = st.number_input( 'Max Age', min_value=0,
+						max_value=10080, value=0, step=10,
+						help='Maximum sensor age in minutes. 0 keeps the default behavior.',
+						key='env_purple_max_age' )
+
+					purple_modified_since = st.number_input( 'Modified Since',
+						min_value=0, max_value=4102444800,
+						value=0, step=1,
+						help='UNIX timestamp filter. 0 disables the filter.',
+						key='env_purple_modified_since' )
+
+					purple_sensor_index = 0
+					purple_center_latitude = (float( purple_nwlat ) + float( purple_selat )) / 2.0
+					purple_center_longitude = (float( purple_nwlng ) + float( purple_selng )) / 2.0
+
+				else:
+					purple_nwlng = 0.0
+					purple_nwlat = 0.0
+					purple_selng = 0.0
+					purple_selat = 0.0
+					purple_location_type = 0
+					purple_max_age = 0
+					purple_modified_since = 0
+					purple_center_latitude = None
+					purple_center_longitude = None
+
+					purple_sensor_index = st.number_input( 'Sensor Index', min_value=1,
+						value=1, step=1, key='env_purple_sensor_index' )
+
+				purple_btn_c1, purple_btn_c2 = st.columns( 2 )
+				with purple_btn_c1:
+					if st.button( label='Run', icon='🏃', key='env_purple_run',
+							use_container_width=True ):
+						try:
+							service = PurpleAir( )
+							if purple_mode == 'Sensors by Bounding Box':
+								result = service.fetch_sensors(
+									nwlng=float( purple_nwlng ),
+									nwlat=float( purple_nwlat ),
+									selng=float( purple_selng ),
+									selat=float( purple_selat ),
+									location_type=int( purple_location_type ),
+									max_age=int( purple_max_age ),
+									modified_since=int( purple_modified_since ),
+									time=int( purple_timeout ) )
+
+							else:
+								result = service.fetch_sensor(
+									sensor_index=int( purple_sensor_index ),
+									time=int( purple_timeout ) )
+
+							st.session_state[ 'env_last_source' ] = 'PurpleAir'
+							st.session_state[ 'env_last_result' ] = result or { }
+							st.session_state[ 'env_last_latitude' ] = purple_center_latitude
+							st.session_state[ 'env_last_longitude' ] = purple_center_longitude
+
+							set_global_coordinates_from_result( purple_center_latitude,
+								purple_center_longitude, location=global_location,
+								description='PurpleAir bounding-box center' )
+
+							st.success( 'PurpleAir request completed.' )
+
+						except Exception as ex:
+							st.error( f'PurpleAir request failed: {ex}' )
+
+				with purple_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='env_purple_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result',
+					'env_last_source', 'PurpleAir', 'env_purpleair' )
+
+			# --------- ENVIROFACTS
+			with st.expander( '🏭 EPA EnviroFacts Facilities', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.EPA_ENVIROFACTS )
+				envirofacts_table = st.selectbox( 'Table',
+					options=[ 'TRI_FACILITY', 'TRI_RELEASE', 'EF_W_EMISSIONS_SOURCE_GHG' ],
+					key='env_envirofacts_table' )
+
+				envirofacts_state = st.text_input( 'State Code', value='',
+					help='Optional two-letter state filter.', key='env_envirofacts_state' )
+
+				envirofacts_facility = st.text_input( 'Facility Name', value='',
+					help='Optional facility-name prefix filter.', key='env_envirofacts_facility' )
+
+				envirofacts_limit = st.number_input( 'Limit', min_value=1, max_value=500, value=25,
+					step=1, key='env_envirofacts_limit' )
+
+				envirofacts_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
+					value=20, step=1, key='env_envirofacts_timeout' )
+
+				envirofacts_btn_c1, envirofacts_btn_c2 = st.columns( 2 )
+
+				with envirofacts_btn_c1:
+					if st.button( label='Run', icon='🏃', key='env_envirofacts_run',
+							use_container_width=True ):
+						try:
+							service = EnviroFacts( )
+							result = service.fetch(
+								table_name=envirofacts_table,
+								state_code=envirofacts_state,
+								facility_name=envirofacts_facility,
+								limit=int( envirofacts_limit ),
+								time=int( envirofacts_timeout ) )
+
+							st.session_state[ 'env_last_source' ] = 'EnviroFacts'
+							st.session_state[ 'env_last_result' ] = result or { }
+							st.session_state[ 'env_last_latitude' ] = None
+							st.session_state[ 'env_last_longitude' ] = None
+							st.success( 'EnviroFacts request completed.' )
+
+						except Exception as ex:
+							st.error( f'EnviroFacts request failed: {ex}' )
+
+				with envirofacts_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='env_envirofacts_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'EnviroFacts', 'env_envirofacts' )
+
+			# --------- FIRMS FIRE / THERMAL ANOMALIES
+			with st.expander( '🔥 NASA FIRMS', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.NASA_FIRMS )
+				firms_source = st.selectbox( 'Source',
+					options=[ 'MODIS_NRT', 'MODIS_SP', 'VIIRS_SNPP_NRT', 'VIIRS_SNPP_SP',
+							'VIIRS_NOAA20_NRT', 'VIIRS_NOAA20_SP', 'VIIRS_NOAA21_NRT',
+							'LANDSAT_NRT' ], key='env_firms_source' )
+
+				firms_area_mode = st.selectbox( 'Area Mode', options=[ 'World', 'Bounding Box' ],
+					key='env_firms_area_mode' )
+
+				firms_day_range = st.number_input( 'Day Range', min_value=1, max_value=5, value=1,
+					step=1, key='env_firms_day_range' )
+
+				firms_use_date = st.checkbox( 'Use Start Date', value=False,
+					key='env_firms_use_date' )
+
+				if firms_use_date:
+					firms_date_value = st.date_input( 'Date', value=dt.date.today( ),
+						key='env_firms_date' )
+					firms_date = firms_date_value.isoformat( )
+				else:
+					firms_date = ''
+
+				firms_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='env_firms_timeout' )
+
+				if firms_area_mode == 'World':
+					firms_area_coordinates = 'world'
+					firms_center_latitude = None
+					firms_center_longitude = None
+
+					st.info(
+						'World mode does not update global latitude and longitude because it '
+						'does not represent a single geographic center.' )
+
+				else:
+					st.caption(
+						'Bounding box defaults are centered on the global latitude and longitude.' )
+
+					firms_box_c1, firms_box_c2 = st.columns( 2 )
+
+					with firms_box_c1:
+						firms_west = st.number_input( 'West',
+							value=float( global_box[ 'west' ] ),
+							format='%.6f', key='env_firms_west' )
+
+						firms_south = st.number_input( 'South',
+							value=float( global_box[ 'south' ] ),
+							format='%.6f', key='env_firms_south' )
+
+					with firms_box_c2:
+						firms_east = st.number_input( 'East',
+							value=float( global_box[ 'east' ] ),
+							format='%.6f', key='env_firms_east' )
+
+						firms_north = st.number_input( 'North',
+							value=float( global_box[ 'north' ] ),
+							format='%.6f', key='env_firms_north' )
+
+					firms_area_coordinates = (
+							f'{float( firms_west )},{float( firms_south )},'
+							f'{float( firms_east )},{float( firms_north )}'
+					)
+
+					firms_center_latitude = (float( firms_south ) + float( firms_north )) / 2.0
+					firms_center_longitude = (float( firms_west ) + float( firms_east )) / 2.0
+
+				firms_btn_c1, firms_btn_c2 = st.columns( 2 )
+				with firms_btn_c1:
+					if st.button( label='Run', icon='🏃', key='btn_env_firms_run',
+							use_container_width=True ):
+						try:
+							service = Firms( )
+							result = service.fetch_area( source=firms_source,
+								area_coordinates=firms_area_coordinates,
+								day_range=int( firms_day_range ),
+								date=firms_date, time=int( firms_timeout ) )
+
+							st.session_state[ 'env_last_source' ] = 'FIRMS'
+							st.session_state[ 'env_last_result' ] = result or { }
+							st.session_state[ 'env_last_latitude' ] = firms_center_latitude
+							st.session_state[ 'env_last_longitude' ] = firms_center_longitude
+							set_global_coordinates_from_result( firms_center_latitude,
+								firms_center_longitude, location=global_location,
+								description='FIRMS bounding-box center' )
+
+							st.success( 'FIRMS request completed.' )
+
+						except Exception as ex:
+							st.error( f'FIRMS request failed: {ex}' )
+
+				with firms_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='btn_env_firms_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result',
+					'env_last_source', 'FIRMS', 'env_firms' )
+
+			# --------- EONET NATURAL EVENTS
+			with st.expander( '🌎 NASA Earth Observatory Natural Events', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.NASA_EONET )
+				eonet_mode = st.selectbox( 'Mode', options=[ 'events', 'categories' ],
+					key='env_eonet_mode' )
+
+				eonet_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='env_eonet_timeout' )
+
+				if eonet_mode == 'events':
+					eonet_source = st.text_input( 'Source', value='',
+						help='Optional EONET source identifier or comma-separated identifiers.',
+						key='env_eonet_source' )
+
+					eonet_category = st.text_input( 'Category', value='',
+						help='Optional EONET category identifier or comma-separated identifiers.',
+						key='env_eonet_category' )
+
+					eonet_status = st.selectbox( 'Status', options=[ 'open', 'closed', 'all' ],
+						key='env_eonet_status' )
+
+					eonet_limit = st.number_input( 'Limit', min_value=1, max_value=500, value=25,
+						step=1, key='env_eonet_limit' )
+
+					eonet_days = st.number_input( 'Days', min_value=1, max_value=3650, value=30,
+						step=1, key='env_eonet_days' )
+
+					eonet_use_dates = st.checkbox( 'Use Start / End Dates', value=False,
+						key='env_eonet_use_dates' )
+
+					if eonet_use_dates:
+						eonet_date_c1, eonet_date_c2 = st.columns( 2 )
+
+						with eonet_date_c1:
+							eonet_start_value = st.date_input( 'Start Date',
+								value=dt.date.today( ) - dt.timedelta( days=30 ),
+								key='env_eonet_start_date' )
+
+						with eonet_date_c2:
+							eonet_end_value = st.date_input( 'End Date', value=dt.date.today( ),
+								key='env_eonet_end_date' )
+
+						eonet_start_date = eonet_start_value.isoformat( )
+						eonet_end_date = eonet_end_value.isoformat( )
+
+					else:
+						eonet_start_date = ''
+						eonet_end_date = ''
+
+					eonet_use_bbox = st.checkbox( 'Use Bounding Box', value=False,
+						key='env_eonet_use_bbox' )
+
+					if eonet_use_bbox:
+						st.caption( 'Defaults are on the global latitude and longitude.' )
+						eonet_box_c1, eonet_box_c2 = st.columns( 2 )
+						with eonet_box_c1:
+							eonet_min_lon = st.number_input( 'Min Longitude',
+								value=float( global_box[ 'west' ] ),
+								format='%.6f', key='env_eonet_min_lon' )
+
+							eonet_max_lat = st.number_input( 'Max Latitude',
+								value=float( global_box[ 'north' ] ),
+								format='%.6f', key='env_eonet_max_lat' )
+
+						with eonet_box_c2:
+							eonet_max_lon = st.number_input( 'Max Longitude',
+								value=float( global_box[ 'east' ] ),
+								format='%.6f', key='env_eonet_max_lon' )
+
+							eonet_min_lat = st.number_input( 'Min Latitude',
+								value=float( global_box[ 'south' ] ),
+								format='%.6f', key='env_eonet_min_lat' )
+
+						eonet_bbox = ( f'{float( eonet_min_lon )},{float( eonet_max_lat )},'
+								f'{float( eonet_max_lon )},{float( eonet_min_lat )}' )
+
+						eonet_center_latitude = ( float( eonet_min_lat ) + float(
+							                        eonet_max_lat ) ) / 2.0
+
+						eonet_center_longitude = ( float( eonet_min_lon ) + float(
+							                         eonet_max_lon ) ) / 2.0
+
+					else:
+						eonet_bbox = ''
+						eonet_center_latitude = None
+						eonet_center_longitude = None
+
+				else:
+					eonet_source = ''
+					eonet_category = ''
+					eonet_status = 'open'
+					eonet_limit = 25
+					eonet_days = 30
+					eonet_start_date = ''
+					eonet_end_date = ''
+					eonet_bbox = ''
+					eonet_center_latitude = None
+					eonet_center_longitude = None
+
+				eonet_btn_c1, eonet_btn_c2 = st.columns( 2 )
+				with eonet_btn_c1:
+					if st.button( label='Run', icon='🏃', key='env_eonet_run',
+							use_container_width=True ):
+						try:
+							service = EoNet( )
+							result = service.fetch( mode=eonet_mode, source=eonet_source,
+								category=eonet_category, status=eonet_status,
+								limit=int( eonet_limit ), days=int( eonet_days ),
+								start_date=eonet_start_date, end_date=eonet_end_date,
+								bbox=eonet_bbox, time=int( eonet_timeout ) )
+
+							st.session_state[ 'env_last_source' ] = 'EONET'
+							st.session_state[ 'env_last_result' ] = result or { }
+							st.session_state[ 'env_last_latitude' ] = eonet_center_latitude
+							st.session_state[ 'env_last_longitude' ] = eonet_center_longitude
+
+							set_global_coordinates_from_result( eonet_center_latitude,
+								eonet_center_longitude, location=global_location,
+								description='EONET bounding-box center' )
+
+							st.success( 'EONET request completed.' )
+
+						except Exception as ex:
+							st.error( f'EONET request failed: {ex}' )
+
+				with eonet_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='env_eonet_clear',
+							use_container_width=True ):
+						st.session_state[ 'env_last_source' ] = ''
+						st.session_state[ 'env_last_result' ] = { }
+						st.session_state[ 'env_last_latitude' ] = None
+						st.session_state[ 'env_last_longitude' ] = None
+
+				st.divider( )
+				render_source_processing_controls( 'env', 'env_last_result',
+					'env_last_source', 'EONET', 'env_eonet' )
+
+		with enviro_c2:
+			render_mode_document_tabs( 'env', '📄 Loaded' )
+
+# ==============================================================================
+# GEOLOGICAL DATA MODE
+# ==============================================================================
+elif mode == 'Geological Data':
+	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	with center:
+		st.subheader( 'Geological Data' )
+		st.divider( )
+		global_location = get_global_location_default( )
+		global_latitude = get_global_latitude_default( )
+		global_longitude = get_global_longitude_default( )
+		global_box = create_bounding_box_from_center( global_latitude, global_longitude )
+		location_c1, location_c2, location_c3 = st.columns( 3, border=True )
+		location_c1.metric( 'Location', global_location )
+		location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
+		location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
+		blue_divider( )
+		geo_c1, geo_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
+		with geo_c1:
+
+			# --------- USGS EARTHQUAKES
+			with st.expander( '🌎 USGS Earthquakes', expanded=True ):
+				st.badge( label='About API', color='blue', help=cfg.USGS_EARTHQUAKES )
+				quake_mode = st.selectbox( 'Mode', options=[ 'feed', 'search' ],
+					key='geo_quake_mode' )
+
+				quake_timeout = st.number_input( 'Timeout', min_value=1, max_value=60,
+					value=20, step=1, key='geo_quake_timeout' )
+
+				if quake_mode == 'feed':
+					quake_feed = st.selectbox( 'Feed',
+						options=[ 'all_hour.geojson', 'all_day.geojson', 'all_week.geojson',
+								'all_month.geojson', '1.0_hour.geojson', '1.0_day.geojson',
+								'1.0_week.geojson', '1.0_month.geojson', '2.5_hour.geojson',
+								'2.5_day.geojson', '2.5_week.geojson', '2.5_month.geojson',
+								'4.5_hour.geojson', '4.5_day.geojson', '4.5_week.geojson',
+								'4.5_month.geojson', 'significant_hour.geojson',
+								'significant_day.geojson', 'significant_week.geojson',
+								'significant_month.geojson' ], key='geo_quake_feed' )
+
+					quake_start_date = ''
+					quake_end_date = ''
+					quake_min_magnitude = 1.0
+					quake_max_magnitude = 10.0
+					quake_limit = 25
+					quake_order_by = 'time'
+					quake_event_type = 'earthquake'
+					quake_use_location = False
+					quake_latitude = None
+					quake_longitude = None
+					quake_radius = None
+
+				else:
+					quake_feed = 'all_day.geojson'
+					search_c1, search_c2 = st.columns( 2 )
+
+					with search_c1:
+						quake_start = st.date_input( 'Start Date',
+							value=dt.date.today( ) - dt.timedelta( days=7 ),
+							key='geo_quake_start_date' )
+
+					with search_c2:
+						quake_end = st.date_input( 'End Date', value=dt.date.today( ),
+							key='geo_quake_end_date' )
+
+					quake_start_date = quake_start.isoformat( )
+					quake_end_date = quake_end.isoformat( )
+
+					mag_c1, mag_c2 = st.columns( 2 )
+					with mag_c1:
+						quake_min_magnitude = st.number_input( 'Minimum Magnitude', min_value=0.0,
+							max_value=10.0, value=1.0, step=0.1,
+							format='%.1f', key='geo_quake_min_magnitude' )
+
+					with mag_c2:
+						quake_max_magnitude = st.number_input( 'Maximum Magnitude', min_value=0.0,
+							max_value=10.0, value=10.0, step=0.1,
+							format='%.1f', key='geo_quake_max_magnitude' )
+
+					quake_limit = st.number_input( 'Limit', min_value=1, max_value=20000, value=25,
+						step=1, key='geo_quake_limit' )
+
+					quake_order_by = st.selectbox( 'Order By',
+						options=[ 'time', 'time-asc', 'magnitude', 'magnitude-asc' ],
+						key='geo_quake_order_by' )
+
+					quake_event_type = st.text_input( 'Event Type', value='earthquake',
+						key='geo_quake_event_type' )
+
+					quake_use_location = st.checkbox( 'Use Location Radius Filter',
+						value=False, key='geo_quake_use_location' )
+
+					if quake_use_location:
+						loc_c1, loc_c2 = st.columns( 2 )
+
+						with loc_c1:
+							quake_latitude = st.number_input( 'Latitude',
+								value=float( global_latitude ), format='%.6f',
+								key='geo_quake_latitude' )
+
+						with loc_c2:
+							quake_longitude = st.number_input( 'Longitude',
+								value=float( global_longitude ), format='%.6f',
+								key='geo_quake_longitude' )
+
+						quake_radius = st.number_input( 'Maximum Radius KM', min_value=1.0,
+							max_value=20000.0,
+							value=float( st.session_state.get( 'radius', 500.0 ) or 500.0 ),
+							step=10.0, format='%.1f', key='geo_quake_radius' )
+
+					else:
+						quake_latitude = None
+						quake_longitude = None
+						quake_radius = None
+
+				quake_btn_c1, quake_btn_c2 = st.columns( 2 )
+				with quake_btn_c1:
+					if st.button( label='Run', icon='🏃', key='geo_quake_run',
+							use_container_width=True ):
+						try:
+							service = USGSEarthquakes( )
+							result = service.fetch( mode=quake_mode, feed=quake_feed,
+								start_date=quake_start_date, end_date=quake_end_date,
+								min_magnitude=float( quake_min_magnitude ),
+								max_magnitude=float( quake_max_magnitude ),
+								limit=int( quake_limit ), order_by=quake_order_by,
+								event_type=quake_event_type, latitude=quake_latitude,
+								longitude=quake_longitude, max_radius_km=quake_radius,
+								time=int( quake_timeout ) )
+
+							st.session_state[ 'geo_last_source' ] = 'USGS Earthquakes'
+							st.session_state[ 'geo_last_result' ] = result or { }
+							st.session_state[ 'geo_last_latitude' ] = quake_latitude
+							st.session_state[ 'geo_last_longitude' ] = quake_longitude
+
+							if quake_radius is not None:
+								st.session_state[ 'radius' ] = float( quake_radius )
+
+							set_global_coordinates_from_result( quake_latitude, quake_longitude,
+								location=global_location,
+								description='USGS Earthquake search center' )
+
+							st.success( 'USGS Earthquake request completed.' )
+
+						except Exception as ex:
+							st.error( f'USGS Earthquake request failed: {ex}' )
+
+				with quake_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='geo_quake_clear',
+							use_container_width=True ):
+						st.session_state[ 'geo_last_source' ] = ''
+						st.session_state[ 'geo_last_result' ] = { }
+						st.session_state[ 'geo_last_latitude' ] = None
+						st.session_state[ 'geo_last_longitude' ] = None
+						st.session_state[ 'geo_last_image_path' ] = ''
+
+				st.divider( )
+				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
+					'USGS Earthquakes', 'geo_usgs_earthquakes' )
+
+			# --------- GLOBAL IMAGERY
+			with st.expander( '🛰️ Global Imagery', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.NASA_GLOBAL_IMAGERY )
+				st.caption( 'Uses the original GlobalImagery fetcher. The current fetch_map_services() '
+					'writes the default NASA GIBS image to python-examples.' )
+
+				imagery_product = st.selectbox( 'Product',
+					options=[ 'NASA GIBS EPSG:4326 Default Map Service' ],
+					key='geo_imagery_product' )
+
+				imagery_btn_c1, imagery_btn_c2 = st.columns( 2 )
+				with imagery_btn_c1:
+					if st.button( label='Run', icon='🏃', key='geo_imagery_run',
+							use_container_width=True ):
+
+						try:
+							Path( 'python-examples' ).mkdir( parents=True, exist_ok=True )
+							service = GlobalImagery( )
+							result = service.fetch_map_services( )
+
+							image_path = ( 'python-examples/'
+									'MODIS_Terra_CorrectedReflectance_TrueColor.png' )
+
+							st.session_state[ 'geo_last_source' ] = 'Global Imagery'
+							st.session_state[ 'geo_last_result' ] = { 'mode': 'fetch_map_services',
+									'product': imagery_product, 'image_path': image_path,
+									'result': str( result ) }
+
+							st.session_state[ 'geo_last_latitude' ] = None
+							st.session_state[ 'geo_last_longitude' ] = None
+							st.session_state[ 'geo_last_image_path' ] = image_path
+							st.success( 'Global Imagery request completed.' )
+
+						except Exception as ex:
+							st.error( f'Global Imagery request failed: {ex}' )
+
+				with imagery_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='geo_imagery_clear',
+							use_container_width=True ):
+						st.session_state[ 'geo_last_source' ] = ''
+						st.session_state[ 'geo_last_result' ] = { }
+						st.session_state[ 'geo_last_latitude' ] = None
+						st.session_state[ 'geo_last_longitude' ] = None
+						st.session_state[ 'geo_last_image_path' ] = ''
+
+				st.divider( )
+				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
+					'Global Imagery', 'geo_global_imagery' )
+
+			# --------- USGS WATER DATA
+			with st.expander( '💧 USGS Water Data', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.USGS_WATER )
+				water_mode = st.selectbox( 'Mode',
+					options=[ 'monitoring-locations', 'time-series-metadata', 'latest-continuous',
+							'latest-daily' ], key='geo_water_mode' )
+
+				water_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='geo_water_timeout' )
+
+				water_limit = st.number_input( 'Limit', min_value=1, max_value=1000, value=25,
+					step=1, key='geo_water_limit' )
+
+				if water_mode == 'monitoring-locations':
+					water_monitoring_location_id = st.text_input( 'Monitoring Location ID',
+						value='', help='Optional. Example: USGS-01491000',
+						key='geo_water_monitoring_location_id' )
+
+					water_state_code = st.text_input( 'State Code', value='',
+						help='Optional state filter.', key='geo_water_state_code' )
+
+					water_county_code = st.text_input( 'County Code', value='',
+						help='Optional county filter.', key='geo_water_county_code' )
+
+					water_site_type = st.text_input( 'Site Type', value='',
+						help='Optional site type filter.', key='geo_water_site_type' )
+
+					water_parameter_code = ''
+
+				else:
+					water_monitoring_location_id = st.text_input( 'Monitoring Location ID',
+						value='USGS-01491000', help='Example: USGS-01491000',
+						key='geo_water_monitoring_location_id_value' )
+
+					water_parameter_code = st.text_input( 'Parameter Code', value='',
+						help='Optional USGS parameter code.', key='geo_water_parameter_code' )
+
+					water_state_code = ''
+					water_county_code = ''
+					water_site_type = ''
+
+				water_btn_c1, water_btn_c2 = st.columns( 2 )
+				with water_btn_c1:
+					if st.button( label='Run', icon='🏃', key='geo_water_run',
+							use_container_width=True ):
+						try:
+							service = USGSWaterData( )
+							result = service.fetch(
+								mode=water_mode,
+								monitoring_location_id=water_monitoring_location_id,
+								state_code=water_state_code,
+								county_code=water_county_code,
+								site_type=water_site_type,
+								parameter_code=water_parameter_code,
+								limit=int( water_limit ),
+								time=int( water_timeout ) )
+
+							st.session_state[ 'geo_last_source' ] = 'USGS Water Data'
+							st.session_state[ 'geo_last_result' ] = result or { }
+							st.session_state[ 'geo_last_latitude' ] = None
+							st.session_state[ 'geo_last_longitude' ] = None
+							st.session_state[ 'geo_last_image_path' ] = ''
+							st.success( 'USGS Water Data request completed.' )
+
+						except Exception as ex:
+							st.error( f'USGS Water Data request failed: {ex}' )
+
+				with water_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='geo_water_clear',
+							use_container_width=True ):
+						st.session_state[ 'geo_last_source' ] = ''
+						st.session_state[ 'geo_last_result' ] = { }
+						st.session_state[ 'geo_last_latitude' ] = None
+						st.session_state[ 'geo_last_longitude' ] = None
+						st.session_state[ 'geo_last_image_path' ] = ''
+
+				st.divider( )
+				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source', 'USGS Water Data', 'geo_usgs_water_data' )
+
+			# --------- USGS THE NATIONAL MAP
+			with st.expander( '🗺️ USGS The National Map', expanded=False ):
+				st.badge( label='About API', color='blue', help=cfg.USGS_NATIONAL_MAP )
+				tnm_mode = st.selectbox( 'Mode', options=[ 'datasets', 'products' ],
+					key='geo_tnm_mode' )
+
+				tnm_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
+					step=1, key='geo_tnm_timeout' )
+
+				if tnm_mode == 'datasets':
+					tnm_dataset = ''
+					tnm_query = ''
+					tnm_bbox = ''
+					tnm_prod_formats = ''
+					tnm_max_items = 25
+					tnm_offset = 0
+					tnm_center_latitude = None
+					tnm_center_longitude = None
+
+					st.caption( 'Datasets mode lists does not use global coordinates.' )
+
+				else:
+					tnm_dataset = st.text_input( 'Dataset', value='',
+						help='Optional TNM dataset filter.', key='geo_tnm_dataset' )
+
+					tnm_query = st.text_input( 'Search Query', value='',
+						help='Optional free-text product search.', key='geo_tnm_query' )
+
+					tnm_prod_formats = st.text_input( 'Product Formats', value='',
+						help='Optional format filter such as GeoTIFF, IMG, LAS, or LAZ.',
+						key='geo_tnm_prod_formats' )
+
+					tnm_use_bbox = st.checkbox( 'Use Bounding Box', value=False,
+						key='geo_tnm_use_bbox' )
+
+					if tnm_use_bbox:
+						st.caption(
+							'Bounding box defaults are centered on the global latitude and '
+							'longitude.' )
+
+						tnm_box_c1, tnm_box_c2 = st.columns( 2 )
+						with tnm_box_c1:
+							tnm_min_x = st.number_input( 'Min X / West Longitude',
+								value=float( global_box[ 'west' ] ), format='%.6f',
+								key='geo_tnm_min_x' )
+
+							tnm_min_y = st.number_input( 'Min Y / South Latitude',
+								value=float( global_box[ 'south' ] ), format='%.6f',
+								key='geo_tnm_min_y' )
+
+						with tnm_box_c2:
+							tnm_max_x = st.number_input( 'Max X / East Longitude',
+								value=float( global_box[ 'east' ] ), format='%.6f',
+								key='geo_tnm_max_x' )
+
+							tnm_max_y = st.number_input( 'Max Y / North Latitude',
+								value=float( global_box[ 'north' ] ), format='%.6f',
+								key='geo_tnm_max_y' )
+
+						tnm_bbox = (f'{float( tnm_min_x )},{float( tnm_min_y )},'
+						            f'{float( tnm_max_x )},{float( tnm_max_y )}')
+
+						tnm_center_latitude = (float( tnm_min_y ) + float( tnm_max_y )) / 2.0
+						tnm_center_longitude = (float( tnm_min_x ) + float( tnm_max_x )) / 2.0
+
+					else:
+						tnm_bbox = ''
+						tnm_center_latitude = None
+						tnm_center_longitude = None
+
+					tnm_max_items = st.number_input( 'Max Items', min_value=1, max_value=1000,
+						value=25, step=1, key='geo_tnm_max_items' )
+
+					tnm_offset = st.number_input( 'Offset', min_value=0, max_value=100000, value=0,
+						step=1, key='geo_tnm_offset' )
+
+				tnm_btn_c1, tnm_btn_c2 = st.columns( 2 )
+				with tnm_btn_c1:
+					if st.button( label='Run', icon='🏃', key='geo_tnm_run',
+							use_container_width=True ):
+
+						try:
+							service = USGSTheNationalMap( )
+							result = service.fetch( mode=tnm_mode, dataset=tnm_dataset, q=tnm_query,
+								bbox=tnm_bbox, prod_formats=tnm_prod_formats,
+								max_items=int( tnm_max_items ), offset=int( tnm_offset ),
+								time=int( tnm_timeout ) )
+
+							st.session_state[ 'geo_last_source' ] = 'USGS The National Map'
+							st.session_state[ 'geo_last_result' ] = result or { }
+							st.session_state[ 'geo_last_latitude' ] = tnm_center_latitude
+							st.session_state[ 'geo_last_longitude' ] = tnm_center_longitude
+							st.session_state[ 'geo_last_image_path' ] = ''
+
+							set_global_coordinates_from_result( tnm_center_latitude,
+								tnm_center_longitude, location=global_location,
+								description='USGS The National Map bounding-box center' )
+
+							st.success( 'USGS The National Map request completed.' )
+
+						except Exception as ex:
+							st.error( f'USGS The National Map request failed: {ex}' )
+
+				with tnm_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='geo_tnm_clear',
+							use_container_width=True ):
+						st.session_state[ 'geo_last_source' ] = ''
+						st.session_state[ 'geo_last_result' ] = { }
+						st.session_state[ 'geo_last_latitude' ] = None
+						st.session_state[ 'geo_last_longitude' ] = None
+						st.session_state[ 'geo_last_image_path' ] = ''
+
+				st.divider( )
+				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
+					'USGS The National Map', 'geo_usgs_the_national_map' )
+
+			# --------- USGS SCIENCEBASE
+			with st.expander( '🧭 USGS ScienceBase', expanded=False ):
+				sciencebase_mode = st.selectbox( 'Mode', options=[ 'items', 'item' ],
+					key='geo_sciencebase_mode' )
+				sciencebase_timeout = st.slider( 'Timeout', min_value=1, max_value=60, value=20,
+					key='geo_sciencebase_timeout' )
+				sciencebase_query = ''
+				sciencebase_item_id = ''
+				sciencebase_max_items = 25
+				sciencebase_offset = 0
+				sciencebase_fields = ''
+				if sciencebase_mode == 'items':
+					sciencebase_c1, sciencebase_c2 = st.columns( 2 )
+					with sciencebase_c1:
+						sciencebase_query = st.text_input( 'Query', key='geo_sciencebase_query' )
+						sciencebase_max_items = st.slider( 'Maximum Items', min_value=1,
+							max_value=500, value=25, key='geo_sciencebase_max_items' )
+					with sciencebase_c2:
+						sciencebase_fields = st.text_input( 'Fields',
+							placeholder='Optional comma-separated fields', key='geo_sciencebase_fields' )
+						sciencebase_offset = st.number_input( 'Offset', min_value=0, value=0, step=1,
+							key='geo_sciencebase_offset' )
+				else:
+					sciencebase_item_id = st.text_input( 'Item ID', key='geo_sciencebase_item_id' )
+				sciencebase_btn_c1, sciencebase_btn_c2 = st.columns( 2 )
+				with sciencebase_btn_c1:
+					if st.button( label='Run', icon='🏃', key='geo_sciencebase_run',
+							use_container_width=True ):
+						try:
+							service = USGSScienceBase( )
+							result = service.fetch( mode=sciencebase_mode, q=sciencebase_query,
+								item_id=sciencebase_item_id, max_items=int( sciencebase_max_items ),
+								offset=int( sciencebase_offset ), fields=sciencebase_fields,
+								time=int( sciencebase_timeout ) )
+							st.session_state[ 'geo_last_source' ] = 'USGS ScienceBase'
+							st.session_state[ 'geo_last_result' ] = result or { }
+							st.session_state[ 'geo_last_latitude' ] = None
+							st.session_state[ 'geo_last_longitude' ] = None
+							st.session_state[ 'geo_last_image_path' ] = ''
+							st.success( 'USGS ScienceBase request completed.' )
+						except Exception as ex:
+							st.error( f'USGS ScienceBase request failed: {ex}' )
+				with sciencebase_btn_c2:
+					if st.button( label='Clear', icon='🧹', key='geo_sciencebase_clear',
+							use_container_width=True ):
+						st.session_state[ 'geo_last_source' ] = ''
+						st.session_state[ 'geo_last_result' ] = { }
+						st.session_state[ 'geo_last_latitude' ] = None
+						st.session_state[ 'geo_last_longitude' ] = None
+						st.session_state[ 'geo_last_image_path' ] = ''
+				st.divider( )
+				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
+					'USGS ScienceBase', 'geo_usgs_sciencebase' )
+		with geo_c2:
+			render_mode_document_tabs( 'geo', '📄 Loaded' )
 
 # ==============================================================================
 # ASTRONOMICAL MODE

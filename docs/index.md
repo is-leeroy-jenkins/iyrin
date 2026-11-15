@@ -32,7 +32,9 @@ Iyrin is a Streamlit application for geospatial analysis, scientific and public 
 | Interactive Map | Interactive mapping and Live World visualization. |
 | Site Crawler | Page retrieval, crawling, and web-content extraction. |
 | Document Data | Document/public-source ingestion and processing. |
-| Geoscience Data | Weather, environment, earth science, and geographic sources. |
+| Weather Data | Weather forecasts, climate, historical observations, and tides. |
+| Environmental Data | Air quality, UV, environmental facilities, fires, and natural events. |
+| Geological Data | Earthquakes, water monitoring, topographic data, and geoscience catalogs. |
 | Astronomical Data | Catalog, orbital, satellite, and space-weather data. |
 | Celestial Map | Star/sky charting and observation-oriented visualization. |
 | Public Health | Demographic, population, biomedical, and health sources. |

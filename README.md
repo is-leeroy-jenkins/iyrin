@@ -64,7 +64,9 @@ Live World Data extends Iyrin with a normalized operational geospatial layer bui
 | **Interactive Map** | Explore interactive geographic and operational data on a shared map surface. | PyDeck mapping, configurable map styles, Live World layers, tracking, measurements, cross-layer analysis, geofencing, replay, and Agent Tools. |
 | **Site Crawler** | Retrieve and inspect web content from individual pages or recursive crawls. | HTTP/web retrieval, Crawl4AI, BeautifulSoup extraction, links, text, HTML, and document preparation. |
 | **Document Data** | Load document-oriented and public information sources for inspection and processing. | Text and document loaders, arXiv, Wikipedia, GitHub, cloud files, corpora, chunking, embeddings, and vector storage. |
-| **Geoscience Data** | Retrieve geographic, weather, climate, environmental, water, fire, and earth-science information. | Google Weather, Open-Meteo, NOAA, EPA, NASA, USGS, OpenSky, mapping, and environmental APIs. |
+| **Weather Data** | Retrieve current forecasts, historical weather, climate, and tides. | Google Weather, OpenWeather, historical weather, NOAA climate and tides services. |
+| **Environmental Data** | Explore air quality, UV, pollution, fires, and environmental events. | AirNow, OpenAQ, PurpleAir, Envirofacts, NASA FIRMS, NASA EONET. |
+| **Geological Data** | Retrieve geological, terrain, earthquake, and hydrological information. | USGS Earthquakes, Water Data, National Map, and ScienceBase. |
 | **Astronomical Data** | Query astronomical catalogs, orbital data, solar/space-weather sources, and related scientific services. | Astroquery, SIMBAD, CelesTrak, near-Earth objects, satellite data, space weather, and U.S. Naval Observatory data. |
 | **Celestial Map** | Render and interact with star and sky visualizations. | Star charts, coordinate/object charts, configurable rendering controls, and What's Up Tonight interactions. |
 | **Public Health** | Retrieve demographic, population, biomedical, and public-health data. | U.S. Census, CDC Socrata, CDC WONDER, HHS, WHO, United Nations, PubMed, World Population, and Open City Data. |
