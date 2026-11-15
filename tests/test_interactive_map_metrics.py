@@ -206,6 +206,39 @@ class SelectedColumnDatabaseTests( unittest.TestCase ):
             list( df_rows.columns ) )
         self.assertEqual( 1, len( df_rows ) )
 
+    def test_selected_column_reader_bypasses_pandas_sql_adapter( self ) -> None:
+        """Read selected columns through SQLite cursors without pandas SQL adapter."""
+        original = pd.read_sql_query
+        try:
+            def fail_sql_adapter( query: str, connection: object ) -> pd.DataFrame:
+                """Reject invocation of the previously failing adapter path.
+
+                Args:
+                    query (str): SQL text.
+                    connection (object): SQLite connection.
+
+                Returns:
+                    pd.DataFrame: Never returned.
+                """
+                raise AssertionError( 'pandas.read_sql_query must not be called' )
+
+            pd.read_sql_query = fail_sql_adapter
+            df_records = self.reader.read_selected_columns( 'Military Installations',
+                [ 'Name', 'Latitude', 'Longitude' ] )
+            self.assertEqual( 1, len( df_records ) )
+            self.assertEqual( 'Fort Example', df_records.iloc[ 0 ][ 'Name' ] )
+        finally:
+            pd.read_sql_query = original
+
+    def test_selected_column_reader_preserves_empty_frame_columns( self ) -> None:
+        """Return requested column names even when a table has zero records."""
+        self.connection.execute( 'DELETE FROM "Military Installations"' )
+        df_records = self.reader.read_selected_columns( 'Military Installations',
+            [ 'Name', 'Latitude', 'Longitude' ] )
+        self.assertTrue( df_records.empty )
+        self.assertEqual( [ 'Name', 'Latitude', 'Longitude' ],
+            list( df_records.columns ) )
+
     def test_unknown_column_and_table_are_rejected( self ) -> None:
         """Reject user-provided SQL identifiers outside the live schema."""
         with self.assertRaises( Exception ):
