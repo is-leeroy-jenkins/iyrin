@@ -80,6 +80,7 @@ create_connection = sqlite_database.create_connection
 list_tables = sqlite_database.list_tables
 create_schema = sqlite_database.create_schema
 read_table = sqlite_database.read_table
+create_read_connection = sqlite_database.create_read_connection
 read_selected_columns = sqlite_database.read_selected_columns
 render_table = sqlite_database.render_table
 make_display_safe = sqlite_database.make_display_safe
@@ -1410,13 +1411,19 @@ def get_reports_map_fields( table: str ) -> List[ str ]:
 	"""
 	throw_if( 'table', table )
 	fields: Dict[ str, List[ str ] ] = {
+		'UAP': [ 'ID', 'Year', 'CountryName', 'Country', 'State', 'Shape', 'CalendarDate',
+			'Type', 'Agency', 'City', 'Latitude', 'Longitude', 'Month', 'Day', 'Summary' ],
 		'UAP Sightings': [ 'Year', 'Country', 'State', 'Shape', 'CalendarDate',
 			'City', 'Latitude', 'Longitude', 'Month', 'Day', 'Summary' ],
 		'Observations': [ 'ID', 'Year', 'CountryName', 'State', 'Shape',
 			'Type', 'Agency', 'Month', 'Day', 'City', 'Latitude', 'Longitude', 'Summary' ],
 		'Airports': [ 'ID', 'Name', 'Identifier', 'Elevation', 'City', 'State',
 			'Latitude', 'Longitude' ],
+		'Military': [ 'ID', 'Name', 'StateCode', 'Component',
+			'Latitude', 'Longitude' ],
 		'Military Installations': [ 'ID', 'Name', 'StateCode', 'Component',
+			'Latitude', 'Longitude' ],
+		'Pollution': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
 			'Latitude', 'Longitude' ],
 		'Pollution Sites': [ 'SuperfundSitesId', 'Name', 'City', 'State',
 			'Latitude', 'Longitude' ],
@@ -1518,6 +1525,13 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 		st.subheader( active_source )
 		
 		profiles: Dict[ str, Dict[ str, List[ str ] ] ] = {
+			'UAP': {
+				'filters': [ 'Year', 'CountryName', 'Country', 'State', 'Shape', 'Type', 'Agency' ],
+				'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
+					'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ],
+				'display': [ 'ID', 'Year', 'Month', 'Day', 'CalendarDate', 'City', 'State',
+					'CountryName', 'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ],
+			},
 			'UAP Sightings': {
 				'filters': [ 'Year', 'Country', 'State', 'Shape' ],
 				'tooltip': [ 'CalendarDate', 'City', 'State', 'Country', 'Latitude', 'Longitude',
@@ -1549,12 +1563,24 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				'tooltip': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
 				'display': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
 			},
+			'Pollution': {
+				'filters': [ 'Name', 'City', 'State' ],
+				'tooltip': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
+					'Latitude', 'Longitude' ],
+				'display': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
+					'Latitude', 'Longitude' ],
+			},
 			'Pollution Sites': {
 				'filters': [ 'Name', 'City', 'State' ],
 				'tooltip': [ 'SuperfundSitesId', 'Name', 'City', 'State',
 					'Latitude', 'Longitude' ],
 				'display': [ 'SuperfundSitesId', 'Name', 'City', 'State',
 					'Latitude', 'Longitude' ],
+			},
+			'Military': {
+				'filters': [ 'StateCode', 'Component', 'Name' ],
+				'tooltip': [ 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
+				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
 			},
 			'Military Installations': {
 				'filters': [ 'StateCode', 'Component', 'Name' ],
@@ -3336,7 +3362,7 @@ with st.sidebar:
 		db_version = db_path.stat( ).st_mtime_ns if db_path.exists( ) else None
 		if source in ( 'Default', 'Database' ):
 			try:
-				with sqlite3.connect( cfg.DB_PATH ) as connection:
+				with create_read_connection( ) as connection:
 					df_tables = pd.read_sql_query( """
                                                SELECT name
                                                FROM sqlite_master
@@ -4376,15 +4402,14 @@ if mode == 'Local Data':
 						
 						documents = [ ]
 						if load_mode == 'Tabular + SQLite':
-							sqlite_path = os.path.join( 'stores', 'sqlite', 'data.db' )
-							os.makedirs( os.path.dirname( sqlite_path ), exist_ok=True )
+							sqlite_path = cfg.DB_PATH
 							if sheet_name.strip( ):
 								dfs = { sheet_name: pd.read_excel( excel_path,
 									sheet_name=sheet_name, ) }
 							else:
 								dfs = pd.read_excel( excel_path, sheet_name=None, )
 							
-							conn = sqlite3.connect( sqlite_path )
+							conn = create_connection( )
 							try:
 								for sheet, df in dfs.items( ):
 									if df.empty:
