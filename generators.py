@@ -340,7 +340,7 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = "def normalize_domains( self, domains: Any ) -> List[ str ]"
+			exception.method = "normalize_domains( self, domains: Any ) -> List[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -372,7 +372,7 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = "def supports_reasoning_effort( self, model: str ) -> bool"
+			exception.method = "supports_reasoning_effort( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -404,7 +404,7 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = "def supports_reasoning_object( self, model: str ) -> bool"
+			exception.method = "supports_reasoning_object( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -436,7 +436,7 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = "def is_reasoning_model( self, model: str ) -> bool"
+			exception.method = "is_reasoning_model( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -682,7 +682,7 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = "def extract_output_text( self, response: Any ) -> str"
+			exception.method = "extract_output_text( self, response: Any ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -764,7 +764,7 @@ class Grok( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Grok'
-			exception.method = "def create_response( self, payload: Dict[ str, Any ] ) -> Any"
+			exception.method = "create_response( self, payload: Dict[ str, Any ] ) -> Any"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1140,7 +1140,7 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = "def normalize_domains( self, domains: Any ) -> List[ str ]"
+			exception.method = "normalize_domains( self, domains: Any ) -> List[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1209,7 +1209,7 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = "def supports_thinking_level( self, model: str ) -> bool"
+			exception.method = "supports_thinking_level( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1239,7 +1239,7 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = "def supports_thinking_budget( self, model: str ) -> bool"
+			exception.method = "supports_thinking_budget( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1392,7 +1392,7 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = "def build_tools( self, grounding: bool=False ) -> List[ Any ]"
+			exception.method = "build_tools( self, grounding: bool=False ) -> List[ Any ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1568,7 +1568,7 @@ class Gemini( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Gemini'
-			exception.method = "def extract_text( self, response: Any ) -> str"
+			exception.method = "extract_text( self, response: Any ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1921,7 +1921,7 @@ class Claude( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = "def normalize_domains( self, domains: Any ) -> List[ str ]"
+			exception.method = "normalize_domains( self, domains: Any ) -> List[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1952,7 +1952,7 @@ class Claude( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = "def supports_thinking( self, model: str ) -> bool"
+			exception.method = "supports_thinking( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2002,7 +2002,7 @@ class Claude( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Claude'
-			exception.method = "def extract_text( self, response: Any ) -> str"
+			exception.method = "extract_text( self, response: Any ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2359,7 +2359,7 @@ class Mistral( Generator ):
 			exception = Error( exc )
 			exception.module = 'generators'
 			exception.cause = 'Mistral'
-			exception.method = "def extract_text( self, response: Any ) -> str"
+			exception.method = "extract_text( self, response: Any ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2688,7 +2688,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def normalize_domains( self, domains: Any ) -> List[ str ]"
+			exception.method = "normalize_domains( self, domains: Any ) -> List[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2717,7 +2717,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def supports_reasoning( self, model: str ) -> bool"
+			exception.method = "supports_reasoning( self, model: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2978,7 +2978,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def extract_output_text( self, response: Any ) -> str"
+			exception.method = "extract_output_text( self, response: Any ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3197,7 +3197,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def generate_image( self, prompt: str ) -> str"
+			exception.method = "generate_image( self, prompt: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3244,7 +3244,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def analyze_image( self, prompt: str, url: str ) -> str"
+			exception.method = "analyze_image( self, prompt: str, url: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3297,7 +3297,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def summarize_document( self, prompt: str, path: str ) -> str"
+			exception.method = "summarize_document( self, prompt: str, path: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3380,7 +3380,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def search_files( self, prompt: str ) -> str"
+			exception.method = "search_files( self, prompt: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3410,7 +3410,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def translate( self, text: str ) -> str"
+			exception.method = "translate( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3437,7 +3437,7 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def transcribe( self, text: str ) -> str"
+			exception.method = "transcribe( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3529,6 +3529,6 @@ class Chat( Generator ):
 			exception = Error( e )
 			exception.module = 'generators'
 			exception.cause = 'Chat'
-			exception.method = "def dump( self ) -> str"
+			exception.method = "dump( self ) -> str"
 			Logger( ).write( exception )
 			raise exception
