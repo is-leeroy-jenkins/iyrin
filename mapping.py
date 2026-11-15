@@ -1033,7 +1033,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "summary( self, origin, destination, mode: str='driving' ) -> Dict"
+			exception.method = "summary( self, **args ) -> Dict"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -1076,7 +1076,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "compare_modes( self, origin, destination, modes=None, departure_time: str='' )"
+			exception.method = "compare_modes( self, **args )"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -1218,7 +1218,7 @@ class Place( ):
 			raise exception
 	
 	def component_value( self, components: List[ Dict[ str, Any ] ], kind: str,
-	                     want_long: bool = False ) -> Optional[ str ]:
+	                     want_long: bool=False ) -> Optional[ str ]:
 		"""
 
 			Purpose:
@@ -1226,16 +1226,12 @@ class Place( ):
 				Geocoding address_components collection.
 
 			Args:
-				components (List[Dict[str, Any]]):
-					Google address component dictionaries.
-				kind (str):
-					Component type to extract, such as country or locality.
-				want_long (bool):
-					When True, return long_name instead of short_name.
+				components (List[Dict[str, Any]]): Google address component dictionaries.
+				kind (str): Component type to extract, such as country or locality.
+				want_long (bool): When True, return long_name instead of short_name.
 
 			Returns:
-				Optional[str]:
-					Component value when present; otherwise None.
+				Optional[str]: Component value when present; otherwise None.
 
 		"""
 		try:
@@ -1251,10 +1247,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = (
-				"component_value( self, components: List[ Dict[ str, Any ] ], kind: str, want_long: "
-				"bool = False ) -> Optional[ str ]:"
-			)
+			exception.method = "component_value( self, **args ) -> Optional[ str ]:"
 			raise exception
 	
 	def flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[
@@ -1266,14 +1259,11 @@ class Place( ):
 				used by Geocoder.flatten_geocode(...).
 
 			Args:
-				details (Dict[str, Any]):
-					Google Place Details result dictionary.
-				query (str):
-					Original query text, when available.
+				details (Dict[str, Any]): Google Place Details result dictionary.
+				query (str): Original query text, when available.
 
 			Returns:
-				Dict[str, Any]:
-					Canonical location dictionary.
+				Dict[str, Any]: Canonical location dictionary.
 
 		"""
 		try:
@@ -1306,11 +1296,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = (
-				"flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[ "
-				"str, Any ]: \"\"\" Purpose: Convert a Place Details result into the same flattened "
-				"output shape used by Geocoder.flatten_geocode(...). Args: details (Dict[str, Any]):"
-			)
+			exception.method = "flatten_place_details( self, **args ) -> Dict[ str, Any ]: "
 			raise exception
 	
 	def place_details( self, place_id: str ) -> Dict[ str, Any ] | None:
@@ -1320,12 +1306,10 @@ class Place( ):
 				Fetch and flatten details for a known Google place_id.
 
 			Args:
-				place_id (str):
-					Google Places place identifier.
+				place_id (str): Google Places place identifier.
 
 			Returns:
-				Dict[str, Any] | None:
-					Canonical flattened place details.
+				Dict[str, Any] | None: Canonical flattened place details.
 
 		"""
 		try:
@@ -1336,8 +1320,8 @@ class Place( ):
 				self.hit = self.cache.get( self.key )
 				if self.hit:
 					return self.hit
-			fields = ('formatted_address,geometry,address_component,place_id,type,'
-			          'name,business_status,rating,user_ratings_total,website,'
+			fields = ('formatted_address, geometry, address_component, place_id,type,'
+			          'name, business_status, rating, user_ratings_total, website,'
 			          'formatted_phone_number')
 			self.request = { 'place_id': self.place_id, 'fields': fields }
 			self.details = self.maps.request( 'place/details/json', self.request ).get( 'result', { } )
@@ -1354,7 +1338,7 @@ class Place( ):
 			exception.method = "place_details( self, place_id: str ) -> Dict[ str, Any ] | None:"
 			raise exception
 	
-	def text_to_location( self, query: str, country: str = 'US' ) -> Dict[ str, Any ] | None:
+	def text_to_location( self, query: str, country: str='US' ) -> Dict[ str, Any ] | None:
 		"""
 
 			Purpose:
@@ -1415,8 +1399,7 @@ class Place( ):
 			exception.method = "text_to_location( self, query: str, country: str = 'US' ) -> Dict[ str, Any ] | None:"
 			raise exception
 	
-	def search_candidates( self, query: str, country: str = 'US', lmt: int = 5 ) -> List[
-		Dict[ str, Any ] ]:
+	def search_candidates( self, query: str, country: str='US', lmt: int=5 ) -> List[ Dict[ str, Any ] ]:
 		"""
 
 			Purpose:
@@ -1424,16 +1407,12 @@ class Place( ):
 				intended for future UI candidate-selection workflows.
 
 			Args:
-				query (str):
-					Free-text search query.
-				country (str):
-					ISO-2 region bias.
-				lmt (int):
-					Maximum candidates to return.
+				query (str): Free-text search query.
+				country (str): ISO-2 region bias.
+				lmt (int): Maximum candidates to return.
 
 			Returns:
-				List[Dict[str, Any]]:
-					Raw candidate dictionaries returned by Text Search.
+				List[Dict[str, Any]]: Raw candidate dictionaries returned by Text Search.
 
 		"""
 		try:
@@ -1452,15 +1431,10 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = (
-				"search_candidates( self, query: str, country: str = 'US', lmt: int = 5 ) -> List[ "
-				"Dict[ str, Any ] ]: \"\"\" Purpose: Return multiple Places Text Search candidates for a "
-				"query. This is intended for future UI candidate-selection workflows. Args: query "
-				"(str):"
-			)
+			exception.method = "search_candidates( self, **args )"
 			raise exception
 
-class Timezone:
+class Timezone( ):
 	"""
 	Google time zone client.
 
@@ -1667,7 +1641,7 @@ class Timezone:
 			raise exception
 	
 	def local_time( self, lat: float, lng: float,
-	                utc_datetime: Optional[ dt.datetime ]=None ) -> Dict | None:
+		utc_datetime: Optional[ dt.datetime ] = None ) -> Dict | None:
 		"""
 
 			Purpose:
@@ -1713,17 +1687,18 @@ class Timezone:
 			self.offset = offset_value
 			self.local = local_value.isoformat( )
 			return { 'timeZoneId': self.data.get( 'timeZoneId' ),
-					'timeZoneName': self.data.get( 'timeZoneName' ),
-					'status': self.data.get( 'status' ), 'rawOffset': raw_offset,
-					'dstOffset': dst_offset, 'offset_hours': self.offset,
-					'utc_time': self.utc_datetime.isoformat( ), 'local_time': self.local,
-					'lat': self.latitude, 'lng': self.longitude }
+				'timeZoneName': self.data.get( 'timeZoneName' ),
+				'status': self.data.get( 'status' ), 'rawOffset': raw_offset,
+				'dstOffset': dst_offset, 'offset_hours': self.offset,
+				'utc_time': self.utc_datetime.isoformat( ), 'local_time': self.local,
+				'lat': self.latitude, 'lng': self.longitude }
 		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Timezone'
-			exception.method = 'local_time( self, lat: float, lng: float, utc_datetime: Optional[ dt.datetime ]=None )'
+			exception.method = ('local_time( self, lat: float, lng: float, utc_datetime: Optional[ '
+			                    'dt.datetime ]=None )')
 			raise exception
 	
 	def batch_lookup( self, rows: list, lat_field: str = 'lat', lng_field: str = 'lng' ) -> list:
