@@ -391,7 +391,7 @@ if st.session_state.opensky_api_credentials == '':
 		os.environ[ 'OPENSKY_API_CREDENTIALS' ] = default
 
 if st.session_state.purpleair_api_key == '':
-	default = getattr( cfg, 'PURPLEAIR_API_KEY', '' )
+	default = cfg.PURPLEAIR_API_KEY
 	if default:
 		st.session_state.purpleair_api_key = default
 		os.environ[ 'PURPLEAIR_API_KEY' ] = default
@@ -596,7 +596,7 @@ def init_env_state( key: str, config_name: str, env_name: str ) -> None:
 	"""
 	init_state( key, '' )
 	if st.session_state.get( key, '' ) == '':
-		default = getattr( cfg, config_name, '' )
+		default = vars( cfg ).get( config_name, '' )
 		if default:
 			st.session_state[ key ] = default
 			os.environ[ env_name ] = default
@@ -7412,7 +7412,7 @@ elif mode == 'Astronomical Data':
 								complete_entry_only=bool( space_complete_entry_only ),
 								speed=int( space_speed ), half_angle=int( space_half_angle ),
 								keyword=space_keyword,
-								api_key=getattr( cfg, 'NASA_API_KEY', None ) )
+								api_key=cfg.NASA_API_KEY )
 							
 							st.session_state[ 'astro_last_source' ] = 'Space Weather'
 							st.session_state[ 'astro_last_result' ] = result or { }
@@ -10473,7 +10473,7 @@ elif mode == 'Artificial Intelligence':
 			
 			with p_row1[ 0 ]:
 				_chat_models = (
-						cfg.GPT_MODELS if hasattr( cfg, 'GPT_MODELS' ) and cfg.GPT_MODELS else [
+						cfg.GPT_MODELS if cfg.GPT_MODELS else [
 								'gpt-5.4', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1' ])
 				
 				chat_model = _model_selector( key_prefix='chat', label='Model',
@@ -11467,8 +11467,7 @@ elif mode == 'Artificial Intelligence':
 			p_row2 = st.columns( 2 )
 			p_row3 = st.columns( 2 )
 			with p_row1[ 0 ]:
-				_mistral_models = (cfg.MISTRAL_MODELS if hasattr( cfg,
-					'MISTRAL_MODELS' ) and cfg.MISTRAL_MODELS else [ 'mistral-large-latest',
+				_mistral_models = (cfg.MISTRAL_MODELS if cfg.MISTRAL_MODELS else [ 'mistral-large-latest',
 				                                                     'mistral-medium-latest',
 				                                                     'mistral-small-latest',
 				                                                     'open-mistral-7b',
