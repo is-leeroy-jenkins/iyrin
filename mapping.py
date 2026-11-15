@@ -69,7 +69,7 @@ def throw_if( name: str, value: object ) -> None:
 		value (object): Value to validate.
 		
 		Returns:
-		None
+		None: This operation has no return value.
 		
 	"""
 	if value is None:
