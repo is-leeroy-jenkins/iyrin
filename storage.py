@@ -977,6 +977,56 @@ class SQLiteDatabase( ):
 			exception.method = "create_schema( self, table: str ) -> List[ Tuple ]"
 			Logger( ).write( exception )
 			raise exception from e
+	def read_selected_columns( self, table: str, columns: List[ str ] ) -> pd.DataFrame:
+		"""Load only the requested columns of an existing SQLite table.
+
+		Purpose:
+			Support schema-aware interactive mapping without loading unrelated large
+			text and binary fields. Validate identifiers against live SQLite metadata.
+
+		Args:
+			table (str): Existing SQLite table name.
+			columns (List[str]): Nonempty column list drawn from the table schema.
+
+		Returns:
+			pd.DataFrame: Selected database records in their original column order.
+
+		Raises:
+			ValueError: When required arguments are missing or unknown identifiers occur.
+			TypeError: When argument types are invalid.
+			Error: When database retrieval fails.
+		"""
+		try:
+			throw_if( 'table', table )
+			throw_if( 'columns', columns )
+			if not isinstance( table, str ):
+				raise TypeError( 'table must be a string.' )
+			if not isinstance( columns, list ) or any(
+					not isinstance( column, str ) for column in columns ):
+				raise TypeError( 'columns must be a list of strings.' )
+			self.table = table
+			self.columns = columns
+			if self.table not in self.list_tables( ):
+				raise ValueError( f'Unknown table: {self.table}' )
+			self.available_columns = {
+				column[ 1 ] for column in self.create_schema( self.table ) }
+			if any( column not in self.available_columns for column in self.columns ):
+				raise ValueError( 'Requested columns are not present in the table schema.' )
+			self.quoted_columns = ', '.join(
+				'"' + column.replace( '"', '""' ) + '"' for column in self.columns )
+			self.quoted_table = '"' + self.table.replace( '"', '""' ) + '"'
+			self.query = f'SELECT {self.quoted_columns} FROM {self.quoted_table}'
+			with self.create_connection( ) as conn:
+				return pd.read_sql_query( self.query, conn )
+		except Exception as e:
+			exception = Error( e )
+			exception.module = 'storage'
+			exception.cause = 'SQLiteDatabase'
+			exception.method = (
+				'read_selected_columns( self, table: str, columns: List[str] ) -> pd.DataFrame' )
+			Logger( ).write( exception )
+			raise exception from e
+
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
