@@ -999,6 +999,38 @@ def resolve_table_name( requested: str, tables: List[ str ] ) -> Optional[ str ]
 	
 	return None
 
+def mark_geocoding_location_modified( ) -> None:
+	"""Record an intentional change to the Geocoding location input.
+
+	Purpose:
+		Preserve user-entered and explicitly cleared locations when browser geolocation
+		completes or the application reruns.
+
+	Returns:
+		None: Marks the Geocoding input as user-managed.
+	"""
+	st.session_state[ 'geocoding_location_user_modified' ] = True
+
+def sync_geocoding_location_input( ) -> None:
+	"""Synchronize the Geocoding input with the canonical location state.
+
+	Purpose:
+		Populate or refresh an untouched Geocoding input using the active browser-first
+		location, including when geolocation arrives after the first Streamlit render.
+		Never overwrite an input intentionally edited or cleared by the user.
+
+	Returns:
+		None: Updates the Geocoding input session-state value when appropriate.
+	"""
+	if st.session_state.get( 'geocoding_location_user_modified', False ):
+		return
+
+	location_default = get_global_location_default( )
+	if location_default:
+		st.session_state[ 'geocoding_location_input' ] = location_default
+	elif 'geocoding_location_input' not in st.session_state:
+		st.session_state[ 'geocoding_location_input' ] = ''
+
 def get_global_location_default( fallback: str = '' ) -> str:
 	"""Get the active location text or its configured fallback.
 
@@ -3464,11 +3496,15 @@ if mode == 'Mapping Tools':
 			with geo_c1:
 				if st.session_state.pop( 'clear_geocoding_location_input', False ):
 					st.session_state[ 'geocoding_location_input' ] = ''
+					mark_geocoding_location_modified( )
 
-				if 'geocoding_location_input' not in st.session_state:
-					st.session_state[ 'geocoding_location_input' ] = get_global_location_default( )
+				sync_geocoding_location_input( )
 
-				query = st.text_input( 'Enter Address or Location', key='geocoding_location_input' )
+				query = st.text_input( 'Enter Address or Location',
+					key='geocoding_location_input', on_change=mark_geocoding_location_modified )
+				browser_error = st.session_state.get( 'browser_geolocation_error', '' )
+				if browser_error and st.session_state.get( 'browser_geolocation_enabled', True ):
+					st.warning( browser_error )
 				btn_c1, btn_c2 = st.columns( 2 )
 				with btn_c1:
 					if st.button( 'Resolve Location', width='stretch', icon='📍' ):
