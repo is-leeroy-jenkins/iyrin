@@ -80,6 +80,7 @@ create_connection = sqlite_database.create_connection
 list_tables = sqlite_database.list_tables
 create_schema = sqlite_database.create_schema
 read_table = sqlite_database.read_table
+read_selected_columns = sqlite_database.read_selected_columns
 render_table = sqlite_database.render_table
 make_display_safe = sqlite_database.make_display_safe
 drop_table = sqlite_database.drop_table
@@ -1394,6 +1395,41 @@ def ensure_active_location_state( ) -> None:
 
 # ------------- VISUALIZATION UTILITIES
 
+def get_reports_map_fields( table: str ) -> List[ str ]:
+	"""Select source columns needed by the active interactive map.
+
+	Purpose:
+		Limit database reads to spatial, filtering, tooltip and mapped-table data
+		while preserving all fields for tables without a declared map profile.
+
+	Args:
+		table (str): Existing spatial database table name.
+
+	Returns:
+		List[str]: Available fields required by the map for this table.
+	"""
+	throw_if( 'table', table )
+	fields: Dict[ str, List[ str ] ] = {
+		'UAP Sightings': [ 'Year', 'Country', 'State', 'Shape', 'CalendarDate',
+			'City', 'Latitude', 'Longitude', 'Month', 'Day', 'Summary' ],
+		'Observations': [ 'ID', 'Year', 'CountryName', 'State', 'Shape',
+			'Type', 'Agency', 'Month', 'Day', 'City', 'Latitude', 'Longitude', 'Summary' ],
+		'Airports': [ 'ID', 'Name', 'Identifier', 'Elevation', 'City', 'State',
+			'Latitude', 'Longitude' ],
+		'Military Installations': [ 'ID', 'Name', 'StateCode', 'Component',
+			'Latitude', 'Longitude' ],
+		'Pollution Sites': [ 'SuperfundSitesId', 'Name', 'City', 'State',
+			'Latitude', 'Longitude' ],
+		'EPA Sites': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
+		'Nuclear Sites': [ 'Name', 'Capacity', 'City', 'State',
+			'Latitude', 'Longitude' ],
+		'World': [ 'Id', 'RefreshId', 'ObservedAt', 'EntityType', 'EntityId',
+			'Name', 'Source', 'Latitude', 'Longitude', 'Altitude', 'Speed' ],
+	}
+	available = [ column[ 1 ] for column in create_schema( table ) ]
+	return [ field for field in fields.get( table, available ) if field in available ]
+
+
 def filter_map_records( df_source: pd.DataFrame,
 		selected_filters: Dict[ str, List[ str ] ] ) -> pd.DataFrame:
 	"""Apply selected map filters to source records before coordinate validation.
@@ -1414,7 +1450,8 @@ def filter_map_records( df_source: pd.DataFrame,
 		TypeError: When the supplied arguments have invalid types.
 	"""
 	throw_if( 'df_source', df_source )
-	throw_if( 'selected_filters', selected_filters )
+	if selected_filters is None:
+		throw_if( 'selected_filters', selected_filters )
 	if not isinstance( df_source, pd.DataFrame ):
 		raise TypeError( 'df_source must be a DataFrame.' )
 	if not isinstance( selected_filters, dict ):
@@ -1581,8 +1618,11 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 						df_options = filter_map_records( df_source,
 							{ name: values for name, values in selected_filters.items( )
 								if name != field } )
-						options = sorted( [ str( value ) for value in
-							df_options[ field ].dropna( ).unique( ) ] )
+						valid_source_values = set( df_source[ field ].dropna( ).astype( str ).unique( ) )
+						options = sorted( { str( value ) for value in
+							df_options[ field ].dropna( ).unique( ) }.union(
+							{ value for value in selected_filters[ field ]
+								if value in valid_source_values } ) )
 						field_key = re.sub( r'[^0-9a-zA-Z_]+', '_', field.lower( ) )
 						widget_key = f'{filter_prefix}_{field_key}'
 						valid_selection = [ value for value in selected_filters[ field ]
@@ -1599,6 +1639,9 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 		total_count = len( df_filtered )
 		base_mask = get_map_coordinate_mask( df_filtered )
 		df_base_map = df_filtered.loc[ base_mask ].copy( )
+		if not df_base_map.empty:
+			df_base_map[ 'Latitude' ] = pd.to_numeric( df_base_map[ 'Latitude' ] )
+			df_base_map[ 'Longitude' ] = pd.to_numeric( df_base_map[ 'Longitude' ] )
 		mapped_count = len( df_base_map )
 		missing_count = total_count - mapped_count
 
@@ -1606,6 +1649,9 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 		if not df_overlay_source.empty:
 			overlay_mask = get_map_coordinate_mask( df_overlay_source )
 			df_overlay_map = df_overlay_source.loc[ overlay_mask ].copy( )
+			if not df_overlay_map.empty:
+				df_overlay_map[ 'Latitude' ] = pd.to_numeric( df_overlay_map[ 'Latitude' ] )
+				df_overlay_map[ 'Longitude' ] = pd.to_numeric( df_overlay_map[ 'Longitude' ] )
 
 		df_user_map = pd.DataFrame( )
 		if (use_user_location and df_source.empty and df_overlay_map.empty):
@@ -3903,9 +3949,12 @@ elif mode == 'Interactive Map':
 	with center:
 		st.subheader( 'Interactive Map' )
 		st.divider( )
-		tables = list_tables( )
+		all_tables = list_tables( )
+		tables = [ name for name in all_tables if
+			{ 'Latitude', 'Longitude' }.issubset(
+				{ column[ 1 ] for column in create_schema( name ) } ) ]
 		if not tables:
-			st.info( 'No tables available.' )
+			st.info( 'No spatial tables containing Latitude and Longitude are available.' )
 		else:
 			default_table = resolve_table_name( cfg.DEFAULT_DATA, tables )
 			if default_table is None:
@@ -3928,7 +3977,8 @@ elif mode == 'Interactive Map':
 				if refresh_map:
 					st.rerun( )
 			
-			df_map_source = read_table( table )
+			profile_fields = get_reports_map_fields( table )
+			df_map_source = read_selected_columns( table, profile_fields )
 			df_overlay = pd.DataFrame( )
 			
 			if include_overlay:
