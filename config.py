@@ -50,9 +50,9 @@ import streamlit.components.v1 as components
 BLUE_DIVIDER = "<div style='height:1.5px;align:left;background:#0078FC;margin:20px 0px 30px 0px;'></div>"
 APP_TITLE = 'Iyrin'
 APP_SUBTITLE = 'Geospatial Toolkit'
-DB_PATH = 'stores/sqlite/data.db'
-DEFAULT_DATA = r'UAP'
 BASE_DIR = Path( __file__ ).resolve( ).parent
+DB_PATH = str( BASE_DIR / 'stores' / 'sqlite' / 'data.db' )
+DEFAULT_DATA = r'UAP'
 FAVICON = r'resources/images/favicon.ico'
 LOGO = r'resources/images/iyrin-logo.png'
 MAP_ID = r'16b56ad08af295ded24d8eb2'
