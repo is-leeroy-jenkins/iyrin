@@ -50,6 +50,22 @@ class ScientificDataModeTests( unittest.TestCase ):
                 continue
             cls.branches[ comparison.comparators[ 0 ].value ] = node
 
+    def mode_source( self, mode: str ) -> str:
+        """Return only the requested mode body, excluding downstream elif branches.
+
+        Args:
+            mode (str): Configured scientific data mode.
+
+        Returns:
+            str: Mode-specific source between its dispatch and the next mode.
+        """
+        starts = { 'Weather Data': 'Environmental Data',
+            'Environmental Data': 'Geological Data',
+            'Geological Data': 'Astronomical Data' }
+        header = f"elif mode == '{mode}':"
+        next_header = f"elif mode == '{starts[ mode ]}':"
+        return SOURCE.split( header, 1 )[ 1 ].split( next_header, 1 )[ 0 ]
+
     def test_sidebar_exposes_three_distinct_modes( self ) -> None:
         """Replace the old combined selection with exactly three separate modes."""
         expected = [ 'Weather Data', 'Environmental Data', 'Geological Data' ]
@@ -71,7 +87,7 @@ class ScientificDataModeTests( unittest.TestCase ):
 
     def test_weather_sources_and_processing_remain( self ) -> None:
         """Retain weather providers, session keys, and document display."""
-        code = ast.get_source_segment( SOURCE, self.branches[ 'Weather Data' ] ) or ''
+        code = self.mode_source( 'Weather Data' )
         for marker in [ 'Google Weather', 'OpenWeather', 'Historical Weather',
                 'Climate Data', 'Tides & Currents', "'weather_last_result'",
                 "render_mode_document_tabs( 'weather'", 
@@ -80,8 +96,8 @@ class ScientificDataModeTests( unittest.TestCase ):
 
     def test_environmental_sources_and_processing_remain( self ) -> None:
         """Retain environmental providers, state, and processed document tabs."""
-        code = ast.get_source_segment( SOURCE, self.branches[ 'Environmental Data' ] ) or ''
-        for marker in [ 'AirNow', 'OpenAQ', 'PurpleAir', 'Envirofacts',
+        code = self.mode_source( 'Environmental Data' )
+        for marker in [ 'AirNow', 'OpenAQ', 'PurpleAir', 'EnviroFacts',
                 'FIRMS', 'EONET', "'env_last_result'",
                 "render_mode_document_tabs( 'env'",
                 "render_source_processing_controls( 'env'" ]:
@@ -89,7 +105,7 @@ class ScientificDataModeTests( unittest.TestCase ):
 
     def test_geological_sources_and_processing_remain( self ) -> None:
         """Retain all USGS sources and the Geological document workflow."""
-        code = ast.get_source_segment( SOURCE, self.branches[ 'Geological Data' ] ) or ''
+        code = self.mode_source( 'Geological Data' )
         for marker in [ 'USGS Earthquakes', 'USGS Water Data',
                 'USGS The National Map', 'USGS ScienceBase',
                 "'geo_last_result'", "render_mode_document_tabs( 'geo'",
