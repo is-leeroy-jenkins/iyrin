@@ -1394,6 +1394,69 @@ def ensure_active_location_state( ) -> None:
 
 # ------------- VISUALIZATION UTILITIES
 
+def filter_map_records( df_source: pd.DataFrame,
+		selected_filters: Dict[ str, List[ str ] ] ) -> pd.DataFrame:
+	"""Apply selected map filters to source records before coordinate validation.
+
+	Purpose:
+		Use OR comparisons within each field and AND comparisons across fields.
+		Retain records with missing coordinates so dashboard metrics remain accurate.
+
+	Args:
+		df_source (pd.DataFrame): Complete source DataFrame.
+		selected_filters (Dict[str, List[str]]): Selected values keyed by column name.
+
+	Returns:
+		pd.DataFrame: Rows matching every active categorical filter.
+
+	Raises:
+		ValueError: When a mandatory argument is missing.
+		TypeError: When the supplied arguments have invalid types.
+	"""
+	throw_if( 'df_source', df_source )
+	throw_if( 'selected_filters', selected_filters )
+	if not isinstance( df_source, pd.DataFrame ):
+		raise TypeError( 'df_source must be a DataFrame.' )
+	if not isinstance( selected_filters, dict ):
+		raise TypeError( 'selected_filters must be a dictionary.' )
+	df_filtered = df_source.copy( )
+	for field, values in selected_filters.items( ):
+		if values and field in df_filtered.columns:
+			df_filtered = df_filtered.loc[
+				df_filtered[ field ].astype( str ).isin( values ) ].copy( )
+	return df_filtered
+
+
+def get_map_coordinate_mask( df_source: pd.DataFrame ) -> pd.Series:
+	"""Classify usable geographic coordinates for mapped records.
+
+	Purpose:
+		Reject unavailable, out-of-range, and null-island coordinate pairs without
+		discarding invalid records before active categorical filters are evaluated.
+
+	Args:
+		df_source (pd.DataFrame): Filtered geographic records.
+
+	Returns:
+		pd.Series: Boolean coordinate validity mask aligned to the source index.
+
+	Raises:
+		ValueError: When the source DataFrame is missing.
+		TypeError: When the source is not a DataFrame.
+	"""
+	throw_if( 'df_source', df_source )
+	if not isinstance( df_source, pd.DataFrame ):
+		raise TypeError( 'df_source must be a DataFrame.' )
+	if not { 'Latitude', 'Longitude' }.issubset( df_source.columns ):
+		return pd.Series( False, index=df_source.index, dtype=bool )
+	latitude = pd.to_numeric( df_source[ 'Latitude' ], errors='coerce' )
+	longitude = pd.to_numeric( df_source[ 'Longitude' ], errors='coerce' )
+	return (latitude.notna( ) & longitude.notna( )
+		& latitude.between( -90.0, 90.0 )
+		& longitude.between( -180.0, 180.0 )
+		& ~((latitude == 0.0) & (longitude == 0.0)))
+
+
 def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=None,
 		use_user_location: bool=True, key_prefix: str='reports_map', source_name: str='' ) -> None:
 	"""Render a map of report locations and optional overlay data.
@@ -1421,9 +1484,16 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 			'UAP Sightings': {
 				'filters': [ 'Year', 'Country', 'State', 'Shape' ],
 				'tooltip': [ 'CalendarDate', 'City', 'State', 'Country', 'Latitude', 'Longitude',
-				             'Shape', 'Summary' ],
+					'Shape', 'Summary' ],
 				'display': [ 'Year', 'Month', 'Day', 'CalendarDate', 'City', 'State', 'Country',
-				             'Latitude', 'Longitude', 'Shape', 'Summary' ],
+					'Latitude', 'Longitude', 'Shape', 'Summary' ],
+			},
+			'Observations': {
+				'filters': [ 'Year', 'CountryName', 'State', 'Shape', 'Type', 'Agency' ],
+				'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
+					'Latitude', 'Longitude', 'Shape', 'Summary' ],
+				'display': [ 'ID', 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
+					'Latitude', 'Longitude', 'Shape', 'Summary' ],
 			},
 			'Nuclear Sites': {
 				'filters': [ 'Name', 'Capacity', 'City', 'State' ],
@@ -1432,13 +1502,34 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 			},
 			'Airports': {
 				'filters': [ 'Name', 'Identifier', 'Elevation', 'City', 'State' ],
-				'tooltip': [ 'Name', 'Identifier', 'Elevation', 'City', 'State', 'Latitude', 'Longitude' ],
-				'display': [ 'Name', 'Identifier', 'Elevation', 'City', 'State', 'Latitude', 'Longitude' ],
+				'tooltip': [ 'Name', 'Identifier', 'Elevation', 'City', 'State',
+					'Latitude', 'Longitude' ],
+				'display': [ 'ID', 'Name', 'Identifier', 'Elevation', 'City', 'State',
+					'Latitude', 'Longitude' ],
 			},
 			'EPA Sites': {
 				'filters': [ 'Name', 'City', 'State' ],
 				'tooltip': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
 				'display': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
+			},
+			'Pollution Sites': {
+				'filters': [ 'Name', 'City', 'State' ],
+				'tooltip': [ 'SuperfundSitesId', 'Name', 'City', 'State',
+					'Latitude', 'Longitude' ],
+				'display': [ 'SuperfundSitesId', 'Name', 'City', 'State',
+					'Latitude', 'Longitude' ],
+			},
+			'Military Installations': {
+				'filters': [ 'StateCode', 'Component', 'Name' ],
+				'tooltip': [ 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
+				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
+			},
+			'World': {
+				'filters': [ 'RefreshId', 'EntityType', 'Source' ],
+				'tooltip': [ 'Name', 'EntityType', 'EntityId', 'ObservedAt',
+					'Latitude', 'Longitude', 'Altitude', 'Speed' ],
+				'display': [ 'Id', 'RefreshId', 'ObservedAt', 'EntityType',
+					'EntityId', 'Name', 'Latitude', 'Longitude', 'Altitude', 'Speed' ],
 			},
 		}
 		profile = profiles.get( active_source, { } )
@@ -1458,37 +1549,66 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 			if overlay_missing_cols:
 				df_overlay_source = pd.DataFrame( )
 		
-		total_count = len( df_source )
-		df_base_map = pd.DataFrame( )
-		if not df_source.empty:
-			df_source[ 'Latitude' ] = pd.to_numeric( df_source[ 'Latitude' ], errors='coerce' )
-			df_source[ 'Longitude' ] = pd.to_numeric( df_source[ 'Longitude' ], errors='coerce' )
-			base_mask = (df_source[ 'Latitude' ].notna( )
-			             & df_source[ 'Longitude' ].notna( )
-			             & df_source[ 'Latitude' ].between( -90.0, 90.0 )
-			             & df_source[ 'Longitude' ].between( -180.0, 180.0 )
-			             & ~((df_source[ 'Latitude' ] == 0.0)
-			                 & (df_source[ 'Longitude' ] == 0.0)))
-			df_base_map = df_source.loc[ base_mask ].copy( )
-		
+		# ----- Metrics retain their existing position above the filter controls.
+		metric_c1, metric_c2, metric_c3, metric_c4 = st.columns( 4, border=True )
+
+		# ----- Filter source records before coordinate classification and metric calculation.
+		filter_fields = [ col for col in profile.get( 'filters',
+			[ 'Year', 'Country', 'State', 'Shape' ] ) if col in df_source.columns ]
+		filter_prefix = f'{key_prefix}_{re.sub( r"[^0-9a-zA-Z_]+", "_", active_source.lower( ) )}'
+		selected_filters: Dict[ str, List[ str ] ] = { }
+		for field in filter_fields:
+			field_key = re.sub( r'[^0-9a-zA-Z_]+', '_', field.lower( ) )
+			widget_key = f'{filter_prefix}_{field_key}'
+			selected_filters[ field ] = list( st.session_state.get( widget_key, [ ] ) )
+
+		# ----- Default the World map to the most recent observation snapshot.
+		if (active_source == 'World' and 'RefreshId' in filter_fields and
+				'ObservedAt' in df_source.columns and not df_source.empty):
+			refresh_key = f'{filter_prefix}_refreshid'
+			if refresh_key not in st.session_state:
+				latest_index = df_source[ 'ObservedAt' ].astype( str ).idxmax( )
+				latest_refresh = df_source.loc[ latest_index, 'RefreshId' ]
+				if pd.notna( latest_refresh ):
+					selected_filters[ 'RefreshId' ] = [ str( latest_refresh ) ]
+					st.session_state[ refresh_key ] = selected_filters[ 'RefreshId' ]
+
+		if filter_fields:
+			for row_start in range( 0, len( filter_fields ), 2 ):
+				filter_columns = st.columns( 2, border=True )
+				for offset, field in enumerate( filter_fields[ row_start: row_start + 2 ] ):
+					with filter_columns[ offset ]:
+						df_options = filter_map_records( df_source,
+							{ name: values for name, values in selected_filters.items( )
+								if name != field } )
+						options = sorted( [ str( value ) for value in
+							df_options[ field ].dropna( ).unique( ) ] )
+						field_key = re.sub( r'[^0-9a-zA-Z_]+', '_', field.lower( ) )
+						widget_key = f'{filter_prefix}_{field_key}'
+						valid_selection = [ value for value in selected_filters[ field ]
+							if value in options ]
+						if widget_key in st.session_state:
+							if st.session_state[ widget_key ] != valid_selection:
+								st.session_state[ widget_key ] = valid_selection
+						else:
+							st.session_state[ widget_key ] = valid_selection
+						selected_filters[ field ] = st.multiselect( field, options,
+							key=widget_key )
+
+		df_filtered = filter_map_records( df_source, selected_filters )
+		total_count = len( df_filtered )
+		base_mask = get_map_coordinate_mask( df_filtered )
+		df_base_map = df_filtered.loc[ base_mask ].copy( )
 		mapped_count = len( df_base_map )
 		missing_count = total_count - mapped_count
+
 		df_overlay_map = pd.DataFrame( )
 		if not df_overlay_source.empty:
-			df_overlay_source[ 'Latitude' ] = pd.to_numeric(
-				df_overlay_source[ 'Latitude' ], errors='coerce' )
-			df_overlay_source[ 'Longitude' ] = pd.to_numeric(
-				df_overlay_source[ 'Longitude' ], errors='coerce' )
-			overlay_mask = (df_overlay_source[ 'Latitude' ].notna( )
-			                & df_overlay_source[ 'Longitude' ].notna( )
-			                & df_overlay_source[ 'Latitude' ].between( -90.0, 90.0 )
-			                & df_overlay_source[ 'Longitude' ].between( -180.0, 180.0 )
-			                & ~((df_overlay_source[ 'Latitude' ] == 0.0)
-			                    & (df_overlay_source[ 'Longitude' ] == 0.0)))
+			overlay_mask = get_map_coordinate_mask( df_overlay_source )
 			df_overlay_map = df_overlay_source.loc[ overlay_mask ].copy( )
-		
+
 		df_user_map = pd.DataFrame( )
-		if use_user_location and df_base_map.empty and df_overlay_map.empty:
+		if (use_user_location and df_source.empty and df_overlay_map.empty):
 			user_latitude = st.session_state.get( 'latitude', None )
 			user_longitude = st.session_state.get( 'longitude', None )
 			if has_valid_coordinates( user_latitude, user_longitude ):
@@ -1496,7 +1616,7 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				user_description = st.session_state.get( 'description', '' )
 				if not user_location:
 					user_location = (f'{float( user_latitude ):.4f},'
-					                 f'{float( user_longitude ):.4f}')
+						f'{float( user_longitude ):.4f}')
 				df_user_map = pd.DataFrame( [ {
 					'CalendarDate': dt.datetime.now( ).strftime( '%Y-%m-%d %H:%M:%S' ),
 					'City': user_location,
@@ -1507,38 +1627,22 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 					'Shape': 'User Location',
 					'Summary': user_description or 'Current user location fallback.',
 				} ] )
-		
-		metric_c1, metric_c2, metric_c3, metric_c4 = st.columns( 4, border=True )
+
 		metric_c1.metric( 'Total Records', f'{total_count:,}' )
 		metric_c2.metric( 'Mapped Records', f'{mapped_count:,}' )
 		metric_c3.metric( 'Missing / Invalid Coordinates', f'{missing_count:,}' )
 		metric_c4.metric( 'Overlay / User Records',
 			f'{len( df_overlay_map ) + len( df_user_map ):,}' )
-		
+		st.caption( f'Filtered records: {total_count:,} of {len( df_source ):,} source rows. '
+			f'Overlay: {len( df_overlay_map ):,}; user fallback: {len( df_user_map ):,}.' )
+
 		if df_base_map.empty and df_overlay_map.empty and df_user_map.empty:
-			st.info( 'No usable base, overlay, or user-location coordinates are available.' )
+			if total_count:
+				st.info( 'Matching records have no valid coordinates to map.' )
+			else:
+				st.info( 'No mapped records match the selected filters.' )
 			return
-		
-		filter_fields = [ col for col in profile.get( 'filters',
-			[ 'Year', 'Country', 'State', 'Shape' ] ) if col in df_base_map.columns ]
-		if not df_base_map.empty and filter_fields:
-			for row_start in range( 0, len( filter_fields ), 2 ):
-				filter_columns = st.columns( 2, border=True )
-				for offset, field in enumerate( filter_fields[ row_start: row_start + 2 ] ):
-					with filter_columns[ offset ]:
-						options = sorted( [ str( value ) for value in
-							df_base_map[ field ].dropna( ).unique( ) ] )
-						field_key = re.sub( r'[^0-9a-zA-Z_]+', '_', field.lower( ) )
-						selected_values = st.multiselect( field, options,
-							key=f'{key_prefix}_{field_key}' )
-						if selected_values:
-							df_base_map = df_base_map[
-								df_base_map[ field ].astype( str ).isin( selected_values ) ]
-		
-		if df_base_map.empty and df_overlay_map.empty and df_user_map.empty:
-			st.info( 'No mapped records match the selected filters.' )
-			return
-		
+
 		map_style_options = {
 			'Carto Positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
 			'Carto Dark Matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
@@ -1564,6 +1668,7 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				max_records = st.slider( 'Maximum Records', min_value=100,
 					max_value=len( df_base_map ), value=min( 2500, len( df_base_map ) ),
 					step=500, key=f'{key_prefix}_limit' )
+				st.caption( f'Rendering {max_records:,} of {mapped_count:,} matching mapped records.' )
 				df_base_map = df_base_map.head( max_records )
 			elif not df_base_map.empty:
 				st.caption( f'Displaying all {len( df_base_map ):,} mapped base records.' )
@@ -3830,7 +3935,8 @@ elif mode == 'Interactive Map':
 				df_overlay = st.session_state.get( 'df_geocoding_map_results',
 					pd.DataFrame( ) )
 			
-			create_reports_map( df_map_source, df_overlay=df_overlay, source_name=table )
+			create_reports_map( df_map_source, df_overlay=df_overlay,
+				key_prefix='reports_map', source_name=table )
 			if include_overlay and df_overlay is not None and not df_overlay.empty:
 				with st.expander( 'Geocoded Overlay Records', expanded=False ):
 					st.data_editor( df_overlay, key='map_mode_overlay_records',
