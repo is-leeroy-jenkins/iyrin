@@ -924,17 +924,54 @@ class SQLiteDatabase( ):
 		self.offset = 0
 		self.df_input: Optional[ pd.DataFrame ] = None
 
-	def create_connection( self ) -> sqlite3.Connection:
-		"""Open a connection to the configured SQLite database.
+	def validate_database_file( self ) -> Path:
+		"""Validate the required pre-hydrated SQLite database.
 
 		Purpose:
-			Open a connection to the configured SQLite database.
+			Reject missing, invalid, or unhydrated Git LFS files before opening SQLite.
 
 		Returns:
-			sqlite3.Connection: Result of the create connection operation.
+			Path: Validated absolute SQLite database path.
+
+		Raises:
+			FileNotFoundError: When the database file is missing.
+			ValueError: When the file does not have a SQLite header.
 		"""
 		self.db_path = cfg.DB_PATH
-		return sqlite3.connect( self.db_path )
+		path = Path( self.db_path ).resolve( )
+		if not path.is_file( ):
+			raise FileNotFoundError( f'Pre-hydrated SQLite database missing: {path}. '
+				'Install it with git lfs pull when using Git LFS.' )
+		with path.open( 'rb' ) as source:
+			header = source.read( 16 )
+		if header != b'SQLite format 3\x00':
+			raise ValueError( f'Invalid SQLite database (possibly Git LFS pointer): {path}. '
+				'Install its contents with git lfs pull.' )
+		return path
+
+	def create_connection( self ) -> sqlite3.Connection:
+		"""Connect to an existing database for explicit Data Management writes.
+
+		Purpose:
+			Preserve intentional writes but reject a missing pre-hydrated database.
+
+		Returns:
+			sqlite3.Connection: Read-write connection to the existing database.
+		"""
+		path = self.validate_database_file( )
+		return sqlite3.connect( path.as_uri( ) + '?mode=rw', uri=True )
+
+	def create_read_connection( self ) -> sqlite3.Connection:
+		"""Connect to the operational SQLite database without write privileges.
+
+		Purpose:
+			Use read-only connections for map queries and metadata inspection.
+
+		Returns:
+			sqlite3.Connection: Read-only connection to the existing database.
+		"""
+		path = self.validate_database_file( )
+		return sqlite3.connect( path.as_uri( ) + '?mode=ro', uri=True )
 	
 	def list_tables( self ) -> List[ str ]:
 		"""List the tables present in the configured SQLite database.
@@ -945,7 +982,7 @@ class SQLiteDatabase( ):
 		Returns:
 			List[ str ]: Result of the list tables operation.
 		"""
-		with self.create_connection( ) as conn:
+		with self.create_read_connection( ) as conn:
 			_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
 			rows = conn.execute( _query ).fetchall( )
 			return [ r[ 0 ] for r in rows ]
@@ -967,7 +1004,7 @@ class SQLiteDatabase( ):
 			if not isinstance( table, str ):
 				raise TypeError( 'table must be a string.' )
 			self.table = table
-			with self.create_connection( ) as conn:
+			with self.create_read_connection( ) as conn:
 				return conn.execute( f'PRAGMA table_info("{self.table}");' ).fetchall( )
 	
 		except Exception as e:
@@ -1016,7 +1053,7 @@ class SQLiteDatabase( ):
 				'"' + column.replace( '"', '""' ) + '"' for column in self.columns )
 			self.quoted_table = '"' + self.table.replace( '"', '""' ) + '"'
 			self.query = f'SELECT {self.quoted_columns} FROM {self.quoted_table}'
-			with self.create_connection( ) as conn:
+			with self.create_read_connection( ) as conn:
 				cursor = conn.execute( self.query )
 				rows = cursor.fetchall( )
 			result_columns = [ item[ 0 ] for item in cursor.description ]
@@ -1074,7 +1111,7 @@ class SQLiteDatabase( ):
 			query = f'SELECT * FROM "{self.table}"'
 			if self.limit is not None:
 				query += f' LIMIT {self.limit} OFFSET {self.offset}'
-			with self.create_connection( ) as conn:
+			with self.create_read_connection( ) as conn:
 				cur = conn.cursor( )
 				cur.execute( query )
 				raw_columns = [ d[ 0 ] for d in (cur.description or [ ]) ]
