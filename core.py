@@ -70,6 +70,7 @@ def throw_if( name: str, value: object ) -> None:
 
 class Result( ):
 	"""
+		Result container that represents the outcome of fetching a single.
 
 		Purpose:
 
@@ -77,6 +78,15 @@ class Result( ):
 		page. It stores the canonical URL, http status code, extracted plain
 		text, optional raw HTML, and response headers.
 	
+		Attributes:
+			url (Optional[str]): Canonical fetched URL.
+			status_code (Optional[int]): HTTP status of the response.
+			text (Optional[str]): Extracted plain-text content.
+			encoding (Optional[str]): Declared response encoding.
+			headers (Optional[Dict[str, str]]): Response headers.
+			html (Optional[str]): Original HTML content.
+			response (Optional[Response]): Underlying HTTP response.
+
 		Args:
 
 		url (str): Canonical URL that was fetched.
@@ -137,6 +147,7 @@ class Result( ):
 
 	def __dir__( self ) -> list[ str ]:
 		"""
+			Provide a stable ordering of attributes used by GUIs or inspector tooling.
 
 			Purpose:
 
@@ -159,6 +170,7 @@ class Result( ):
 
 	def to_dict( self ) -> Dict[ str, Any ]:
 		"""
+			Produce a plain dictionary representation of the Result for serialization.
 
 			Purpose:
 
@@ -187,6 +199,7 @@ class Result( ):
 	@property
 	def has_html( self ) -> bool:
 		"""
+			Indicate whether the Result includes non-empty HTML content.
 
 			Purpose:
 
