@@ -99,7 +99,7 @@ def calculate_distance_nm( latitude_a: float, longitude_a: float,
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'calculate_distance_nm'
+        exception.method = "calculate_distance_nm( latitude_a: float, longitude_a: float, latitude_b: float, longitude_b: float ) -> float"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -144,7 +144,7 @@ def calculate_bearing( latitude_a: float, longitude_a: float,
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'calculate_bearing'
+        exception.method = "calculate_bearing( latitude_a: float, longitude_a: float, latitude_b: float, longitude_b: float ) -> float"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -187,7 +187,7 @@ def make_entity_record( row: pd.Series ) -> Dict[ str, object ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'make_entity_record'
+        exception.method = "make_entity_record( row: pd.Series ) -> Dict[ str, object ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -227,7 +227,7 @@ def get_live_world_status( ) -> Dict[ str, object ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'get_live_world_status'
+        exception.method = "get_live_world_status( ) -> Dict[ str, object ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -268,7 +268,7 @@ def list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str,
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'list_live_world_entities'
+        exception.method = "list_live_world_entities( entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -317,7 +317,7 @@ def search_live_world_entities( query: str, entity_type: str, limit: int ) -> Li
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'search_live_world_entities'
+        exception.method = "search_live_world_entities( query: str, entity_type: str, limit: int ) -> List[ Dict[ str, object ] ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -431,7 +431,7 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'get_live_world_geofence_status'
+        exception.method = "get_live_world_geofence_status( ) -> Dict[ str, object ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -467,7 +467,7 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'get_live_world_source_status'
+        exception.method = "get_live_world_source_status( ) -> List[ Dict[ str, object ] ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -496,7 +496,7 @@ def get_live_world_analysis_status( ) -> Dict[ str, object ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'get_live_world_analysis_status'
+        exception.method = "get_live_world_analysis_status( ) -> Dict[ str, object ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -531,7 +531,7 @@ def get_live_world_history_status( ) -> Dict[ str, object ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'get_live_world_history_status'
+        exception.method = "get_live_world_history_status( ) -> Dict[ str, object ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -578,7 +578,7 @@ def list_live_world_history( hours: int, entity_type: str, snapshot: str,
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'list_live_world_history'
+        exception.method = "list_live_world_history( hours: int, entity_type: str, snapshot: str, limit: int ) -> List[ Dict[ str, object ] ]"
         Logger( ).write( exception )
         raise exception from exc
 
@@ -609,7 +609,7 @@ def get_live_world_tracking_status( ) -> Dict[ str, object ]:
         exception = Error( exc )
         exception.module = 'tools'
         exception.cause = 'tools'
-        exception.method = 'get_live_world_tracking_status'
+        exception.method = "get_live_world_tracking_status( ) -> Dict[ str, object ]"
         Logger( ).write( exception )
         raise exception from exc
 
