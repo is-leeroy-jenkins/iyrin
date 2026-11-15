@@ -1017,7 +1017,25 @@ class SQLiteDatabase( ):
 			self.quoted_table = '"' + self.table.replace( '"', '""' ) + '"'
 			self.query = f'SELECT {self.quoted_columns} FROM {self.quoted_table}'
 			with self.create_connection( ) as conn:
-				return pd.read_sql_query( self.query, conn )
+				cursor = conn.execute( self.query )
+				rows = cursor.fetchall( )
+			result_columns = [ item[ 0 ] for item in cursor.description ]
+			normalized_rows: List[ Dict[ str, Any ] ] = [ ]
+			for row in rows:
+				record: Dict[ str, Any ] = { }
+				for index, column in enumerate( result_columns ):
+					value = row[ index ]
+					if isinstance( value, bytes ):
+						try:
+							value = value.decode( 'utf-8' )
+						except Exception:
+							value = value.hex( )
+					elif value is not None and not isinstance(
+							value, (str, int, float, bool) ):
+						value = str( value )
+					record[ column ] = value
+				normalized_rows.append( record )
+			return pd.DataFrame( normalized_rows, columns=result_columns )
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'storage'
