@@ -92,12 +92,13 @@ def throw_if( name: str, value: object ) -> None:
 
 def initialize_live_world_history( ) -> None:
     """
+    	Create the Live World history tables and supporting indexes when they do not exist.
 
         Purpose:
         Create the Live World history tables and supporting indexes when they do not exist.
 
         Returns:
-        None
+        None: This operation has no return value.
 
     """
     try:
@@ -143,6 +144,7 @@ def initialize_live_world_history( ) -> None:
 
 def create_live_world_history_fingerprint( row: pd.Series ) -> str:
     """
+    	Create a stable content fingerprint for event/static Live World entities so.
 
         Purpose:
         Create a stable content fingerprint for event/static Live World entities so
@@ -188,6 +190,7 @@ def create_live_world_history_fingerprint( row: pd.Series ) -> str:
 def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
         observed_at: str, max_rows_per_source: int=5000 ) -> int:
     """
+    	Persist one normalized Live World refresh while bounding per-source growth and.
 
         Purpose:
         Persist one normalized Live World refresh while bounding per-source growth and
@@ -298,6 +301,7 @@ def persist_live_world_history( df_entities: pd.DataFrame, refresh_id: str,
 
 def purge_live_world_history( retention_days: int ) -> int:
     """
+    	Delete persisted Live World observations older than the configured retention period.
 
         Purpose:
         Delete persisted Live World observations older than the configured retention period
@@ -338,6 +342,7 @@ def purge_live_world_history( retention_days: int ) -> int:
 
 def clear_live_world_history( ) -> int:
     """
+    	Delete all persisted Live World historical observations and deduplication state.
 
         Purpose:
         Delete all persisted Live World historical observations and deduplication state.
@@ -363,6 +368,7 @@ def clear_live_world_history( ) -> int:
 
 def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
     """
+    	Return persisted refresh timestamps within a replay window, newest first.
 
         Purpose:
         Return persisted refresh timestamps within a replay window, newest first.
@@ -399,6 +405,7 @@ def get_live_world_history_snapshots( hours: int=24 ) -> List[ str ]:
 def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: str,
         limit: int=5000 ) -> pd.DataFrame:
     """
+    	Load the most recent bounded set of persisted observations through a selected replay.
 
         Purpose:
         Load the most recent bounded set of persisted observations through a selected replay
@@ -471,6 +478,7 @@ def load_live_world_history( hours: int, entity_types: List[ str ], snapshot: st
 
 def get_live_world_history_summary( ) -> Dict[ str, object ]:
     """
+    	Return aggregate persistence statistics for the Historical Replay interface.
 
         Purpose:
         Return aggregate persistence statistics for the Historical Replay interface.

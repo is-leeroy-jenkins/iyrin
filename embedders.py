@@ -162,7 +162,7 @@ class LocalEmbeddings( Embeddings ):
 			exception = Error( e )
 			exception.module = 'embedders'
 			exception.cause = 'LocalEmbeddings'
-			exception.method = 'load( self ) -> None'
+			exception.method = "load( self ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -207,7 +207,7 @@ class LocalEmbeddings( Embeddings ):
 			exception = Error( e )
 			exception.module = 'embedders'
 			exception.cause = 'LocalEmbeddings'
-			exception.method = 'embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]'
+			exception.method = "embed_documents( self, texts: List[ str ] ) -> List[ List[ float ] ]"
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -233,7 +233,7 @@ class LocalEmbeddings( Embeddings ):
 			exception = Error( e )
 			exception.module = 'embedders'
 			exception.cause = 'LocalEmbeddings'
-			exception.method = 'embed_query( self, text: str ) -> List[ float ]'
+			exception.method = "embed_query( self, text: str ) -> List[ float ]"
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -317,7 +317,7 @@ class EmbeddingFactory( ):
 			exception = Error( e )
 			exception.module = 'embedders'
 			exception.cause = 'EmbeddingFactory'
-			exception.method = "create( self, provider: str, model: str, model_path: str='' ) -> Embeddings"
+			exception.method = "create( self, provider: str, model: str, model_path: str = '' ) -> Embeddings"
 			Logger( ).write( exception )
 			raise exception from e
 		

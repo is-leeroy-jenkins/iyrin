@@ -60,6 +60,7 @@ from langchain_core.embeddings import Embeddings
 
 def throw_if( name: str, value: object ) -> None:
 	"""
+		Validate that a required value is not empty.
 
 	Purpose:
 		Validate that a required value is not empty.
@@ -204,12 +205,13 @@ class BaseCache( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'BaseCache'
-			exception.method = 'contains( self, key: str ) -> bool'
+			exception.method = "contains( self, key: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
 	def namespace_key( self, namespace: str, key: str ) -> str:
 		"""
+			Create a cache key prefixed by a namespace.
 
 		Purpose:
 			Create a cache key prefixed by a namespace.
@@ -231,7 +233,7 @@ class BaseCache( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'BaseCache'
-			exception.method = 'namespace_key( self, namespace: str, key: str ) -> str'
+			exception.method = "namespace_key( self, namespace: str, key: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -282,6 +284,7 @@ class InMemoryCache( BaseCache ):
 	
 	def now( self ) -> float:
 		"""
+			Return the current Unix timestamp.
 
 		Purpose:
 			Return the current Unix timestamp.
@@ -295,13 +298,14 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'now( self )'
+			exception.method = "now( self ) -> float"
 			Logger( ).write( exception )
 			raise exception
 	
 	def make_record( self, key: str, value: Dict[ str, Any ],
 			ttl: Optional[ int ] = None ) -> Dict[ str, Any ]:
 		"""
+			Create a cache metadata record for the supplied key and value.
 
 		Purpose:
 			Create a cache metadata record for the supplied key and value.
@@ -338,6 +342,7 @@ class InMemoryCache( BaseCache ):
 	
 	def is_expired( self, record: Dict[ str, Any ] ) -> bool:
 		"""
+			Determine whether an in-memory cache record has expired.
 
 		Purpose:
 			Determine whether an in-memory cache record has expired.
@@ -360,12 +365,13 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'is_expired( self, record: Dict[ str, Any ] )'
+			exception.method = "is_expired( self, record: Dict[ str, Any ] ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
+			Return a cached value by key when present and not expired.
 
 		Purpose:
 			Return a cached value by key when present and not expired.
@@ -396,12 +402,13 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'get( self, key: str )'
+			exception.method = "get( self, key: str ) -> Optional[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:
 		"""
+			Set a cache value by key.
 
 		Purpose:
 			Set a cache value by key.
@@ -425,12 +432,13 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None:"
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ] = None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def delete( self, key: str ) -> None:
 		"""
+			Delete a cache entry by key.
 
 		Purpose:
 			Delete a cache entry by key.
@@ -450,12 +458,13 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'delete( self, key: str )'
+			exception.method = "delete( self, key: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def clear( self, namespace: Optional[ str ] = None ) -> None:
 		"""
+			Clear all cache entries or only entries under a namespace prefix.
 
 		Purpose:
 			Clear all cache entries or only entries under a namespace prefix.
@@ -480,12 +489,13 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
+			exception.method = "clear( self, namespace: Optional[ str ] = None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def contains( self, key: str ) -> bool:
 		"""
+			Determine whether a cache key exists and is not expired.
 
 		Purpose:
 			Determine whether a cache key exists and is not expired.
@@ -503,12 +513,13 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'contains( self, key: str )'
+			exception.method = "contains( self, key: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
+			Return cache diagnostics.
 
 		Purpose:
 			Return cache diagnostics.
@@ -528,7 +539,7 @@ class InMemoryCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'InMemoryCache'
-			exception.method = 'stats( self )'
+			exception.method = "stats( self ) -> Dict[ str, Any ]"
 			Logger( ).write( exception )
 			raise exception
 
@@ -566,6 +577,7 @@ class SQLiteCache( BaseCache ):
 	
 	def initialize( self ) -> None:
 		"""
+			Create the SQLite cache table when it does not already exist.
 
 		Purpose:
 			Create the SQLite cache table when it does not already exist.
@@ -589,12 +601,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'initialize( self )'
+			exception.method = "initialize( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def migrate( self ) -> None:
 		"""
+			Add metadata columns to older kv tables that only contain k and v.
 
 		Purpose:
 			Add metadata columns to older kv tables that only contain k and v.
@@ -619,12 +632,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'migrate( self )'
+			exception.method = "migrate( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def now( self ) -> float:
 		"""
+			Return the current Unix timestamp.
 
 		Purpose:
 			Return the current Unix timestamp.
@@ -638,12 +652,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'now( self )'
+			exception.method = "now( self ) -> float"
 			Logger( ).write( exception )
 			raise exception
 	
 	def get( self, key: str ) -> Optional[ Dict[ str, Any ] ]:
 		"""
+			Return a cached value by key when present and not expired.
 
 		Purpose:
 			Return a cached value by key when present and not expired.
@@ -677,12 +692,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'get( self, key: str ) -> Dict[ str, Any ]'
+			exception.method = "get( self, key: str ) -> Optional[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
 	def set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:
 		"""
+			Set a cache value by key.
 
 		Purpose:
 			Set a cache value by key.
@@ -715,12 +731,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None:"
+			exception.method = "set( self, key: str, value: Dict[ str, Any ], ttl: Optional[ int ]=None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def delete( self, key: str ) -> None:
 		"""
+			Delete a cache entry by key.
 
 		Purpose:
 			Delete a cache entry by key.
@@ -739,12 +756,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'delete( self, key: str )'
+			exception.method = "delete( self, key: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def clear( self, namespace: Optional[ str ]=None ) -> None:
 		"""
+			Clear all cache entries or only entries under a namespace prefix.
 
 		Purpose:
 			Clear all cache entries or only entries under a namespace prefix.
@@ -767,12 +785,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'clear( self, namespace: Optional[ str ]=None )'
+			exception.method = "clear( self, namespace: Optional[ str ]=None ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
 	def contains( self, key: str ) -> bool:
 		"""
+			Determine whether a cache key exists and is not expired.
 
 		Purpose:
 			Determine whether a cache key exists and is not expired.
@@ -790,12 +809,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'contains( self, key: str )'
+			exception.method = "contains( self, key: str ) -> bool"
 			Logger( ).write( exception )
 			raise exception
 	
 	def purge_expired( self ) -> int:
 		"""
+			Delete expired cache entries.
 
 		Purpose:
 			Delete expired cache entries.
@@ -817,12 +837,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'purge_expired( self )'
+			exception.method = "purge_expired( self ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
 	def stats( self ) -> Dict[ str, Any ]:
 		"""
+			Return SQLite cache diagnostics.
 
 		Purpose:
 			Return SQLite cache diagnostics.
@@ -843,12 +864,13 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'stats( self )'
+			exception.method = "stats( self ) -> Dict[ str, Any ]"
 			Logger( ).write( exception )
 			raise exception
 	
 	def close( self ) -> None:
 		"""
+			Close the SQLite connection.
 
 		Purpose:
 			Close the SQLite connection.
@@ -862,7 +884,7 @@ class SQLiteCache( BaseCache ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteCache'
-			exception.method = 'close( self )'
+			exception.method = "close( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -952,11 +974,12 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "create_schema( self, table: str ) -> List[ Tuple ]:"
+			exception.method = "create_schema( self, table: str ) -> List[ Tuple ]"
 			Logger( ).write( exception )
 			raise exception from e
 	def read_table( self, table: str, limit: Optional[ int ] = None, offset: int = 0 ) -> pd.DataFrame:
 		"""
+			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
 
 		Purpose:
 			Read a SQLite table into a pandas DataFrame using a normalized scalar-only path.
@@ -1050,6 +1073,7 @@ class SQLiteDatabase( ):
 			raise exception from e
 	def render_table( self, df: pd.DataFrame | None ) -> None:
 		"""
+			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe.
 
 		Purpose:
 			Render a DataFrame safely in Streamlit. Use the normal interactive dataframe
@@ -1098,6 +1122,7 @@ class SQLiteDatabase( ):
 	
 	def drop_table( self, table: str ) -> None:
 		"""
+			Safely drop a table if it exists.
 
 		Purpose:
 			Safely drop a table if it exists.
@@ -1121,11 +1146,12 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "drop_table( self, table: str ) -> None:"
+			exception.method = "drop_table( self, table: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_index( self, table: str, column: str ) -> None:
 		"""
+			Create a safe SQLite index on a specified table column.
 
 		Purpose:
 			Create a safe SQLite index on a specified table column.
@@ -1180,7 +1206,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "create_index( self, table: str, column: str ) -> None:"
+			exception.method = "create_index( self, table: str, column: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def apply_filters( self, df: pd.DataFrame ) -> pd.DataFrame:
@@ -1259,6 +1285,7 @@ class SQLiteDatabase( ):
 	
 	def create_visualization( self, df: pd.DataFrame ) -> None:
 		"""
+			Render data visualizations without passing pandas objects directly into.
 
 		Purpose:
 			Render data visualizations without passing pandas objects directly into
@@ -1406,7 +1433,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None:"
+			exception.method = "convert_dataframe( self, table_name: str, df: pd.DataFrame ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def insert_data( self, table_name: str, df: pd.DataFrame ) -> None:
@@ -1441,11 +1468,12 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "insert_data( self, table_name: str, df: pd.DataFrame ) -> None:"
+			exception.method = "insert_data( self, table_name: str, df: pd.DataFrame ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def get_sqlite_type( self, dtype: Any ) -> str:
 		"""
+			Map a pandas dtype to an appropriate SQLite column type.
 
 		Purpose:
 			Map a pandas dtype to an appropriate SQLite column type.
@@ -1489,6 +1517,7 @@ class SQLiteDatabase( ):
 	
 	def create_custom_table( self, table_name: str, columns: list ) -> None:
 		"""
+			Create a custom SQLite table from column definitions.
 
 		Purpose:
 			Create a custom SQLite table from column definitions.
@@ -1537,6 +1566,7 @@ class SQLiteDatabase( ):
 	
 	def is_safe_query( self, query: str ) -> bool:
 		"""
+			Determine whether a SQL query is read-only and safe to execute.
 
 		Purpose:
 			Determine whether a SQL query is read-only and safe to execute.
@@ -1601,6 +1631,7 @@ class SQLiteDatabase( ):
 	
 	def create_identifier( self, name: str ) -> str:
 		"""
+			Sanitize a string into a safe SQLite identifier.
 
 		Purpose:
 			Sanitize a string into a safe SQLite identifier.
@@ -1650,7 +1681,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "get_indexes( self, table: str ) -> List[ Tuple ]:"
+			exception.method = "get_indexes( self, table: str ) -> List[ Tuple ]"
 			Logger( ).write( exception )
 			raise exception from e
 	def add_column( self, table: str, column: str, col_type: str ) -> None:
@@ -1684,11 +1715,12 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "add_column( self, table: str, column: str, col_type: str ) -> None:"
+			exception.method = "add_column( self, table: str, column: str, col_type: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:
 		"""
+			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename.
 
 		Purpose:
 			Rename a column within an existing SQLite table. Attempts native ALTER TABLE rename
@@ -1774,7 +1806,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "rename_column( self, table_name: str, old_name: str, new_name: str ) -> None:"
+			exception.method = "rename_column( self, table_name: str, old_name: str, new_name: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def create_profile_table( self, table: str ) -> pd.DataFrame:
@@ -1820,7 +1852,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "create_profile_table( self, table: str ) -> pd.DataFrame:"
+			exception.method = "create_profile_table( self, table: str ) -> pd.DataFrame"
 			Logger( ).write( exception )
 			raise exception from e
 	def drop_column( self, table: str, column: str ) -> None:
@@ -1901,11 +1933,12 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "drop_column( self, table: str, column: str ) -> None:"
+			exception.method = "drop_column( self, table: str, column: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 	def rename_table( self, old_name: str, new_name: str ) -> None:
 		"""
+			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,.
 
 		Purpose:
 			Rename an existing SQLite table. Attempts native ALTER TABLE rename first; if it fails,
@@ -1967,7 +2000,7 @@ class SQLiteDatabase( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'SQLiteDatabase'
-			exception.method = "rename_table( self, old_name: str, new_name: str ) -> None:"
+			exception.method = "rename_table( self, old_name: str, new_name: str ) -> None"
 			Logger( ).write( exception )
 			raise exception from e
 class ChromaStore( ):
@@ -2044,7 +2077,7 @@ class ChromaStore( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'ChromaStore'
-			exception.method = 'create( self, documents, embedder, collection_name, persist_directory ) -> Chroma'
+			exception.method = "create( self, documents: List[ Document ], embedder: Embeddings, collection_name: str, persist_directory: str ) -> Chroma"
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -2141,7 +2174,7 @@ class PineconeStore( ):
 			exception = Error( e )
 			exception.module = 'storage'
 			exception.cause = 'PineconeStore'
-			exception.method = 'create( self, documents, embedder, index_name, namespace, api_key ) -> Any'
+			exception.method = "create( self, documents: List[ Document ], embedder: Embeddings, index_name: str, namespace: str, api_key: str ) -> Any"
 			Logger( ).write( exception )
 			raise exception from e
 

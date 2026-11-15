@@ -206,7 +206,7 @@ class Loader( ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'Loader'
-			exception.method = '_ensure_existing_file( self, path: str ) -> str'
+			exception.method = "verify_exists( self, path: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -243,7 +243,7 @@ class Loader( ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'Loader'
-			exception.method = 'resolve_paths( self, pattern: str ) -> List[ str ]'
+			exception.method = "resolve_paths( self, pattern: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -280,7 +280,7 @@ class Loader( ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'CSV'
-			exception.method = 'loader( )'
+			exception.method = 'load_documents( )'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -407,7 +407,7 @@ class TextLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'TextLoader'
-			exception.method = 'load( self, filepath: str ) -> List[ Document ] | None'
+			exception.method = "load( self, filepath: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -501,7 +501,7 @@ class TextLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'TextLoader'
-			exception.method = 'TextLoader.split_chars'
+			exception.method = "split_chars( self, size: int=1000, amount: int=200, seps: str=\"\\n\\n\" ) -> List[ Document ]"
 			Logger( ).write( exception )
 			raise exception
 
@@ -733,7 +733,7 @@ class XmlLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'XmlLoader'
-			exception.method = 'load(self, filepath: str)'
+			exception.method = "load( self, filepath: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -766,7 +766,7 @@ class XmlLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'XmlLoader'
-			exception.method = 'split(self, size: int=1000, amount: int=200)'
+			exception.method = "split( self, size: int=1000, amount: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -800,7 +800,7 @@ class XmlLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'XmlLoader'
-			exception.method = 'load_tree(self, filepath: str)'
+			exception.method = "load_tree( self, filepath: str ) -> etree._ElementTree | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -829,7 +829,7 @@ class XmlLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'XmlLoader'
-			exception.method = 'get_elements(self, xpath: str)'
+			exception.method = "get_elements( self, xpath: str ) -> List[ etree._Element ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -986,7 +986,7 @@ class WebLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'WebLoader'
-			exception.method = 'WebLoader.load_pages'
+			exception.method = "load_pages( self, urls: str | List[ str ], timeout: int=10, ignore: bool=True, progress: bool=True ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1061,7 +1061,7 @@ class WebLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'WebLoader'
-			exception.method = 'WebLoader.split'
+			exception.method = "split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1209,7 +1209,7 @@ class PdfLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'PdfLoader'
-			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			exception.method = "normalize_mode( self, mode: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1244,7 +1244,7 @@ class PdfLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'PdfLoader'
-			exception.method = 'normalize_extraction( self, extract: str ) -> str'
+			exception.method = "normalize_extraction( self, extract: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1278,7 +1278,7 @@ class PdfLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'PdfLoader'
-			exception.method = 'normalize_image_format( self, format: str ) -> str'
+			exception.method = "normalize_image_format( self, format: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1458,7 +1458,7 @@ class ExcelLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'ExcelLoader'
-			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			exception.method = "normalize_mode( self, mode: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1492,7 +1492,7 @@ class ExcelLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'ExcelLoader'
-			exception.method = 'load( self, , **kwars  ) -> List[ Document ] | None'
+			exception.method = "load( self, path: str, mode: str='single', has_headers: bool=True ) -> List[ Document ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1527,7 +1527,7 @@ class ExcelLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'ExcelLoader'
-			exception.method = 'split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ]'
+			exception.method = "split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1604,7 +1604,7 @@ class WordLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'WordLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load( self, path: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1636,7 +1636,7 @@ class WordLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'WordLoader'
-			exception.method = 'split( self, **kwars  ) -> List[ Document ]'
+			exception.method = "split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1734,7 +1734,7 @@ class MarkdownLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'MarkdownLoader'
-			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			exception.method = "normalize_mode( self, mode: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -1879,7 +1879,7 @@ class HtmlLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'HTML'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load( self, path: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2153,7 +2153,7 @@ class ArXivLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'ArxivLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load( self, query: str, max_chars: int=1000 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2566,7 +2566,7 @@ class PowerPointLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'PowerPointLoader'
-			exception.method = 'normalize_mode( self, mode: str ) -> str'
+			exception.method = "normalize_mode( self, mode: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -2626,7 +2626,7 @@ class PowerPointLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'PowerPointLoader'
-			exception.method = 'load_multiple( self, path: str ) -> List[ Document ] | None'
+			exception.method = "load_multiple( self, path: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2747,7 +2747,7 @@ class OutlookLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'OutlookLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load( self, path: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3122,7 +3122,7 @@ class SpfxLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'SpfxLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load( self, library_id: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3155,7 +3155,7 @@ class SpfxLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'SpfxLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load_folder( self, library_id: str, folder_id: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3334,7 +3334,7 @@ class OneDriveDocLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'WikiLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = "load_folder( self, id: str, path: str ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3471,7 +3471,7 @@ class GoogleLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'GoogleDriveLoader'
-			exception.method = 'load_File( self, file_id: str ) -> List[ Document ]'
+			exception.method = "load_file( self, file_id: str, recursive: bool=False ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3503,7 +3503,7 @@ class GoogleLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'GoogleDriveLoader'
-			exception.method = 'load_folder( self, path: str ) -> List[ Document ]'
+			exception.method = "load_folder( self, folder_id: str, recursive: bool=False ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4123,7 +4123,7 @@ class GoogleCloudFileLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'GoogleCloudStorageFileLoader'
-			exception.method = 'GoogleCloudFileLoader.split'
+			exception.method = "split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -4525,7 +4525,7 @@ class GoogleBucketLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'GoogleBucketLoader'
-			exception.method = 'GoogleBucketLoader.split'
+			exception.method = "split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -4676,6 +4676,6 @@ class AwsBucketLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'AmazonBucketLoader'
-			exception.method = 'AwsBucketLoader.split'
+			exception.method = "split( self, chunk: int=1000, overlap: int=200 ) -> List[ Document ] | None"
 			Logger( ).write( exception )
 			raise exception
