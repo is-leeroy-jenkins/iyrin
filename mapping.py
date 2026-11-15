@@ -326,7 +326,7 @@ class Map( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Maps'
-			exception.method = "def request( self, endpoint: str, params: Dict[ str, str ] ) -> Dict | None"
+			exception.method = "request( self, endpoint: str, params: Dict[ str, str ] ) -> Dict | None"
 			Logger( ).write( exception )
 			raise exception from e
 
@@ -437,7 +437,7 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = "def key_for( self, prefix: str, parts: List[ str ] ) -> str | None"
+			exception.method = "key_for( self, prefix: str, parts: List[ str ] ) -> str | None"
 			raise exception
 	
 	def validate_coordinates( self, latitude: float, longitude: float ) -> Tuple[ float, float ]:
@@ -475,7 +475,7 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = "def validate_coordinates( self, latitude: float, longitude: float ) -> Tuple[ float, float ]"
+			exception.method = "validate_coordinates( self, latitude: float, longitude: float ) -> Tuple[ float, float ]"
 			raise exception
 	
 	def freeform( self, address: str, country: str='US' ) -> Dict[ str, Any ] | None:
@@ -524,7 +524,7 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = "def freeform( self, address: str, country: str='US' ) -> Dict[ str, Any ] | None"
+			exception.method = "freeform( self, address: str, country: str='US' ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def reverse( self, latitude: float, longitude: float ) -> Dict[ str, Any ] | None:
@@ -572,7 +572,7 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = "def reverse( self, latitude: float, longitude: float ) -> Dict[ str, Any ] | None"
+			exception.method = "reverse( self, latitude: float, longitude: float ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def city_state_country( self, city: str, state: str, country: str ) -> Dict[ str, Any ] | None:
@@ -617,7 +617,7 @@ class Geocoder( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Geocoder'
-			exception.method = "def city_state_country( self, city: str, state: str, country: str ) -> Dict[ str, Any ] | None"
+			exception.method = "city_state_country( self, city: str, state: str, country: str ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def batch_freeform( self, addresses: List[ str ], country: str='US' ) -> List[ Dict[ str, Any ] ]:
@@ -750,7 +750,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "def normalize_mode( self, mode: str ) -> str"
+			exception.method = "normalize_mode( self, mode: str ) -> str"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -787,7 +787,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "def normalize_inputs( self, values: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | AddressOrCoord ) -> List[ AddressOrCoord ]"
+			exception.method = "normalize_inputs( self, values: List[ AddressOrCoord ] | Tuple[ AddressOrCoord, ... ] | AddressOrCoord ) -> List[ AddressOrCoord ]"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -815,7 +815,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "def convert_distance( self, meters: int | float | None ) -> Dict[ str, float | None ]"
+			exception.method = "convert_distance( self, meters: int | float | None ) -> Dict[ str, float | None ]"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -843,7 +843,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "def convert_duration( self, seconds: int | float | None ) -> Dict[ str, float | None ]"
+			exception.method = "convert_duration( self, seconds: int | float | None ) -> Dict[ str, float | None ]"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -1033,7 +1033,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "def summary( self, origin: AddressOrCoord, destination: AddressOrCoord, mode: str = 'driving' ) -> Dict"
+			exception.method = "summary( self, origin: AddressOrCoord, destination: AddressOrCoord, mode: str = 'driving' ) -> Dict"
 			Logger( ).write( exception )
 			raise exception from e
 	
@@ -1105,7 +1105,7 @@ class DistanceMatrix( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'DistanceMatrix'
-			exception.method = "def to_dataframe( self, rows: List[ Dict[ str, Any ] ] | None = None ) -> pd.DataFrame"
+			exception.method = "to_dataframe( self, rows: List[ Dict[ str, Any ] ] | None = None ) -> pd.DataFrame"
 			Logger( ).write( exception )
 			raise exception
 		
@@ -1214,7 +1214,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = "def key_for( self, prefix: str, parts: List[ str ] ) -> str | None"
+			exception.method = "key_for( self, prefix: str, parts: List[ str ] ) -> str | None"
 			raise exception
 	
 	def component_value( self, components: List[ Dict[ str, Any ] ], kind: str,
@@ -1247,7 +1247,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = "def component_value( self, components: List[ Dict[ str, Any ] ], kind: str, want_long: bool=False ) -> Optional[ str ]"
+			exception.method = "component_value( self, components: List[ Dict[ str, Any ] ], kind: str, want_long: bool=False ) -> Optional[ str ]"
 			raise exception
 	
 	def flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[
@@ -1296,7 +1296,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = "def flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[ str, Any ]"
+			exception.method = "flatten_place_details( self, details: Dict[ str, Any ], query: str = '' ) -> Dict[ str, Any ]"
 			raise exception
 	
 	def place_details( self, place_id: str ) -> Dict[ str, Any ] | None:
@@ -1335,7 +1335,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = "def place_details( self, place_id: str ) -> Dict[ str, Any ] | None"
+			exception.method = "place_details( self, place_id: str ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def text_to_location( self, query: str, country: str='US' ) -> Dict[ str, Any ] | None:
@@ -1396,7 +1396,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = "def text_to_location( self, query: str, country: str='US' ) -> Dict[ str, Any ] | None"
+			exception.method = "text_to_location( self, query: str, country: str='US' ) -> Dict[ str, Any ] | None"
 			raise exception
 	
 	def search_candidates( self, query: str, country: str='US', lmt: int=5 ) -> List[ Dict[ str, Any ] ]:
@@ -1431,7 +1431,7 @@ class Place( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Places'
-			exception.method = "def search_candidates( self, query: str, country: str='US', lmt: int=5 ) -> List[ Dict[ str, Any ] ]"
+			exception.method = "search_candidates( self, query: str, country: str='US', lmt: int=5 ) -> List[ Dict[ str, Any ] ]"
 			raise exception
 
 class Timezone( ):
@@ -1528,7 +1528,7 @@ class Timezone( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Timezone'
-			exception.method = "def validate_coordinates( self, lat: float, lng: float ) -> tuple"
+			exception.method = "validate_coordinates( self, lat: float, lng: float ) -> tuple"
 			raise exception
 	
 	def lookup( self, lat: float, lng: float ) -> Dict | None:
@@ -1566,7 +1566,7 @@ class Timezone( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Timezone'
-			exception.method = "def lookup( self, lat: float, lng: float ) -> Dict | None"
+			exception.method = "lookup( self, lat: float, lng: float ) -> Dict | None"
 			raise exception
 	
 	def get_id( self, lat: float, lng: float ) -> Optional[ str ]:
@@ -1599,7 +1599,7 @@ class Timezone( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Timezone'
-			exception.method = "def get_id( self, lat: float, lng: float ) -> Optional[ str ]"
+			exception.method = "get_id( self, lat: float, lng: float ) -> Optional[ str ]"
 			raise exception
 	
 	def offset_hours( self, lat: float, lng: float ) -> Optional[ float ]:
@@ -1637,7 +1637,7 @@ class Timezone( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Timezone'
-			exception.method = "def offset_hours( self, lat: float, lng: float ) -> Optional[ float ]"
+			exception.method = "offset_hours( self, lat: float, lng: float ) -> Optional[ float ]"
 			raise exception
 	
 	def local_time( self, lat: float, lng: float,
@@ -1776,7 +1776,7 @@ class Timezone( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'Timezone'
-			exception.method = "def batch_lookup( self, rows: list, lat_field: str = 'lat', lng_field: str = 'lng' ) -> list"
+			exception.method = "batch_lookup( self, rows: list, lat_field: str = 'lat', lng_field: str = 'lng' ) -> list"
 			raise exception
 
 # ------- Static Maps
@@ -1882,7 +1882,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "def validate_coordinate( self, lat: float, lng: float ) -> tuple"
+			exception.method = "validate_coordinate( self, lat: float, lng: float ) -> tuple"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1928,7 +1928,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "def normalize_points( self, points: list ) -> list"
+			exception.method = "normalize_points( self, points: list ) -> list"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1957,7 +1957,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "def build_url( self, params: Dict ) -> str | None"
+			exception.method = "build_url( self, params: Dict ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2004,7 +2004,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "def pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None"
+			exception.method = "pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2135,7 +2135,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "def path( self, points: list, size: int='600x400', maptype: int='roadmap', color: int='0x0000ff', weight: int=5 ) -> str | None"
+			exception.method = "path( self, points: list, size: int='600x400', maptype: int='roadmap', color: int='0x0000ff', weight: int=5 ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2200,7 +2200,7 @@ class StaticMap( ):
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "def bbox( self, west: float, south: float, east: float, north: float, size: int='600x400', maptype: int='roadmap' ) -> str | None"
+			exception.method = "bbox( self, west: float, south: float, east: float, north: float, size: int='600x400', maptype: int='roadmap' ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 
