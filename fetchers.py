@@ -312,7 +312,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetcher'
-			exception.method = 'fetch( self, url: str, time: int=10 ) -> List[ Document ]'
+			exception.method = "def fetch( self, url: str, time: int=10 ) -> List[ Document ]"
 			Logger( ).write( exception )
 			raise exception
 
@@ -346,7 +346,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = "html_to_text( self, html: str ) -> str"
+			exception.method = "def html_to_text( self, html: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -381,7 +381,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_paragraphs( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_paragraphs( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -415,7 +415,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_lists( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_lists( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -457,7 +457,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_tables( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_tables( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -492,7 +492,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_articles( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_articles( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -527,7 +527,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_headings( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_headings( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -561,7 +561,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_divisions( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_divisions( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -595,7 +595,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_sections( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_sections( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -629,7 +629,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_blockquotes( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_blockquotes( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -663,7 +663,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_hyperlinks( self, uri: str ) -> List[ str ]'
+			exception.method = "def scrape_hyperlinks( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -697,7 +697,7 @@ class WebFetcher( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebFetchers'
-			exception.method = 'scrape_images( self, uri: str ) -> List[ str ] '
+			exception.method = "def scrape_images( self, uri: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -913,7 +913,7 @@ class WebCrawler( WebFetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
-			exception.method = 'crawl_page( self, url: str, time: int=15 ) -> Result'
+			exception.method = "def fetch( self, url: str, time: int=10 ) -> Result | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -950,7 +950,7 @@ class WebCrawler( WebFetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'WebCrawler'
-			exception.method = "render_with_playwright( self, url: str, timeout: int=15 ) -> str"
+			exception.method = "def render_with_playwright( self, url: str, timeout: int=15 ) -> str"
 			Logger( ).write( exception )
 			raise exception
 
@@ -2020,7 +2020,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = "geocode_coordinates( self, lat: float, long: float ) -> str | None"
+			exception.method = "def geocode_coordinates( self, lat: float, long: float ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -2065,7 +2065,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'validate_address( self, address: str ) -> str'
+			exception.method = "def validate_address( self, address: List[ str ] ) -> Dict[ Any, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -2125,7 +2125,7 @@ class GoogleMaps( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleMaps'
-			exception.method = 'request_directions( self, origin: str, destination: str ) -> dict'
+			exception.method = "def request_directions( self, origin: str, destination: str, mode: str='driving' ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 			
@@ -2336,7 +2336,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'resolve_coordinates( self, address: str ) -> Tuple[ float, float ]'
+			exception.method = "def resolve_coordinates( self, address: str ) -> Tuple[ float, float ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2388,7 +2388,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'request( self, *params ) -> Dict[ str, Any ]'
+			exception.method = "def request( self, path: str, params: Dict[ str, Any ], time: int=10 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2423,7 +2423,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_current( self, *params ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_current( self, address: str, units_system: str='METRIC', language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2530,7 +2530,7 @@ class GoogleWeather( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleWeather'
-			exception.method = 'fetch_alerts( self, *params ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_alerts( self, address: str, language_code: str='en', time: int=10 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -2631,7 +2631,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'validate_date( self, date_value: str ) -> str'
+			exception.method = "def validate_date( self, date_value: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2669,7 +2669,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'validate_time( self, time_value: str ) -> str'
+			exception.method = "def validate_time( self, time_value: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2709,7 +2709,7 @@ class NavalObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'NavalObservatory'
-			exception.method = 'validate_coordinates( self, *params ) -> tuple[ float, float ]'
+			exception.method = "def validate_coordinates( self, latitude: float, longitude: float ) -> tuple[ float, float ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2970,7 +2970,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'fetch_observatories( self ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_observatories( self ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2994,7 +2994,7 @@ class SatelliteCenter( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'SatelliteCenter'
-			exception.method = 'fetch_ground_stations( self ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_ground_stations( self ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3368,7 +3368,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_categories( self, time: int=20 ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3407,7 +3407,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = 'fetch_sources( self, time: int=20 ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_sources( self, time: int=20 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3454,7 +3454,7 @@ class EarthObservatory( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EarthObservatory'
-			exception.method = "fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "def fetch_layers( self, category: str='', time: int=20 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3698,7 +3698,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_map_services( self ) -> Image.Image'
+			exception.method = "def fetch_map_services( self ) -> Image.Image"
 			Logger( ).write( exception )
 			raise exception
 
@@ -3758,7 +3758,7 @@ class GlobalImagery( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalImagery'
-			exception.method = 'fetch_mercator_map( self, ccrs: Any | None=None ) -> Any'
+			exception.method = "def fetch_mercator_map( self, ccrs: Any | None=None ) -> Any"
 			Logger( ).write( exception )
 			raise exception
 
@@ -4513,7 +4513,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = 'validate_format( self, format_value: str ) -> str'
+			exception.method = "def validate_format( self, format_value: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4548,7 +4548,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str"
+			exception.method = "def coerce_response( self, response: requests.Response ) -> Dict[ str, Any ] | str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -4586,7 +4586,7 @@ class OpenScience( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenScience'
-			exception.method = "fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None"
+			exception.method = "def fetch_dataset( self, accession: str, time: int=20 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -5467,7 +5467,7 @@ class AstroCatalog( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroCatalog'
-			exception.method = 'request( self, route: str, params: Dict[ str, Any ] | None=None, time: int=20 ) -> Any'
+			exception.method = "def request( self, route: str, params: Dict[ str, Any ] | None = None, time: int=20 ) -> Any"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -5764,7 +5764,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'table_to_records( self, table: Table | None ) -> List[ Dict[ str, Any ] ]'
+			exception.method = "def table_to_records( self, table: Table | None=None ) -> List[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -5810,7 +5810,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ]'
+			exception.method = "def object_search( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -5855,7 +5855,7 @@ class AstroQuery( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'AstroQuery'
-			exception.method = 'object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ]'
+			exception.method = "def object_ids( self, name: str, row_limit: int=100 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6197,7 +6197,7 @@ class StarMap( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'StarMap'
-			exception.method = 'extract_snapshot_links( self, html: str, base_url: str ) -> Dict[ str, str ]'
+			exception.method = "def extract_snapshot_links( self, html: str | None, base_url: str ) -> Dict[ str, str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6758,7 +6758,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'resolve_api_key( self ) -> str'
+			exception.method = "def resolve_api_key( self ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6791,7 +6791,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'validate_page_size( self, page_size: int ) -> int'
+			exception.method = "def validate_page_size( self, page_size: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6830,7 +6830,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'validate_sort_field( self, sort_field: str ) -> str'
+			exception.method = "def validate_sort_field( self, sort_field: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -6867,7 +6867,7 @@ class GovData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GovData'
-			exception.method = 'validate_sort_order( self, sort_order: str ) -> str'
+			exception.method = "def validate_sort_order( self, sort_order: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -8104,7 +8104,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'resolve_api_key( self ) -> str'
+			exception.method = "def resolve_api_key( self ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -8137,7 +8137,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'validate_limit( self, limit: int ) -> int'
+			exception.method = "def validate_limit( self, limit: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -8170,7 +8170,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'validate_offset( self, offset: int ) -> int'
+			exception.method = "def validate_offset( self, offset: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -8213,7 +8213,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'normalize_bill_type( self, bill_type: str ) -> str'
+			exception.method = "def normalize_bill_type( self, bill_type: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -8250,7 +8250,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'normalize_law_type( self, law_type: str ) -> str'
+			exception.method = "def normalize_law_type( self, law_type: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -8289,7 +8289,7 @@ class Congress( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Congress'
-			exception.method = 'normalize_report_type( self, report_type: str ) -> str'
+			exception.method = "def normalize_report_type( self, report_type: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -9172,7 +9172,7 @@ class InternetArchive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
-			exception.method = 'validate_rows( self, rows: int ) -> int'
+			exception.method = "def validate_rows( self, rows: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -9205,7 +9205,7 @@ class InternetArchive( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'InternetArchive'
-			exception.method = 'validate_page( self, page: int ) -> int'
+			exception.method = "def validate_page( self, page: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -10723,7 +10723,7 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = 'validate_limit( self, limit: int ) -> int'
+			exception.method = "def validate_limit( self, limit: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -10756,7 +10756,7 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = 'validate_offset( self, offset: int ) -> int'
+			exception.method = "def validate_offset( self, offset: int ) -> int"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -10780,7 +10780,7 @@ class Grokipedia( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Grokipedia'
-			exception.method = 'get_client( self ) -> GrokipediaClient'
+			exception.method = "def get_client( self ) -> GrokipediaClient"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -11166,7 +11166,7 @@ class GoogleGeocoding( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GoogleGeocoding'
-			exception.method = 'resolve_api_key( self, api_key: Optional[ str ]=None ) -> str'
+			exception.method = "def resolve_api_key( self, api_key: Optional[ str ] = None ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -11729,7 +11729,7 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'normalize_fields( self, fields: str ) -> str'
+			exception.method = "def normalize_fields( self, fields: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -11839,7 +11839,7 @@ class CensusData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'CensusData'
-			exception.method = 'shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]'
+			exception.method = "def shape_table( self, rows: List[ Any ] ) -> Dict[ str, Any ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12280,7 +12280,7 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'normalize_domain( self, domain: str ) -> str'
+			exception.method = "def normalize_domain( self, domain: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12312,7 +12312,7 @@ class Socrata( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Socrata'
-			exception.method = 'normalize_dataset_id( self, dataset_id: str ) -> str'
+			exception.method = "def normalize_dataset_id( self, dataset_id: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12771,7 +12771,7 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'normalize_domain( self, domain: str ) -> str'
+			exception.method = "def normalize_domain( self, domain: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -12803,7 +12803,7 @@ class HealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'HealthData'
-			exception.method = 'normalize_dataset_id( self, dataset_id: str ) -> str'
+			exception.method = "def normalize_dataset_id( self, dataset_id: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -13246,7 +13246,7 @@ class GlobalHealthData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'GlobalHealthData'
-			exception.method = 'normalize_query_path( self, query_path: str ) -> str'
+			exception.method = "def normalize_query_path( self, query_path: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -13602,7 +13602,7 @@ class UnitedNations( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'UnitedNations'
-			exception.method = 'normalize_query_path( self, query_path: str ) -> str'
+			exception.method = "def normalize_query_path( self, query_path: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -13952,7 +13952,7 @@ class WorldPopulation( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'WorldPopulation'
-			exception.method = 'normalize_asset_path( self, asset_path: str ) -> str'
+			exception.method = "def normalize_asset_path( self, asset_path: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -14382,7 +14382,7 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'normalize_dataset_id( self, dataset_id: str ) -> str'
+			exception.method = "def normalize_dataset_id( self, dataset_id: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -14431,7 +14431,7 @@ class Wonder( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Wonder'
-			exception.method = 'build_template( self, dataset_id: str="D76" ) -> str'
+			exception.method = "def build_template( self, dataset_id: str='D76' ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -15460,7 +15460,7 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = "def resolve_api_key( self ) -> Optional[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -15499,7 +15499,7 @@ class USGSWaterData( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSWaterData'
-			exception.method = 'coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			exception.method = "def coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -16490,7 +16490,7 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			exception.method = "def coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -16730,7 +16730,7 @@ class USGSTheNationalMap( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSTheNationalMap'
-			exception.method = 'fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_datasets( self, time: int=20 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -17141,7 +17141,7 @@ class USGSScienceBase( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'USGSScienceBase'
-			exception.method = 'coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]'
+			exception.method = "def coalesce( self, payload: Any ) -> List[ Dict[ str, Any ] ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -17731,7 +17731,7 @@ class AirNow( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'AirNow'
-			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = "def resolve_api_key( self ) -> Optional[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -19424,7 +19424,7 @@ class EoNet( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'EoNet'
-			exception.method = 'fetch_categories( self, time: int=20 ) -> Dict[ str, Any ]'
+			exception.method = "def fetch_categories( self, time: int=20 ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -21578,7 +21578,7 @@ class PurpleAir( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'PurpleAir'
-			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = "def resolve_api_key( self ) -> Optional[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -22253,7 +22253,7 @@ class OpenAQ( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenAQ'
-			exception.method = 'resolve_api_key( self ) -> Optional[ str ]'
+			exception.method = "def resolve_api_key( self ) -> Optional[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -22914,7 +22914,7 @@ class Firms( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
-			exception.method = 'resolve_map_key( self ) -> Optional[ str ]'
+			exception.method = "def resolve_map_key( self ) -> Optional[ str ]"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -23509,7 +23509,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'get_token( self, client_id: str, client_secret: str ) -> str'
+			exception.method = "def get_token( self, client_id: str, client_secret: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -23659,7 +23659,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'normalize_states( self, payload: Dict[ str, Any ] | None )'
+			exception.method = "def normalize_states( self, payload: Dict[ str, Any ] | None=None ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -23786,7 +23786,7 @@ class OpenSky( Fetcher ):
 			exception = Error( exc )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'normalize_track( self, payload: Dict[ str, Any ] | None )'
+			exception.method = "def normalize_track( self, payload: Dict[ str, Any ] | None=None ) -> Dict[ str, Any ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -23972,7 +23972,7 @@ class OpenSky( Fetcher ):
 			exception = Error( e )
 			exception.module = 'fetchers'
 			exception.cause = 'OpenSky'
-			exception.method = 'build_fetch_result( source, mode, url, status, data ) -> Dict[ str, Any ]'
+			exception.method = "def build_fetch_result( source: str, mode: str, url: str, status: int, data: Any ) -> Dict[ str, Any ]"
 			Logger( ).write( exception )
 			raise exception from e
 
