@@ -387,7 +387,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'load_text( self, file_path: str ) -> str'
+			exception.method = "def load_text( self, filepath: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -414,7 +414,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'collapse_whitespace( self, text: str ) -> str | None'
+			exception.method = "def collapse_whitespace( self, text: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -456,7 +456,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_punctuation( self, text: str ) -> str'
+			exception.method = "def remove_punctuation( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -488,7 +488,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'reduce_repeats( self, text: str ) -> str'
+			exception.method = "def reduce_repeats( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -516,7 +516,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'normalize_text( self, text: str ) -> str'
+			exception.method = "def normalize_text( self, text: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -565,7 +565,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_errors( self, text: str ) -> str'
+			exception.method = "def remove_errors( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -629,7 +629,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_fragments( self, text: str ) -> str'
+			exception.method = "def remove_fragments( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -667,7 +667,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_symbols( self, text: str ) -> str'
+			exception.method = "def remove_symbols( self, text: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -722,7 +722,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_html( self, text: str ) -> str'
+			exception.method = "def remove_html( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -783,7 +783,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_xml( self, text: str ) -> str'
+			exception.method = "def remove_xml( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -829,7 +829,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_markdown( self, text: str ) -> str'
+			exception.method = "def remove_markdown( self, text: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -883,7 +883,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_stopwords( self, text: str ) -> str'
+			exception.method = "def remove_stopwords( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -940,7 +940,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_encodings( self, text: str ) -> str'
+			exception.method = "def remove_encodings( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1070,7 +1070,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_numbers( self, text: str ) -> str'
+			exception.method = "def remove_numbers( self, text: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1109,7 +1109,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_numerals( self, text: str ) -> str'
+			exception.method = "def remove_numerals( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1147,7 +1147,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'remove_images( self, text: str ) -> str'
+			exception.method = "def remove_images( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1405,7 +1405,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'create_wordbag( self, words: List[ str ] ) -> dict'
+			exception.method = "def create_wordbag( self, tokens: List[ str ] ) -> DataFrame | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1490,7 +1490,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'clean_file( self, src: str ) -> str'
+			exception.method = "def clean_file( self, filepath: str ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1547,7 +1547,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'clean_files( self, src: str, dest: str )'
+			exception.method = "def clean_files( self, source: str, destination: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1603,7 +1603,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'chunk_files( self, src: str, dest: str )'
+			exception.method = "def chunk_files( self, source: str, destination: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1652,7 +1652,7 @@ class TextParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'chunk_data( self, filepath: str, size: int=512  ) -> DataFrame'
+			exception.method = "def chunk_data( self, filepath: str, size: int=10 ) -> DataFrame | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1944,7 +1944,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'NltkParser.initialize_resources( self ) -> None'
+			exception.method = "def initialize_resources( self ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -1975,7 +1975,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'word_tokenizer( self, text: str ) -> List[ str ]'
+			exception.method = "def word_tokenizer( self, text: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2005,7 +2005,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'sentence_tokenizer( self, text: str ) -> str'
+			exception.method = "def sentence_tokenizer( self, text: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2038,7 +2038,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'word_stemmer( self, text: str ) -> str'
+			exception.method = "def word_stemmer( self, text: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2071,7 +2071,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'word_lemmatizer( self, text: str ) -> str'
+			exception.method = "def word_lemmatizer( self, text: str ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2102,7 +2102,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'pos_tagger( self, text: str ) -> str'
+			exception.method = "def pos_tagger( self, text: str ) -> List[ Tuple[ str, str ] ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2144,7 +2144,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'named_entity_recognition( self, text: str ) -> List[ Tuple[ str, str ] ] | None'
+			exception.method = "def named_entity_recognition( self, text: str ) -> List[ Tuple[ str, str ] ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2183,7 +2183,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'TextParser'
-			exception.method = 'chunk_words( self, text: str, max: int=10 ) -> DataFrame'
+			exception.method = "def chunk_words( self, text: str, size: int=5 ) -> DataFrame | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2222,7 +2222,7 @@ class NltkParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'NltkParser'
-			exception.method = 'chunk_sentences( self, text: str, max: int=512 ) -> DataFrame'
+			exception.method = "def chunk_sentences( self, text: str, size: int=15 ) -> DataFrame | None"
 			Logger( ).write( exception )
 			raise exception
 
@@ -2314,7 +2314,7 @@ class WordParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'Word'
-			exception.method = 'extract_text( self, num: int ) -> str'
+			exception.method = "def extract_text( self, num: int=1 ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2340,7 +2340,7 @@ class WordParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'Word'
-			exception.method = 'split_sentences( self ) -> List[ str ]'
+			exception.method = "def split_sentences( self ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2369,7 +2369,7 @@ class WordParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'Word'
-			exception.method = 'clean_sentences( self ) -> List[ str ]'
+			exception.method = "def clean_sentences( self ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2401,7 +2401,7 @@ class WordParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'Word'
-			exception.method = 'create_vocabulary( self ) -> List[ str ]'
+			exception.method = "def create_vocabulary( self ) -> set | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2432,7 +2432,7 @@ class WordParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'Word'
-			exception.method = 'compute_frequency_distribution( self ) -> Dict[ str, int ]'
+			exception.method = "def compute_frequency_distribution( self ) -> Dict[ str, int ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2776,7 +2776,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'remove_repeats( self, pages: List[ dict ] )'
+			exception.method = "def remove_repeats( self, pages: List[ Dict ], minimum_repeats: int=3 ) -> List[ Dict ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2834,7 +2834,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'clean_artifacts( self, text: str ) -> str'
+			exception.method = "def clean_artifacts( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -2917,7 +2917,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'repair_spacing( self, text: str ) -> str'
+			exception.method = "def repair_spacing( self, text: str ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3058,7 +3058,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'rejoin_hyphenation( self, text: str ) -> str'
+			exception.method = "def rejoin_hyphenation( self, text: str, repair_embedded: bool=True ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3124,7 +3124,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'rebuild_pages( self, pages: List[ dict ] ) -> str'
+			exception.method = "def rebuild_pages( self, pages: List[ dict ], preserve_page_breaks: bool=False ) -> str"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3157,7 +3157,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'extract_lines( self, path: str, count: Optional[ int ]=None )'
+			exception.method = "def extract_lines( self, path: str, count: Optional[ int ] = None ) -> List[ str ] | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3187,7 +3187,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'extract_text( self, path: str, count: Optional[ int ]=None )'
+			exception.method = "def extract_text( self, path: str, count: Optional[ int ] = None ) -> str | None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3228,7 +3228,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'extract_tables( self, path: str, count: Optional[ int ]=None )'
+			exception.method = "def extract_tables( self, path: str, count: Optional[ int ] = None ) -> ( List[ pd.DataFrame ] | None)"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3262,7 +3262,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'export_csv( self, tables: List[ pd.DataFrame ], filename: str )'
+			exception.method = "def export_csv( self, tables: List[ pd.DataFrame ], filename: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3297,7 +3297,7 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'export_text( self, lines: List[ str ], path: str )'
+			exception.method = "def export_text( self, lines: List[ str ], path: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3334,6 +3334,6 @@ class PdfParser( Processor ):
 			exception = Error( e )
 			exception.module = 'processors'
 			exception.cause = 'PdfParser'
-			exception.method = 'export_excel( self, tables: List[ pd.DataFrame ], path: str )'
+			exception.method = "def export_excel( self, tables: List[ pd.DataFrame ], path: str ) -> None"
 			Logger( ).write( exception )
 			raise exception
