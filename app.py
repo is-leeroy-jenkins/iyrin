@@ -2155,7 +2155,8 @@ def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ s
 	         'vector_target': vector_target, 'persist_directory': persist_directory,
 	         'namespace': namespace, }
 
-def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap: int ) -> List[ Document ]:
+def chunk_documents( documents: List[ Document ], chunk_size: int,
+	chunk_overlap: int ) -> List[ Document ]:
 	"""Split LangChain documents into retrieval chunks.
 
 	Purpose:
@@ -2183,8 +2184,8 @@ def chunk_documents( documents: List[ Document ], chunk_size: int, chunk_overlap
 		document.metadata[ 'chunk_id' ] = chunk_identifier( document, index )
 	return chunks
 
-def create_embeddings( chunks: List[ Document ],
-           provider: str, model: str, model_path: str ) -> tuple[ object, List[ List[ float ] ] ]:
+def create_embeddings( chunks: List[ Document ], provider: str, model: str,
+	model_path: str ) -> tuple[ object, List[ List[ float ] ] ]:
 	"""Create and validate embeddings for document chunks.
 
 	Purpose:
@@ -2215,7 +2216,7 @@ def create_embeddings( chunks: List[ Document ],
 	return embedder, vectors
 
 def store_documents( chunks: List[ Document ], embedder: object, vector_backend: str,
-                     vector_target: str, persist_directory: str, namespace: str ) -> object:
+	vector_target: str, persist_directory: str, namespace: str ) -> object:
 	"""Persist document chunks to Chroma or Pinecone.
 
 	Purpose:
