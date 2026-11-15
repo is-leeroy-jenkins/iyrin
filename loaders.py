@@ -206,7 +206,7 @@ class Loader( ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'Loader'
-			exception.method = '_ensure_existing_file( self, path: str ) -> str'
+			exception.method = 'verify_exists( self, path: str ) -> str'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -280,7 +280,7 @@ class Loader( ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'CSV'
-			exception.method = 'loader( )'
+			exception.method = 'load_documents( )'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3155,7 +3155,7 @@ class SpfxLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'SpfxLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = 'load_folder( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3334,7 +3334,7 @@ class OneDriveDocLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'WikiLoader'
-			exception.method = 'load( self, path: str ) -> List[ Document ]'
+			exception.method = 'load_folder( self, path: str ) -> List[ Document ]'
 			Logger( ).write( exception )
 			raise exception
 	
@@ -3471,7 +3471,7 @@ class GoogleLoader( Loader ):
 			exception = Error( e )
 			exception.module = 'loaders'
 			exception.cause = 'GoogleDriveLoader'
-			exception.method = 'load_File( self, file_id: str ) -> List[ Document ]'
+			exception.method = 'load_file( self, file_id: str ) -> List[ Document ]'
 			Logger( ).write( exception )
 			raise exception
 	
