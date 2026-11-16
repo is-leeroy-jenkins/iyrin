@@ -2568,11 +2568,11 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 		sync_mode_document( prefix, result_key, source_key )
 	settings = render_processing_inputs( key_prefix, f'iyr-{prefix}-documents' )
 	chunk_col, embed_col, store_col = st.columns( 3 )
-	chunk_run = chunk_col.button( 'Chunk', icon='✂️', key=f'{key_prefix}_chunk_run',
+	chunk_run = chunk_col.button( 'Chunk', icon='⛏️', key=f'{key_prefix}_chunk_run',
 		use_container_width=True )
 	embed_run = embed_col.button( 'Embed', icon='🧬', key=f'{key_prefix}_embed_run',
 		use_container_width=True )
-	store_run = store_col.button( 'Store', icon='🗄️', key=f'{key_prefix}_store_run',
+	store_run = store_col.button( 'Store', icon='💻', key=f'{key_prefix}_store_run',
 		use_container_width=True )
 	if chunk_run:
 		if active_source != source_name:
@@ -2834,11 +2834,11 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 		st.warning( 'Processing controls are not initialized.' )
 		return
 	chunk_col, embed_col, store_col = st.columns( 3 )
-	chunk_run = chunk_col.button( 'Chunk', icon='✂️', key=f'{key_prefix}_loader_chunk',
+	chunk_run = chunk_col.button( 'Chunk', icon='⛏️', key=f'{key_prefix}_loader_chunk',
 		use_container_width=True )
 	embed_run = embed_col.button( 'Embed', icon='🧬', key=f'{key_prefix}_loader_embed',
 		use_container_width=True )
-	store_run = store_col.button( 'Store', icon='🗄️', key=f'{key_prefix}_loader_store',
+	store_run = store_col.button( 'Store', icon='💻', key=f'{key_prefix}_loader_store',
 		use_container_width=True )
 	if chunk_run:
 		st.session_state[ 'chunked_documents' ] = [ ]
@@ -2853,11 +2853,11 @@ def render_document_processing_actions( loader_name: str, key_prefix: str ) -> N
 			chunks = chunk_documents( documents, settings[ 'chunk_size' ],
 				settings[ 'chunk_overlap' ] )
 			chunk_rows = pd.DataFrame( [
-					{ 'Chunk': index, 'Chunk ID': (document.metadata or { }).get( 'chunk_id', '' ),
-							'Source': (document.metadata or { }).get( 'source', '' ),
-							'Characters': len( document.page_content ),
-							'Text': document.page_content, } for index, document in
-					enumerate( chunks, start=1 ) ] )
+				{ 'Chunk': index, 'Chunk ID': (document.metadata or { }).get( 'chunk_id', '' ),
+					'Source': (document.metadata or { }).get( 'source', '' ),
+					'Characters': len( document.page_content ), 'Text': document.page_content,
+				} for
+				index, document in enumerate( chunks, start=1 ) ] )
 			st.session_state[ 'chunked_documents' ] = chunks
 			st.session_state[ 'chunk_loader' ] = loader_name
 			st.session_state[ 'df_chunks' ] = chunk_rows
@@ -2928,7 +2928,7 @@ def render_loading_tabs( ) -> None:
 		None: Renders shared Loaded, Chunks, and Embeddings tabs for Loading mode.
 	"""
 	initialize_loading_state( )
-	loaded_tab, chunks_tab, embeddings_tab = st.tabs( [ '📄 Loaded', '✂️ Chunks', '🔢 Embeddings' ] )
+	loaded_tab, chunks_tab, embeddings_tab = st.tabs( [ '📤 Loaded', '🧱 Chunks', '🔢 Embeddings' ] )
 	with loaded_tab:
 		documents = st.session_state.get( 'documents', [ ] ) or [ ]
 		if not documents:
@@ -3015,7 +3015,7 @@ def render_web_document_processing( ) -> None:
 			request_timeout = st.slider( 'Request Timeout', min_value=1, max_value=120, value=10,
 				step=1, key='web_document_timeout' )
 			fetch_col, clear_col = st.columns( 2 )
-			fetch_run = fetch_col.button( 'Fetch', icon='🌐', key='web_document_fetch',
+			fetch_run = fetch_col.button( 'Fetch', icon='🐕', key='web_document_fetch',
 				use_container_width=True )
 			clear_run = clear_col.button( 'Clear', icon='🧹', key='web_document_clear',
 				use_container_width=True )
@@ -3039,11 +3039,11 @@ def render_web_document_processing( ) -> None:
 					st.error( str( exc ) )
 			settings = render_processing_inputs( 'web', 'iyr-web-documents' )
 			chunk_col, embed_col, store_col = st.columns( 3 )
-			chunk_run = chunk_col.button( 'Chunk', icon='✂️', key='web_chunk_run',
+			chunk_run = chunk_col.button( 'Chunk', icon='⛏️', key='web_chunk_run',
 				use_container_width=True )
 			embed_run = embed_col.button( 'Embed', icon='🔢', key='web_embed_run',
 				use_container_width=True )
-			store_run = store_col.button( 'Store', icon='🗄️', key='web_store_run',
+			store_run = store_col.button( 'Store', icon='💻', key='web_store_run',
 				use_container_width=True )
 			if chunk_run:
 				if not st.session_state[ 'web_documents' ]:
