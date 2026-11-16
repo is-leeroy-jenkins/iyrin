@@ -1436,7 +1436,6 @@ def get_reports_map_fields( table: str ) -> List[ str ]:
 	available = [ column[ 1 ] for column in create_schema( table ) ]
 	return [ field for field in fields.get( table, available ) if field in available ]
 
-
 def filter_map_records( df_source: pd.DataFrame,
 		selected_filters: Dict[ str, List[ str ] ] ) -> pd.DataFrame:
 	"""Apply selected map filters to source records before coordinate validation.
@@ -1470,7 +1469,6 @@ def filter_map_records( df_source: pd.DataFrame,
 				df_filtered[ field ].astype( str ).isin( values ) ].copy( )
 	return df_filtered
 
-
 def get_map_coordinate_mask( df_source: pd.DataFrame ) -> pd.Series:
 	"""Classify usable geographic coordinates for mapped records.
 
@@ -1499,7 +1497,6 @@ def get_map_coordinate_mask( df_source: pd.DataFrame ) -> pd.Series:
 		& latitude.between( -90.0, 90.0 )
 		& longitude.between( -180.0, 180.0 )
 		& ~((latitude == 0.0) & (longitude == 0.0)))
-
 
 def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=None,
 		use_user_location: bool=True, key_prefix: str='reports_map', source_name: str='' ) -> None:
@@ -3755,8 +3752,8 @@ if mode == 'Mapping Tools':
 
 			ctl_c1, ctl_c2, ctl_c3 = st.columns( [ 0.30, 0.30, 0.40 ], border=True )
 			with ctl_c1:
-				travel_mode = st.selectbox( 'Travel Mode',
-					[ 'driving', 'walking', 'bicycling', 'transit' ], key='travel_key' )
+				travel_mode = st.selectbox( 'Travel Mode', [ 'driving', 'walking', 'bicycling',
+					'transit' ], key='travel_key' )
 
 			with ctl_c2:
 				update_global_route = st.checkbox( 'Save Route to Global State', value=True,
