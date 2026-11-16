@@ -6587,7 +6587,7 @@ elif mode == 'Environmental Data':
 
 			# --------- PURPLEAIR SENSORS
 			with st.expander( '🟣 PurpleAir Sensors', expanded=False ):
-				st.caption( 'API', help=cfg.PUTPLE_AIR )
+				st.caption( 'API', help=cfg.PURPLE_AIR )
 				purple_mode = st.selectbox( 'Mode',
 					options=[ 'Sensors by Bounding Box', 'Single Sensor' ],
 					key='env_purple_mode' )
