@@ -6044,7 +6044,7 @@ elif mode == 'Weather Data':
 
 			# --------- CLIMATE DATA
 			with st.expander( '🌡️ Climate Data', expanded=False ):
-				st.caption( 'API', help=cfg.NOAA_CLIMATE_DATE )
+				st.caption( 'API', help=cfg.NOAA_CLIMATE_DATA )
 				climate_mode = st.selectbox( 'Mode',
 					options=[ 'datasets', 'data' ],
 					key='weather_climate_mode' )
