@@ -2635,7 +2635,7 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 			except Exception as exc:
 				st.error( str( exc ) )
 
-def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) -> None:
+def render_mode_document_tabs( prefix: str, loaded_label: str = '📤 Loaded' ) -> None:
 	"""Render Loaded, Chunks, and Embeddings tabs for one API mode.
 
 	Purpose:
@@ -2651,7 +2651,7 @@ def render_mode_document_tabs( prefix: str, loaded_label: str = '📄 Loaded' ) 
 	throw_if( 'prefix', prefix )
 	initialize_mode_document_state( prefix )
 	loaded_tab, chunks_tab, embeddings_tab = st.tabs(
-		[ loaded_label, '✂️ Chunks', '🔢 Embeddings' ] )
+		[ loaded_label, '🧱 Chunks', '🔢 Embeddings' ] )
 	with loaded_tab:
 		documents = st.session_state[ f'{prefix}_documents' ]
 		if not documents:
@@ -4037,7 +4037,7 @@ if mode == 'Local Data':
 		
 		with st.expander( label='Local Documents', expanded=True ):
 			
-			# ------ Expander Text Loader
+			# ------ Text Loader
 			with st.expander( label='Text Loader', icon='📝', expanded=False ):
 				st.caption( 'API', help=cfg.TEXT_LOADER )
 				files = st.file_uploader( 'Upload Text File(s)', type=[ 'txt', 'text', 'log' ],
@@ -4113,7 +4113,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_actions( 'TextLoader', 'txt' )
 			
-			# ------ Expander CSV Loader
+			# ------ CSV Loader
 			with st.expander( label='CSV Loader', icon='📑', expanded=False ):
 				st.caption( 'API', help=cfg.CSV_LOADER )
 				csv_file = st.file_uploader( label='Upload CSV', type=[ 'csv' ], key='csv_upload' )
@@ -4184,7 +4184,7 @@ if mode == 'Local Data':
 				# ----------------------------
 				render_document_processing_actions( 'CsvLoader', 'csv' )
 			
-			# ------- Expander PDF Loader
+			# ------- PDF Loader
 			with st.expander( label='PDF Loader', icon='📕', expanded=False ):
 				st.caption( 'API', help=cfg.PDF_LOADER )
 				pdf = st.file_uploader( 'Upload PDF', type=[ 'pdf' ], key='pdf_upload', )
@@ -4329,7 +4329,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_actions( 'PdfLoader', 'pdf' )
 			
-			# ------- Expander Excel Loader
+			# ------- Excel Loader
 			with st.expander( label='Excel Loader', icon='📊', expanded=False ):
 				st.caption( 'API', help=cfg.EXCEL_LOADER )
 				excel_file = st.file_uploader( 'Upload Excel file', type=[ 'xlsx', 'xls' ],
@@ -4472,7 +4472,7 @@ if mode == 'Local Data':
 				# ----------------------------
 				render_document_processing_actions( 'ExcelLoader', 'excel' )
 			
-			# ------- Expander Markdown Loader
+			# ------- Markdown Loader
 			with st.expander( label='Markdown Loader', icon='🧾', expanded=False ):
 				st.caption( 'API', help=cfg.MARKDOWN_LOADER )
 				md = st.file_uploader( 'Upload Markdown', type=[ 'md', 'markdown' ],
@@ -4536,7 +4536,7 @@ if mode == 'Local Data':
 				# ----------------------------
 				render_document_processing_actions( 'MarkdownLoader', 'md' )
 			
-			# ------- Expander HTML Loader
+			# ------- HTML Loader
 			with st.expander( label='HTML Loader', icon='🌐', expanded=False ):
 				st.caption( 'API', help=cfg.HTML_LOADER )
 				html = st.file_uploader( 'Upload HTML', type=[ 'html', 'htm' ], key='html_upload' )
@@ -4593,7 +4593,7 @@ if mode == 'Local Data':
 				# ----------------------------
 				render_document_processing_actions( 'HtmlLoader', 'html' )
 			
-			# ------- Expander JSON Loader
+			# ------- JSON Loader
 			with st.expander( label='JSON Loader', icon='🧩', expanded=False ):
 				st.caption( 'API', help=cfg.JSON_LOADER )
 				js = st.file_uploader( 'Upload JSON', type=[ 'json', 'jsonl' ], key='json_upload', )
@@ -4665,7 +4665,7 @@ if mode == 'Local Data':
 		
 		with st.expander( label='Web Documents', expanded=False ):
 			
-			# ------- Expander ArXiv Loader
+			# ------- ArXiv Loader
 			with st.expander( label='ArXiv Loader', icon='🧠', expanded=False ):
 				st.caption( 'API', help=cfg.ARXIV_LOADER )
 				arxiv_query = st.text_input( 'Query', placeholder='e.g., transformer OR llm',
@@ -4721,7 +4721,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'ArXivLoader', 'loader_arxiv_loader' )
 			
-			# ------- Expander Wikipedia Loader
+			# ------- Wikipedia Loader
 			with st.expander( label='Wikipedia Loader', icon='📚', expanded=False ):
 				st.caption( 'API', help=cfg.WIKIPEDIA_LOADER )
 				wiki_query = st.text_input( 'Query',
@@ -4782,7 +4782,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'WikiLoader', 'loader_wikipedia_loader' )
 			
-			# ------- Expander GitHub Loader
+			# ------- GitHub Loader
 			with st.expander( label='GitHub Loader', icon='🐙', expanded=False ):
 				st.caption( 'API', help=cfg.GITHUB_LOADER )
 				gh_url = st.text_input( 'GitHub API URL', placeholder='https://api.github.com',
@@ -4850,7 +4850,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'GithubLoader', 'loader_github_loader' )
 			
-			# ------- Expander Web Loader
+			# ------- Web Loader
 			with st.expander( label='Web Loader', icon='🌐', expanded=False ):
 				st.caption( 'API', help=cfg.WEB_LOADER )
 				urls = st.text_area( 'Enter one URL per line',
@@ -4912,7 +4912,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'WebLoader', 'loader_web_loader' )
 			
-			# ------- Expander Web Crawler
+			# ------- Web Crawler
 			with st.expander( label='Web Crawler', icon='🕷️', expanded=False ):
 				st.caption( 'API', help=cfg.WEB_CRAWLER )
 				start_url = st.text_input( 'Start URL', placeholder='https://example.com',
@@ -4985,7 +4985,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'WebCrawler', 'loader_web_crawler' )
 			
-			# ------- Expander Email Loader
+			# ------- Email Loader
 			with st.expander( label='E-mail Loader', icon='📧', expanded=False ):
 				st.caption( 'API', help=cfg.EMAIL_LOADER )
 				email_file = st.file_uploader( 'Upload Email File', type=[ 'eml' ],
@@ -5065,7 +5065,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'EmailLoader', 'loader_e_mail_loader' )
 			
-			# ------- Expander PubMed Loader
+			# ------- PubMed Loader
 			with st.expander( label='Pub Med Loader', icon='🧬', expanded=False ):
 				st.caption( 'API', help=cfg.PUBMED_LOADER )
 				pubmed_query = st.text_input( 'PubMed Query', value='', key='pubmed_query',
@@ -5136,7 +5136,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'PubMedSearchLoader', 'loader_pub_med_loader' )
 			
-			# ------- Expander Open City Loader
+			# ------- Open City Loader
 			with st.expander( label='Open City Loader', icon='🏙️', expanded=False ):
 				st.caption( 'API', help=cfg.OPEN_CITY_DATA_LOADER )
 				open_city_id = st.text_input( 'City Domain', value='', key='open_city_id',
@@ -5219,7 +5219,7 @@ if mode == 'Local Data':
 		
 		with st.expander( label='Cloud Documents', expanded=False ):
 			
-			# ------- Expander OneDrive Loader
+			# ------- OneDrive Loader
 			with st.expander( label='OneDrive Loader', icon='🟦', expanded=False ):
 				st.caption( 'API', help=cfg.ONEDRIVE_LOADER )
 				onedrive_drive_id = st.text_input( 'Drive ID', value='', key='onedrive_drive_id',
@@ -5301,7 +5301,7 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'OneDriveDocLoader', 'loader_onedrive_loader' )
 			
-			# ------- Expander Google Cloud File Loader
+			# ------- Google Cloud File Loader
 			with st.expander( label='Google Cloud File Loader', icon='☁️', expanded=False ):
 				st.caption( 'API', help=cfg.WEB_CRAWLER )
 				gcs_project_name = st.text_input( 'Project Name', value='',
@@ -5382,9 +5382,9 @@ if mode == 'Local Data':
 				render_document_processing_controls( 'GoogleCloudFileLoader',
 					'loader_google_cloud_file_loader' )
 			
-			# ------- Expander AWS File Loader
+			# ------- AWS File Loader
 			with st.expander( label='AWS File Loader', icon='🪣', expanded=False ):
-				st.caption( 'API', help=cfg.AWS_S3FILE_LOADER )
+				st.caption( 'API', help=cfg.AWS_FILE_LOADER )
 				aws_file_bucket = st.text_input( 'Bucket', value='', key='aws_file_bucket',
 					placeholder='e.g. my-s3-bucket', )
 				
@@ -5492,8 +5492,9 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'AwsFileLoader', 'loader_aws_file_loader' )
 			
-			# ------- Expander Google Bucket Loader
+			# ------- Google Bucket Loader
 			with st.expander( label='Google Bucket Loader', icon='🗂️', expanded=False ):
+				st.caption( 'API', help=cfg.GOOGLE_CLOUD_BUCKET_LOADER )
 				gcs_bucket_project_name = st.text_input( 'Project Name', value='',
 					key='gcs_bucket_project_name', placeholder='e.g. my-gcp-project', )
 				
@@ -5583,8 +5584,9 @@ if mode == 'Local Data':
 				render_document_processing_controls( 'GoogleBucketLoader',
 					'loader_google_bucket_loader' )
 			
-			# ------- Expander AWS Bucket Loader
+			# ------- AWS Bucket Loader
 			with st.expander( label='AWS Bucket Loader', icon='🗃️', expanded=False ):
+				st.caption( 'API', help=cfg.AWS_S3FILE_LOADER )
 				aws_bucket_name = st.text_input( 'Bucket', value='', key='aws_bucket_name',
 					placeholder='e.g. my-s3-bucket', )
 				
@@ -5703,8 +5705,9 @@ if mode == 'Local Data':
 				
 				render_document_processing_controls( 'AwsBucketLoader', 'loader_aws_bucket_loader' )
 			
-			# ------- Expander SharePoint Loader
+			# ------- SharePoint Loader
 			with st.expander( label='SharePoint Loader', icon='🟩', expanded=False ):
+				st.caption( 'API', help=cfg.SHAREPOINT_LOADER )
 				spfx_library_id = st.text_input( 'Library ID', value='', key='spfx_library_id',
 					placeholder='SharePoint document library identifier', )
 				
@@ -5808,7 +5811,7 @@ elif mode == 'Weather Data':
 
 			# --------- GOOGLE WEATHER
 			with st.expander( '🌦️ Google Weather', expanded=True ):
-				st.badge( label='About API', color='blue', help=cfg.GOOGLE_WEATHER )
+				st.caption( 'API', help=cfg.GOOGLE_WEATHER )
 				google_address = st.text_input( 'Address or Location', value=global_location,
 					key='weather_google_address' )
 
@@ -5911,9 +5914,9 @@ elif mode == 'Weather Data':
 				render_source_processing_controls( 'weather', 'weather_last_result',
 					'weather_last_source', 'Google Weather', 'weather_google_weather' )
 
-			# --------- OPENWEATHER / OPEN-METEO\
+			# --------- OPENWEATHER / OPEN-METEO
 			with st.expander( '🌤️ OpenWeather / Open-Meteo', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.OPEN_WEATHER )
+				st.caption( 'API', help=cfg.OPEN_WEATHER )
 				open_location = st.text_input( 'Location', value=global_location,
 					key='weather_open_location' )
 
@@ -5982,7 +5985,7 @@ elif mode == 'Weather Data':
 
 			# --------- HISTORICAL WEATHER
 			with st.expander( '🕰️ Historical Weather', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.HISTORICAL_WEATHER )
+				st.caption( 'API', help=cfg.HISTORICAL_WEATHER )
 				historical_location = st.text_input( 'Location', value=global_location,
 					key='weather_historical_location' )
 
@@ -6041,7 +6044,7 @@ elif mode == 'Weather Data':
 
 			# --------- CLIMATE DATA
 			with st.expander( '🌡️ Climate Data', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.NOAA_CLIMATE_DATA )
+				st.caption( 'API', help=cfg.NOAA_CLIMATE_DATE )
 				climate_mode = st.selectbox( 'Mode',
 					options=[ 'datasets', 'data' ],
 					key='weather_climate_mode' )
@@ -6150,7 +6153,7 @@ elif mode == 'Weather Data':
 
 			# --------- TIDES AND CURRENTS
 			with st.expander( '🌊 Tides & Currents', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.NOAA_TIDES_CURRENTS )
+				st.caption( 'API', help=cfg.NOAA_TIDES_CURRENTS )
 				tides_mode = st.selectbox( 'Mode',
 					options=[ 'station', 'water-level', 'tide-predictions' ],
 					key='weather_tides_mode' )
@@ -6388,7 +6391,7 @@ elif mode == 'Environmental Data':
 
 			# --------- UV INDEX
 			with st.expander( '☀️ UV Index', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.AIR_NOW )
+				st.caption( 'API', help=cfg.AIR_NOW )
 				uv_mode = st.selectbox( 'Mode', options=[ 'Daily by ZIP', 'Daily by City / State',
 					'Hourly by ZIP', 'Hourly by City / State' ], key='env_uv_mode' )
 				uv_timeout = st.number_input( 'Timeout', min_value=1, max_value=60, value=20,
@@ -6471,7 +6474,7 @@ elif mode == 'Environmental Data':
 
 			# --------- OPENAQ
 			with st.expander( '🧪 OpenAQ', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.OPEN_AQ )
+				st.caption( 'API', help=cfg.OPEN_AQ )
 				openaq_mode = st.selectbox( 'Mode',
 					options=[ 'Locations', 'Latest Measurements' ], key='sb_openaq_mode' )
 
@@ -6584,7 +6587,7 @@ elif mode == 'Environmental Data':
 
 			# --------- PURPLEAIR SENSORS
 			with st.expander( '🟣 PurpleAir Sensors', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.PURPLE_AIR )
+				st.caption( 'API', help=cfg.PUTPLE_AIR )
 				purple_mode = st.selectbox( 'Mode',
 					options=[ 'Sensors by Bounding Box', 'Single Sensor' ],
 					key='env_purple_mode' )
@@ -6698,7 +6701,7 @@ elif mode == 'Environmental Data':
 
 			# --------- ENVIROFACTS
 			with st.expander( '🏭 EPA EnviroFacts Facilities', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.EPA_ENVIROFACTS )
+				st.caption( 'API', help=cfg.EPA_ENVIROFACTS )
 				envirofacts_table = st.selectbox( 'Table',
 					options=[ 'TRI_FACILITY', 'TRI_RELEASE', 'EF_W_EMISSIONS_SOURCE_GHG' ],
 					key='env_envirofacts_table' )
@@ -6751,7 +6754,7 @@ elif mode == 'Environmental Data':
 
 			# --------- FIRMS FIRE / THERMAL ANOMALIES
 			with st.expander( '🔥 NASA FIRMS', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.NASA_FIRMS )
+				st.caption( 'API', help=cfg.NASA_FIRMS )
 				firms_source = st.selectbox( 'Source',
 					options=[ 'MODIS_NRT', 'MODIS_SP', 'VIIRS_SNPP_NRT', 'VIIRS_SNPP_SP',
 							'VIIRS_NOAA20_NRT', 'VIIRS_NOAA20_SP', 'VIIRS_NOAA21_NRT',
@@ -6855,7 +6858,7 @@ elif mode == 'Environmental Data':
 
 			# --------- EONET NATURAL EVENTS
 			with st.expander( '🌎 NASA Earth Observatory Natural Events', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.NASA_EONET )
+				st.caption( 'API', help=cfg.NASA_EONET )
 				eonet_mode = st.selectbox( 'Mode', options=[ 'events', 'categories' ],
 					key='env_eonet_mode' )
 
@@ -7015,7 +7018,7 @@ elif mode == 'Geological Data':
 
 			# --------- USGS EARTHQUAKES
 			with st.expander( '🌎 USGS Earthquakes', expanded=True ):
-				st.badge( label='About API', color='blue', help=cfg.USGS_EARTHQUAKES )
+				st.caption( 'API', help=cfg.USGS_EARTHQUAKES )
 				quake_mode = st.selectbox( 'Mode', options=[ 'feed', 'search' ],
 					key='geo_quake_mode' )
 
@@ -7155,7 +7158,7 @@ elif mode == 'Geological Data':
 
 			# --------- GLOBAL IMAGERY
 			with st.expander( '🛰️ Global Imagery', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.NASA_GLOBAL_IMAGERY )
+				st.caption( 'API', help=cfg.NASA_GLOBAL_IMAGERY )
 				st.caption( 'Uses the original GlobalImagery fetcher. The current fetch_map_services() '
 					'writes the default NASA GIBS image to python-examples.' )
 
@@ -7204,7 +7207,7 @@ elif mode == 'Geological Data':
 
 			# --------- USGS WATER DATA
 			with st.expander( '💧 USGS Water Data', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.USGS_WATER )
+				st.caption( 'API', help=cfg.USGS_WATER )
 				water_mode = st.selectbox( 'Mode',
 					options=[ 'monitoring-locations', 'time-series-metadata', 'latest-continuous',
 							'latest-daily' ], key='geo_water_mode' )
@@ -7283,7 +7286,7 @@ elif mode == 'Geological Data':
 
 			# --------- USGS THE NATIONAL MAP
 			with st.expander( '🗺️ USGS The National Map', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.USGS_NATIONAL_MAP )
+				st.caption( 'API', help=cfg.USGS_NATIONAL_MAP )
 				tnm_mode = st.selectbox( 'Mode', options=[ 'datasets', 'products' ],
 					key='geo_tnm_mode' )
 
@@ -7399,6 +7402,7 @@ elif mode == 'Geological Data':
 
 			# --------- USGS SCIENCEBASE
 			with st.expander( '🧭 USGS ScienceBase', expanded=False ):
+				st.caption( 'API', help=cfg.USGS_SCIENCEBASE )
 				sciencebase_mode = st.selectbox( 'Mode', options=[ 'items', 'item' ],
 					key='geo_sciencebase_mode' )
 				sciencebase_timeout = st.slider( 'Timeout', min_value=1, max_value=60, value=20,
@@ -7450,6 +7454,7 @@ elif mode == 'Geological Data':
 				st.divider( )
 				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
 					'USGS ScienceBase', 'geo_usgs_sciencebase' )
+		
 		with geo_c2:
 			render_mode_document_tabs( 'geo', '📄 Loaded' )
 
@@ -7474,7 +7479,7 @@ elif mode == 'Astronomical Data':
 			
 			# --------- NAVAL OBSERVATORY
 			with st.expander( '🧭 Naval Observatory', expanded=True ):
-				st.badge( label='About API', color='blue', help=cfg.US_NAVAL_OBSERVATORY )
+				st.caption( 'API', help=cfg.US_NAVAL_OBSERVATORY )
 				naval_date = st.date_input( 'Date', value=dt.date.today( ),
 					key='astro_naval_date' )
 				
@@ -7547,7 +7552,7 @@ elif mode == 'Astronomical Data':
 			
 			# --------- SPACE WEATHER
 			with st.expander( '☀️ Space Weather', expanded=False ):
-				st.badge( label='About API', color='blue', help=cfg.SPACE_WEATHER )
+				st.caption( 'API', help=cfg.SPACE_WEATHER )
 				space_mode = st.selectbox( 'Mode',
 					options=[ 'cme', 'cme_analysis', 'gst', 'ips', 'flr', 'sep', 'mpc', 'rbe',
 					          'hss', 'wsa_enlil', 'notifications' ], key='astro_space_mode' )

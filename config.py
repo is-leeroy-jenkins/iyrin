@@ -151,6 +151,14 @@ into Document objects.
 https://reference.langchain.com/python/langchain-community/document_loaders/text/TextLoader
 '''
 
+SHAREPOINT_LOADER = r'''A document loader in the langchain_community package that connects to
+Microsoft SharePoint document libraries via the Microsoft Graph/O365 API and converts
+files into LangChain Document objects.
+
+https://reference.langchain.com/python/langchain-classic/document_loaders/sharepoint
+'''
+
+
 NLTK_LOADER = r'''The Natural Language Toolkit (NLTK) is a comprehensive, open-source Python library
 used for symbolic and statistical Natural Language Processing (NLP). Developed originally at
 the University of Pennsylvania by Steven Bird and Edward Loper, it has become a standard tool
@@ -615,4 +623,18 @@ historical data to support academic, scientific, and institutional research on a
 safety and efficiency.
 
 https://openskynetwork.github.io/opensky-api/rest.html
+'''
+
+USGS_SCIENCEBASE = r'''ScienceBase is a Trusted Digital Repository (TDR) in the U.S. Geological
+Survey (USGS). The platform is developed and maintained by the USGS to provide shared,
+permission-controlled access to scientific data products and Bureau resources. Rather than serving
+merely as a generic online storage location, ScienceBase is designed to add value to digital data
+by exposing well-organized, documented datasets and scientific information over the web. Content
+within ScienceBase Catalog is stored within a standardized item model with consistent informational
+facets (e.g., title, abstract, keywords, etc.) and is accessible through both a web browser and an
+application programming interface (API). This enables powerful querying capabilities and makes it
+possible to integrate content into dynamic collections and connect ScienceBase-hosted data to
+external applications and workflows.
+
+https://www.sciencebase.gov/catalog/
 '''
