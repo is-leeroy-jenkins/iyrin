@@ -658,22 +658,28 @@ def log_step( msg: str ) -> None:
 # ------------- CELESTIAL MAP UTILITY
 
 def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400,
-		latitude: Optional[ float ] = None, longitude: Optional[ float ] = None,
-		location: Optional[ str ] = None, zoom: Optional[ int ] = None ) -> None:
+	latitude: Optional[ float ] = None, longitude: Optional[ float ] = None,
+	location: Optional[ str ] = None, zoom: Optional[ int ] = None ) -> None:
 	"""Render the interactive Celestial Map using local browser assets and observer coordinates.
 
 	Purpose:
-		Render the browser-based Celestial Map application inside Streamlit as a self-contained HTML
-		component. The function preserves the existing HTML, CSS, JavaScript, D3, Leaflet, Pickr, star-map
-		rendering, location picker, star detail panel, animation controls, and image-export behavior while
-		loading local JSON data from the configured asset folder and passing iyr's observer location into
+		Render the browser-based Celestial Map application inside Streamlit as a self-contained
+		HTML
+		component. The function preserves the existing HTML, CSS, JavaScript, D3, Leaflet, Pickr,
+		star-map
+		rendering, location picker, star detail panel, animation controls, and image-export
+		behavior while
+		loading local JSON data from the configured asset folder and passing iyr's observer
+		location into
 		the embedded JavaScript application.
 
 	Args:
-		asset_root (str): Root folder containing index.html, style.css, js/main.js, js/modules/*.js, and
+		asset_root (str): Root folder containing index.html, style.css, js/main.js,
+		js/modules/*.js, and
 			data/*.json.
 		height (int): Component iframe height in pixels.
-		latitude (Optional[ float ]): Observer latitude supplied by iyr Location State or manual Celestial
+		latitude (Optional[ float ]): Observer latitude supplied by iyr Location State or manual
+		Celestial
 			Map controls.
 		longitude (Optional[ float ]): Observer longitude supplied by iyr Location State or manual
 			Celestial Map controls.
@@ -681,111 +687,101 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 		zoom (Optional[ int ]): Initial Leaflet location-picker zoom level.
 
 	Returns:
-		None: Renders the interactive Celestial Map using local browser assets and observer coordinates.
+		None: Renders the interactive Celestial Map using local browser assets and observer
+		coordinates.
 	"""
 	try:
 		root = Path( asset_root )
 		index_path = root / 'index.html'
 		style_path = root / 'style.css'
 		data_paths = { 'constellations': root / 'data' / 'constellations.json',
-				'lines': root / 'data' / 'constellations.lines.json',
-				'stars': root / 'data' / 'stars.6.json',
-				'dsos': root / 'data' / 'dsos.bright.json',
-				'starnames': root / 'data' / 'starnames.json',
-				'planets': root / 'data' / 'planets.json',
-				'mw': root / 'data' / 'mw.json',
-				'constellationBorders': root / 'data' / 'constellations.borders.json',
-				'dsonames': root / 'data' / 'dsonames.json', }
-		
+			'lines': root / 'data' / 'constellations.lines.json',
+			'stars': root / 'data' / 'stars.6.json', 'dsos': root / 'data' / 'dsos.bright.json',
+			'starnames': root / 'data' / 'starnames.json',
+			'planets': root / 'data' / 'planets.json', 'mw': root / 'data' / 'mw.json',
+			'constellationBorders': root / 'data' / 'constellations.borders.json',
+			'dsonames': root / 'data' / 'dsonames.json', }
 		module_paths = [ root / 'js' / 'modules' / 'CelestialMath.js',
-				root / 'js' / 'modules' / 'StarData.js',
-				root / 'js' / 'modules' / 'MapRenderer.js',
-				root / 'js' / 'modules' / 'LocationPicker.js',
-				root / 'js' / 'modules' / 'UIController.js',
-				root / 'js' / 'modules' / 'StarDetailsPanel.js',
-				root / 'js' / 'modules' / 'ImageExporter.js',
-				root / 'js' / 'main.js', ]
-		
+			root / 'js' / 'modules' / 'StarData.js', root / 'js' / 'modules' / 'MapRenderer.js',
+			root / 'js' / 'modules' / 'LocationPicker.js',
+			root / 'js' / 'modules' / 'UIController.js',
+			root / 'js' / 'modules' / 'StarDetailsPanel.js',
+			root / 'js' / 'modules' / 'ImageExporter.js', root / 'js' / 'main.js', ]
 		required_paths = [ index_path, style_path, *data_paths.values( ), *module_paths ]
 		missing_paths = [ str( path ) for path in required_paths if not path.exists( ) ]
 		if missing_paths:
 			st.error( 'Celestial Map assets are missing.' )
 			st.code( '\n'.join( missing_paths ) )
 			return
-		
 		html = index_path.read_text( encoding='utf-8' )
 		css = style_path.read_text( encoding='utf-8' )
 		local_data: Dict[ str, object ] = { }
 		for key, path in data_paths.items( ):
 			local_data[ key ] = json.loads( path.read_text( encoding='utf-8' ) )
-		
 		if has_valid_coordinates( latitude, longitude ):
 			default_latitude = float( latitude )
 			default_longitude = float( longitude )
 		else:
 			default_latitude = get_global_latitude_default( )
 			default_longitude = get_global_longitude_default( )
-		
 		if location is not None and str( location ).strip( ):
 			default_location = str( location ).strip( )
 		else:
 			default_location = get_global_location_default( )
-		
 		default_zoom = int( zoom if zoom is not None else st.session_state.get( 'zoom', 8 ) or 8 )
 		default_payload = { 'latitude': default_latitude, 'longitude': default_longitude,
-				'location': default_location, 'zoom': default_zoom, }
-		
-		html = html.replace( '<link rel="stylesheet" href="style.css">',
-			f'<style>\n{css}\n</style>' )
-		
+			'location': default_location, 'zoom': default_zoom, }
+		html = html.replace( '<link rel="stylesheet" href="style.css">', f'<style>\n'
+		                                                                 f'{css}\n</style>' )
 		for relative_path in [ 'js/modules/CelestialMath.js', 'js/modules/StarData.js',
-				'js/modules/MapRenderer.js', 'js/modules/LocationPicker.js',
-				'js/modules/UIController.js', 'js/modules/StarDetailsPanel.js',
-				'js/modules/ImageExporter.js', 'js/main.js', ]:
+			'js/modules/MapRenderer.js', 'js/modules/LocationPicker.js',
+			'js/modules/UIController.js', 'js/modules/StarDetailsPanel.js',
+			'js/modules/ImageExporter.js', 'js/main.js', ]:
 			html = re.sub( rf'\s*<script\s+src="{re.escape( relative_path )}"></script>', '',
 				html, flags=re.IGNORECASE )
-		
-		data_script = ( '<script>\n'
-				'window.StarMapApp = window.StarMapApp || {};\n'
-				f'window.StarMapApp.LOCAL_DATA = {json.dumps( local_data )};\n'
-				f'window.StarMapApp.DEFAULT_LOCATION = {json.dumps( default_payload )};\n'
-				'</script>' )
-		
+		data_script = ('<script>\n'
+		               'window.StarMapApp = window.StarMapApp || {};\n'
+		               f'window.StarMapApp.LOCAL_DATA = {json.dumps( local_data )};\n'
+		               f'window.StarMapApp.DEFAULT_LOCATION = {json.dumps( default_payload )};\n'
+		               '</script>')
 		inline_scripts = [ data_script ]
 		for path in module_paths:
 			source = path.read_text( encoding='utf-8' )
 			if path.name == 'main.js':
-				source = source.replace(
-					"this.locationPicker = new LocationPicker('locationPicker', {\n"
-					"                onLocationChange: (lat, lon) => this.handleLocationChange(lat, lon)\n"
-					"            });",
-					"const defaultLocation = window.StarMapApp.DEFAULT_LOCATION || {};\n"
-					"            this.locationPicker = new LocationPicker('locationPicker', {\n"
-					"                initialLat: defaultLocation.latitude,\n"
-					"                initialLon: defaultLocation.longitude,\n"
-					"                onLocationChange: (lat, lon) => this.handleLocationChange(lat, lon)\n"
-					"            });" )
-				
+				source = source.replace( "this.locationPicker = new LocationPicker("
+				                         "'locationPicker', {\n"
+				                         "                onLocationChange: (lat, lon) => "
+				                         "this.handleLocationChange(lat, lon)\n"
+				                         "            });", "const defaultLocation = "
+				                                            "window.StarMapApp.DEFAULT_LOCATION || "
+				                                            "{};\n"
+				                                            "            this.locationPicker = new "
+				                                            "LocationPicker('locationPicker', {\n"
+				                                            "                initialLat: "
+				                                            "defaultLocation.latitude,\n"
+				                                            "                initialLon: "
+				                                            "defaultLocation.longitude,\n"
+				                                            "                onLocationChange: ("
+				                                            "lat, lon) => "
+				                                            "this.handleLocationChange(lat, lon)\n"
+				                                            "            });" )
 				source = source.replace( "this.selectedCoords = { lat: 30.0444, lon: 31.2357 };",
 					"this.selectedCoords = {\n"
-					"                lat: Number(defaultLocation.latitude || 30.0444),\n"
-					"                lon: Number(defaultLocation.longitude || 31.2357)\n"
-					"            };" )
-				
-				source = source.replace(
-					"this.locationPicker.setView(this.selectedCoords.lat, this.selectedCoords.lon);",
+				                                                                                  "                lat: Number(defaultLocation.latitude || 30.0444),\n"
+				                                                                                  "                lon: Number(defaultLocation.longitude || 31.2357)\n"
+				                                                                                  "            };" )
+				source = source.replace( "this.locationPicker.setView(this.selectedCoords.lat, "
+				                         "this.selectedCoords.lon);",
 					"this.locationPicker.setView(\n"
-					"                    this.selectedCoords.lat,\n"
-					"                    this.selectedCoords.lon,\n"
-					"                    Number(defaultLocation.zoom || 8)\n"
-					"                );\n"
-					"                this.ui.updateLocationDisplay(\n"
-					"                    this.selectedCoords.lat,\n"
-					"                    this.selectedCoords.lon\n"
-					"                );" )
-			
+				                                                                                                           "                    this.selectedCoords.lat,\n"
+				                                                                                                           "                    this.selectedCoords.lon,\n"
+				                                                                                                           "                    Number(defaultLocation.zoom || 8)\n"
+				                                                                                                           "                );\n"
+				                                                                                                           "                this.ui.updateLocationDisplay(\n"
+				                                                                                                           "                    this.selectedCoords.lat,\n"
+				                                                                                                           "                    this.selectedCoords.lon\n"
+				                                                                                                           "                );" )
 			inline_scripts.append( f'<script>\n{source}\n</script>' )
-		
 		local_data_override = """
 		<script>
 		(function () {
@@ -802,10 +798,8 @@ def render_celestial_map( asset_root: str = 'assets/starmap', height: int = 1400
 		})();
 		</script>
 		"""
-		
 		inline_scripts.append( local_data_override )
 		html = html.replace( '</body>', '\n'.join( inline_scripts ) + '\n</body>' )
-		
 		components.html( html, height=int( height ), scrolling=True )
 	
 	except Exception as ex:
@@ -909,9 +903,9 @@ def get_location_state( ) -> Dict[ str, object ]:
 	}
 
 def set_location_state( location: Optional[ str ] = None, city: Optional[ str ] = None,
-		state: Optional[ str ] = None, country: Optional[ str ] = None,
-		zipcode: Optional[ str ] = None, description: Optional[ str ] = None,
-		latitude: Optional[ float ] = None, longitude: Optional[ float ] = None ) -> None:
+	state: Optional[ str ] = None, country: Optional[ str ] = None, zipcode: Optional[ str ] =  None,
+	description: Optional[ str ] = None, latitude: Optional[ float ] = None,
+	longitude: Optional[ float ] = None ) -> None:
 	"""Update selected location fields without modifying unrelated session state.
 
 	Purpose:
@@ -932,22 +926,16 @@ def set_location_state( location: Optional[ str ] = None, city: Optional[ str ] 
 	"""
 	if location is not None:
 		st.session_state[ 'location' ] = str( location ).strip( )
-	
 	if city is not None:
 		st.session_state[ 'city' ] = str( city ).strip( )
-	
 	if state is not None:
 		st.session_state[ 'state' ] = str( state ).strip( )
-	
 	if country is not None:
 		st.session_state[ 'country' ] = str( country ).strip( )
-	
 	if zipcode is not None:
 		st.session_state[ 'zipcode' ] = str( zipcode ).strip( )
-	
 	if description is not None:
 		st.session_state[ 'description' ] = str( description ).strip( )
-	
 	if latitude is not None and longitude is not None:
 		set_coordinates( latitude, longitude )
 
@@ -1105,7 +1093,7 @@ def get_global_longitude_default( fallback: float=0.0 ) -> float:
 	return float( fallback )
 
 def set_global_coordinates_from_result( latitude: object, longitude: object,
-		location: Optional[ str ]=None, description: Optional[ str ]=None ) -> None:
+	location: Optional[ str ]=None, description: Optional[ str ]=None ) -> None:
 	"""Store a resolved coordinate pair in the global location state.
 
 	Purpose:
@@ -1127,7 +1115,7 @@ def set_global_coordinates_from_result( latitude: object, longitude: object,
 		longitude=float( longitude ) )
 
 def create_bounding_box_from_center( latitude: object, longitude: object,
-		delta: float=0.125 ) -> Dict[ str, float ]:
+	delta: float = 0.125 ) -> Dict[ str, float ]:
 	"""Calculate a bounding box around the supplied center coordinate.
 
 	Purpose:
@@ -1146,12 +1134,11 @@ def create_bounding_box_from_center( latitude: object, longitude: object,
 	if has_valid_coordinates( latitude, longitude ):
 		lat_value = float( latitude )
 		lng_value = float( longitude )
-	
 	return { 'west': lng_value - float( delta ), 'south': lat_value - float( delta ),
-			'east': lng_value + float( delta ), 'north': lat_value + float( delta ),
-			'nw_lng': lng_value - float( delta ), 'nw_lat': lat_value + float( delta ),
-			'se_lng': lng_value + float( delta ), 'se_lat': lat_value - float( delta ),
-			'center_lat': lat_value, 'center_lng': lng_value, }
+		'east': lng_value + float( delta ), 'north': lat_value + float( delta ),
+		'nw_lng': lng_value - float( delta ), 'nw_lat': lat_value + float( delta ),
+		'se_lng': lng_value + float( delta ), 'se_lat': lat_value - float( delta ),
+		'center_lat': lat_value, 'center_lng': lng_value, }
 
 # ------------- BROWSER GEOLOCATION UTILITIES
 
@@ -1437,7 +1424,7 @@ def get_reports_map_fields( table: str ) -> List[ str ]:
 	return [ field for field in fields.get( table, available ) if field in available ]
 
 def filter_map_records( df_source: pd.DataFrame,
-		selected_filters: Dict[ str, List[ str ] ] ) -> pd.DataFrame:
+	selected_filters: Dict[ str, List[ str ] ] ) -> pd.DataFrame:
 	"""Apply selected map filters to source records before coordinate validation.
 
 	Purpose:
@@ -1498,133 +1485,108 @@ def get_map_coordinate_mask( df_source: pd.DataFrame ) -> pd.Series:
 		& longitude.between( -180.0, 180.0 )
 		& ~((latitude == 0.0) & (longitude == 0.0)))
 
-def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=None,
-		use_user_location: bool=True, key_prefix: str='reports_map', source_name: str='' ) -> None:
+def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ] = None,
+	use_user_location: bool = True, key_prefix: str = 'reports_map',
+	source_name: str = '' ) -> None:
 	"""Render a map of report locations and optional overlay data.
 
 	Purpose:
-		Render an interactive PyDeck map for records containing Latitude and Longitude fields. The map
+		Render an interactive PyDeck map for records containing Latitude and Longitude fields. The
+		map
 		title, filters, tooltip fields, and mapped-record table adapt to known source schemas.
 
 	Args:
 		df (pd.DataFrame): Source DataFrame containing geospatial records.
-		df_overlay (Optional[ pd.DataFrame ]): Optional geocoded records rendered above the base layer.
+		df_overlay (Optional[ pd.DataFrame ]): Optional geocoded records rendered above the base
+		layer.
 		use_user_location (bool): Use the global/user location as a fallback map point.
 		key_prefix (str): Unique Streamlit widget key prefix for this map instance.
-		source_name (str): Active database table or custom dataset name displayed as the map header.
+		source_name (str): Active database table or custom dataset name displayed as the map
+		header.
 
 	Returns:
 		None: Renders a map of report locations and optional overlay data.
 	"""
 	try:
-		active_source = str( source_name or st.session_state.get( 'active_dataset_name', '' )
-			or cfg.DEFAULT_DATA ).strip( )
+		active_source = str( source_name or st.session_state.get( 'active_dataset_name',
+			'' ) or cfg.DEFAULT_DATA ).strip( )
 		st.subheader( active_source )
-		
-		profiles: Dict[ str, Dict[ str, List[ str ] ] ] = {
-			'UAP': {
-				'filters': [ 'Year', 'CountryName', 'Country', 'State', 'Shape', 'Type', 'Agency' ],
-				'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
-					'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ],
-				'display': [ 'ID', 'Year', 'Month', 'Day', 'CalendarDate', 'City', 'State',
-					'CountryName', 'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ],
-			},
-			'UAP Sightings': {
-				'filters': [ 'Year', 'Country', 'State', 'Shape' ],
+		profiles: Dict[ str, Dict[ str, List[ str ] ] ] = { 'UAP': {
+			'filters': [ 'Year', 'CountryName', 'Country', 'State', 'Shape', 'Type', 'Agency' ],
+			'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName', 'Country',
+				'Latitude', 'Longitude', 'Shape', 'Summary' ],
+			'display': [ 'ID', 'Year', 'Month', 'Day', 'CalendarDate', 'City', 'State',
+				'CountryName', 'Country', 'Latitude', 'Longitude', 'Shape', 'Summary' ], },
+			'UAP Sightings': { 'filters': [ 'Year', 'Country', 'State', 'Shape' ],
 				'tooltip': [ 'CalendarDate', 'City', 'State', 'Country', 'Latitude', 'Longitude',
 					'Shape', 'Summary' ],
 				'display': [ 'Year', 'Month', 'Day', 'CalendarDate', 'City', 'State', 'Country',
-					'Latitude', 'Longitude', 'Shape', 'Summary' ],
-			},
-			'Observations': {
+					'Latitude', 'Longitude', 'Shape', 'Summary' ], }, 'Observations': {
 				'filters': [ 'Year', 'CountryName', 'State', 'Shape', 'Type', 'Agency' ],
-				'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
-					'Latitude', 'Longitude', 'Shape', 'Summary' ],
+				'tooltip': [ 'Year', 'Month', 'Day', 'City', 'State', 'CountryName', 'Latitude',
+					'Longitude', 'Shape', 'Summary' ],
 				'display': [ 'ID', 'Year', 'Month', 'Day', 'City', 'State', 'CountryName',
-					'Latitude', 'Longitude', 'Shape', 'Summary' ],
-			},
-			'Nuclear Sites': {
-				'filters': [ 'Name', 'Capacity', 'City', 'State' ],
+					'Latitude', 'Longitude', 'Shape', 'Summary' ], },
+			'Nuclear Sites': { 'filters': [ 'Name', 'Capacity', 'City', 'State' ],
 				'tooltip': [ 'Name', 'Capacity', 'City', 'State', 'Latitude', 'Longitude' ],
-				'display': [ 'Name', 'Capacity', 'City', 'State', 'Latitude', 'Longitude' ],
-			},
-			'Airports': {
-				'filters': [ 'Name', 'Identifier', 'Elevation', 'City', 'State' ],
-				'tooltip': [ 'Name', 'Identifier', 'Elevation', 'City', 'State',
-					'Latitude', 'Longitude' ],
-				'display': [ 'ID', 'Name', 'Identifier', 'Elevation', 'City', 'State',
-					'Latitude', 'Longitude' ],
-			},
-			'EPA Sites': {
-				'filters': [ 'Name', 'City', 'State' ],
+				'display': [ 'Name', 'Capacity', 'City', 'State', 'Latitude', 'Longitude' ], },
+			'Airports': { 'filters': [ 'Name', 'Identifier', 'Elevation', 'City', 'State' ],
+				'tooltip': [ 'Name', 'Identifier', 'Elevation', 'City', 'State', 'Latitude',
+					'Longitude' ],
+				'display': [ 'ID', 'Name', 'Identifier', 'Elevation', 'City', 'State', 'Latitude',
+					'Longitude' ], }, 'EPA Sites': { 'filters': [ 'Name', 'City', 'State' ],
 				'tooltip': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
-				'display': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ],
-			},
-			'Pollution': {
-				'filters': [ 'Name', 'City', 'State' ],
-				'tooltip': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
-					'Latitude', 'Longitude' ],
-				'display': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State',
-					'Latitude', 'Longitude' ],
-			},
-			'Pollution Sites': {
-				'filters': [ 'Name', 'City', 'State' ],
-				'tooltip': [ 'SuperfundSitesId', 'Name', 'City', 'State',
-					'Latitude', 'Longitude' ],
-				'display': [ 'SuperfundSitesId', 'Name', 'City', 'State',
-					'Latitude', 'Longitude' ],
-			},
-			'Military': {
-				'filters': [ 'StateCode', 'Component', 'Name' ],
+				'display': [ 'Name', 'City', 'State', 'Latitude', 'Longitude' ], },
+			'Pollution': { 'filters': [ 'Name', 'City', 'State' ],
+				'tooltip': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State', 'Latitude',
+					'Longitude' ],
+				'display': [ 'SuperfundSitesId', 'ID', 'Name', 'City', 'State', 'Latitude',
+					'Longitude' ], }, 'Pollution Sites': { 'filters': [ 'Name', 'City', 'State' ],
+				'tooltip': [ 'SuperfundSitesId', 'Name', 'City', 'State', 'Latitude',
+					'Longitude' ],
+				'display': [ 'SuperfundSitesId', 'Name', 'City', 'State', 'Latitude',
+					'Longitude' ], }, 'Military': { 'filters': [ 'StateCode', 'Component',
+				'Name' ],
 				'tooltip': [ 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
-				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
-			},
-			'Military Installations': {
-				'filters': [ 'StateCode', 'Component', 'Name' ],
+				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ], },
+			'Military Installations': { 'filters': [ 'StateCode', 'Component', 'Name' ],
 				'tooltip': [ 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
-				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ],
-			},
-			'World': {
-				'filters': [ 'RefreshId', 'EntityType', 'Source' ],
-				'tooltip': [ 'Name', 'EntityType', 'EntityId', 'ObservedAt',
-					'Latitude', 'Longitude', 'Altitude', 'Speed' ],
-				'display': [ 'Id', 'RefreshId', 'ObservedAt', 'EntityType',
-					'EntityId', 'Name', 'Latitude', 'Longitude', 'Altitude', 'Speed' ],
-			},
-		}
+				'display': [ 'ID', 'Name', 'StateCode', 'Component', 'Latitude', 'Longitude' ], },
+			'World': { 'filters': [ 'RefreshId', 'EntityType', 'Source' ],
+				'tooltip': [ 'Name', 'EntityType', 'EntityId', 'ObservedAt', 'Latitude',
+					'Longitude', 'Altitude', 'Speed' ],
+				'display': [ 'Id', 'RefreshId', 'ObservedAt', 'EntityType', 'EntityId', 'Name',
+					'Latitude', 'Longitude', 'Altitude', 'Speed' ], }, }
 		profile = profiles.get( active_source, { } )
 		df_source = pd.DataFrame( ) if df is None else df.copy( )
 		df_overlay_source = pd.DataFrame( ) if df_overlay is None else df_overlay.copy( )
 		required_cols = [ 'Latitude', 'Longitude' ]
-		
 		if not df_source.empty:
 			missing_cols = [ col for col in required_cols if col not in df_source.columns ]
 			if missing_cols:
 				st.warning( f'Map requires missing column(s): {", ".join( missing_cols )}' )
 				return
-		
 		if not df_overlay_source.empty:
-			overlay_missing_cols = [ col for col in required_cols
-				if col not in df_overlay_source.columns ]
+			overlay_missing_cols = [ col for col in required_cols if
+				col not in df_overlay_source.columns ]
 			if overlay_missing_cols:
 				df_overlay_source = pd.DataFrame( )
-		
 		# ----- Metrics retain their existing position above the filter controls.
 		metric_c1, metric_c2, metric_c3, metric_c4 = st.columns( 4, border=True )
-
 		# ----- Filter source records before coordinate classification and metric calculation.
-		filter_fields = [ col for col in profile.get( 'filters',
-			[ 'Year', 'Country', 'State', 'Shape' ] ) if col in df_source.columns ]
+		filter_fields = [ col for col in
+			profile.get( 'filters', [ 'Year', 'Country', 'State', 'Shape' ] ) if
+			col in df_source.columns ]
 		filter_prefix = f'{key_prefix}_{re.sub( r"[^0-9a-zA-Z_]+", "_", active_source.lower( ) )}'
 		selected_filters: Dict[ str, List[ str ] ] = { }
 		for field in filter_fields:
 			field_key = re.sub( r'[^0-9a-zA-Z_]+', '_', field.lower( ) )
 			widget_key = f'{filter_prefix}_{field_key}'
 			selected_filters[ field ] = list( st.session_state.get( widget_key, [ ] ) )
-
 		# ----- Default the World map to the most recent observation snapshot.
-		if (active_source == 'World' and 'RefreshId' in filter_fields and
-				'ObservedAt' in df_source.columns and not df_source.empty):
+		if (
+				active_source == 'World' and 'RefreshId' in filter_fields and 'ObservedAt' in
+				df_source.columns and not df_source.empty):
 			refresh_key = f'{filter_prefix}_refreshid'
 			if refresh_key not in st.session_state:
 				latest_index = df_source[ 'ObservedAt' ].astype( str ).idxmax( )
@@ -1632,24 +1594,22 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				if pd.notna( latest_refresh ):
 					selected_filters[ 'RefreshId' ] = [ str( latest_refresh ) ]
 					st.session_state[ refresh_key ] = selected_filters[ 'RefreshId' ]
-
 		if filter_fields:
 			for row_start in range( 0, len( filter_fields ), 2 ):
 				filter_columns = st.columns( 2, border=True )
 				for offset, field in enumerate( filter_fields[ row_start: row_start + 2 ] ):
 					with filter_columns[ offset ]:
-						df_options = filter_map_records( df_source,
-							{ name: values for name, values in selected_filters.items( )
-								if name != field } )
-						valid_source_values = set( df_source[ field ].dropna( ).astype( str ).unique( ) )
+						df_options = filter_map_records( df_source, { name: values for name, values
+							in selected_filters.items( ) if name != field } )
+						valid_source_values = set(
+							df_source[ field ].dropna( ).astype( str ).unique( ) )
 						options = sorted( { str( value ) for value in
-							df_options[ field ].dropna( ).unique( ) }.union(
-							{ value for value in selected_filters[ field ]
-								if value in valid_source_values } ) )
+							df_options[ field ].dropna( ).unique( ) }.union( { value for value in
+							selected_filters[ field ] if value in valid_source_values } ) )
 						field_key = re.sub( r'[^0-9a-zA-Z_]+', '_', field.lower( ) )
 						widget_key = f'{filter_prefix}_{field_key}'
-						valid_selection = [ value for value in selected_filters[ field ]
-							if value in options ]
+						valid_selection = [ value for value in selected_filters[ field ] if
+							value in options ]
 						if widget_key in st.session_state:
 							if st.session_state[ widget_key ] != valid_selection:
 								st.session_state[ widget_key ] = valid_selection
@@ -1657,7 +1617,6 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 							st.session_state[ widget_key ] = valid_selection
 						selected_filters[ field ] = st.multiselect( field, options,
 							key=widget_key )
-
 		df_filtered = filter_map_records( df_source, selected_filters )
 		total_count = len( df_filtered )
 		base_mask = get_map_coordinate_mask( df_filtered )
@@ -1667,7 +1626,6 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 			df_base_map[ 'Longitude' ] = pd.to_numeric( df_base_map[ 'Longitude' ] )
 		mapped_count = len( df_base_map )
 		missing_count = total_count - mapped_count
-
 		df_overlay_map = pd.DataFrame( )
 		if not df_overlay_source.empty:
 			overlay_mask = get_map_coordinate_mask( df_overlay_source )
@@ -1675,7 +1633,6 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 			if not df_overlay_map.empty:
 				df_overlay_map[ 'Latitude' ] = pd.to_numeric( df_overlay_map[ 'Latitude' ] )
 				df_overlay_map[ 'Longitude' ] = pd.to_numeric( df_overlay_map[ 'Longitude' ] )
-
 		df_user_map = pd.DataFrame( )
 		if (use_user_location and df_source.empty and df_overlay_map.empty):
 			user_latitude = st.session_state.get( 'latitude', None )
@@ -1685,59 +1642,51 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				user_description = st.session_state.get( 'description', '' )
 				if not user_location:
 					user_location = (f'{float( user_latitude ):.4f},'
-						f'{float( user_longitude ):.4f}')
-				df_user_map = pd.DataFrame( [ {
-					'CalendarDate': dt.datetime.now( ).strftime( '%Y-%m-%d %H:%M:%S' ),
-					'City': user_location,
-					'State': '',
-					'Country': '',
-					'Latitude': float( user_latitude ),
-					'Longitude': float( user_longitude ),
-					'Shape': 'User Location',
-					'Summary': user_description or 'Current user location fallback.',
-				} ] )
-
+					                 f'{float( user_longitude ):.4f}')
+				df_user_map = pd.DataFrame( [
+					{ 'CalendarDate': dt.datetime.now( ).strftime( '%Y-%m-%d %H:%M:%S' ),
+						'City': user_location, 'State': '', 'Country': '',
+						'Latitude': float( user_latitude ), 'Longitude': float( user_longitude ),
+						'Shape': 'User Location',
+						'Summary': user_description or 'Current user location fallback.', } ] )
 		metric_c1.metric( 'Total Records', f'{total_count:,}' )
 		metric_c2.metric( 'Mapped Records', f'{mapped_count:,}' )
 		metric_c3.metric( 'Missing / Invalid Coordinates', f'{missing_count:,}' )
-		metric_c4.metric( 'Overlay / User Records',
-			f'{len( df_overlay_map ) + len( df_user_map ):,}' )
+		metric_c4.metric( 'Overlay / User Records', f'{len( df_overlay_map ) + len( df_user_map ):,}' )
 		st.caption( f'Filtered records: {total_count:,} of {len( df_source ):,} source rows. '
-			f'Overlay: {len( df_overlay_map ):,}; user fallback: {len( df_user_map ):,}.' )
-
+		            f'Overlay: {len( df_overlay_map ):,}; user fallback: {len( df_user_map ):,}.' )
 		if df_base_map.empty and df_overlay_map.empty and df_user_map.empty:
 			if total_count:
 				st.info( 'Matching records have no valid coordinates to map.' )
 			else:
 				st.info( 'No mapped records match the selected filters.' )
 			return
-
 		map_style_options = {
 			'Carto Positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-			'Carto Dark Matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+			'Carto Dark Matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style'
+			                     '.json',
 			'Carto Voyager': 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
 			'Dark': 'dark', 'Light': 'light', 'Road': 'road', 'Satellite': 'satellite',
 			'Dark - No Labels': 'dark_no_labels', 'Light - No Labels': 'light_no_labels',
-			'Streamlit Theme': None,
-		}
-		control_c1, control_c2, control_c3, control_c4 = st.columns(
-			[ 0.20, 0.20, 0.30, 0.30 ], border=True )
+			'Streamlit Theme': None, }
+		control_c1, control_c2, control_c3, control_c4 = st.columns( [ 0.20, 0.20, 0.30,
+			0.30 ], border=True )
 		with control_c1:
-			zoom_level = st.slider( 'Initial Zoom', min_value=0, max_value=50, step=1,
-				value=5, key=f'{key_prefix}_zoom' )
+			zoom_level = st.slider( 'Initial Zoom', min_value=0, max_value=50, step=1, value=5,
+				key=f'{key_prefix}_zoom' )
 		with control_c2:
-			point_radius = st.slider( 'Point Radius', min_value=1, max_value=50, value=1,
-				step=5, key=f'{key_prefix}_radius' )
+			point_radius = st.slider( 'Point Radius', min_value=1, max_value=50, value=1, step=5,
+				key=f'{key_prefix}_radius' )
 		with control_c3:
 			selected_map_style = st.selectbox( 'Map Style', list( map_style_options.keys( ) ),
 				index=1, key=f'{key_prefix}_style' )
 			map_style = map_style_options[ selected_map_style ]
 		with control_c4:
 			if len( df_base_map ) > 100:
-				max_records = st.slider( 'Maximum Records', min_value=100,
-					max_value=len( df_base_map ), value=min( 2500, len( df_base_map ) ),
-					step=500, key=f'{key_prefix}_limit' )
-				st.caption( f'Rendering {max_records:,} of {mapped_count:,} matching mapped records.' )
+				max_records = st.slider( 'Maximum Records', min_value=100, max_value=len(
+					df_base_map ), value=min( 2500, len( df_base_map ) ), step=500, key=f'{key_prefix}_limit' )
+				st.caption( f'Rendering {max_records:,} of {mapped_count:,} matching mapped '
+				            f'records.' )
 				df_base_map = df_base_map.head( max_records )
 			elif not df_base_map.empty:
 				st.caption( f'Displaying all {len( df_base_map ):,} mapped base records.' )
@@ -1745,67 +1694,64 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				st.caption( f'Displaying {len( df_overlay_map ):,} overlay record(s).' )
 			else:
 				st.caption( 'Displaying current user/global location fallback.' )
-		
-		tooltip_fields = profile.get( 'tooltip', [ 'City', 'State', 'Country',
-			'Latitude', 'Longitude', 'Shape', 'Summary' ] )
+		tooltip_fields = profile.get( 'tooltip', [ 'City', 'State', 'Country', 'Latitude',
+			'Longitude', 'Shape', 'Summary' ] )
 		for df_target in [ df_base_map, df_overlay_map, df_user_map ]:
 			if df_target.empty:
 				continue
 			for col in tooltip_fields:
 				if col not in df_target.columns:
 					df_target[ col ] = ''
-			df_target[ 'Position' ] = df_target.apply(
-				lambda row: [ float( row[ 'Longitude' ] ), float( row[ 'Latitude' ] ) ], axis=1 )
-		
+			df_target[ 'Position' ] = df_target.apply( lambda row: [ float( row[ 'Longitude' ] ),
+				float( row[ 'Latitude' ] ) ], axis=1 )
 		if not df_base_map.empty:
 			df_view = df_base_map
 		elif not df_overlay_map.empty:
 			df_view = df_overlay_map
 		else:
 			df_view = df_user_map
-		
-		view_state = pdk.ViewState( latitude=float( df_view[ 'Latitude' ].median( ) ),
-			longitude=float( df_view[ 'Longitude' ].median( ) ), zoom=zoom_level, pitch=0 )
+		view_state = pdk.ViewState( latitude=float(
+			df_view[ 'Latitude' ].median( ) ), longitude=float(
+			df_view[ 'Longitude' ].median( ) ), zoom=zoom_level, pitch=0 )
 		layers = [ ]
 		if not df_base_map.empty:
 			layers.append( pdk.Layer( 'ScatterplotLayer', data=df_base_map,
-				get_position='Position', get_radius=point_radius,
-				get_fill_color=[ 0, 120, 252, 160 ], get_line_color=[ 255, 255, 255, 180 ],
-				line_width_min_pixels=1, radius_min_pixels=4, radius_max_pixels=24,
+				get_position='Position', get_radius=point_radius, get_fill_color=[
+				0, 120, 252, 160 ], get_line_color=[ 255, 255, 255,
+				180 ], line_width_min_pixels=1, radius_min_pixels=4, radius_max_pixels=24,
 				filled=True, stroked=True, pickable=True ) )
 		if not df_overlay_map.empty:
 			layers.append( pdk.Layer( 'ScatterplotLayer', data=df_overlay_map,
 				get_position='Position', get_radius=max( point_radius * 2, 20000 ),
-				get_fill_color=[ 255, 80, 0, 220 ], get_line_color=[ 255, 255, 255, 255 ],
-				line_width_min_pixels=2, radius_min_pixels=8, radius_max_pixels=40,
+				get_fill_color=[
+				255, 80, 0, 220 ], get_line_color=[ 255, 255, 255,
+				255 ], line_width_min_pixels=2, radius_min_pixels=8, radius_max_pixels=40,
 				filled=True, stroked=True, pickable=True ) )
 		if not df_user_map.empty:
 			layers.append( pdk.Layer( 'ScatterplotLayer', data=df_user_map,
 				get_position='Position', get_radius=max( point_radius * 2, 20000 ),
-				get_fill_color=[ 0, 180, 80, 230 ], get_line_color=[ 255, 255, 255, 255 ],
-				line_width_min_pixels=2, radius_min_pixels=10, radius_max_pixels=42,
+				get_fill_color=[
+				0, 180, 80, 230 ], get_line_color=[ 255, 255, 255,
+				255 ], line_width_min_pixels=2, radius_min_pixels=10, radius_max_pixels=42,
 				filled=True, stroked=True, pickable=True ) )
-		
 		labels = { 'CalendarDate': 'Date' }
 		tooltip_lines = [ ]
 		for field in tooltip_fields:
 			label = labels.get( field, field )
 			if field == 'Summary':
-				tooltip_lines.append(
-					'<b>Summary:</b><div style="max-width:320px;white-space:normal;overflow-wrap:anywhere;">{Summary}</div>' )
+				tooltip_lines.append( '<b>Summary:</b><div '
+				                      'style="max-width:320px;white-space:normal;overflow-wrap'
+				                      ':anywhere;">{Summary}</div>' )
 			else:
 				tooltip_lines.append( f'<b>{label}:</b> {{{field}}}<br/>' )
-		tooltip = {
-			'html': ''.join( tooltip_lines ),
+		tooltip = { 'html': ''.join( tooltip_lines ),
 			'style': { 'backgroundColor': 'rgba(0, 0, 0, 0.85)', 'color': 'white',
 				'fontSize': '12px' }, }
 		blue_divider( )
-		deck = pdk.Deck( layers=layers, initial_view_state=view_state,
-			map_style=map_style, tooltip=tooltip )
+		deck = pdk.Deck( layers=layers, initial_view_state=view_state, map_style=map_style,
+			tooltip=tooltip )
 		st.pydeck_chart( deck, use_container_width=True )
-		
-		show_table = st.checkbox( 'Show mapped records table', value=False,
-			key=f'{key_prefix}_show_table' )
+		show_table = st.checkbox( 'Show mapped records table', value=False, key=f'{key_prefix}_show_table' )
 		if show_table:
 			if df_base_map.empty:
 				if not df_user_map.empty:
@@ -1815,10 +1761,12 @@ def create_reports_map( df: pd.DataFrame, df_overlay: Optional[ pd.DataFrame ]=N
 				else:
 					st.info( 'No base mapped records are available to display.' )
 			else:
-				display_cols = [ col for col in profile.get( 'display', list( df_base_map.columns ) )
-					if col in df_base_map.columns and col != 'Position' ]
-				st.data_editor( df_base_map[ display_cols ], key=f'{key_prefix}_table',
-					use_container_width=True, disabled=True )
+				display_cols = [ col for col in
+					profile.get( 'display', list( df_base_map.columns ) ) if
+					col in df_base_map.columns and col != 'Position' ]
+				st.data_editor( df_base_map[
+					display_cols ], key=f'{key_prefix}_table', use_container_width=True,
+					disabled=True )
 	
 	except Exception as e:
 		st.error( f'Interactive map failed: {e}' )
@@ -2538,7 +2486,7 @@ def sync_mode_document( prefix: str, result_key: str, source_key: str ) -> None:
 	st.session_state[ f'{prefix}_document_signature' ] = signature
 
 def render_source_processing_controls( prefix: str, result_key: str, source_key: str,
-                                       source_name: str, key_prefix: str ) -> None:
+	source_name: str, key_prefix: str ) -> None:
 	"""Render Foo-style processing controls inside one source/API expander.
 
 	Purpose:
@@ -2577,8 +2525,8 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 		else:
 			try:
 				documents = st.session_state[ f'{prefix}_documents' ]
-				chunks = chunk_documents( documents, settings[ 'chunk_size' ],
-					settings[ 'chunk_overlap' ] )
+				chunks = chunk_documents( documents,
+					settings[ 'chunk_size' ], settings[ 'chunk_overlap' ] )
 				st.session_state[ f'{prefix}_chunks' ] = chunks
 				st.session_state[ f'{prefix}_chunk_size_used' ] = settings[ 'chunk_size' ]
 				st.session_state[ f'{prefix}_chunk_overlap_used' ] = settings[ 'chunk_overlap' ]
@@ -2599,13 +2547,14 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 			st.warning( 'Chunk settings changed. Run Chunk again before embedding.' )
 		else:
 			try:
-				embedder, vectors = create_embeddings( chunks, settings[ 'provider' ],
-					settings[ 'model' ], settings[ 'model_path' ] )
+				embedder, vectors = create_embeddings( chunks,
+					settings[ 'provider' ], settings[ 'model' ], settings[ 'model_path' ] )
 				st.session_state[ f'{prefix}_embedder' ] = embedder
 				st.session_state[ f'{prefix}_embeddings' ] = vectors
 				st.session_state[ f'{prefix}_embedding_provider_used' ] = settings[ 'provider' ]
 				st.session_state[ f'{prefix}_embedding_model_used' ] = settings[ 'model' ]
-				st.session_state[ f'{prefix}_embedding_model_path_used' ] = settings[ 'model_path' ]
+				st.session_state[ f'{prefix}_embedding_model_path_used' ] = settings[
+					'model_path' ]
 				st.session_state[ f'{prefix}_vector_store' ] = None
 				st.success( f'Created {len( vectors ):,} embedding vector(s).' )
 			except Exception as exc:
@@ -2625,10 +2574,11 @@ def render_source_processing_controls( prefix: str, result_key: str, source_key:
 		else:
 			try:
 				st.session_state[ f'{prefix}_vector_store' ] = store_documents( chunks, embedder,
-					settings[ 'vector_backend' ], settings[ 'vector_target' ],
+					settings[ 'vector_backend' ],
+					settings[ 'vector_target' ],
 					settings[ 'persist_directory' ], settings[ 'namespace' ] )
-				st.success(
-					f"Stored {len( chunks ):,} chunk(s) in {settings[ 'vector_backend' ]}." )
+				st.success( f"Stored {len( chunks ):,} chunk(s) in "
+				            f"{settings[ 'vector_backend' ]}." )
 			except Exception as exc:
 				st.error( str( exc ) )
 
@@ -2701,7 +2651,6 @@ def initialize_loading_state( ) -> None:
 		if key not in st.session_state:
 			st.session_state[ key ] = value
 
-# Initialize shared loader state after its implementation is available.
 initialize_loading_state( )
 
 def rebuild_raw_text_from_documents( ) -> str:
@@ -5846,7 +5795,6 @@ elif mode == 'Weather Data':
 						else:
 							try:
 								weather = GoogleWeather( )
-
 								if google_product == 'Current Conditions':
 									result = weather.fetch_current( address=google_address,
 										units_system=google_units, language_code=google_language,
@@ -5873,11 +5821,8 @@ elif mode == 'Weather Data':
 								st.session_state[ 'weather_last_result' ] = result or { }
 								st.session_state[ 'weather_last_latitude' ] = weather_latitude
 								st.session_state[ 'weather_last_longitude' ] = weather_longitude
-
-								set_global_coordinates_from_result(
-									weather_latitude,
-									weather_longitude,
-									location=google_address,
+								set_global_coordinates_from_result( weather_latitude,
+									weather_longitude, location=google_address,
 									description='Google Weather result' )
 
 								st.success( 'Google Weather request completed.' )
@@ -5890,13 +5835,10 @@ elif mode == 'Weather Data':
 							use_container_width=True ):
 						if st.session_state.get( 'weather_last_source' ) == 'Google Weather':
 							initialize_mode_document_state( 'weather' )
-							for key, value in {
-								'weather_documents': [ ], 'weather_chunks': [ ],
+							for key, value in { 'weather_documents': [ ], 'weather_chunks': [ ],
 								'weather_embeddings': [ ], 'weather_embedder': None,
-								'weather_vector_store': None,
-								'weather_document_signature': '',
-								'weather_chunk_size_used': 0,
-								'weather_chunk_overlap_used': 0,
+								'weather_vector_store': None, 'weather_document_signature': '',
+								'weather_chunk_size_used': 0, 'weather_chunk_overlap_used': 0,
 								'weather_embedding_provider_used': '',
 								'weather_embedding_model_used': '',
 								'weather_embedding_model_path_used': '',
@@ -5943,7 +5885,6 @@ elif mode == 'Weather Data':
 						else:
 							try:
 								weather = OpenWeather( )
-
 								result = weather.fetch( location=open_location, mode=open_mode,
 									zone=open_zone, forecast_days=int( open_forecast_days ),
 									past_days=int( open_past_days ),
@@ -9622,10 +9563,9 @@ elif mode == 'Public Health':
 		with st.expander( label='Open City Data', icon='🏙️', expanded=False ):
 			st.caption( 'API', help=cfg.OPEN_CITY_DATA_LOADER )
 			OPEN_CITY_DOMAINS = [ 'data.sfgov.org', 'data.cityofnewyork.us',
-			                      'data.cityofchicago.org', 'data.lacity.org', 'data.seattle.gov',
-			                      'data.austintexas.gov', 'data.cincinnati-oh.gov',
-			                      'data.baltimorecity.gov', 'data.cityofboston.gov',
-			                      'data.nashville.gov', 'Other' ]
+				'data.cityofchicago.org', 'data.lacity.org', 'data.seattle.gov',
+				'data.austintexas.gov', 'data.cincinnati-oh.gov', 'data.baltimorecity.gov',
+				'data.cityofboston.gov', 'data.nashville.gov', 'Other' ]
 			
 			def _clear_open_city_state( ) -> None:
 				"""
@@ -10540,7 +10480,7 @@ elif mode == 'Artificial Intelligence':
 	# ------------------------------------------------------------------
 	with left:
 		
-		# ---- Expander GPT
+		# ---- GPT
 		with st.expander( label='ChatGPT', expanded=True ):
 			CHAT_REASONING_EFFORTS = [ 'minimal', 'low', 'medium', 'high' ]
 			
@@ -10786,7 +10726,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---- Expander Grok
+		# ---- Grok
 		with st.expander( label='Grok', expanded=False ):
 			GROK_REASONING_EFFORTS = [ 'none', 'low', 'medium', 'high' ]
 			
@@ -11066,7 +11006,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---- Expander Claude
+		# ---- Claude
 		with st.expander( label='Claude', expanded=False ):
 			def _clear_claude_state( ) -> None:
 				"""
@@ -11318,7 +11258,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as ex:
 					st.error( f'Claude generation failed: {ex}' )
 
-		# ---- Expander GEMINI
+		# ---- GEMINI
 		with st.expander( label='Gemini', expanded=False ):
 			GEMINI_THINKING_LEVELS = [ 'minimal', 'low', 'medium', 'high' ]
 			
@@ -11612,7 +11552,7 @@ elif mode == 'Artificial Intelligence':
 				except Exception as exc:
 					st.error( str( exc ) )
 		
-		# ---- Expander Mistral
+		# ---- Mistral
 		with st.expander( label='Mistral', expanded=False ):
 			def _clear_mistral_state( ) -> None:
 				"""
