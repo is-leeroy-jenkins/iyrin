@@ -696,6 +696,32 @@ def create_world_bounding_box( latitude: float, longitude: float,
 	north = min( 90.0, latitude + delta )
 	return f'{west:.6f},{south:.6f},{east:.6f},{north:.6f}'
 
+def create_world_bounding_boxes( latitude: float, longitude: float,
+		delta: float=2.0 ) -> List[ str ]:
+	"""Build one or two valid FIRMS boxes without losing coverage at the date line.
+
+	Purpose:
+		Split longitude ranges crossing 180 degrees into independent west,south,
+		east,north rectangles supported by NASA's Area API.
+
+	Args:
+		latitude (float): Bounding-box center latitude.
+		longitude (float): Bounding-box center longitude.
+		delta (float): Positive half-width in decimal degrees.
+
+	Returns:
+		List[str]: One or two FIRMS area-coordinate strings.
+	"""
+	area = create_world_bounding_box( latitude, longitude, delta )
+	if longitude - delta >= -180.0 and longitude + delta <= 180.0:
+		return [ area ]
+	west, south, east, north = area.split( ',' )
+	if longitude - delta < -180.0:
+		return [ f'{longitude - delta + 360.0:.6f},{south},180.000000,{north}',
+			f'-180.000000,{south},{east},{north}' ]
+	return [ f'{west},{south},180.000000,{north}',
+		f'-180.000000,{south},{longitude + delta - 360.0:.6f},{north}' ]
+
 def is_valid_world_coordinates( latitude: float, longitude: float ) -> bool:
 	"""Determine whether provider coordinates are finite and geographically valid.
 
@@ -1126,13 +1152,15 @@ def fetch_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	source = str( st.session_state[ 'live_world_firms_source' ] )
 	day_range = int( st.session_state[ 'live_world_firms_day_range' ] )
 	area_mode = str( st.session_state[ 'live_world_firms_area_mode' ] )
-	area_coordinates = 'world' if area_mode == 'World' else create_world_bounding_box(
+	area_coordinates = [ 'world' ] if area_mode == 'World' else create_world_bounding_boxes(
 		latitude, longitude )
 
 	service = Firms( )
-	result = service.fetch_area( source=source, area_coordinates=area_coordinates,
-		day_range=day_range, date='', time=20 ) or { }
-	rows = result.get( 'rows', [ ] ) or [ ]
+	rows: List[ Dict[ str, Any ] ] = [ ]
+	for area in area_coordinates:
+		result = service.fetch_area( source=source, area_coordinates=area,
+			day_range=day_range, date='', time=20 ) or { }
+		rows.extend( result.get( 'rows', [ ] ) or [ ] )
 	max_records = int( st.session_state[ 'live_world_firms_max_records' ] )
 	st.session_state[ 'live_world_firms_source_count' ] = len( rows )
 	st.session_state[ 'live_world_firms_truncated' ] = len( rows ) > max_records
@@ -2245,6 +2273,14 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
 	st.session_state[ 'live_world_last_error' ] = ''
+	# An unresolved global location is represented by (0, 0) in app.py.
+	# Never turn that fallback into a local provider query.
+	has_location = (is_valid_world_coordinates( latitude, longitude )
+		and not (latitude == 0.0 and longitude == 0.0))
+	location_required_sources = { 'aircraft', 'military_aircraft', 'vessels',
+		'infrastructure', 'cameras', 'map_layers' }
+	if st.session_state[ 'live_world_firms_area_mode' ] != 'World':
+		location_required_sources.add( 'fires' )
 	fetchers: Dict[ str, Callable[ [ ], pd.DataFrame ] ] = {
 		'aircraft': lambda: fetch_aircraft( latitude, longitude ),
 		'military_aircraft': lambda: fetch_military_aircraft( latitude, longitude ),
@@ -2262,7 +2298,15 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 			frame_key = source[ 'frame_key' ]
 			enabled_key = source[ 'enabled_key' ]
 			if st.session_state[ enabled_key ]:
-				df_source = refresh_live_source( source_key, fetchers[ source_key ] )
+				if not has_location and source_key in location_required_sources:
+					df_source = st.session_state.get( frame_key, pd.DataFrame( ) )
+					if not isinstance( df_source, pd.DataFrame ):
+						df_source = pd.DataFrame( )
+					update_source_state( source_key, 'Location Required',
+						error='Set a valid global location before refreshing this source.',
+						stale=not df_source.empty, error_type='MissingLocation' )
+				else:
+					df_source = refresh_live_source( source_key, fetchers[ source_key ] )
 				if not df_source.empty:
 					frames.append( df_source )
 			else:
@@ -2283,7 +2327,7 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 		errors = dict( st.session_state[ 'live_world_source_errors' ] )
 		failures: List[ str ] = [ ]
 		for source_key, status in statuses.items( ):
-			if status not in ( 'Failed', 'Configuration Required' ):
+			if status not in ( 'Failed', 'Configuration Required', 'Location Required' ):
 				continue
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
 			failures.append( f'{label}: {errors.get( source_key, "" )}' )
@@ -2362,9 +2406,9 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			attempts = int( st.session_state.get(
 				'live_world_satellite_propagation_attempts', 0 ) )
 			st.warning( f'Satellites: {failures} of {attempts} orbit propagations failed.' )
-		if status == 'Configuration Required':
+		if status in ( 'Configuration Required', 'Location Required' ):
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
-			note = source_errors.get( source_key, '' ) or 'Credentials are required.'
+			note = source_errors.get( source_key, '' ) or 'Configuration is required.'
 			st.warning( f'{label}: {note}' )
 			continue
 		if status != 'Failed':
@@ -2386,7 +2430,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if df_entities is None or df_entities.empty:
 		if not (st.session_state[ 'live_world_measurements' ]
 				or st.session_state[ 'live_world_historical_replay' ]):
-			if any( value in ( 'Failed', 'Configuration Required' ) for value in source_status.values( ) ):
+			if any( value in ( 'Failed', 'Configuration Required', 'Location Required' )
+					for value in source_status.values( ) ):
 				st.info( 'No records are available because the enabled Live World source refresh failed.' )
 			else:
 				st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )

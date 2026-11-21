@@ -95,6 +95,24 @@ class AisStreamValidationTests(unittest.TestCase):
         self.assertTrue(self.socket.closed)
         self.assertEqual(1, self.source.max_messages)
 
+    def test_antimeridian_bounding_boxes_preserve_entire_search_area(self) -> None:
+        """Generate two provider-valid longitude ranges when crossing +180 degrees."""
+        self.fetch(self.source, 10.0, 179.0, 2.0, 1, 3.0)
+        boxes = json.loads(self.socket.subscription)['BoundingBoxes']
+        self.assertEqual([
+            [[12.0, 177.0], [8.0, 180.0]],
+            [[12.0, -180.0], [8.0, -179.0]],
+        ], boxes)
+
+    def test_negative_antimeridian_bounding_boxes_are_valid(self) -> None:
+        """Generate two provider-valid longitude ranges when crossing -180 degrees."""
+        self.fetch(self.source, 10.0, -179.0, 2.0, 1, 3.0)
+        boxes = json.loads(self.socket.subscription)['BoundingBoxes']
+        self.assertEqual([
+            [[12.0, 179.0], [8.0, 180.0]],
+            [[12.0, -180.0], [8.0, -177.0]],
+        ], boxes)
+
     def test_missing_subscription_confirmation_fails(self) -> None:
         """Reject a position feed that never acknowledges the subscription."""
         self.socket.frames = [json.dumps({'MessageType': 'PositionReport',

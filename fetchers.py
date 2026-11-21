@@ -4049,15 +4049,15 @@ class NearbyObjects( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, launch: str='2020-2045',
-			h: float=26.0, occ: int=7, time: int=20 ) -> Dict[ str, Any ] | None:
+	def fetch_nhats_summary( self, dv: int=6, dur: int=360, stay: int=8, launch: str='2020-2045',
+			h: int=26, occ: int=7, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Fetch NHATS summary data using standard screening constraints.
 
 		Purpose:
 			Fetch NHATS summary data using standard screening constraints.
 
 		Args:
-			dv (float): Maximum total delta-V in km/s.
+			dv (int): Maximum total delta-V in km/s.
 
 			dur (int): Maximum mission duration in days.
 
@@ -4065,7 +4065,7 @@ class NearbyObjects( Fetcher ):
 
 			launch (str): Launch window year range. Example: 2020-2045.
 
-			h (float): Maximum H magnitude.
+			h (int): Maximum H magnitude.
 
 			occ (int): Maximum Orbit Condition Code.
 
@@ -4078,6 +4078,19 @@ class NearbyObjects( Fetcher ):
 			Error: Wraps and propagates the underlying provider or request exception.
 		"""
 		try:
+			if type( dv ) is not int or dv not in range( 4, 13 ):
+				raise ValueError( 'dv must be an integer from 4 through 12.' )
+			if type( dur ) is not int or dur not in range( 60, 451, 30 ):
+				raise ValueError( 'dur must be an allowable 30-day duration (60 through 450).' )
+			if type( stay ) is not int or stay not in ( 8, 16, 24, 32 ):
+				raise ValueError( 'stay must be 8, 16, 24, or 32.' )
+			if launch not in ( '2020-2025', '2025-2030', '2030-2035',
+					'2035-2040', '2040-2045', '2020-2045' ):
+				raise ValueError( 'launch must be a supported NHATS launch window.' )
+			if type( h ) is not int or h not in range( 16, 31 ):
+				raise ValueError( 'h must be an integer from 16 through 30.' )
+			if type( occ ) is not int or occ not in range( 0, 9 ):
+				raise ValueError( 'occ must be an integer from 0 through 8.' )
 			self.mode = 'nhats_summary'
 			self.url = f'{self.base_url}/nhats.api'
 			self.params = {
@@ -4106,14 +4119,14 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = (
-				"fetch_nhats_summary( self, dv: float=6.0, dur: int=360, stay: int=8, "
-				"launch: str='2020-2045', h: float=26.0, occ: int=7, time: int=20 ) -> "
+				"fetch_nhats_summary( self, dv: int=6, dur: int=360, stay: int=8, "
+				"launch: str='2020-2045', h: int=26, occ: int=7, time: int=20 ) -> "
 				"Dict[ str, Any ] | None"
 			)
 			Logger( ).write( exception )
 			raise exception
 	
-	def fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360,
+	def fetch_nhats_object( self, designation: str, dv: int=6, dur: int=360,
 			stay: int=8, launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:
 		"""Fetch NHATS details for a near-Earth object designation.
 
@@ -4122,7 +4135,7 @@ class NearbyObjects( Fetcher ):
 
 		Args:
 			designation (str): Required near-Earth object designation.
-			dv (float): Maximum mission delta-V in kilometers per second; defaults to 6.0.
+			dv (int): Maximum mission delta-V in kilometers per second; defaults to 6.
 			dur (int): Maximum mission duration in days; defaults to 360.
 			stay (int): Minimum stay in days; defaults to 8.
 			launch (str): Launch year range; defaults to 2020-2045.
@@ -4138,15 +4151,18 @@ class NearbyObjects( Fetcher ):
 			throw_if( 'designation', designation )
 			if not isinstance( designation, str ):
 				raise TypeError( 'designation must be a string.' )
-			if type( dv ) not in (int, float) or dv <= 0:
-				raise ValueError( 'dv must be a positive number.' )
-			if type( dur ) is not int or dur <= 0:
-				raise ValueError( 'dur must be a positive integer.' )
-			if type( stay ) is not int or stay < 0:
-				raise ValueError( 'stay must be a nonnegative integer.' )
+			if type( dv ) is not int or dv not in range( 4, 13 ):
+				raise ValueError( 'dv must be an integer from 4 through 12.' )
+			if type( dur ) is not int or dur not in range( 60, 451, 30 ):
+				raise ValueError( 'dur must be an allowable 30-day duration (60 through 450).' )
+			if type( stay ) is not int or stay not in ( 8, 16, 24, 32 ):
+				raise ValueError( 'stay must be 8, 16, 24, or 32.' )
 			throw_if( 'launch', launch )
 			if not isinstance( launch, str ):
 				raise TypeError( 'launch must be a string.' )
+			if launch not in ( '2020-2025', '2025-2030', '2030-2035',
+					'2035-2040', '2040-2045', '2020-2045' ):
+				raise ValueError( 'launch must be a supported NHATS launch window.' )
 			if type( time ) is not int or time <= 0:
 				raise ValueError( 'time must be a positive integer.' )
 			self.designation = designation
@@ -4172,7 +4188,7 @@ class NearbyObjects( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'NearbyObjects'
 			exception.method = (
-				"fetch_nhats_object( self, designation: str, dv: float=6.0, dur: int=360, stay: int=8, "
+				"fetch_nhats_object( self, designation: str, dv: int=6, dur: int=360, stay: int=8, "
 				"launch: str='2020-2045', time: int=20 ) -> Dict[ str, Any ] | None:"
 			)
 			Logger( ).write( exception )
@@ -4236,11 +4252,11 @@ class NearbyObjects( Fetcher ):
 			Logger( ).write( exception )
 			raise exception from e
 
-	def fetch( self, mode: str='close_approaches', start_date: str='',
-			end_date: str='', query: str='', query_type: str='sstr',
+	def fetch( self, mode: str='close_approaches', start_date: str='now',
+			end_date: str='+60', query: str='', query_type: str='sstr',
 			dist_max: str='10LD', body: str='Earth', sort: str='date',
-			limit: int=20, dv: float=6.0, dur: int=360,
-			stay: int=8, launch: str='2020-2045', h: float=26.0,
+			limit: int=20, dv: int=6, dur: int=360,
+			stay: int=8, launch: str='2020-2045', h: int=26,
 			occ: int=7, include_physical: bool=True,
 			include_close_approaches: bool=True, ca_body: str='Earth',
 			include_discovery: bool=True, time: int=20 ) -> Dict[ str, Any ] | None:
@@ -4257,9 +4273,9 @@ class NearbyObjects( Fetcher ):
 				- nhats_object
 				- fireballs
 
-			start_date (str): Date lower bound for close_approaches.
+			start_date (str): Date lower bound; defaults to the JPL-supported now token.
 
-			end_date (str): Date upper bound for close_approaches.
+			end_date (str): Date upper bound; defaults to the JPL-supported +60 days token.
 
 			query (str): Object query or designation for object_lookup or nhats_object.
 
@@ -4273,7 +4289,7 @@ class NearbyObjects( Fetcher ):
 
 			limit (int): Result limit.
 
-			dv (float): NHATS delta-V filter.
+			dv (int): NHATS delta-V filter.
 
 			dur (int): NHATS duration filter.
 
@@ -4281,7 +4297,7 @@ class NearbyObjects( Fetcher ):
 
 			launch (str): NHATS launch window.
 
-			h (float): NHATS H-magnitude filter.
+			h (int): NHATS H-magnitude filter.
 
 			occ (int): NHATS OCC filter.
 
@@ -23223,7 +23239,7 @@ class Firms( Fetcher ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def fetch( self, mode: str='area', source: str='',
+	def fetch( self, mode: str='area', source: str='VIIRS_NOAA21_NRT',
 			area_coordinates: str='world', day_range: int=1, date: str='',
 			sensor: str='ALL', time: int=20 ) -> Dict[ str, Any ] | None:
 		"""
@@ -23280,7 +23296,7 @@ class Firms( Fetcher ):
 			exception.module = 'fetchers'
 			exception.cause = 'Firms'
 			exception.method = (
-					'fetch( self, mode: str=area, source: str=, '
+					'fetch( self, mode: str=area, source: str=VIIRS_NOAA21_NRT, '
 					'area_coordinates: str=world, day_range: int=1, date: str=, '
 					'sensor: str=ALL, time: int=20 ) -> Dict[ str, Any ]'
 			)

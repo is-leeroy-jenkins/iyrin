@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ast
 import os
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict
@@ -149,7 +150,7 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
         self.assertIn(
             "type='password' if field_type == 'password' else 'default'",
-            source)
+            re.sub(r'\s+', ' ', source))
         self.assertNotIn("type=field_type,", source)
 
     def test_credential_editor_is_available_without_environment_gate(self) -> None:
@@ -157,9 +158,12 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
         self.assertNotIn('IYRIN_SINGLE_USER_MODE', source)
         self.assertIn("initialize_api_credential_state( )\n\nwith st.sidebar:", source)
-        self.assertIn("with st.form( 'api_credentials_form'", source)
-        self.assertIn("st.form_submit_button( 'Apply'", source)
-        self.assertIn("st.form_submit_button( 'Reset to OS Defaults'", source)
+        # The current sidebar uses an API expander and explicit Apply/Reset
+        # controls. Forms were removed without changing credential ownership.
+        self.assertIn("render_api_credential_controls( )", source)
+        self.assertIn("with st.expander( label='API', expanded=False ):", source)
+        self.assertIn("st.button( 'Apply', type='primary' )", source)
+        self.assertIn("st.button( 'Reset' )", source)
         self.assertIn("get_opensky_service.clear( )", source)
 
 

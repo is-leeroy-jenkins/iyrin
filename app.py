@@ -7841,19 +7841,19 @@ elif mode == 'Astronomical Data':
 					          'fireballs' ], key='astro_nearby_mode' )
 				nearby_timeout = st.slider( 'Timeout', min_value=1, max_value=60, value=20,
 					key='astro_nearby_timeout' )
-				nearby_start_date = ''
-				nearby_end_date = ''
+				nearby_start_date = 'now'
+				nearby_end_date = '+60'
 				nearby_query = ''
 				nearby_query_type = 'sstr'
 				nearby_dist_max = '10LD'
 				nearby_body = 'Earth'
 				nearby_sort = 'date'
 				nearby_limit = 20
-				nearby_dv = 6.0
+				nearby_dv = 6
 				nearby_dur = 360
 				nearby_stay = 8
 				nearby_launch = '2020-2045'
-				nearby_h = 26.0
+				nearby_h = 26
 				nearby_occ = 7
 				nearby_include_physical = True
 				nearby_include_close = True
@@ -7862,14 +7862,14 @@ elif mode == 'Astronomical Data':
 				if nearby_mode == 'close_approaches':
 					nearby_c1, nearby_c2 = st.columns( 2 )
 					with nearby_c1:
-						nearby_start_date = st.text_input( 'Start Date', placeholder='YYYY-MM-DD',
+						nearby_start_date = st.text_input( 'Start Date', value='now', placeholder='YYYY-MM-DD or now',
 							key='astro_nearby_start_date' )
 						nearby_dist_max = st.text_input( 'Maximum Distance', value='10LD',
 							key='astro_nearby_dist_max' )
 						nearby_sort = st.selectbox( 'Sort', [ 'date', 'dist' ],
 							key='astro_nearby_sort' )
 					with nearby_c2:
-						nearby_end_date = st.text_input( 'End Date', placeholder='YYYY-MM-DD',
+						nearby_end_date = st.text_input( 'End Date', value='+60', placeholder='YYYY-MM-DD or +days',
 							key='astro_nearby_end_date' )
 						nearby_body = st.selectbox( 'Body', [ 'Earth', 'Moon', 'Mars', 'Juptr' ],
 							key='astro_nearby_body' )
@@ -7896,19 +7896,20 @@ elif mode == 'Astronomical Data':
 						nearby_query = st.text_input( 'Designation', key='astro_nearby_designation' )
 					nhats_c1, nhats_c2 = st.columns( 2 )
 					with nhats_c1:
-						nearby_dv = st.number_input( 'Maximum ΔV', min_value=0.0, value=6.0,
-							step=0.1, key='astro_nearby_dv' )
-						nearby_stay = st.number_input( 'Minimum Stay', min_value=0, value=8,
-							step=1, key='astro_nearby_stay' )
-						nearby_h = st.number_input( 'Maximum H', min_value=0.0, value=26.0,
-							step=0.1, key='astro_nearby_h' )
+						nearby_dv = st.number_input( 'Maximum ΔV', min_value=4, max_value=12,
+							value=6, step=1, key='astro_nearby_dv' )
+						nearby_stay = st.selectbox( 'Minimum Stay', options=[ 8, 16, 24, 32 ],
+							key='astro_nearby_stay' )
+						nearby_h = st.number_input( 'Maximum H', min_value=16, max_value=30,
+							value=26, step=1, key='astro_nearby_h' )
 					with nhats_c2:
-						nearby_dur = st.number_input( 'Maximum Duration', min_value=1, value=360,
-							step=1, key='astro_nearby_dur' )
-						nearby_launch = st.text_input( 'Launch Window', value='2020-2045',
+						nearby_dur = st.selectbox( 'Maximum Duration', options=list( range( 60, 451, 30 ) ),
+							index=10, key='astro_nearby_dur' )
+						nearby_launch = st.selectbox( 'Launch Window', options=[ '2020-2045',
+							'2020-2025', '2025-2030', '2030-2035', '2035-2040', '2040-2045' ],
 							key='astro_nearby_launch' )
-						nearby_occ = st.number_input( 'Minimum Opportunities', min_value=1, value=7,
-							step=1, key='astro_nearby_occ' )
+						nearby_occ = st.number_input( 'Maximum Orbit Condition Code', min_value=0,
+							max_value=8, value=7, step=1, key='astro_nearby_occ' )
 				else:
 					nearby_start_date = st.text_input( 'Minimum Date', placeholder='YYYY-MM-DD',
 						key='astro_nearby_fireball_date' )
@@ -7924,8 +7925,8 @@ elif mode == 'Astronomical Data':
 								end_date=nearby_end_date, query=nearby_query,
 								query_type=nearby_query_type, dist_max=nearby_dist_max,
 								body=nearby_body, sort=nearby_sort, limit=int( nearby_limit ),
-								dv=float( nearby_dv ), dur=int( nearby_dur ), stay=int( nearby_stay ),
-								launch=nearby_launch, h=float( nearby_h ), occ=int( nearby_occ ),
+								dv=nearby_dv, dur=nearby_dur, stay=nearby_stay,
+								launch=nearby_launch, h=nearby_h, occ=nearby_occ,
 								include_physical=bool( nearby_include_physical ),
 								include_close_approaches=bool( nearby_include_close ),
 								ca_body=nearby_ca_body, include_discovery=bool( nearby_include_discovery ),

@@ -191,27 +191,62 @@ class OpenSkyLive( ):
 				self.latitude = latitude
 				self.longitude = longitude
 				self.radius_degrees = radius_degrees
+				if (type( self.latitude ) not in ( int, float )
+						or type( self.longitude ) not in ( int, float )
+						or not math.isfinite( self.latitude )
+						or not math.isfinite( self.longitude )
+						or not -90.0 <= self.latitude <= 90.0
+						or not -180.0 <= self.longitude <= 180.0):
+					raise ValueError( 'OpenSky requires valid geographic coordinates.' )
+				if (type( self.radius_degrees ) not in ( int, float )
+						or not math.isfinite( self.radius_degrees )
+						or not 0.0 < self.radius_degrees <= 180.0):
+					raise ValueError( 'radius_degrees must be between 0 and 180.' )
 				self.lamin = max( -90.0, self.latitude - self.radius_degrees )
 				self.lamax = min( 90.0, self.latitude + self.radius_degrees )
 				self.lomin = max( -180.0, self.longitude - self.radius_degrees )
 				self.lomax = min( 180.0, self.longitude + self.radius_degrees )
-				self.params = { 'lamin': self.lamin, 'lomin': self.lomin, 'lamax': self.lamax,
-					'lomax': self.lomax, }
+				west = self.longitude - self.radius_degrees
+				east = self.longitude + self.radius_degrees
+				if west < -180.0:
+					longitude_ranges = [ (west + 360.0, 180.0), (-180.0, east) ]
+				elif east > 180.0:
+					longitude_ranges = [ (west, 180.0), (-180.0, east - 360.0) ]
+				else:
+					longitude_ranges = [ (west, east) ]
 				self.headers: Dict[ str, str ] = { }
 				self.access_token = self.get_access_token( )
 				if self.access_token:
 					self.headers[ 'Authorization' ] = f'Bearer {self.access_token}'
-		
-				self.response = requests.get( self.states_url, params=self.params,
-					headers=self.headers, timeout=self.timeout )
-				self.response.raise_for_status( )
-				payload = self.response.json( ) or { }
-				if not isinstance( payload, dict ):
-					raise TypeError( 'OpenSky states response must be a dictionary.' )
-				states = payload.get( 'states' )
-				if states is not None and not isinstance( states, list ):
-					raise TypeError( 'OpenSky states must be a list or null.' )
-				return payload
+
+				combined: Dict[ str, Any ] = { }
+				all_states: List[ Any ] = [ ]
+				seen: set[ str ] = set( )
+				for west_boundary, east_boundary in longitude_ranges:
+					self.params = { 'lamin': self.lamin, 'lomin': west_boundary,
+						'lamax': self.lamax, 'lomax': east_boundary }
+					self.response = requests.get( self.states_url, params=self.params,
+						headers=self.headers, timeout=self.timeout )
+					self.response.raise_for_status( )
+					payload = self.response.json( ) or { }
+					if not isinstance( payload, dict ):
+						raise TypeError( 'OpenSky states response must be a dictionary.' )
+					states = payload.get( 'states' )
+					if states is not None and not isinstance( states, list ):
+						raise TypeError( 'OpenSky states must be a list or null.' )
+					if not combined:
+						combined = dict( payload )
+					for row in states or [ ]:
+						icao24 = str( row[ 0 ] ) if isinstance( row, list ) and row else ''
+						if icao24 and icao24 in seen:
+							continue
+						if icao24:
+							seen.add( icao24 )
+						all_states.append( row )
+				if len( longitude_ranges ) > 1:
+					combined[ 'states' ] = all_states
+				return combined
+
 		except Exception as e:
 			if isinstance( e, Error ):
 				raise
@@ -397,8 +432,21 @@ class AisStreamLive( ):
 			self.south = max( -90.0, self.latitude - self.radius_degrees )
 			self.west = max( -180.0, self.longitude - self.radius_degrees )
 			self.east = min( 180.0, self.longitude + self.radius_degrees )
+			west = self.longitude - self.radius_degrees
+			east = self.longitude + self.radius_degrees
+			if west < -180.0:
+				bounding_boxes = [
+					[ [ self.north, west + 360.0 ], [ self.south, 180.0 ] ],
+					[ [ self.north, -180.0 ], [ self.south, east ] ], ]
+			elif east > 180.0:
+				bounding_boxes = [
+					[ [ self.north, west ], [ self.south, 180.0 ] ],
+					[ [ self.north, -180.0 ], [ self.south, east - 360.0 ] ], ]
+			else:
+				bounding_boxes = [
+					[ [ self.north, west ], [ self.south, east ] ], ]
 			self.subscription = { 'APIKey': self.api_key,
-				'BoundingBoxes': [ [ [ self.north, self.west ], [ self.south, self.east ] ] ],
+				'BoundingBoxes': bounding_boxes,
 				'FilterMessageTypes': [ 'PositionReport', 'StandardClassBPositionReport',
 					'ExtendedClassBPositionReport', 'LongRangeAisBroadcastMessage', ], }
 			messages: List[ Dict[ str, Any ] ] = [ ]
