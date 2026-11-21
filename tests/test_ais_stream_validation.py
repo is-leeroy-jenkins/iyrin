@@ -33,7 +33,9 @@ class FakeSocket:
         self.subscription = payload
 
     def recv(self, timeout: float) -> str:
-        """Return subscription confirmation followed by a position report."""
+        """Return a frame or simulate a closed subscription connection."""
+        if not self.frames:
+            raise ConnectionError('No remaining frames from provider')
         return self.frames.pop(0)
 
     def close(self) -> None:
@@ -97,7 +99,23 @@ class AisStreamValidationTests(unittest.TestCase):
         """Reject a position feed that never acknowledges the subscription."""
         self.socket.frames = [json.dumps({'MessageType': 'PositionReport',
             'MetaData': {'Latitude': 38.0, 'Longitude': -77.0}})]
-        self.socket.recv = lambda timeout: (_ for _ in ()).throw(TimeoutError())
+        with self.assertRaises(SourceError):
+            self.fetch(self.source, 38.0, -77.0, 2.0, 1, 0.01)
+
+    def test_explicit_compression_rejection_fails(self) -> None:
+        """Require CompressionEnabled true in the documented confirmation."""
+        self.socket.frames = [json.dumps({
+            'MessageType': 'SubscriptionConfirmation',
+            'Message': {'CompressionEnabled': False},
+        })]
+        with self.assertRaises(SourceError):
+            self.fetch(self.source, 38.0, -77.0, 2.0, 1, 0.01)
+
+    def test_missing_compression_acknowledgement_fails(self) -> None:
+        """Do not silently accept an incomplete confirmation payload."""
+        self.socket.frames = [json.dumps({
+            'MessageType': 'SubscriptionConfirmation', 'Message': {},
+        })]
         with self.assertRaises(SourceError):
             self.fetch(self.source, 38.0, -77.0, 2.0, 1, 0.01)
 
