@@ -546,7 +546,7 @@ def render_api_credential_controls( ) -> None:
 		for group in ('AI & Language Models', 'Geospatial & Mapping', 'Aviation & Maritime',
 			'Environmental & Scientific', 'Government & Public Data',
 			'Cloud, Storage & Integrations',):
-			st.markdown( f'**{group}**' )
+			st.markdown( f':blue[**{group}**]' )
 			for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
 				category, env_name, label, field_type = field
 				if category != group:
