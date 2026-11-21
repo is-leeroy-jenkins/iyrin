@@ -6,6 +6,7 @@ Purpose:
 from __future__ import annotations
 
 import ast
+import datetime as dt
 import json
 import math
 from contextlib import nullcontext
@@ -116,6 +117,67 @@ class ApiDefaultContractTests(unittest.TestCase):
         self.assertEqual([177.0, -180.0], [x['lomin'] for x in calls])
         self.assertEqual([180.0, -179.0], [x['lomax'] for x in calls])
         self.assertEqual(1, len(result['states']))
+
+    def test_missing_global_location_does_not_refresh_local_providers(self) -> None:
+        """Location-dependent sources must never receive the (0, 0) fallback."""
+        funcs = load_production_functions('realtime.py', '', ['refresh_world_data'])
+        calls: List[str] = []
+        states: Dict[str, Any] = {
+            'live_world_firms_area_mode': 'Local Bounding Box',
+            'live_world_last_error': '', 'live_world_historical_replay': False,
+            'live_world_history_persist': False,
+            'live_world_refresh_requested': True,
+            'live_world_source_status': {}, 'live_world_source_errors': {},
+            'live_world_vessels': True, 'live_world_satellites': True,
+            'live_world_fires': True,
+        }
+        source_names = ('vessels', 'satellites', 'fires')
+        for name in source_names:
+            states['live_world_df_' + name] = pd.DataFrame()
+        configs = {name: {'enabled_key': 'live_world_' + name,
+            'frame_key': 'live_world_df_' + name, 'label': name}
+            for name in source_names}
+
+        def record_status(name: str, status: str, error: str='',
+                stale: bool=False, error_type: str='') -> None:
+            """Capture the source outcomes produced by real refresh dispatch."""
+            states['live_world_source_status'][name] = status
+            states['live_world_source_errors'][name] = error
+
+        def refresh_one(name: str, fetcher: Any) -> pd.DataFrame:
+            """Track which real provider dispatch paths would execute."""
+            calls.append(name)
+            return pd.DataFrame([{'Source': name}])
+
+        funcs['refresh_world_data'].__globals__.update({
+            'st': SimpleNamespace(session_state=states),
+            'dt': dt, 'pd': pd, 'Callable': __import__('typing').Callable,
+            'LIVE_WORLD_DATA_SOURCES': configs,
+            'initialize_world_state': lambda: None,
+            'is_valid_world_coordinates': lambda lat, lon:
+                -90 <= lat <= 90 and -180 <= lon <= 180,
+            'update_source_state': record_status,
+            'refresh_live_source': refresh_one,
+            'entities_to_dataframe': lambda values: pd.DataFrame(),
+            'update_tracking': lambda data: None,
+        })
+        for name in ('aircraft', 'military_aircraft', 'vessels', 'satellites',
+                'earthquakes', 'fires', 'infrastructure', 'cameras', 'map_layers'):
+            funcs['refresh_world_data'].__globals__['fetch_' + name] = lambda: None
+
+        funcs['refresh_world_data'](0.0, 0.0)
+        self.assertEqual(['satellites'], calls)
+        self.assertEqual('Location Required', states[
+            'live_world_source_status']['vessels'])
+        self.assertEqual('Location Required', states[
+            'live_world_source_status']['fires'])
+
+    def test_worldwide_firms_does_not_require_global_coordinates(self) -> None:
+        """A global FIRMS area request remains legal without a local location."""
+        source = (ROOT / 'realtime.py').read_text(encoding='utf-8')
+        self.assertIn("if st.session_state[ 'live_world_firms_area_mode' ] != 'World':",
+            source)
+        self.assertIn("location_required_sources.add( 'fires' )", source)
 
     def test_nhats_defaults_use_documented_integer_enum_values(self) -> None:
         """JPL NHATS dv, dur, stay, launch, h and occ must be valid enums."""
