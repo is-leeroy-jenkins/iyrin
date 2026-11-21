@@ -387,7 +387,7 @@ if st.session_state.firms_map_key == '':
 		os.environ[ 'FIRMS_MAP_KEY' ] = default
 
 if st.session_state.opensky_api_credentials == '':
-	default = cfg.OPENSKY_API_CREDENTIALS
+	default = cfg.OPENSKY_API_CLIENT_SECRET
 	if default:
 		st.session_state.opensky_api_credentials = default
 		os.environ[ 'OPENSKY_API_CREDENTIALS' ] = default

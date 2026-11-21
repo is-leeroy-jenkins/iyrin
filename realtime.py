@@ -54,6 +54,8 @@ from typing import Any, Callable, Dict, List
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+from requests.exceptions import HTTPError
+from boogr import Error
 import config as cfg
 from fetchers import Firms, USGSEarthquakes
 from history import (clear_live_world_history, get_live_world_history_snapshots,
@@ -234,7 +236,7 @@ def initialize_live_world_state( ) -> None:
 		'live_world_aircraft_radius': 2.0,
 		'live_world_aircraft_airborne_only': True,
 		'opensky_api_client_id': cfg.OPENSKY_CLIENT_ID or '',
-		'opensky_api_client_secret': cfg.OPENSKY_API_CREDENTIALS or '',
+		'opensky_api_credentials': cfg.OPENSKY_API_CREDENTIALS or '',
 		'live_world_military_aircraft': False,
 		'live_world_military_radius_nm': 250,
 		'live_world_satellites': False,
@@ -325,11 +327,17 @@ def initialize_live_world_state( ) -> None:
 		'live_world_agent_tools': False,
 		'live_world_refresh_requested': False,
 		'live_world_last_refresh': '',
+		'live_world_refresh_id': '',
+		'live_world_last_success': '',
 		'live_world_last_error': '',
 		'live_world_source_status': {
 			key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES },
 		'live_world_source_errors': {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_error_types': {
+			key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_http_status': {
+			key: 0 for key in LIVE_WORLD_DATA_SOURCES },
 		'live_world_source_last_attempt': {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES },
 		'live_world_source_last_success': {
@@ -728,11 +736,17 @@ def clear_live_world_data( ) -> None:
 	st.session_state[ 'live_world_geofence_initialized' ] = False
 	st.session_state[ 'live_world_geofence_last_refresh_processed' ] = ''
 	st.session_state[ 'live_world_last_refresh' ] = ''
+	st.session_state[ 'live_world_refresh_id' ] = ''
+	st.session_state[ 'live_world_last_success' ] = ''
 	st.session_state[ 'live_world_last_error' ] = ''
 	st.session_state[ 'live_world_source_status' ] = {
 		key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_source_errors' ] = {
 		key: '' for key in LIVE_WORLD_DATA_SOURCES }
+	st.session_state[ 'live_world_source_error_types' ] = {
+		key: '' for key in LIVE_WORLD_DATA_SOURCES }
+	st.session_state[ 'live_world_source_http_status' ] = {
+		key: 0 for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_source_last_attempt' ] = {
 		key: '' for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_source_last_success' ] = {
@@ -772,6 +786,23 @@ def create_live_world_bounding_box( latitude: float, longitude: float,
 	north = min( 90.0, latitude + delta )
 	return f'{west:.6f},{south:.6f},{east:.6f},{north:.6f}'
 
+def is_valid_live_world_coordinates( latitude: float, longitude: float ) -> bool:
+	"""Determine whether provider coordinates are finite and geographically valid.
+
+	Purpose:
+		Reject nonfinite or out-of-range positions before constructing Live World entities.
+
+	Args:
+		latitude (float): Candidate latitude in decimal degrees.
+		longitude (float): Candidate longitude in decimal degrees.
+
+	Returns:
+		bool: True when the geographic coordinates are finite and in range.
+	"""
+	return (type( latitude ) in (int, float) and type( longitude ) in (int, float)
+		and math.isfinite( latitude ) and math.isfinite( longitude )
+		and -90.0 <= latitude <= 90.0 and -180.0 <= longitude <= 180.0)
+
 def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
 		Retrieve current OpenSky aircraft state vectors around the Iyr/global location and.
@@ -792,7 +823,7 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
 	client_id = str( st.session_state.get( 'opensky_api_client_id', '' ) or '' )
-	client_secret = str( st.session_state.get( 'opensky_api_client_secret', '' ) or '' )
+	client_secret = str( st.session_state.get( 'opensky_api_credentials', '' ) or '' )
 	radius = float( st.session_state[ 'live_world_aircraft_radius' ] )
 	airborne_only = bool( st.session_state[ 'live_world_aircraft_airborne_only' ] )
 	service = OpenSkyLive( client_id=client_id, client_secret=client_secret, timeout=20 )
@@ -819,6 +850,8 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 
@@ -900,6 +933,7 @@ def calculate_live_world_distance_nm( latitude_a: float, longitude_a: float,
 	delta_lon = math.radians( float( longitude_b ) - float( longitude_a ) )
 	value = (math.sin( delta_lat / 2.0 ) ** 2
 		+ math.cos( lat_a ) * math.cos( lat_b ) * math.sin( delta_lon / 2.0 ) ** 2)
+	value = min( 1.0, max( 0.0, value ) )
 	central_angle = 2.0 * math.atan2( math.sqrt( value ), math.sqrt( 1.0 - value ) )
 	return 3440.065 * central_angle
 
@@ -940,6 +974,8 @@ def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.Data
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 
@@ -1038,6 +1074,8 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 
@@ -1175,6 +1213,9 @@ def fetch_live_earthquakes( ) -> pd.DataFrame:
 		except ( TypeError, ValueError ):
 			continue
 
+		if not is_valid_live_world_coordinates( latitude_value, longitude_value ):
+			continue
+
 		if magnitude_value < min_magnitude:
 			continue
 
@@ -1261,6 +1302,8 @@ def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 
@@ -1338,6 +1381,8 @@ def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFra
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 		tags = element.get( 'tags', { } ) or { }
@@ -1413,6 +1458,8 @@ def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 		tags = element.get( 'tags', { } ) or { }
@@ -1492,6 +1539,8 @@ def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 		try:
 			lat = float( latitude_value )
 			lon = float( longitude_value )
+			if not is_valid_live_world_coordinates( lat, lon ):
+				continue
 		except ( TypeError, ValueError ):
 			continue
 		tags = element.get( 'tags', { } ) or { }
@@ -2311,7 +2360,8 @@ def get_live_world_tracking_frame( ) -> pd.DataFrame:
 	return pd.DataFrame( history, columns=columns )
 
 def update_live_world_source_state( source_key: str, status: str, error: str='',
-		stale: bool=False, attempted_at: str='', successful_at: str='' ) -> None:
+		stale: bool=False, attempted_at: str='', successful_at: str='',
+		error_type: str='', http_status: int=0 ) -> None:
 	'''
 		Update the operational state for one Live World provider without changing any.
 
@@ -2326,6 +2376,8 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 		stale (bool): Whether retained source data predates the current refresh attempt.
 		attempted_at (str): UTC timestamp for the most recent refresh attempt.
 		successful_at (str): UTC timestamp for the most recent successful refresh.
+		error_type (str): Underlying provider exception class name.
+		http_status (int): HTTP status, or zero for non-HTTP exceptions.
 
 	Returns:
 		None: This operation has no return value.
@@ -2339,11 +2391,15 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 
 	statuses = dict( st.session_state[ 'live_world_source_status' ] )
 	errors = dict( st.session_state[ 'live_world_source_errors' ] )
+	error_types = dict( st.session_state[ 'live_world_source_error_types' ] )
+	http_statuses = dict( st.session_state[ 'live_world_source_http_status' ] )
 	last_attempt = dict( st.session_state[ 'live_world_source_last_attempt' ] )
 	last_success = dict( st.session_state[ 'live_world_source_last_success' ] )
 	stale_state = dict( st.session_state[ 'live_world_source_stale' ] )
 	statuses[ source_key ] = status
 	errors[ source_key ] = error
+	error_types[ source_key ] = error_type
+	http_statuses[ source_key ] = http_status
 	stale_state[ source_key ] = stale
 	if attempted_at:
 		last_attempt[ source_key ] = attempted_at
@@ -2351,6 +2407,8 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 		last_success[ source_key ] = successful_at
 	st.session_state[ 'live_world_source_status' ] = statuses
 	st.session_state[ 'live_world_source_errors' ] = errors
+	st.session_state[ 'live_world_source_error_types' ] = error_types
+	st.session_state[ 'live_world_source_http_status' ] = http_statuses
 	st.session_state[ 'live_world_source_last_attempt' ] = last_attempt
 	st.session_state[ 'live_world_source_last_success' ] = last_success
 	st.session_state[ 'live_world_source_stale' ] = stale_state
@@ -2395,17 +2453,29 @@ def refresh_live_world_source( source_key: str,
 			raise TypeError(
 				f'Live World source {source_key} must return a pandas DataFrame.' )
 		st.session_state[ frame_key ] = df_source
+		status = 'Success'
+		if (source_key == 'satellites'
+				and st.session_state.get( 'live_world_satellite_propagation_failures', 0 ) > 0):
+			status = 'Partial Success'
 		update_live_world_source_state(
-			source_key, 'Success', attempted_at=attempted_at,
+			source_key, status, attempted_at=attempted_at,
 			successful_at=dt.datetime.now( dt.timezone.utc ).isoformat( ) )
 		return df_source
 
 	except Exception as ex:
+		original_error = ex
+		while isinstance( original_error, Error ):
+			original_error = original_error.error
+		error_type = type( original_error ).__name__
+		http_status = (original_error.response.status_code
+			if isinstance( original_error, HTTPError )
+			and original_error.response is not None else 0)
 		has_stale_data = not previous_frame.empty
 		st.session_state[ frame_key ] = previous_frame
 		update_live_world_source_state(
 			source_key, 'Failed', error=str( ex ), stale=has_stale_data,
-			attempted_at=attempted_at )
+			attempted_at=attempted_at, error_type=error_type,
+			http_status=http_status )
 		return previous_frame
 
 def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
@@ -2461,6 +2531,7 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 		st.session_state[ 'live_world_df_entities' ] = df_entities
 		update_live_world_tracking( df_entities )
 		observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
+		st.session_state[ 'live_world_refresh_id' ] = observed_at
 		st.session_state[ 'live_world_last_refresh' ] = dt.datetime.now( ).strftime(
 			'%Y-%m-%d %H:%M:%S' )
 
@@ -2473,6 +2544,8 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
 			failures.append( f'{label}: {errors.get( source_key, "" )}' )
 		st.session_state[ 'live_world_last_error' ] = '; '.join( failures )
+		if not failures:
+			st.session_state[ 'live_world_last_success' ] = observed_at
 
 		if (st.session_state[ 'live_world_historical_replay' ]
 				and st.session_state[ 'live_world_history_persist' ] and not failures):
@@ -2518,7 +2591,9 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 
 	st.divider( )
 	st.subheader( '🌐 Live World Data' )
-	if not any( get_live_world_layers( ).values( ) ):
+	if (not any( get_live_world_layers( ).values( ) )
+			and not st.session_state[ 'live_world_historical_replay' ]
+			and not st.session_state[ 'live_world_measurements' ]):
 		st.info( 'Select at least one implemented Live World layer in the sidebar.' )
 		return
 
@@ -2533,6 +2608,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	source_errors = dict( st.session_state[ 'live_world_source_errors' ] )
 	source_stale = dict( st.session_state[ 'live_world_source_stale' ] )
 	for source_key, status in source_status.items( ):
+		if status == 'Partial Success' and source_key == 'satellites':
+			st.warning( f'Satellites: {int( st.session_state.get( "live_world_satellite_propagation_failures", 0 ) )} of {int( st.session_state.get( "live_world_satellite_propagation_attempts", 0 ) )} orbit propagations failed.' )
 		if status != 'Failed':
 			continue
 		label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
@@ -2550,8 +2627,12 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 
 	df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
 	if df_entities is None or df_entities.empty:
-		if not st.session_state[ 'live_world_measurements' ]:
-			st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
+		if not (st.session_state[ 'live_world_measurements' ]
+				or st.session_state[ 'live_world_historical_replay' ]):
+			if any( value == 'Failed' for value in source_status.values( ) ):
+				st.info( 'No records are available because the enabled Live World source refresh failed.' )
+			else:
+				st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
 			return
 		df_entities = entities_to_dataframe( [ ] )
 
@@ -2681,7 +2762,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 					get_fill_color=[ 255, 80, 80, 45 ], get_line_color=[ 255, 80, 80, 255 ],
 					line_width_min_pixels=2, radius_min_pixels=7, radius_max_pixels=28,
 					filled=True, stroked=True, pickable=True ) )
-			last_refresh = str( st.session_state.get( 'live_world_last_refresh', '' ) or '' )
+			last_refresh = str( st.session_state.get( 'live_world_refresh_id', '' ) or '' )
 			last_processed = str( st.session_state.get(
 				'live_world_geofence_last_refresh_processed', '' ) or '' )
 			if not st.session_state[ 'live_world_geofence_initialized' ]:
