@@ -257,7 +257,7 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
         with self.assertRaises(WrappedProviderError) as context:
             provider.execute('[out:json];node(1);out;')
         self.assertIsInstance(context.exception.error, TimeoutError)
-        self.assertIn('Request', str(context.exception))
+        self.assertIn('deadline exceeded', str(context.exception))
         self.assertIn('overpass-api.de', str(context.exception))
         self.assertLessEqual(self.clock.now, 4.0)
 
