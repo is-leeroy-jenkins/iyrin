@@ -144,6 +144,14 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         self.assertEqual('GOOGLE_ACCOUNT_CREDENTIALS',
             fields['GOOGLE_ACCOUNT_FILE'][1])
 
+    def test_credential_input_types_are_supported_by_streamlit(self) -> None:
+        """Text fields must use Streamlit's 'default', not the unsupported 'text' type."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn(
+            "type='password' if field_type == 'password' else 'default'",
+            source)
+        self.assertNotIn("type=field_type,", source)
+
     def test_credential_editor_is_available_without_environment_gate(self) -> None:
         """The complete credentials form must be visible without an opt-in flag."""
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
