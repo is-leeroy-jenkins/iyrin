@@ -150,7 +150,7 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
         self.assertIn(
             "type='password' if field_type == 'password' else 'default'",
-            re.sub(r'\\s+', ' ', source))
+            re.sub(r'\s+', ' ', source))
         self.assertNotIn("type=field_type,", source)
 
     def test_credential_editor_is_available_without_environment_gate(self) -> None:
