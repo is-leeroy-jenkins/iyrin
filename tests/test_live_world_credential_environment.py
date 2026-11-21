@@ -55,7 +55,7 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         self.state: Dict[str, Any] = {}
         self.config = SimpleNamespace(
             OPENSKY_CLIENT_ID='configured-client',
-            OPENSKY_API_CREDENTIALS='configured-secret',
+            OPENSKY_CLIENT_SECRET='configured-secret',
             AISSTREAM_API_KEY='configured-ais-key',
         )
 
@@ -69,7 +69,7 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
             'cfg': self.config,
             'LIVE_WORLD_DATA_SOURCES': {},
         }
-        initialize = load_live_world_function('initialize_live_world_state', namespace)
+        initialize = load_live_world_function('initialize_world_state', namespace)
         with patch.dict(os.environ, {
                 'OPENSKY_CLIENT_ID': 'os-client',
                 'OPENSKY_API_CLIENT_SECRET': 'os-secret',
@@ -92,7 +92,7 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
             'cfg': self.config,
             'LIVE_WORLD_DATA_SOURCES': {},
         }
-        initialize = load_live_world_function('initialize_live_world_state', namespace)
+        initialize = load_live_world_function('initialize_world_state', namespace)
         self.state['live_world_vessel_radius'] = 5.0
         initialize()
         self.assertEqual(5.0, self.state['live_world_vessel_radius'])
