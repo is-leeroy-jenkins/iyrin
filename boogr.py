@@ -92,7 +92,7 @@ def get_config_int( name: str, default: int ) -> int:
 	except Exception:
 		return default
 
-def sanitize_text( value: object, max_length: int = 1000 ) -> str:
+def sanitize_text( value: object, max_length: int = 1000, mask_payload: bool=True ) -> str:
 	"""Return a reviewer-safe and log-safe text representation.
 
 	Purpose:
@@ -105,6 +105,7 @@ def sanitize_text( value: object, max_length: int = 1000 ) -> str:
 	Args:
 		value (object): Source value to sanitize.
 		max_length (int): Maximum returned string length after masking.
+		mask_payload (bool): Whether long document and manifest payloads should be masked.
 
 	Returns:
 		str: Sanitized text value suitable for local diagnostic logging.
@@ -134,7 +135,7 @@ def sanitize_text( value: object, max_length: int = 1000 ) -> str:
 			r'(?i)(password|secret|token|api[_-]?key|subscription[_-]?key)\s*[=:]\s*[^\s,;]+',
 			r'\1=[SECRET]', text )
 		
-		if not get_config_bool( 'ENABLE_RAW_TEXT_LOGGING', False ):
+		if mask_payload and not get_config_bool( 'ENABLE_RAW_TEXT_LOGGING', False ):
 			text = re.sub( r'"[^"]{120,}"', '"[LONG_TEXT]"', text )
 			text = re.sub( r"'[^']{120,}'", "'[LONG_TEXT]'", text )
 			
@@ -228,7 +229,7 @@ class Error( Exception ):
 		self.module = sanitize_text( module, 120 ) if module else None
 		self.type = exc_info( )[ 0 ]
 		self.message = sanitize_text( str( error ) if error else '',
-			get_config_int( 'MAX_LOG_MESSAGE_CHARS', 1000 ) )
+			get_config_int( 'MAX_LOG_MESSAGE_CHARS', 1000 ), mask_payload=False )
 		self.trace = sanitize_traceback( traceback.format_exc( ),
 			get_config_int( 'MAX_LOG_TRACE_CHARS', 4000 ) )
 		self.info = sanitize_text( f'{str( self.type )}: {self.trace}',
@@ -256,7 +257,8 @@ class Error( Exception ):
 			object.__setattr__( self, name, sanitize_text( value, 180 ) )
 		elif name == 'message' and value is not None:
 			object.__setattr__( self, name,
-				sanitize_text( value, get_config_int( 'MAX_LOG_MESSAGE_CHARS', 1000 ) ) )
+				sanitize_text( value, get_config_int( 'MAX_LOG_MESSAGE_CHARS', 1000 ),
+					mask_payload=False ) )
 		elif name in ('trace', 'info') and value is not None:
 			object.__setattr__( self, name,
 				sanitize_traceback( value, get_config_int( 'MAX_LOG_TRACE_CHARS', 4000 ) ) )
