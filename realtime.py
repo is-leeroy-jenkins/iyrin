@@ -208,10 +208,10 @@ class LiveWorldValidation:
 			raise ValueError( f'Argument "{name}" cannot be empty.' )
 
 class LiveWorldState:
-	"""Initialize, clear, and render Live World session state and sidebar controls.
+	"""Initialize and clear Live World session state without owning UI controls.
 
 	Purpose:
-		Initialize, clear, and render Live World session state and sidebar controls.
+		Initialize and clear Live World session state without owning UI controls.
 
 	Attributes:
 		state (object): Session-specific Streamlit state mapping.
@@ -2304,10 +2304,10 @@ class LiveWorldRefresh:
 			self.state[ 'live_world_refresh_requested' ] = False
 
 class LiveWorldRendering:
-	"""Render the complete Live World map and related display data.
+	"""Render the Live World sidebar, operational map, and related display data.
 
 	Purpose:
-		Render the complete Live World map and related display data.
+		Render the Live World sidebar, operational map, and related display data.
 
 	Attributes:
 		state (object): Session-specific Streamlit state mapping.
