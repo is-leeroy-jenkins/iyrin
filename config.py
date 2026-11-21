@@ -101,17 +101,78 @@ O365_CLIENT_ID = os.getenv( 'O365_CLIENT_ID' )
 O365_CLIENT_SECRET = os.getenv( 'O365_CLIENT_SECRET' )
 OPENAQ_API_KEY = os.getenv( 'OPENAQ_API_KEY' )
 OPENSKY_CLIENT_ID = os.getenv( 'OPENSKY_CLIENT_ID' )
-OPENSKY_CLIENT_SECRET = os.getenv( 'OPENSKY_CLIENT_SECRET' )
-OPENSKY_API_CREDENTIALS = os.getenv( 'OPENSKY_API_CREDENTIALS' )
+OPENSKY_CLIENT_SECRET = (os.getenv( 'OPENSKY_CLIENT_SECRET' )
+    or os.getenv( 'OPENSKY_API_CREDENTIALS' )
+    or os.getenv( 'OPENSKY_API_CLIENT_SECRET' ))
+OPENSKY_API_CREDENTIALS = OPENSKY_CLIENT_SECRET
 CENSUS_API_KEY = os.getenv( 'CENSUS_API_KEY' )
 SOCRATA_API_KEY = os.getenv( 'SOCRATA_API_KEY' )
 HEALTHDATA_API_KEY = os.getenv( 'HEALTHDATA_API_KEY' )
 USGS_WATERDATA_API_KEY =  os.getenv( 'USGS_API_KEY' )
 DATA_GOV_API_KEY = os.getenv( 'DATAGOV_API_KEY' )
-GOVINFO_API_KEY = os.getenv( 'GOVINFO_API_KEY' )
 FIRMS_MAP_KEY = os.getenv( 'FIRMS_MAP_KEY' ) or os.getenv( 'NASA_FIRMS_MAP_KEY' )
 PURPLEAIR_API_KEY = os.getenv( 'PURPLEAIR_API_KEY' )
 SKYMAP_TOKEN = os.getenv( 'SKY_MAP_TOKEN' )
+WHO_API_KEY = os.getenv( 'WHO_API_KEY' )
+# Credential metadata is explicit: environment aliases and non-secret fields
+# cannot safely be inferred from a variable suffix.
+# Tuple: (sidebar group, OS environment name, display label, input kind).
+API_CREDENTIAL_FIELDS: Dict[ str, tuple[ str, str, str, str ] ] = {
+	'OPENAI_API_KEY': ( 'AI & Language Models', 'OPENAI_API_KEY', 'OpenAI API Key', 'password' ),
+	'GEMINI_API_KEY': ( 'AI & Language Models', 'GEMINI_API_KEY', 'Gemini API Key', 'password' ),
+	'GOOGLE_API_KEY': ( 'AI & Language Models', 'GOOGLE_API_KEY', 'Google API Key', 'password' ),
+	'CLAUDE_API_KEY': ( 'AI & Language Models', 'CLAUDE_API_KEY', 'Claude API Key', 'password' ),
+	'MISTRAL_API_KEY': ( 'AI & Language Models', 'MISTRAL_API_KEY', 'Mistral API Key', 'password' ),
+	'XAI_API_KEY': ( 'AI & Language Models', 'XAI_API_KEY', 'xAI API Key', 'password' ),
+	'HUGGINGFACE_API_KEY': ( 'AI & Language Models', 'HUGGINGFACE_API_KEY', 'Hugging Face API Key', 'password' ),
+	'GOOGLEMAPS_API_KEY': ( 'Geospatial & Mapping', 'GOOGLEMAPS_API_KEY', 'Google Maps API Key', 'password' ),
+	'GEOCODING_API_KEY': ( 'Geospatial & Mapping', 'GEOCODING_API_KEY', 'Geocoding API Key', 'password' ),
+	'GEOAPIFY_API_KEY': ( 'Geospatial & Mapping', 'GEOAPIFY_API_KEY', 'Geoapify API Key', 'password' ),
+	'GOOGLE_CSE_ID': ( 'Geospatial & Mapping', 'GOOGLE_CSE_ID', 'Google Custom Search ID', 'text' ),
+	'IPINFO_API_KEY': ( 'Geospatial & Mapping', 'IPINFO_API_KEY', 'IPInfo API Key', 'password' ),
+	'SKYMAP_TOKEN': ( 'Geospatial & Mapping', 'SKY_MAP_TOKEN', 'Sky Map Token', 'password' ),
+	'OPENSKY_CLIENT_ID': ( 'Aviation & Maritime', 'OPENSKY_CLIENT_ID', 'OpenSky Client ID', 'text' ),
+	'OPENSKY_CLIENT_SECRET': ( 'Aviation & Maritime', 'OPENSKY_CLIENT_SECRET', 'OpenSky Client Secret', 'password' ),
+	'AISSTREAM_API_KEY': ( 'Aviation & Maritime', 'AISSTREAM_API_KEY', 'AIS Stream API Key', 'password' ),
+	'AIRNOW_API_KEY': ( 'Environmental & Scientific', 'AIRNOW_API_KEY', 'AirNow API Key', 'password' ),
+	'OPENAQ_API_KEY': ( 'Environmental & Scientific', 'OPENAQ_API_KEY', 'OpenAQ API Key', 'password' ),
+	'PURPLEAIR_API_KEY': ( 'Environmental & Scientific', 'PURPLEAIR_API_KEY', 'PurpleAir API Key', 'password' ),
+	'NASA_API_KEY': ( 'Environmental & Scientific', 'NASA_API_KEY', 'NASA API Key', 'password' ),
+	'NASA_EARTHDATA_TOKEN': ( 'Environmental & Scientific', 'NASA_EARTHDATA_TOKEN', 'NASA Earthdata Token', 'password' ),
+	'FIRMS_MAP_KEY': ( 'Environmental & Scientific', 'FIRMS_MAP_KEY', 'NASA FIRMS Map Key', 'password' ),
+	'GOOGLE_WEATHER_API_KEY': ( 'Environmental & Scientific', 'GOOGLE_WEATHER_API_KEY', 'Google Weather API Key', 'password' ),
+	'WEATHERAPI_API_KEY': ( 'Environmental & Scientific', 'WEATHERAPI_API_KEY', 'WeatherAPI Key', 'password' ),
+	'USGS_WATERDATA_API_KEY': ( 'Environmental & Scientific', 'USGS_WATERDATA_API_KEY', 'USGS Water Data API Key', 'password' ),
+	'CONGRESS_API_KEY': ( 'Government & Public Data', 'CONGRESS_API_KEY', 'Congress API Key', 'password' ),
+	'CENSUS_API_KEY': ( 'Government & Public Data', 'CENSUS_API_KEY', 'Census API Key', 'password' ),
+	'SOCRATA_API_KEY': ( 'Government & Public Data', 'SOCRATA_API_KEY', 'Socrata API Key', 'password' ),
+	'HEALTHDATA_API_KEY': ( 'Government & Public Data', 'HEALTHDATA_API_KEY', 'HealthData API Key', 'password' ),
+	'GOVINFO_API_KEY': ( 'Government & Public Data', 'GOVINFO_API_KEY', 'GovInfo API Key', 'password' ),
+	'DATA_GOV_API_KEY': ( 'Government & Public Data', 'DATAGOV_API_KEY', 'Data.gov API Key', 'password' ),
+	'NEWS_API_KEY': ( 'Government & Public Data', 'NEWSAPI_API_KEY', 'NewsAPI Key', 'password' ),
+	'THENEWS_API_KEY': ( 'Government & Public Data', 'THENEWSAPI_API_KEY', 'TheNewsAPI Key', 'password' ),
+	'WHO_API_KEY': ( 'Government & Public Data', 'WHO_API_KEY', 'World Health Organization API Key', 'password' ),
+	'PINECONE_API_KEY': ( 'Cloud, Storage & Integrations', 'PINECONE_API_KEY', 'Pinecone API Key', 'password' ),
+	'CHROMA_API_KEY': ( 'Cloud, Storage & Integrations', 'CHROMA_API_KEY', 'Chroma API Key', 'password' ),
+	'CHROMA_TENET_ID': ( 'Cloud, Storage & Integrations', 'CHROMA_TENET_ID', 'Chroma Tenant ID', 'text' ),
+	'LANGSMITH_API_KEY': ( 'Cloud, Storage & Integrations', 'LANGSMITH_API_KEY', 'LangSmith API Key', 'password' ),
+	'LLAMAINDEX_API_KEY': ( 'Cloud, Storage & Integrations', 'LLAMAINDEX_API_KEY', 'LlamaIndex API Key', 'password' ),
+	'LLAMACLOUD_API_KEY': ( 'Cloud, Storage & Integrations', 'LLAMACLOUD_API_KEY', 'LlamaCloud API Key', 'password' ),
+	'GOOGLE_CLOUD_PROJECT_ID': ( 'Cloud, Storage & Integrations', 'GOOGLE_CLOUD_PROJECT_ID', 'Google Cloud Project ID', 'text' ),
+	'GOOGLE_CLOUD_LOCATION': ( 'Cloud, Storage & Integrations', 'GOOGLE_CLOUD_LOCATION', 'Google Cloud Location', 'text' ),
+	'GOOGLE_GENAI_USE_VERTEXAI': ( 'Cloud, Storage & Integrations', 'GOOGLE_GENAI_USE_VERTEXAI', 'Use Google Vertex AI', 'checkbox' ),
+	'GOOGLE_ACCOUNT_FILE': ( 'Cloud, Storage & Integrations', 'GOOGLE_ACCOUNT_CREDENTIALS', 'Google Account Credentials Path', 'text' ),
+	'GOOGLE_DRIVE_TOKEN_PATH': ( 'Cloud, Storage & Integrations', 'GOOGLE_DRIVE_TOKEN_PATH', 'Google Drive Token Path', 'text' ),
+	'GOOGLE_DRIVE_FOLDER_ID': ( 'Cloud, Storage & Integrations', 'GOOGLE_DRIVE_FOLDER_ID', 'Google Drive Folder ID', 'text' ),
+	'O365_CLIENT_ID': ( 'Cloud, Storage & Integrations', 'O365_CLIENT_ID', 'Microsoft 365 Client ID', 'text' ),
+	'O365_CLIENT_SECRET': ( 'Cloud, Storage & Integrations', 'O365_CLIENT_SECRET', 'Microsoft 365 Client Secret', 'password' ),
+}
+
+# Preserve original OS-derived defaults even after single-user runtime overrides.
+API_CREDENTIAL_DEFAULTS: Dict[ str, str | None ] = {
+	name: globals( )[ name ] for name in API_CREDENTIAL_FIELDS
+}
+
 
 
 # -------------- SETTINGS

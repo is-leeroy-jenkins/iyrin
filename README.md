@@ -345,7 +345,27 @@ streamlit run app.py
 
 ## ⚙️ Configuration 
 
-Iyrin reads provider credentials from OS environment variables through `config.py`. OpenSky uses `OPENSKY_CLIENT_ID` and `OPENSKY_API_CLIENT_SECRET`; AIS Stream uses `AISSTREAM_API_KEY`. Restart the application after changing these environment variables. `NASA_FIRMS_MAP_KEY` remains an accepted compatibility alias.
+Iyrin reads provider credentials from OS environment variables through `config.py`.
+OpenSky uses `OPENSKY_CLIENT_ID` and `OPENSKY_CLIENT_SECRET` (legacy
+`OPENSKY_API_CREDENTIALS` and `OPENSKY_API_CLIENT_SECRET` are accepted as
+fallbacks). AIS Stream uses `AISSTREAM_API_KEY`. Restart the application
+after changing OS environment variables. `NASA_FIRMS_MAP_KEY` remains an
+accepted FIRMS compatibility alias.
+
+The global sidebar **Credentials → API** editor lists all 48 registered
+OS-backed credentials and related configuration values, organized by provider.
+Each field defaults to the value captured when `config.py` reads the OS
+environment. Changes take effect only when **Apply** is selected, and
+**Reset to OS Defaults** restores those original values.
+
+**Security:** Process-wide credential overrides are deliberately disabled by
+default. To enable the editor in a private **single-user** Streamlit instance,
+set the OS environment variable `IYRIN_SINGLE_USER_MODE=1` and restart the
+application. Overrides modify the process environment and `config.py`, and
+therefore are **not isolated across concurrent sessions**. Do not enable this
+mode on public or multi-user deployments. Credentials are never written to
+the repository or persisted beyond the current process by this editor.
+OpenSky's cached provider is invalidated when its client credentials change.
 
 | Environment Variable      | Service                          |
 |---------------------------|----------------------------------|
@@ -364,7 +384,7 @@ Iyrin reads provider credentials from OS environment variables through `config.p
 | `OPENAQ_API_KEY`          | OpenAQ                           |
 | `PURPLEAIR_API_KEY`       | PurpleAir                        |
 | `OPENSKY_CLIENT_ID`          | OpenSky OAuth client ID          |
-| `OPENSKY_API_CLIENT_SECRET` | OpenSky OAuth client secret       |
+| `OPENSKY_CLIENT_SECRET` | OpenSky OAuth client secret       |
 | `AISSTREAM_API_KEY`       | AIS Stream                       |
 | `PINECONE_API_KEY`        | Pinecone vector storage          |
 

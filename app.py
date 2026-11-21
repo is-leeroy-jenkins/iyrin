@@ -252,133 +252,8 @@ if 'active_location_source' not in st.session_state:
 if 'browser_location_signature' not in st.session_state:
 	st.session_state[ 'browser_location_signature' ] = ''
 	
-# ------- API Key State
-
-if 'google_api_key' not in st.session_state:
-	st.session_state[ 'google_api_key' ] = ''
-
-if 'google_cse_id' not in st.session_state:
-	st.session_state[ 'google_cse_id' ] = ''
-
-if 'googlemaps_api_key' not in st.session_state:
-	st.session_state[ 'googlemaps_api_key' ] = ''
-
-if 'geocoding_api_key' not in st.session_state:
-	st.session_state[ 'geocoding_api_key' ] = ''
-
-if 'google_cloud_project_id' not in st.session_state:
-	st.session_state[ 'google_cloud_project_id' ] = ''
-
-if 'google_cloud_location' not in st.session_state:
-	st.session_state[ 'google_cloud_location' ] = ''
-
-if 'google_weather_api_key' not in st.session_state:
-	st.session_state[ 'google_weather_api_key' ] = ''
-
-if 'govinfo_api_key' not in st.session_state:
-	st.session_state[ 'govinfo_api_key' ] = ''
-
-if 'nasa_api_key' not in st.session_state:
-	st.session_state[ 'nasa_api_key' ] = ''
-
-if 'airnow_api_key' not in st.session_state:
-	st.session_state[ 'airnow_api_key' ] = ''
-
-if 'openaq_api_key' not in st.session_state:
-	st.session_state[ 'openaq_api_key' ] = ''
-
-if 'nasa_earthdata_token' not in st.session_state:
-	st.session_state[ 'nasa_earthdata_token' ] = ''
-
-if 'firms_map_key' not in st.session_state:
-	st.session_state[ 'firms_map_key' ] = ''
-
-if 'purpleair_api_key' not in st.session_state:
-	st.session_state[ 'purpleair_api_key' ] = ''
-
-if st.session_state.google_api_key == '':
-	default = cfg.GOOGLE_API_KEY
-	if default:
-		st.session_state.google_api_key = default
-		os.environ[ 'GOOGLE_API_KEY' ] = default
-
-if st.session_state.google_cse_id == '':
-	default = cfg.GOOGLE_CSE_ID
-	if default:
-		st.session_state.google_cse_id = default
-		os.environ[ 'GOOGLE_CSE_ID' ] = default
-
-if st.session_state.googlemaps_api_key == '':
-	default = cfg.GOOGLEMAPS_API_KEY
-	if default:
-		st.session_state.googlemaps_api_key = default
-		os.environ[ 'GOOGLEMAPS_API_KEY' ] = default
-
-if st.session_state.geocoding_api_key == '':
-	default = cfg.GEOCODING_API_KEY
-	if default:
-		st.session_state.geocoding_api_key = default
-		os.environ[ 'GEOCODING_API_KEY' ] = default
-
-if st.session_state.google_cloud_project_id == '':
-	default = cfg.GOOGLE_CLOUD_PROJECT_ID
-	if default:
-		st.session_state.google_cloud_project_id = default
-		os.environ[ 'GOOGLE_CLOUD_PROJECT_ID' ] = default
-
-if st.session_state.google_cloud_location == '':
-	default = cfg.GOOGLE_CLOUD_LOCATION
-	if default:
-		st.session_state.google_cloud_location = default
-		os.environ[ 'GOOGLE_CLOUD_LOCATION' ] = default
-
-if st.session_state.google_weather_api_key == '':
-	default = cfg.GOOGLE_WEATHER_API_KEY
-	if default:
-		st.session_state.google_weather_api_key = default
-		os.environ[ 'GOOGLE_WEATHER_API_KEY' ] = default
-
-if st.session_state.govinfo_api_key == '':
-	default = cfg.GOVINFO_API_KEY
-	if default:
-		st.session_state.govinfo_api_key = default
-		os.environ[ 'GOVINFO_API_KEY' ] = default
-
-if st.session_state.nasa_api_key == '':
-	default = cfg.NASA_API_KEY
-	if default:
-		st.session_state.nasa_api_key = default
-		os.environ[ 'NASA_API_KEY' ] = default
-
-if st.session_state.airnow_api_key == '':
-	default = cfg.AIRNOW_API_KEY
-	if default:
-		st.session_state.airnow_api_key = default
-		os.environ[ 'AIRNOW_API_KEY' ] = default
-
-if st.session_state.openaq_api_key == '':
-	default = cfg.OPENAQ_API_KEY
-	if default:
-		st.session_state.openaq_api_key = default
-		os.environ[ 'OPENAQ_API_KEY' ] = default
-
-if st.session_state.nasa_earthdata_token == '':
-	default = cfg.NASA_EARTHDATA_TOKEN
-	if default:
-		st.session_state.nasa_earthdata_token = default
-		os.environ[ 'NASA_EARTHDATA_TOKEN' ] = default
-
-if st.session_state.firms_map_key == '':
-	default = cfg.FIRMS_MAP_KEY
-	if default:
-		st.session_state.firms_map_key = default
-		os.environ[ 'FIRMS_MAP_KEY' ] = default
-
-if st.session_state.purpleair_api_key == '':
-	default = cfg.PURPLEAIR_API_KEY
-	if default:
-		st.session_state.purpleair_api_key = default
-		os.environ[ 'PURPLEAIR_API_KEY' ] = default
+# API credential input state is initialized before rendering the global sidebar.
+# See initialize_api_credential_state and apply_api_credential_values below.
 
 # ---------------------------------------------------------------------
 # UTILITIES
@@ -563,27 +438,169 @@ def init_state( key: str, value: Any ) -> None:
 	if key not in st.session_state:
 		st.session_state[ key ] = value
 
-def init_env_state( key: str, config_name: str, env_name: str ) -> None:
-	"""Initialize session state from configuration and mirror configured credentials to the environment.
+def initialize_api_credential_state( ) -> None:
+	"""Initialize credential widget values from the original OS configuration.
 
 	Purpose:
-		Initialize a session-state API/configuration key from config.py and mirror the value to os.environ
-		when a configured value exists.
-
-	Args:
-		key (str): Session-state key to initialize.
-		config_name (str): Attribute name to read from config.py.
-		env_name (str): Environment variable name to assign.
+		Seed credential inputs before Streamlit creates the keyed widgets. Reset
+		requests are applied only at this pre-render boundary.
 
 	Returns:
-		None: Initializes session state from configuration and mirror configured credentials to the environment.
+		None: Initializes credential form values and pending reset state.
 	"""
-	init_state( key, '' )
-	if st.session_state.get( key, '' ) == '':
-		default = vars( cfg ).get( config_name, '' )
-		if default:
-			st.session_state[ key ] = default
-			os.environ[ env_name ] = default
+	reset_requested = st.session_state.pop( 'api_credentials_reset_pending', False )
+	for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
+		field_type = field[ 3 ]
+		key = f'api_credential_{config_name.lower( )}'
+		if reset_requested or key not in st.session_state:
+			default = cfg.API_CREDENTIAL_DEFAULTS[ config_name ]
+			if field_type == 'checkbox':
+				st.session_state[ key ] = str( default or '' ).lower( ) in (
+					'1', 'true', 'yes', 'on' )
+			else:
+				st.session_state[ key ] = default or ''
+
+	if reset_requested:
+		defaults: Dict[ str, str ] = {
+			name: value or '' for name, value in cfg.API_CREDENTIAL_DEFAULTS.items( )
+		}
+		apply_api_credential_values( defaults, validate_pairs=False )
+
+
+def apply_api_credential_values( values: Dict[ str, str ],
+		validate_pairs: bool=True ) -> None:
+	"""Apply the authorized single-user credential configuration.
+
+	Purpose:
+		Update the process environment and config.py consistently before new
+		provider instances are created, and invalidate the cached OpenSky provider
+		when its OAuth credentials change. This must not run in a multi-user app.
+
+	Args:
+		values (Dict[str, str]): Complete set of configuration values.
+		validate_pairs (bool): Require complete OAuth credential pairs when applying.
+
+	Returns:
+		None: Applies changed values to process configuration and provider cache.
+
+	Raises:
+		ValueError: Raised for missing or inconsistent credential entries.
+	"""
+	throw_if( 'values', values )
+	if set( values ) != set( cfg.API_CREDENTIAL_FIELDS ):
+		raise ValueError( 'Credential values must contain the full configured registry.' )
+	if validate_pairs and (bool( values[ 'OPENSKY_CLIENT_ID' ] )
+			!= bool( values[ 'OPENSKY_CLIENT_SECRET' ] )):
+		raise ValueError( 'OpenSky requires both a client ID and client secret.' )
+	if validate_pairs and (bool( values[ 'O365_CLIENT_ID' ] )
+			!= bool( values[ 'O365_CLIENT_SECRET' ] )):
+		raise ValueError( 'Microsoft 365 requires both a client ID and client secret.' )
+
+	changed: List[ str ] = [ ]
+	for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
+		env_name = field[ 1 ]
+		new_value = values[ config_name ]
+		current_value = vars( cfg )[ config_name ] or ''
+		if new_value == current_value:
+			continue
+		changed.append( config_name )
+		vars( cfg )[ config_name ] = new_value or None
+		if new_value:
+			os.environ[ env_name ] = new_value
+		else:
+			os.environ.pop( env_name, None )
+
+	cfg.OPENSKY_API_CREDENTIALS = cfg.OPENSKY_CLIENT_SECRET
+	legacy_state = {
+		'GOOGLE_API_KEY': 'google_api_key',
+		'GOOGLEMAPS_API_KEY': 'googlemaps_api_key',
+		'GEOCODING_API_KEY': 'geocoding_api_key',
+		'GOOGLE_CSE_ID': 'google_cse_id',
+		'GOOGLE_CLOUD_PROJECT_ID': 'google_cloud_project_id',
+		'GOOGLE_CLOUD_LOCATION': 'google_cloud_location',
+		'GOOGLE_WEATHER_API_KEY': 'google_weather_api_key',
+		'GOVINFO_API_KEY': 'govinfo_api_key',
+		'NASA_API_KEY': 'nasa_api_key',
+		'AIRNOW_API_KEY': 'airnow_api_key',
+		'OPENAQ_API_KEY': 'openaq_api_key',
+		'NASA_EARTHDATA_TOKEN': 'nasa_earthdata_token',
+		'FIRMS_MAP_KEY': 'firms_map_key',
+		'PURPLEAIR_API_KEY': 'purpleair_api_key',
+		'OPENAI_API_KEY': 'openai_api_key',
+		'GEMINI_API_KEY': 'gemini_api_key',
+		'XAI_API_KEY': 'xai_api_key',
+		'CLAUDE_API_KEY': 'claude_api_key',
+		'MISTRAL_API_KEY': 'mistral_api_key',
+	}
+	for config_name, state_key in legacy_state.items( ):
+		st.session_state[ state_key ] = values[ config_name ]
+
+	if 'OPENSKY_CLIENT_ID' in changed or 'OPENSKY_CLIENT_SECRET' in changed:
+		from realtime import get_opensky_service
+		get_opensky_service.clear( )
+
+
+def render_api_credential_controls( ) -> None:
+	"""Render the complete application credential editor in the global sidebar.
+
+	Purpose:
+		Expose every registered OS-backed credential, with explicit Apply/Reset
+		operations restricted to an operator-enabled single-user deployment.
+
+	Returns:
+		None: Draws sidebar controls and applies approved changes.
+	"""
+	st.markdown( '#### 🔒 Credentials' )
+	with st.expander( label='API', expanded=False ):
+		if os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) != '1':
+			st.warning( 'API credential editing is disabled for multi-user safety. '
+				'Set IYRIN_SINGLE_USER_MODE=1 in a private, single-user deployment '
+				'and restart Streamlit to enable the editor.' )
+			return
+
+		st.caption( 'Configured values originate from config.py and OS environment '
+			'variables. Apply modifies process-wide configuration: private single-user use only.' )
+		with st.form( 'api_credentials_form', clear_on_submit=False ):
+			for group in (
+				'AI & Language Models', 'Geospatial & Mapping', 'Aviation & Maritime',
+				'Environmental & Scientific', 'Government & Public Data',
+				'Cloud, Storage & Integrations',
+			):
+				with st.container( border=True ):
+					st.markdown( f'**{group}**' )
+					for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
+						category, env_name, label, field_type = field
+						if category != group:
+							continue
+						widget_key = f'api_credential_{config_name.lower( )}'
+						if field_type == 'checkbox':
+							st.checkbox( label, key=widget_key,
+								help=f'Environment variable: {env_name}' )
+						else:
+							st.text_input( label, key=widget_key, type=field_type,
+								help=f'Environment variable: {env_name}' )
+
+			apply_button = st.form_submit_button( 'Apply', type='primary' )
+			reset_button = st.form_submit_button( 'Reset to OS Defaults' )
+
+		if reset_button:
+			st.session_state[ 'api_credentials_reset_pending' ] = True
+			st.rerun( )
+
+		if apply_button:
+			values: Dict[ str, str ] = { }
+			for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
+				current = st.session_state[ f'api_credential_{config_name.lower( )}' ]
+				if field[ 3 ] == 'checkbox':
+					values[ config_name ] = 'true' if current else 'false'
+				else:
+					values[ config_name ] = current
+			try:
+				apply_api_credential_values( values )
+			except ValueError as ex:
+				st.error( str( ex ) )
+			else:
+				st.success( 'Credential settings applied to this single-user process.' )
 
 def normalize( obj: object ) -> object:
 	"""Convert external API payloads into JSON-serializable Python values.
@@ -3247,6 +3264,9 @@ style_subheaders( )
 # ==============================================================================
 st.logo( cfg.LOGO, size='Large' )
 
+if os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) == '1':
+	initialize_api_credential_state( )
+
 with st.sidebar:
 	# ------------------------------------------------------------------------------
 	# Expander - Map Mode
@@ -3397,146 +3417,11 @@ with st.sidebar:
 			cache = SQLiteCache( cache_path )
 	
 	# ------------------------------------------------------------------------------
-	# Expander - Security
+	# Complete API credentials, shared by every application mode.
 	# ------------------------------------------------------------------------------
 	blue_divider( )
-	st.markdown( '#### 🔒 Credentials' )
-	with st.expander( label='API', expanded=False ):
-		init_env_state( 'openai_api_key', 'OPENAI_API_KEY', 'OPENAI_API_KEY' )
-		init_env_state( 'gemini_api_key', 'GEMINI_API_KEY', 'GEMINI_API_KEY' )
-		init_env_state( 'xai_api_key', 'XAI_API_KEY', 'XAI_API_KEY' )
-		init_env_state( 'claude_api_key', 'CLAUDE_API_KEY', 'CLAUDE_API_KEY' )
-		init_env_state( 'mistral_api_key', 'MISTRAL_API_KEY', 'MISTRAL_API_KEY' )
-		openai_key = st.text_input( 'OpenAI API Key', type='password',
-			value=st.session_state.openai_api_key or '', help='Overrides OPENAI_API_KEY.' )
-		if openai_key:
-			st.session_state.openai_api_key = openai_key
-			os.environ[ 'OPENAI_API_KEY' ] = openai_key
-			cfg.OPENAI_API_KEY = openai_key
+	render_api_credential_controls( )
 
-		gemini_key = st.text_input( 'Gemini API Key', type='password',
-			value=st.session_state.gemini_api_key or '', help='Overrides GEMINI_API_KEY.' )
-		if gemini_key:
-			st.session_state.gemini_api_key = gemini_key
-			os.environ[ 'GEMINI_API_KEY' ] = gemini_key
-			cfg.GEMINI_API_KEY = gemini_key
-
-		xai_key = st.text_input( 'Grok / xAI API Key', type='password',
-			value=st.session_state.xai_api_key or '', help='Overrides XAI_API_KEY.' )
-		if xai_key:
-			st.session_state.xai_api_key = xai_key
-			os.environ[ 'XAI_API_KEY' ] = xai_key
-			cfg.XAI_API_KEY = xai_key
-
-		claude_key = st.text_input( 'Claude API Key', type='password',
-			value=st.session_state.claude_api_key or '', help='Overrides CLAUDE_API_KEY' )
-		if claude_key:
-			st.session_state.claude_api_key = claude_key
-			os.environ[ 'CLAUDE_API_KEY' ] = claude_key
-			cfg.CLAUDE_API_KEY = claude_key
-
-		mistral_key = st.text_input( 'Mistral API Key', type='password',
-			value=st.session_state.mistral_api_key or '', help='Overrides MISTRAL_API_KEY.' )
-		if mistral_key:
-			st.session_state.mistral_api_key = mistral_key
-			os.environ[ 'MISTRAL_API_KEY' ] = mistral_key
-			cfg.MISTRAL_API_KEY = mistral_key
-
-		google_key = st.text_input( 'Google API Key', type='password',
-			value=st.session_state.google_api_key or '', help='Overrides GOOGLE_API_KEY.' )
-		
-		if google_key:
-			st.session_state.google_api_key = google_key
-			os.environ[ 'GOOGLE_API_KEY' ] = google_key
-			cfg.GOOGLE_API_KEY = google_key
-		
-		googlemaps_key = st.text_input( 'Google Maps API Key', type='password',
-			value=st.session_state.googlemaps_api_key or '', help='Overrides GOOGLEMAPS_API_KEY.' )
-		
-		if googlemaps_key:
-			st.session_state.googlemaps_api_key = googlemaps_key
-			os.environ[ 'GOOGLEMAPS_API_KEY' ] = googlemaps_key
-			cfg.GOOGLEMAPS_API_KEY = googlemaps_key
-		
-		googleweather_key = st.text_input( 'Google Weather API Key', type='password',
-			value=st.session_state.google_weather_api_key or '',
-			help='Overrides GOOGLE_WEATHER_API_KEY.' )
-		
-		if googleweather_key:
-			st.session_state.google_weather_api_key = googleweather_key
-			os.environ[ 'GOOGLE_WEATHER_API_KEY' ] = googleweather_key
-		
-		geocoding_key = st.text_input( 'Geocoding API Key', type='password',
-			value=st.session_state.geocoding_api_key or '',
-			help='Overrides GEOCODING_API_KEY.' )
-		
-		if geocoding_key:
-			st.session_state.geocoding_api_key = geocoding_key
-			os.environ[ 'GEOCODING_API_KEY' ] = geocoding_key
-		
-		google_cse_id = st.text_input( 'Google Custom Search ID', type='password',
-			value=st.session_state.google_cse_id or '', help='Overrides GOOGLE_CSE_ID.' )
-		
-		if google_cse_id:
-			st.session_state.google_cse_id = google_cse_id
-			os.environ[ 'GOOGLE_CSE_ID' ] = google_cse_id
-		
-		govinfo_key = st.text_input( 'Gov Info API', type='password',
-			value=st.session_state.govinfo_api_key or '',
-			help='Overrides GOVINFO_API_KEY from config.py for this session only.' )
-		
-		if govinfo_key:
-			st.session_state.govinfo_api_key = govinfo_key
-			os.environ[ 'GOVINFO_API_KEY' ] = govinfo_key
-		
-		airnow_key = st.text_input( 'Air Quality Now', type='password',
-			value=st.session_state.airnow_api_key or '',
-			help='Overrides AIRNOW_API_KEY from config.py for this session only.' )
-		
-		if airnow_key:
-			st.session_state.airnow_api_key = airnow_key
-			os.environ[ 'AIRNOW_API_KEY' ] = airnow_key
-		
-		nasa_key = st.text_input( 'NASA API Key', type='password',
-			value=st.session_state.nasa_api_key or '',
-			help='Overrides NASA_API_KEY from config.py for this session only.' )
-		
-		if nasa_key:
-			st.session_state.nasa_api_key = nasa_key
-			os.environ[ 'NASA_API_KEY' ] = nasa_key
-		
-		nasa_token = st.text_input( 'NASA Earth Data', type='password',
-			value=st.session_state.nasa_earthdata_token or '',
-			help='Overrides NASA_EARTHDATA_TOKEN from config.py for this session only.' )
-		
-		if nasa_token:
-			st.session_state.nasa_earthdata_token = nasa_token
-			os.environ[ 'NASA_EARTHDATA_TOKEN' ] = nasa_token
-		
-		openaq_key = st.text_input( 'Open Air Quality', type='password',
-			value=st.session_state.openaq_api_key or '',
-			help='Overrides OPENAQ_API_KEY from config.py for this session only.' )
-		
-		if openaq_key:
-			st.session_state.openaq_api_key = openaq_key
-			os.environ[ 'OPENAQ_API_KEY' ] = openaq_key
-		
-		firms_key = st.text_input( 'FIRMS Map Client', type='password',
-			value=st.session_state.firms_map_key or '',
-			help='Overrides FIRMS_MAP_KEY from config.py for this session only.' )
-		
-		if firms_key:
-			st.session_state.firms_map_key = firms_key
-			os.environ[ 'FIRMS_MAP_KEY' ] = firms_key
-		
-		purpleair_key = st.text_input( 'Purple Air API', type='password',
-			value=st.session_state.purpleair_api_key or '',
-			help='Overrides Purple Air API from config.py for this session only.' )
-		
-		if purpleair_key:
-			st.session_state.purpleair_api_key = purpleair_key
-			os.environ[ 'PURPLEAIR_API_KEY' ] = purpleair_key
-	
 	# ------- Map Functionality
 	maps = Map( qps=qps, )
 	distances = DistanceMatrix( maps )
