@@ -543,31 +543,25 @@ def render_api_credential_controls( ) -> None:
 	"""
 	st.markdown( '#### 🔒 Credentials' )
 	with st.expander( label='API', expanded=False ):
-		st.caption( 'Values default to config.py environment settings. Apply updates '
-			'process-wide credentials; use this editor only in a trusted, access-controlled app.' )
-		with st.form( 'api_credentials_form', clear_on_submit=False ):
-			for group in (
-				'AI & Language Models', 'Geospatial & Mapping', 'Aviation & Maritime',
-				'Environmental & Scientific', 'Government & Public Data',
-				'Cloud, Storage & Integrations', ):
-				with st.container( border=True ):
-					st.markdown( f'**{group}**' )
-					for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
-						category, env_name, label, field_type = field
-						if category != group:
-							continue
-						widget_key = f'api_credential_{config_name.lower( )}'
-						if field_type == 'checkbox':
-							st.checkbox( label, key=widget_key,
-								help=f'Environment variable: {env_name}' )
-						else:
-							st.text_input( label, key=widget_key,
-								type='password' if field_type == 'password' else 'default',
-								help=f'Environment variable: {env_name}' )
+		for group in ('AI & Language Models', 'Geospatial & Mapping', 'Aviation & Maritime',
+			'Environmental & Scientific', 'Government & Public Data',
+			'Cloud, Storage & Integrations',):
+			st.markdown( f'**{group}**' )
+			for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
+				category, env_name, label, field_type = field
+				if category != group:
+					continue
+				widget_key = f'api_credential_{config_name.lower( )}'
+				if field_type == 'checkbox':
+					st.checkbox( label, key=widget_key, help=f'Environment variable: {env_name}' )
+				else:
+					st.text_input( label, key=widget_key, type='password' if field_type ==
+					                                                         'password' else
+					'default', help=f'Environment variable: {env_name}' )
 
-			apply_button = st.form_submit_button( 'Apply', type='primary' )
-			reset_button = st.form_submit_button( 'Reset to OS Defaults' )
-
+		apply_button = st.button( 'Apply', type='primary' )
+		reset_button = st.button( 'Reset' )
+		
 		if reset_button:
 			st.session_state[ 'api_credentials_reset_pending' ] = True
 			st.rerun( )
@@ -6467,7 +6461,8 @@ elif mode == 'Environmental Data':
 						st.session_state[ 'env_last_longitude' ] = None
 
 				st.divider( )
-				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source', 'EnviroFacts', 'env_envirofacts' )
+				render_source_processing_controls( 'env', 'env_last_result', 'env_last_source',
+					'EnviroFacts', 'env_envirofacts' )
 
 			# --------- FIRMS FIRE / THERMAL ANOMALIES
 			with st.expander( '🔥 NASA FIRMS', expanded=False ):
@@ -6999,7 +6994,8 @@ elif mode == 'Geological Data':
 						st.session_state[ 'geo_last_image_path' ] = ''
 
 				st.divider( )
-				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source', 'USGS Water Data', 'geo_usgs_water_data' )
+				render_source_processing_controls( 'geo', 'geo_last_result', 'geo_last_source',
+					'USGS Water Data', 'geo_usgs_water_data' )
 
 			# --------- USGS THE NATIONAL MAP
 			with st.expander( '🗺️ USGS The National Map', expanded=False ):
@@ -7415,11 +7411,8 @@ elif mode == 'Astronomical Data':
 					with static_c2:
 						chart_height = st.number_input( 'Height', min_value=250, max_value=2500,
 							value=450, step=50, key='astro_chart_height' )
-						
-						chart_show_const_names = st.checkbox(
-							'Show Constellation Names',
-							value=False,
-							key='astro_chart_show_const_names' )
+						chart_show_const_names = st.checkbox( 'Show Constellation Names',
+							value=False, key='astro_chart_show_const_names' )
 				
 				else:
 					chart_width = 900
@@ -7436,7 +7429,6 @@ elif mode == 'Astronomical Data':
 							use_container_width=True ):
 						try:
 							service = StarChart( )
-							
 							if chart_mode == 'Object Chart':
 								if not chart_object_name:
 									st.warning( 'Enter an object name.' )
