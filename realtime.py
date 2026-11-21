@@ -2245,6 +2245,14 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
 	st.session_state[ 'live_world_last_error' ] = ''
+	# An unresolved global location is represented by (0, 0) in app.py.
+	# Never turn that fallback into a local provider query.
+	has_location = (is_valid_world_coordinates( latitude, longitude )
+		and not (latitude == 0.0 and longitude == 0.0))
+	location_required_sources = { 'aircraft', 'military_aircraft', 'vessels',
+		'infrastructure', 'cameras', 'map_layers' }
+	if st.session_state[ 'live_world_firms_area_mode' ] != 'World':
+		location_required_sources.add( 'fires' )
 	fetchers: Dict[ str, Callable[ [ ], pd.DataFrame ] ] = {
 		'aircraft': lambda: fetch_aircraft( latitude, longitude ),
 		'military_aircraft': lambda: fetch_military_aircraft( latitude, longitude ),
@@ -2262,7 +2270,15 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 			frame_key = source[ 'frame_key' ]
 			enabled_key = source[ 'enabled_key' ]
 			if st.session_state[ enabled_key ]:
-				df_source = refresh_live_source( source_key, fetchers[ source_key ] )
+				if not has_location and source_key in location_required_sources:
+					df_source = st.session_state.get( frame_key, pd.DataFrame( ) )
+					if not isinstance( df_source, pd.DataFrame ):
+						df_source = pd.DataFrame( )
+					update_source_state( source_key, 'Location Required',
+						error='Set a valid global location before refreshing this source.',
+						stale=not df_source.empty, error_type='MissingLocation' )
+				else:
+					df_source = refresh_live_source( source_key, fetchers[ source_key ] )
 				if not df_source.empty:
 					frames.append( df_source )
 			else:
@@ -2283,7 +2299,7 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 		errors = dict( st.session_state[ 'live_world_source_errors' ] )
 		failures: List[ str ] = [ ]
 		for source_key, status in statuses.items( ):
-			if status not in ( 'Failed', 'Configuration Required' ):
+			if status not in ( 'Failed', 'Configuration Required', 'Location Required' ):
 				continue
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
 			failures.append( f'{label}: {errors.get( source_key, "" )}' )
@@ -2362,9 +2378,9 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			attempts = int( st.session_state.get(
 				'live_world_satellite_propagation_attempts', 0 ) )
 			st.warning( f'Satellites: {failures} of {attempts} orbit propagations failed.' )
-		if status == 'Configuration Required':
+		if status in ( 'Configuration Required', 'Location Required' ):
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
-			note = source_errors.get( source_key, '' ) or 'Credentials are required.'
+			note = source_errors.get( source_key, '' ) or 'Configuration is required.'
 			st.warning( f'{label}: {note}' )
 			continue
 		if status != 'Failed':
@@ -2386,7 +2402,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if df_entities is None or df_entities.empty:
 		if not (st.session_state[ 'live_world_measurements' ]
 				or st.session_state[ 'live_world_historical_replay' ]):
-			if any( value in ( 'Failed', 'Configuration Required' ) for value in source_status.values( ) ):
+			if any( value in ( 'Failed', 'Configuration Required', 'Location Required' )
+					for value in source_status.values( ) ):
 				st.info( 'No records are available because the enabled Live World source refresh failed.' )
 			else:
 				st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
