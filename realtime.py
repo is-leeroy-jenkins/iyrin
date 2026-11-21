@@ -2303,59 +2303,42 @@ class LiveWorldRefresh:
 		finally:
 			self.state[ 'live_world_refresh_requested' ] = False
 
-class LiveWorldRendering:
-	"""Render the Live World sidebar, operational map, and related display data.
+class LiveWorldSidebar:
+	"""Render session-specific Live World sidebar controls.
 
 	Purpose:
-		Render the Live World sidebar, operational map, and related display data.
+		Provide the Live World operational control surface independently of map rendering.
 
 	Attributes:
 		state (object): Session-specific Streamlit state mapping.
-		state_service (LiveWorldState): Explicitly injected collaborator.
-		analytics (LiveWorldAnalytics): Explicitly injected collaborator.
-		history (LiveWorldHistory): Explicitly injected collaborator.
-		refresh (LiveWorldRefresh): Explicitly injected collaborator.
-		entities (LiveWorldEntities): Explicitly injected collaborator.
-		geometry (LiveWorldGeometry): Explicitly injected collaborator.
-		validation (LiveWorldValidation): Explicitly injected collaborator.
+		state_service (LiveWorldState): Session initialization and clear operations.
+		analytics (LiveWorldAnalytics): Measurement, annotation, and geofence actions.
+		history (LiveWorldHistory): Tracking and replay actions.
 	"""
-
-
 	state: object
 	state_service: LiveWorldState
 	analytics: LiveWorldAnalytics
 	history: LiveWorldHistory
-	refresh: LiveWorldRefresh
-	entities: LiveWorldEntities
-	geometry: LiveWorldGeometry
-	validation: LiveWorldValidation
 
-	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics, history: LiveWorldHistory, refresh_service: LiveWorldRefresh, entities: LiveWorldEntities, geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
-		"""Initialize the service's explicit dependencies.
+	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics,
+			history: LiveWorldHistory ) -> None:
+		"""Initialize the sidebar's explicit service dependencies.
 
 		Purpose:
-			Render sidebar and map using explicitly injected session services.
+			Bind sidebar controls to the current session's state and workflow services.
 
 		Args:
-			state_service (LiveWorldState): Required collaborator for this service.
-			analytics (LiveWorldAnalytics): Required collaborator for this service.
-			history (LiveWorldHistory): Required collaborator for this service.
-			refresh_service (LiveWorldRefresh): Required collaborator for this service.
-			entities (LiveWorldEntities): Required collaborator for this service.
-			geometry (LiveWorldGeometry): Required collaborator for this service.
-			validation (LiveWorldValidation): Required collaborator for this service.
+			state_service (LiveWorldState): Session state and reset operations.
+			analytics (LiveWorldAnalytics): Analysis and annotation operations.
+			history (LiveWorldHistory): History and tracking operations.
 
 		Returns:
-			None: Initializes the service's retained dependencies.
+			None: Initializes the sidebar collaborators.
 		"""
 		self.state_service = state_service
 		self.state = state_service.state
 		self.analytics = analytics
 		self.history = history
-		self.refresh = refresh_service
-		self.entities = entities
-		self.geometry = geometry
-		self.validation = validation
 
 	def render_live_world_sidebar(self) -> None:
 		'''
@@ -2630,6 +2613,61 @@ class LiveWorldRendering:
 							self.state[ 'live_world_history_last_saved' ] = 0
 							self.state[ 'live_world_history_last_error' ] = ''
 				st.checkbox( AI_ADVANCED_TOOLS[ 'agent_tools' ], key='live_world_agent_tools' )
+
+class LiveWorldRendering:
+	"""Render the Live World sidebar, operational map, and related display data.
+
+	Purpose:
+		Render the Live World sidebar, operational map, and related display data.
+
+	Attributes:
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Explicitly injected collaborator.
+		analytics (LiveWorldAnalytics): Explicitly injected collaborator.
+		history (LiveWorldHistory): Explicitly injected collaborator.
+		refresh (LiveWorldRefresh): Explicitly injected collaborator.
+		entities (LiveWorldEntities): Explicitly injected collaborator.
+		geometry (LiveWorldGeometry): Explicitly injected collaborator.
+		validation (LiveWorldValidation): Explicitly injected collaborator.
+	"""
+
+
+	state: object
+	state_service: LiveWorldState
+	analytics: LiveWorldAnalytics
+	history: LiveWorldHistory
+	refresh: LiveWorldRefresh
+	entities: LiveWorldEntities
+	geometry: LiveWorldGeometry
+	validation: LiveWorldValidation
+
+	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics, history: LiveWorldHistory, refresh_service: LiveWorldRefresh, entities: LiveWorldEntities, geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Render sidebar and map using explicitly injected session services.
+
+		Args:
+			state_service (LiveWorldState): Required collaborator for this service.
+			analytics (LiveWorldAnalytics): Required collaborator for this service.
+			history (LiveWorldHistory): Required collaborator for this service.
+			refresh_service (LiveWorldRefresh): Required collaborator for this service.
+			entities (LiveWorldEntities): Required collaborator for this service.
+			geometry (LiveWorldGeometry): Required collaborator for this service.
+			validation (LiveWorldValidation): Required collaborator for this service.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.analytics = analytics
+		self.history = history
+		self.refresh = refresh_service
+		self.entities = entities
+		self.geometry = geometry
+		self.validation = validation
+
 
 	def render_live_world_map(self,  latitude: float, longitude: float ) -> None:
 		'''
@@ -3371,6 +3409,7 @@ class LiveWorld:
 		analytics (LiveWorldAnalytics): Session analytics, annotations, and geofences.
 		history (LiveWorldHistory): History and tracking workflows.
 		refresh (LiveWorldRefresh): Source refresh orchestration.
+		sidebar (LiveWorldSidebar): Sidebar operational controls.
 		rendering (LiveWorldRendering): Map and display assembly.
 	"""
 	session_state: object
@@ -3382,6 +3421,7 @@ class LiveWorld:
 	analytics: LiveWorldAnalytics
 	history: LiveWorldHistory
 	refresh: LiveWorldRefresh
+	sidebar: LiveWorldSidebar
 	rendering: LiveWorldRendering
 
 	def __init__( self, session_state: object ) -> None:
@@ -3408,6 +3448,7 @@ class LiveWorld:
 		self.history = LiveWorldHistory( self.state, self.validation )
 		self.refresh = LiveWorldRefresh( self.state, self.providers,
 			self.history, self.entities, self.validation )
+		self.sidebar = LiveWorldSidebar( self.state, self.analytics, self.history )
 		self.rendering = LiveWorldRendering( self.state, self.analytics,
 			self.history, self.refresh, self.entities, self.geometry, self.validation )
 
@@ -3459,7 +3500,7 @@ def render_live_world_sidebar( ) -> None:
 	Returns:
 		None: Result from the corresponding Live World service method.
 	"""
-	get_live_world( ).rendering.render_live_world_sidebar(  )
+	get_live_world( ).sidebar.render_live_world_sidebar(  )
 
 def clear_live_world_data( ) -> None:
 	"""Compatibility entry point delegating to the session-owned LiveWorldState service.
