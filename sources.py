@@ -105,7 +105,7 @@ class OpenSkyLive( ):
 
 		'''
 		self.client_id = cfg.OPENSKY_CLIENT_ID
-		self.client_secret = cfg.OPENSKY_API_CLIENT_SECRET
+		self.client_secret = cfg.OPENSKY_CLIENT_SECRET
 		self.timeout = timeout
 		self.token_url = ( 'https://auth.opensky-network.org/auth/realms/opensky-network/'
 			'protocol/openid-connect/token' )
@@ -399,11 +399,8 @@ class AisStreamLive( ):
 			self.east = min( 180.0, self.longitude + self.radius_degrees )
 			self.subscription = { 'APIKey': self.api_key,
 				'BoundingBoxes': [ [ [ self.north, self.west ], [ self.south, self.east ] ] ],
-				'FilterMessageTypes': [
-					'PositionReport',
-					'StandardClassBPositionReport',
-					'ExtendedClassBPositionReport',
-					'LongRangeAisBroadcastMessage', ], }
+				'FilterMessageTypes': [ 'PositionReport', 'StandardClassBPositionReport',
+					'ExtendedClassBPositionReport', 'LongRangeAisBroadcastMessage', ], }
 			messages: List[ Dict[ str, Any ] ] = [ ]
 			started = time.monotonic( )
 			last_error = ''
