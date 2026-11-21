@@ -1,0 +1,75 @@
+"""Regression coverage for full-width static maps and supported Google embeds.
+
+Purpose:
+    Verify the static-map rendering contracts without requesting live Google services.
+"""
+
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, Dict
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class ProviderError(Exception):
+    """Represent the application's API exception wrapper."""
+
+
+class StaticMapEmbedContractTests(unittest.TestCase):
+    """Check map rendering and documented Google Static Maps parameter limits."""
+
+    def test_static_map_resolution_uses_google_supported_scale(self) -> None:
+        """The optional scale preserves the old interface and supports scale=2."""
+        tree = ast.parse((ROOT / 'mapping.py').read_text(encoding='utf-8'))
+        cls = next(node for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == 'StaticMap')
+        method = next(node for node in cls.body
+            if isinstance(node, ast.FunctionDef) and node.name == 'pin')
+        module = ast.fix_missing_locations(ast.Module(body=[method], type_ignores=[]))
+        namespace: Dict[str, Any] = {
+            'throw_if': lambda name, value: None,
+            'Error': ProviderError,
+            'Logger': lambda: SimpleNamespace(write=lambda exception: None),
+        }
+        exec(compile(module, str(ROOT / 'mapping.py'), 'exec'), namespace)
+        pin = namespace['pin']
+        service = SimpleNamespace(
+            validate_coordinate=lambda lat, lng: (lat, lng),
+            build_url=lambda params: params.copy(),
+        )
+        parameters = pin(service, 38.861562, -77.063107, zoom=8,
+            size='640x400', scale=2)
+        self.assertEqual(2, parameters['scale'])
+        self.assertEqual('640x400', parameters['size'])
+        self.assertEqual('38.861562,-77.063107', parameters['center'])
+        self.assertEqual(1, pin(service, 38.861562, -77.063107)['scale'])
+        with self.assertRaises(ProviderError):
+            pin(service, 38.861562, -77.063107, scale=3)
+
+    def test_static_map_tab_fills_container(self) -> None:
+        """Keep the existing static result, but display it at content width."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn("st.image( map_url, width='stretch' )", source)
+        self.assertIn("st.code( map_url )", source)
+        self.assertIn("scale=2 )", source)
+        self.assertNotIn("'800x600'", source)
+
+    def test_street_and_earth_use_supported_embed_modes(self) -> None:
+        """Use documented Street View and satellite iframe endpoints."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn("st.tabs( [ 'Map', 'Street', 'Earth' ] )", source)
+        self.assertIn("https://www.google.com/maps/embed/v1/streetview?", source)
+        self.assertIn("https://www.google.com/maps/embed/v1/view?", source)
+        self.assertIn("'maptype': 'satellite'", source)
+        self.assertEqual(2, source.count("components.iframe( "))
+        self.assertIn("st.link_button( 'Open Google Earth', earth_url )", source)
+        self.assertIn("cfg.GOOGLEMAPS_API_KEY", source)
+
+
+if __name__ == '__main__':
+    unittest.main()

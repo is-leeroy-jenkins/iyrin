@@ -43,7 +43,7 @@ from streamlit_js_eval import get_geolocation
 import sqlite3
 import re
 import time
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlencode, urljoin, urlparse
 from pathlib import Path
 import config as cfg
 from mapping import Map, Geocoder, Place, DistanceMatrix, Timezone, StaticMap
@@ -3691,7 +3691,7 @@ if mode == 'Mapping Tools':
 			with map_c2:
 				zoom_default = int( st.session_state.get( 'zoom', 8 ) or 8 )
 				size_default = str( st.session_state.get( 'map_size', '600x400' ) or '600x400' )
-				size_options = [ '400x400', '600x400', '800x600' ]
+				size_options = [ '400x400', '600x400', '640x400', '640x640' ]
 				if size_default not in size_options:
 					size_default = '600x400'
 
@@ -3717,7 +3717,7 @@ if mode == 'Mapping Tools':
 							st.session_state[ 'map_size' ] = str( size )
 
 						url = static_maps.pin( lat=float( lat ), lng=float( lng ), zoom=int( zoom ),
-							size=str( size ) )
+							size=str( size ), scale=2 )
 
 						st.session_state[ 'maps_last_url' ] = url
 						st.session_state[ 'maps_last_latitude' ] = float( lat )
@@ -3729,9 +3729,40 @@ if mode == 'Mapping Tools':
 			map_url = st.session_state.get( 'maps_last_url', '' )
 			if map_url:
 				blue_divider( )
-				st.markdown( '##### Static Map Result' )
-				st.image( map_url )
-				st.code( map_url )
+				map_tab, street_tab, earth_tab = st.tabs( [ 'Map', 'Street', 'Earth' ] )
+				with map_tab:
+					st.markdown( '##### Static Map Result' )
+					st.image( map_url, width='stretch' )
+					st.code( map_url )
+				map_latitude = float( st.session_state.get( 'maps_last_latitude',
+					get_global_latitude_default( ) ) )
+				map_longitude = float( st.session_state.get( 'maps_last_longitude',
+					get_global_longitude_default( ) ) )
+				map_center = f'{map_latitude:.6f},{map_longitude:.6f}'
+				map_embed_key = cfg.GOOGLEMAPS_API_KEY
+				with street_tab:
+					if not map_embed_key:
+						st.warning( 'Google Maps API key is required for Street View.' )
+					else:
+						street_url = ( 'https://www.google.com/maps/embed/v1/streetview?'
+							+ urlencode( { 'key': map_embed_key, 'location': map_center } ) )
+						components.iframe( street_url, height=650, scrolling=False )
+						st.caption( 'Street View availability depends on Google imagery coverage. '
+							'The Maps Embed API must be enabled for your API key.' )
+				with earth_tab:
+					st.caption( 'Google Earth does not provide an embeddable web viewer. '
+						'This tab displays Google Maps satellite imagery instead.' )
+					if not map_embed_key:
+						st.warning( 'Google Maps API key is required for satellite imagery.' )
+					else:
+						satellite_url = ( 'https://www.google.com/maps/embed/v1/view?'
+							+ urlencode( { 'key': map_embed_key, 'center': map_center,
+								'zoom': int( st.session_state.get( 'maps_zoom', 8 ) ),
+								'maptype': 'satellite' } ) )
+						components.iframe( satellite_url, height=650, scrolling=False )
+					earth_url = ( 'https://earth.google.com/web/search/'
+						+ urlencode( { 'q': map_center } ).split( '=', 1 )[ 1 ] )
+					st.link_button( 'Open Google Earth', earth_url )
 
 # ==============================================================================
 # MAP MODE
