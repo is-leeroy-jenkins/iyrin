@@ -41,7 +41,8 @@ def load_live_world_function(name: str, namespace: Dict[str, Any]) -> Any:
     function.decorator_list = []
     module = ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[]))
     exec(compile(module, str(ROOT / 'realtime.py'), 'exec'), namespace)
-    return namespace[name]
+    service = SimpleNamespace(state=namespace['st'].session_state)
+    return lambda: namespace[name](service)
 
 
 class LiveWorldCredentialResolutionTests(unittest.TestCase):
