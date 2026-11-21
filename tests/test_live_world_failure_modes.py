@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import datetime as dt
+from email.utils import format_datetime, parsedate_to_datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, List
@@ -150,6 +151,8 @@ def load_production_class(name: str, request_post: Mock,
         'Error': WrappedProviderError,
         'Logger': lambda: SimpleNamespace(write=lambda exception: None),
         'time': clock,
+        'dt': dt,
+        'parsedate_to_datetime': parsedate_to_datetime,
         'requests': SimpleNamespace(
             post=request_post,
             RequestException=requests.RequestException,
@@ -221,6 +224,20 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
             self.clock)(timeout=10, retries=2)
         self.assertEqual({'elements': []}, provider.execute('[out:json];node(1);out;'))
         self.assertEqual([2.0], self.clock.sleeps)
+        self.assertEqual(2, request_post.call_count)
+
+    def test_overpass_http_date_retry_after_is_honored(self) -> None:
+        """Honor an HTTP-date Retry-After without multiplying backoff delays."""
+        retry_at = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=5)
+        request_post = Mock(side_effect=[
+            FakeResponse(503, {}, {'Retry-After': format_datetime(retry_at)}),
+            FakeResponse(200, {'elements': []}),
+        ])
+        provider = load_production_class('OverpassClient', request_post,
+            self.clock)(timeout=10, retries=2)
+        self.assertEqual({'elements': []}, provider.execute('[out:json];node(1);out;'))
+        self.assertEqual(1, len(self.clock.sleeps))
+        self.assertGreaterEqual(self.clock.sleeps[0], 3.0)
         self.assertEqual(2, request_post.call_count)
 
     def test_overpass_permanent_http_failure_is_not_retried(self) -> None:
