@@ -78,6 +78,7 @@ class OpenSkyLive( ):
 		access_token (str): Most recently obtained OAuth access token.
 		access_token_expires_at (float): Monotonic timestamp for proactive token refresh.
 		token_lock (threading.Lock): Synchronizes token acquisition across requests.
+		request_lock (threading.Lock): Serializes shared provider request state.
 		response (Response | None): Most recent HTTP response.
 	"""
 	client_id: str
@@ -112,6 +113,7 @@ class OpenSkyLive( ):
 		self.access_token = ''
 		self.access_token_expires_at = 0.0
 		self.token_lock = threading.Lock( )
+		self.request_lock = threading.Lock( )
 		self.response = None
 
 	def get_access_token( self ) -> str:
@@ -182,33 +184,34 @@ class OpenSkyLive( ):
 
 		'''
 		try:
-			throw_if( 'latitude', latitude )
-			throw_if( 'longitude', longitude )
-			throw_if( 'radius_degrees', radius_degrees )
-			self.latitude = latitude
-			self.longitude = longitude
-			self.radius_degrees = radius_degrees
-			self.lamin = max( -90.0, self.latitude - self.radius_degrees )
-			self.lamax = min( 90.0, self.latitude + self.radius_degrees )
-			self.lomin = max( -180.0, self.longitude - self.radius_degrees )
-			self.lomax = min( 180.0, self.longitude + self.radius_degrees )
-			self.params = { 'lamin': self.lamin, 'lomin': self.lomin, 'lamax': self.lamax,
-				'lomax': self.lomax, }
-			self.headers: Dict[ str, str ] = { }
-			self.access_token = self.get_access_token( )
-			if self.access_token:
-				self.headers[ 'Authorization' ] = f'Bearer {self.access_token}'
-	
-			self.response = requests.get( self.states_url, params=self.params,
-				headers=self.headers, timeout=self.timeout )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			if not isinstance( payload, dict ):
-				raise TypeError( 'OpenSky states response must be a dictionary.' )
-			states = payload.get( 'states' )
-			if states is not None and not isinstance( states, list ):
-				raise TypeError( 'OpenSky states must be a list or null.' )
-			return payload
+			with self.request_lock:
+				throw_if( 'latitude', latitude )
+				throw_if( 'longitude', longitude )
+				throw_if( 'radius_degrees', radius_degrees )
+				self.latitude = latitude
+				self.longitude = longitude
+				self.radius_degrees = radius_degrees
+				self.lamin = max( -90.0, self.latitude - self.radius_degrees )
+				self.lamax = min( 90.0, self.latitude + self.radius_degrees )
+				self.lomin = max( -180.0, self.longitude - self.radius_degrees )
+				self.lomax = min( 180.0, self.longitude + self.radius_degrees )
+				self.params = { 'lamin': self.lamin, 'lomin': self.lomin, 'lamax': self.lamax,
+					'lomax': self.lomax, }
+				self.headers: Dict[ str, str ] = { }
+				self.access_token = self.get_access_token( )
+				if self.access_token:
+					self.headers[ 'Authorization' ] = f'Bearer {self.access_token}'
+		
+				self.response = requests.get( self.states_url, params=self.params,
+					headers=self.headers, timeout=self.timeout )
+				self.response.raise_for_status( )
+				payload = self.response.json( ) or { }
+				if not isinstance( payload, dict ):
+					raise TypeError( 'OpenSky states response must be a dictionary.' )
+				states = payload.get( 'states' )
+				if states is not None and not isinstance( states, list ):
+					raise TypeError( 'OpenSky states must be a list or null.' )
+				return payload
 		except Exception as e:
 			if isinstance( e, Error ):
 				raise
