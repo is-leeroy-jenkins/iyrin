@@ -238,7 +238,7 @@ def initialize_live_world_state( ) -> None:
 		'live_world_satellites': False, 'live_world_satellite_group': 'stations',
 		'live_world_satellite_limit': 100, 'live_world_satellite_propagation_attempts': 0,
 		'live_world_satellite_propagation_failures': 0, 'live_world_vessels': False,
-		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY', '' ) or '',
+		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '',
 		'live_world_vessel_radius': 2.0, 'live_world_vessel_limit': 100,
 		'live_world_earthquakes': False, 'live_world_earthquake_feed': 'all_day.geojson',
 		'live_world_earthquake_min_magnitude': 1.0, 'live_world_fires': False,
@@ -314,6 +314,15 @@ def initialize_live_world_state( ) -> None:
 		if key not in st.session_state:
 			st.session_state[ key ] = value
 
+	# Refresh environment-backed credentials without replacing explicit sidebar overrides.
+	client_id = os.getenv( 'OPENSKY_CLIENT_ID' ) or os.getenv( 'OPENSKY_API_CLIENT_ID' )
+	client_secret = (os.getenv( 'OPENSKY_API_CLIENT_SECRET' )
+		or os.getenv( 'OPENSKY_API_CREDENTIALS' ))
+	if client_id and not st.session_state.get( 'opensky_api_client_id_user_override', False ):
+		st.session_state[ 'opensky_api_client_id' ] = client_id
+	if client_secret and not st.session_state.get( 'opensky_api_credentials_user_override', False ):
+		st.session_state[ 'opensky_api_credentials' ] = client_secret
+
 def get_live_world_layers( ) -> Dict[ str, bool ]:
 	'''
 		Return the enabled state of every implemented Live World Data layer.
@@ -342,6 +351,11 @@ def render_live_world_sidebar( ) -> None:
 
 	'''
 	initialize_live_world_state( )
+	# Populate the keyed AIS input before Streamlit instantiates its widget.
+	if not st.session_state.get( 'live_world_aisstream_api_key', '' ):
+		api_key = os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY
+		if api_key:
+			st.session_state[ 'live_world_aisstream_api_key' ] = api_key
 	with st.expander( '🌐 Mapping', expanded=False ):
 		st.checkbox( 'Enable Live Map', key='live_world_enabled' )
 		st.divider( )
@@ -933,7 +947,8 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	initialize_live_world_state( )
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
-	api_key = str( st.session_state.get( 'live_world_aisstream_api_key', '' ) or '' )
+	api_key = str( st.session_state.get( 'live_world_aisstream_api_key', '' )
+		or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '' )
 	throw_if( 'live_world_aisstream_api_key', api_key )
 	radius = float( st.session_state[ 'live_world_vessel_radius' ] )
 	limit = int( st.session_state[ 'live_world_vessel_limit' ] )
@@ -2204,7 +2219,8 @@ def refresh_live_world_source( source_key: str,
 	update_live_world_source_state(
 		source_key, 'Refreshing', attempted_at=attempted_at )
 	if (source_key == 'vessels'
-			and not st.session_state.get( 'live_world_aisstream_api_key', '' )):
+			and not (st.session_state.get( 'live_world_aisstream_api_key', '' )
+				or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY)):
 		st.session_state[ frame_key ] = previous_frame
 		update_live_world_source_state(
 			source_key, 'Configuration Required',

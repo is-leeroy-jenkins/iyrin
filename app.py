@@ -3548,6 +3548,8 @@ with st.sidebar:
 			value=st.session_state.opensky_api_client_id or '',
 			help='Overrides OPENSKY_API_CLIENT_ID from config.py for this session only.' )
 		
+		if opensky_client and opensky_client != st.session_state.opensky_api_client_id:
+			st.session_state[ 'opensky_api_client_id_user_override' ] = True
 		if opensky_client:
 			st.session_state.opensky_api_client_id = opensky_client
 			os.environ[ 'OPENSKY_API_CLIENT_ID' ] = opensky_client
@@ -3565,6 +3567,8 @@ with st.sidebar:
 			help='OAuth API client secret from OpenSky, not an account password. '
 			     'Overrides OPENSKY_API_CREDENTIALS for this session.' )
 		
+		if opensky_credentials and opensky_credentials != st.session_state.opensky_api_credentials:
+			st.session_state[ 'opensky_api_credentials_user_override' ] = True
 		if opensky_credentials:
 			st.session_state.opensky_api_credentials = opensky_credentials
 			os.environ[ 'OPENSKY_API_CREDENTIALS' ] = opensky_credentials
