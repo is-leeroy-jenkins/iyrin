@@ -75,52 +75,25 @@ LIVE_WORLD_LAYERS: Dict[ str, str ] = { 'aircraft': '✈️ Aircraft (Live)',
 LIVE_WORLD_PENDING_LAYERS: Dict[ str, str ] = { }
 
 LIVE_WORLD_DATA_SOURCES: Dict[ str, Dict[ str, str ] ] = {
-	'aircraft': {
-		'label': 'Aircraft',
-		'enabled_key': 'live_world_aircraft',
-		'frame_key': 'live_world_df_aircraft',
-	},
-	'military_aircraft': {
-		'label': 'Military Aircraft',
+	'aircraft': { 'label': 'Aircraft', 'enabled_key': 'live_world_aircraft',
+		'frame_key': 'live_world_df_aircraft', },
+	'military_aircraft': { 'label': 'Military Aircraft',
 		'enabled_key': 'live_world_military_aircraft',
-		'frame_key': 'live_world_df_military_aircraft',
-	},
-	'satellites': {
-		'label': 'Satellites',
-		'enabled_key': 'live_world_satellites',
-		'frame_key': 'live_world_df_satellites',
-	},
-	'vessels': {
-		'label': 'Vessels',
-		'enabled_key': 'live_world_vessels',
-		'frame_key': 'live_world_df_vessels',
-	},
-	'earthquakes': {
-		'label': 'Earthquakes',
-		'enabled_key': 'live_world_earthquakes',
-		'frame_key': 'live_world_df_earthquakes',
-	},
-	'fires': {
-		'label': 'Fires',
-		'enabled_key': 'live_world_fires',
-		'frame_key': 'live_world_df_fires',
-	},
-	'infrastructure': {
-		'label': 'Infrastructure',
-		'enabled_key': 'live_world_infrastructure',
-		'frame_key': 'live_world_df_infrastructure',
-	},
-	'cameras': {
-		'label': 'Cameras',
-		'enabled_key': 'live_world_cameras',
-		'frame_key': 'live_world_df_cameras',
-	},
-	'map_layers': {
-		'label': 'Map Features',
-		'enabled_key': 'live_world_map_layers',
-		'frame_key': 'live_world_df_map_layers',
-	},
-}
+		'frame_key': 'live_world_df_military_aircraft', },
+	'satellites': { 'label': 'Satellites', 'enabled_key': 'live_world_satellites',
+		'frame_key': 'live_world_df_satellites', },
+	'vessels': { 'label': 'Vessels', 'enabled_key': 'live_world_vessels',
+		'frame_key': 'live_world_df_vessels', },
+	'earthquakes': { 'label': 'Earthquakes', 'enabled_key': 'live_world_earthquakes',
+		'frame_key': 'live_world_df_earthquakes', },
+	'fires': { 'label': 'Fires', 'enabled_key': 'live_world_fires',
+		'frame_key': 'live_world_df_fires', },
+	'infrastructure': { 'label': 'Infrastructure', 'enabled_key': 'live_world_infrastructure',
+		'frame_key': 'live_world_df_infrastructure', },
+	'cameras': { 'label': 'Cameras', 'enabled_key': 'live_world_cameras',
+		'frame_key': 'live_world_df_cameras', },
+	'map_layers': { 'label': 'Map Features', 'enabled_key': 'live_world_map_layers',
+		'frame_key': 'live_world_df_map_layers', }, }
 
 AI_ADVANCED_TOOLS: Dict[ str, str ] = { 'cross_layer_analysis': '🧭 Cross-Layer Analysis',
 		'geofencing': '🛡️ Geofencing', 'historical_replay': '🕓 Historical Replay',
@@ -216,6 +189,7 @@ def throw_if( name: str, value: object ) -> None:
 
 	if isinstance( value, str ) and not value.strip( ):
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
+	
 	if isinstance( value, (list, tuple, dict, set) ) and not value:
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
