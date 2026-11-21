@@ -131,6 +131,8 @@ class OpenSkyLive( ):
 			throw_if( 'access_token', self.access_token )
 			return self.access_token
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OpenSkyLive'
@@ -186,8 +188,16 @@ class OpenSkyLive( ):
 			self.response = requests.get( self.states_url, params=self.params,
 				headers=self.headers, timeout=self.timeout )
 			self.response.raise_for_status( )
-			return self.response.json( ) or { }
+			payload = self.response.json( ) or { }
+			if not isinstance( payload, dict ):
+				raise TypeError( 'OpenSky states response must be a dictionary.' )
+			states = payload.get( 'states' )
+			if states is not None and not isinstance( states, list ):
+				raise TypeError( 'OpenSky states must be a list or null.' )
+			return payload
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OpenSkyLive'
@@ -264,6 +274,8 @@ class AdsbLolMilitary( ):
 				if isinstance( row, dict ) and int( row.get( 'dbFlags', 0 ) or 0 ) & 1 ]
 			return payload
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'AdsbLolMilitary'
@@ -449,6 +461,8 @@ class AisStreamLive( ):
 				raise RuntimeError( _alert )
 			return messages
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'AisStreamLive'
@@ -519,6 +533,8 @@ class CelesTrakLive( ):
 				raise TypeError( 'CelesTrak GP JSON response must be a list.' )
 			return payload[ :self.limit ]
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
@@ -571,6 +587,8 @@ class CelesTrakLive( ):
 				'Epoch': str( self.record.get( 'EPOCH', '' ) or '' ),
 				'Classification': str( self.record.get( 'CLASSIFICATION_TYPE', '' ) or '' ), }
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'CelesTrakLive'
@@ -690,6 +708,8 @@ class OverpassClient( ):
 			detail = ' | '.join( errors[ -6: ] )
 			raise RuntimeError( f'Overpass request failed across configured endpoints: {detail}' )
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassClient'
@@ -812,6 +832,8 @@ class OverpassInfrastructure( OverpassClient ):
 			payload[ 'elements' ] = rows
 			return payload
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
@@ -833,7 +855,10 @@ class OverpassInfrastructure( OverpassClient ):
 
 		'''
 		try:
-			throw_if( 'tags', tags )
+			if not isinstance( tags, dict ):
+				raise TypeError( 'tags must be a dictionary.' )
+			if not tags:
+				return ''
 			if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
 				return 'Airports'
 			if tags.get( 'harbour' ) == 'yes' or tags.get( 'amenity' ) == 'ferry_terminal':
@@ -848,6 +873,8 @@ class OverpassInfrastructure( OverpassClient ):
 				return 'Military Installations'
 			return ''
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
@@ -968,6 +995,8 @@ class OverpassCameras( OverpassClient ):
 			payload[ 'elements' ] = rows
 			return payload
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassCameras'
@@ -989,13 +1018,18 @@ class OverpassCameras( OverpassClient ):
 
 		'''
 		try:
-			throw_if( 'tags', tags )
+			if not isinstance( tags, dict ):
+				raise TypeError( 'tags must be a dictionary.' )
+			if not tags:
+				return ''
 			if tags.get( 'webcam' ) or tags.get( 'contact:webcam' ):
 				return 'Web Cameras'
 			if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
 				return 'CCTV / Surveillance'
 			return ''
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassCameras'
@@ -1123,6 +1157,8 @@ class OverpassMapLayers( OverpassClient ):
 			payload[ 'elements' ] = rows
 			return payload
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
@@ -1144,7 +1180,10 @@ class OverpassMapLayers( OverpassClient ):
 
 		'''
 		try:
-			throw_if( 'tags', tags )
+			if not isinstance( tags, dict ):
+				raise TypeError( 'tags must be a dictionary.' )
+			if not tags:
+				return ''
 			if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
 				return 'Launch Sites'
 			if tags.get( 'amenity' ) == 'bicycle_rental':
@@ -1162,6 +1201,8 @@ class OverpassMapLayers( OverpassClient ):
 				return 'Communications'
 			return ''
 		except Exception as e:
+			if isinstance( e, Error ):
+				raise
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
