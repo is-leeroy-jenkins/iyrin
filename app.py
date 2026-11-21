@@ -466,7 +466,6 @@ def initialize_api_credential_state( ) -> None:
 		}
 		apply_api_credential_values( defaults, validate_pairs=False )
 
-
 def apply_api_credential_values( values: Dict[ str, str ],
 		validate_pairs: bool=True ) -> None:
 	"""Apply the authorized single-user credential configuration.
@@ -530,7 +529,6 @@ def apply_api_credential_values( values: Dict[ str, str ],
 		from realtime import get_opensky_service
 		get_opensky_service.clear( )
 
-
 def render_api_credential_controls( ) -> None:
 	"""Render the complete application credential editor in the global sidebar.
 
@@ -561,7 +559,6 @@ def render_api_credential_controls( ) -> None:
 
 		apply_button = st.button( 'Apply', type='primary' )
 		reset_button = st.button( 'Reset' )
-		
 		if reset_button:
 			st.session_state[ 'api_credentials_reset_pending' ] = True
 			st.rerun( )

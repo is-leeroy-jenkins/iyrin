@@ -101,10 +101,8 @@ O365_CLIENT_ID = os.getenv( 'O365_CLIENT_ID' )
 O365_CLIENT_SECRET = os.getenv( 'O365_CLIENT_SECRET' )
 OPENAQ_API_KEY = os.getenv( 'OPENAQ_API_KEY' )
 OPENSKY_CLIENT_ID = os.getenv( 'OPENSKY_CLIENT_ID' )
-OPENSKY_CLIENT_SECRET = (os.getenv( 'OPENSKY_CLIENT_SECRET' )
-    or os.getenv( 'OPENSKY_API_CREDENTIALS' )
-    or os.getenv( 'OPENSKY_API_CLIENT_SECRET' ))
-OPENSKY_API_CREDENTIALS = OPENSKY_CLIENT_SECRET
+OPENSKY_CLIENT_SECRET = os.getenv( 'OPENSKY_CLIENT_SECRET' )
+OPENSKY_API_CREDENTIALS = os.getenv( 'OPENSKY_API_CREDENTIALS' )
 CENSUS_API_KEY = os.getenv( 'CENSUS_API_KEY' )
 SOCRATA_API_KEY = os.getenv( 'SOCRATA_API_KEY' )
 HEALTHDATA_API_KEY = os.getenv( 'HEALTHDATA_API_KEY' )
@@ -114,8 +112,7 @@ FIRMS_MAP_KEY = os.getenv( 'FIRMS_MAP_KEY' ) or os.getenv( 'NASA_FIRMS_MAP_KEY' 
 PURPLEAIR_API_KEY = os.getenv( 'PURPLEAIR_API_KEY' )
 SKYMAP_TOKEN = os.getenv( 'SKY_MAP_TOKEN' )
 WHO_API_KEY = os.getenv( 'WHO_API_KEY' )
-# Credential metadata is explicit: environment aliases and non-secret fields
-# cannot safely be inferred from a variable suffix.
+
 # Tuple: (sidebar group, OS environment name, display label, input kind).
 API_CREDENTIAL_FIELDS: Dict[ str, tuple[ str, str, str, str ] ] = {
 	'OPENAI_API_KEY': ( 'AI & Language Models', 'OPENAI_API_KEY', 'OpenAI API Key', 'password' ),
