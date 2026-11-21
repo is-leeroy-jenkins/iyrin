@@ -2375,11 +2375,11 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	source_stale = dict( st.session_state[ 'live_world_source_stale' ] )
 	for source_key, status in source_status.items( ):
 		if status == 'Partial Success' and source_key == 'satellites':
-			st.warning( f'Satellites: '
-			            f'{int( st.session_state.get( "live_world_satellite_propagation_failures"
-				            , 0 ) )} of '
-			            f'{
-			            int( st.session_state.get( "live_world_satellite_propagation_attempts", 0 ) )} orbit propagations failed.' )
+			failures = int( st.session_state.get(
+				'live_world_satellite_propagation_failures', 0 ) )
+			attempts = int( st.session_state.get(
+				'live_world_satellite_propagation_attempts', 0 ) )
+			st.warning( f'Satellites: {failures} of {attempts} orbit propagations failed.' )
 		if status == 'Configuration Required':
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
 			note = source_errors.get( source_key, '' ) or 'Credentials are required.'
