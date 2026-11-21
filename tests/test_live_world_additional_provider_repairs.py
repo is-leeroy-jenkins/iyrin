@@ -71,6 +71,27 @@ class LiveWorldAdditionalProviderTests(unittest.TestCase):
         with self.assertRaises(SourceFailure):
             parse(service, 'message,status\nserver error,200\n')
 
+    def test_firms_nonempty_unparsable_response_is_rejected(self) -> None:
+        """An HTTP-successful provider message without CSV columns is not zero fires."""
+        parse = self.load_method('fetchers.py', 'Firms', 'csv_to_rows')
+        service = SimpleNamespace()
+        with self.assertRaises(SourceFailure):
+            parse(service, ';;;')
+
+    def test_camera_guard_is_not_treated_as_cctv(self) -> None:
+        """A surveillance tag alone doesn't prove the existence of a camera."""
+        classify = self.load_method('sources.py', 'OverpassCameras', 'classify_camera')
+        self.assertEqual('', classify(SimpleNamespace(), {
+            'man_made': 'surveillance', 'surveillance:type': 'guard',
+        }))
+
+    def test_camera_explicit_camera_type_is_retained(self) -> None:
+        """Keep camera entities with an explicit OSM camera classification."""
+        classify = self.load_method('sources.py', 'OverpassCameras', 'classify_camera')
+        self.assertEqual('CCTV / Surveillance', classify(SimpleNamespace(), {
+            'man_made': 'surveillance', 'surveillance:type': 'camera',
+        }))
+
     def test_camera_existing_empty_webcam_key_is_classified(self) -> None:
         """Classify the OSM webcam key using the same existence rule as Overpass."""
         classify = self.load_method('sources.py', 'OverpassCameras', 'classify_camera')
