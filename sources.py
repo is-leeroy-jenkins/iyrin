@@ -38,8 +38,7 @@ from astropy.time import Time
 from requests import Response
 from sgp4 import omm
 from sgp4.api import Satrec
-from websockets.sync.client import connect
-from websockets.sync.connection import ClientConnection
+from websockets.sync.client import ClientConnection, connect
 
 def throw_if( name: str, value: object ) -> None:
 	"""Validate a required runtime value.
