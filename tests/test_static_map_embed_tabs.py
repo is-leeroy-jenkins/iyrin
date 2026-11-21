@@ -59,10 +59,20 @@ class StaticMapEmbedContractTests(unittest.TestCase):
         self.assertIn("scale=2 )", source)
         self.assertNotIn("'800x600'", source)
 
-    def test_street_and_earth_use_supported_embed_modes(self) -> None:
-        """Use documented Street View and satellite iframe endpoints."""
+    def test_street_and_satellites_are_top_level_mapping_tabs(self) -> None:
+        """Street and Satellites belong directly to Mapping Tools after Static Maps."""
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
-        self.assertIn("st.tabs( [ 'Map', 'Street', 'Earth' ] )", source)
+        self.assertIn(
+            "geocoding_tab, distances_tab, timezones_tab, static_maps_tab, "
+            "street_tab, satellites_tab =", source.replace('\\\n', ' '))
+        self.assertIn(
+            "st.tabs( [ 'Geocoding', 'Distances', 'Time Zones', 'Static Maps', 'Street',",
+            source)
+        self.assertIn("'Satellites' ] )", source)
+        self.assertIn("with static_maps_tab:", source)
+        self.assertIn("with street_tab:", source)
+        self.assertIn("with satellites_tab:", source)
+        self.assertNotIn("st.tabs( [ 'Map', 'Street', 'Earth' ] )", source)
         self.assertIn("https://www.google.com/maps/embed/v1/streetview?", source)
         self.assertIn("https://www.google.com/maps/embed/v1/view?", source)
         self.assertIn("'maptype': 'satellite'", source)

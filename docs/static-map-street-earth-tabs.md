@@ -9,11 +9,11 @@
 - Request `scale=2` for sharper imagery while preserving Google Maps Static
   API's maximum supported base `size` of 640×640; remove the unsupported
   `800x600` option.
-- Display the result in a **Map** tab alongside **Street** and **Earth** tabs.
+- Keep the static image in **Static Maps** and add **Street** and **Satellites** to the\n  top-level Mapping Tools tab bar, immediately to the right of Static Maps.
 - **Street:** Embed an interactive, location-based Google Street View panorama
   using the documented Maps Embed API `streetview` iframe mode. Available
   imagery depends on Street View coverage.
-- **Earth:** Google Earth does **not** support official iframe embedding.
+- **Satellites:** Google Earth does **not** support official iframe embedding.
   Use the documented Google Maps Embed API `view` mode with
   `maptype=satellite`, and provide an **Open Google Earth** external link.
 - Use the latitude and longitude saved with the most recently generated static
@@ -30,7 +30,7 @@ required. If the key is HTTP-referrer-restricted, allow the deployed application
 public origin. Embedded Street View may show imagery at a nearby road rather
 than the exact coordinate.
 
-The Earth tab is a satellite-map substitute, **not** the Google Earth web app
+The Satellites tab is a satellite-map substitute, **not** the Google Earth web app
 inside an iframe. Google explicitly states that Earth has no embed or client API.
 
 ## Official documentation
@@ -43,6 +43,6 @@ inside an iframe. Google explicitly states that Earth has no embed or client API
 ## Regression checks
 
 Run `tests/test_static_map_embed_tabs.py` and the existing project audit.
-Verify that the Map, Street and Earth tabs show the most recently generated
+Verify that the Static Maps, Street and Satellites tabs show the most recently generated
 coordinates, that Street View displays a panorama when coverage exists, and
 that satellite imagery uses a browser-accessible API key.
