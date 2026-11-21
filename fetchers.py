@@ -22847,7 +22847,7 @@ class Firms( Fetcher ):
 		"""
 		super( ).__init__( )
 		self.base_url = 'https://firms.modaps.eosdis.nasa.gov/api'
-		self.map_key = self.resolve_map_key( )
+		self.map_key = cfg.FIRMS_MAP_KEY
 		self.mode = 'area'
 		self.params = { }
 		self.payload = ''
@@ -22887,29 +22887,20 @@ class Firms( Fetcher ):
 	
 	def resolve_map_key( self ) -> Optional[ str ]:
 		"""
-			Resolve the NASA FIRMS MAP_KEY from environment variables.
+			Return the API credential stored on this provider instance.
 
 		Purpose:
-			Resolve the NASA FIRMS MAP_KEY from environment variables.
+			Expose the NASA FIRMS MAP_KEY loaded from config.py by the constructor.
+			Retain the existing public method for compatibility.
 
 		Returns:
-			Optional[str]: Text returned by the requested provider operation.
+			Optional[str]: Configured FIRMS MAP_KEY, if available.
 
 		Raises:
-			Error: Wraps and propagates the underlying provider or request exception.
+			Error: Wraps and propagates unexpected provider errors.
 		"""
 		try:
-			candidates: List[ Optional[ str ] ] = [
-					os.getenv( 'FIRMS_MAP_KEY' ),
-					os.getenv( 'NASA_FIRMS_MAP_KEY' )
-			]
-			
-			for candidate in candidates:
-				if candidate is not None and str( candidate ).strip( ):
-					return str( candidate ).strip( )
-			
-			return None
-		
+			return self.map_key
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'fetchers'
@@ -22917,7 +22908,7 @@ class Firms( Fetcher ):
 			exception.method = "resolve_map_key( self ) -> Optional[ str ]"
 			Logger( ).write( exception )
 			raise exception
-	
+
 	def request_csv( self, url: str, time: int=20 ) -> Dict[ str, Any ] | None:
 		"""
 			Issue a GET request to a FIRMS CSV endpoint.
