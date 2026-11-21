@@ -237,6 +237,7 @@ def initialize_world_state( ) -> None:
 		'live_world_satellite_limit': 100, 'live_world_satellite_propagation_attempts': 0,
 		'live_world_satellite_propagation_failures': 0, 'live_world_vessels': False,
 		'live_world_vessel_radius': 2.0, 'live_world_vessel_limit': 100,
+		'live_world_vessel_observation_seconds': 15,
 		'live_world_earthquakes': False, 'live_world_earthquake_feed': 'all_day.geojson',
 		'live_world_earthquake_min_magnitude': 1.0, 'live_world_fires': False,
 		'live_world_firms_source': 'VIIRS_NOAA21_NRT', 'live_world_firms_day_range': 1,
@@ -367,6 +368,8 @@ def render_world_sidebar( ) -> None:
 				key='live_world_vessel_radius' )
 			st.slider( 'Vessel Message Limit', min_value=10, max_value=250, step=10,
 				key='live_world_vessel_limit' )
+			st.slider( 'Observation Window (Seconds)', min_value=5, max_value=60, step=5,
+				key='live_world_vessel_observation_seconds' )
 		st.checkbox( LIVE_WORLD_LAYERS[ 'earthquakes' ], key='live_world_earthquakes' )
 		if st.session_state[ 'live_world_earthquakes' ]:
 			st.selectbox( 'Earthquake Feed', options=[ 'all_hour.geojson', 'all_day.geojson',
@@ -941,7 +944,8 @@ def fetch_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	limit = int( st.session_state[ 'live_world_vessel_limit' ] )
 	service = AisStreamLive( timeout=5 )
 	result = service.fetch_positions( latitude=latitude, longitude=longitude,
-		radius_degrees=radius, max_messages=limit, duration_seconds=3.0 )
+		radius_degrees=radius, max_messages=limit,
+		duration_seconds=float( st.session_state[ 'live_world_vessel_observation_seconds' ] ) )
 	entities_by_mmsi: Dict[ str, GeoEntity ] = { }
 	for index, envelope in enumerate( result ):
 		metadata_source = envelope.get( 'MetaData', { } ) or { }
@@ -2172,6 +2176,13 @@ def refresh_live_source( source_key: str,
 	attempted_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
 	update_source_state(
 		source_key, 'Refreshing', attempted_at=attempted_at )
+	if source_key == 'fires' and not cfg.FIRMS_MAP_KEY:
+		st.session_state[ frame_key ] = previous_frame
+		update_source_state( source_key, 'Configuration Required',
+			error='Set FIRMS_MAP_KEY in the OS environment and restart the application.',
+			stale=not previous_frame.empty, attempted_at=attempted_at,
+			error_type='MissingCredentials' )
+		return previous_frame
 	if source_key == 'vessels' and not cfg.AISSTREAM_API_KEY:
 		st.session_state[ frame_key ] = previous_frame
 		update_source_state(
@@ -2189,7 +2200,7 @@ def refresh_live_source( source_key: str,
 			raise TypeError(
 				f'Live World source {source_key} must return a pandas DataFrame.' )
 		st.session_state[ frame_key ] = df_source
-		status = 'Success'
+		status = 'No Records' if df_source.empty else 'Success'
 		if (source_key == 'satellites'
 				and st.session_state.get( 'live_world_satellite_propagation_failures', 0 ) > 0):
 			status = 'Partial Success'
@@ -2341,6 +2352,10 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	source_errors = dict( st.session_state[ 'live_world_source_errors' ] )
 	source_stale = dict( st.session_state[ 'live_world_source_stale' ] )
 	for source_key, status in source_status.items( ):
+		if status == 'No Records':
+			st.info( f'{LIVE_WORLD_DATA_SOURCES[ source_key ][ "label" ]}: '
+				'Provider returned no usable records for this refresh.' )
+			continue
 		if status == 'Partial Success' and source_key == 'satellites':
 			failures = int( st.session_state.get(
 				'live_world_satellite_propagation_failures', 0 ) )
