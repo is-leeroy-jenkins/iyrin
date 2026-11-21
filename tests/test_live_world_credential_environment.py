@@ -35,8 +35,10 @@ def load_live_world_function(name: str, namespace: Dict[str, Any]) -> Any:
         Any: Function compiled from the repository source.
     """
     tree = ast.parse((ROOT / 'realtime.py').read_text(encoding='utf-8'))
-    function = next(node for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == name)
+    function = next(method for cls in tree.body if isinstance(cls, ast.ClassDef)
+        for method in cls.body if isinstance(method, ast.FunctionDef)
+        and method.name == name)
+    function.decorator_list = []
     module = ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[]))
     exec(compile(module, str(ROOT / 'realtime.py'), 'exec'), namespace)
     return namespace[name]
