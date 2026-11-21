@@ -3561,9 +3561,10 @@ with st.sidebar:
 			st.session_state.firms_map_key = firms_key
 			os.environ[ 'FIRMS_MAP_KEY' ] = firms_key
 		
-		opensky_credentials = st.text_input( 'Open Sky Credentials', type='password',
+		opensky_credentials = st.text_input( 'Open Sky API Client Secret', type='password',
 			value=st.session_state.opensky_api_credentials or '',
-			help='Overrides OPENSKY_API_CREDENTIALS from config.py for this session only.' )
+			help='OAuth API client secret from OpenSky, not an account password. '
+			     'Overrides OPENSKY_API_CREDENTIALS for this session.' )
 		
 		if opensky_credentials:
 			st.session_state.opensky_api_credentials = opensky_credentials
