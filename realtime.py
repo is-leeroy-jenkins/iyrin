@@ -234,7 +234,7 @@ def initialize_live_world_state( ) -> None:
 		'live_world_aircraft_radius': 2.0,
 		'live_world_aircraft_airborne_only': True,
 		'opensky_api_client_id': cfg.OPENSKY_CLIENT_ID or '',
-		'opensky_api_client_secret': cfg.OPENSKY_API_CLIENT_SECRET or '',
+		'opensky_api_client_secret': cfg.OPENSKY_API_CREDENTIALS or '',
 		'live_world_military_aircraft': False,
 		'live_world_military_radius_nm': 250,
 		'live_world_satellites': False,
