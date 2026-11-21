@@ -119,12 +119,19 @@ class OpenSkyLive( ):
 
 		'''
 		try:
-			if not self.client_id or not self.client_secret:
+			if not self.client_id and not self.client_secret:
 				return ''
+			if not self.client_id or not self.client_secret:
+				raise ValueError( 'OpenSky OAuth requires both an API client ID and a client secret.' )
 	
 			data = { 'grant_type': 'client_credentials', 'client_id': self.client_id,
 				'client_secret': self.client_secret, }
 			self.response = requests.post( self.token_url, data=data, timeout=self.timeout )
+			if self.response.status_code in (401, 403):
+				raise requests.HTTPError(
+					f'OpenSky OAuth token request rejected (HTTP {self.response.status_code}). '
+					'Confirm the configured API client ID and client secret.',
+					response=self.response )
 			self.response.raise_for_status( )
 			payload = self.response.json( ) or { }
 			self.access_token = str( payload.get( 'access_token', '' ) or '' )
@@ -658,59 +665,81 @@ class OverpassClient( ):
 		self.response = None
 
 	def execute( self, query: str ) -> Dict[ str, Any ]:
-		'''
+		"""Execute Overpass QL through bounded retries and endpoint fallback.
 
 		Purpose:
-			Execute one Overpass query with request identification, bounded retry, and
-			alternate-endpoint fallback.
+			Use a single deadline for all HTTP attempts and retry delays. Preserve sanitized
+			endpoint and status diagnostics without retrying permanent HTTP errors.
 
 		Args:
-			query (str): Overpass QL query.
+			query (str): Valid Overpass QL query.
 
 		Returns:
 			Dict[str, Any]: Decoded Overpass JSON response.
 
-		'''
+		Raises:
+			Error: Wrapped provider, response, or deadline failure.
+		"""
 		try:
 			throw_if( 'query', query )
+			if not isinstance( query, str ):
+				raise TypeError( 'query must be a string.' )
 			self.query = query
+			self.deadline = time.monotonic( ) + self.timeout * len( self.endpoints )
 			transient_statuses = { 406, 429, 500, 502, 503, 504 }
 			errors: List[ str ] = [ ]
-			self.deadline = time.monotonic( ) + self.timeout * len( self.endpoints )
 			for endpoint in self.endpoints:
 				for attempt in range( self.retries + 1 ):
+					remaining = self.deadline - time.monotonic( )
+					if remaining <= 0.0:
+						break
+					self.url = endpoint
+					self.response = None
+					status_code = 0
 					try:
-						self.url = endpoint
-						self.response = None
-						remaining = self.deadline - time.monotonic( )
-						if remaining <= 0.0:
-							raise TimeoutError( 'Overpass total request deadline exceeded.' )
-						self.response = requests.post( self.url, data={ 'data': self.query }, headers=self.headers,
+						self.response = requests.post( self.url,
+							data={ 'data': self.query }, headers=self.headers,
 							timeout=min( self.timeout, remaining ) )
-						status_code = int( self.response.status_code )
-						if status_code in transient_statuses and attempt < self.retries:
-							delay = self.retry_delay * (2 ** attempt)
-							if delay > 0.0:
-								time.sleep( delay )
-							continue
+						status_code = self.response.status_code
 						self.response.raise_for_status( )
-						payload = self.response.json( ) or { }
+						payload = self.response.json( )
 						if not isinstance( payload, dict ):
 							raise TypeError( 'Overpass response must be a dictionary.' )
 						return payload
-	
 					except ( requests.RequestException, TypeError, ValueError ) as ex:
-						errors.append( f'{endpoint}: {ex}' )
-						status_code = int( self.response.status_code ) if self.response is not None else 0
+						category = type( ex ).__name__
+						detail = f'{self.url}: {category}'
+						if status_code:
+							detail += f' (HTTP {status_code})'
+						errors.append( detail )
 						if status_code and status_code not in transient_statuses:
+							raise RuntimeError(
+								f'Overpass permanent request failure: {detail}' ) from ex
+						if isinstance( ex, ( TypeError, ValueError ) ):
+							raise RuntimeError(
+								f'Overpass response validation failed: {detail}' ) from ex
+						if attempt == self.retries:
 							break
-						if attempt < self.retries:
-							delay = self.retry_delay * (2 ** attempt)
-							if delay > 0.0:
-								time.sleep( delay )
-	
-			detail = ' | '.join( errors[ -6: ] )
-			raise RuntimeError( f'Overpass request failed across configured endpoints: {detail}' )
+						delay = self.retry_delay * (2 ** attempt)
+						if status_code in (429, 503) and self.response is not None:
+							retry_after = self.response.headers.get( 'Retry-After', '' )
+							if retry_after:
+								try:
+									delay = max( delay, float( retry_after ) )
+								except ValueError:
+									pass
+						remaining = self.deadline - time.monotonic( )
+						if delay >= remaining:
+							break
+						if delay > 0.0:
+							time.sleep( delay )
+			if time.monotonic( ) >= self.deadline:
+				raise TimeoutError(
+					f'Overpass total request deadline exceeded. Last attempts: '
+					f'{" | ".join( errors[ -4: ] ) or "none"}' )
+			raise RuntimeError(
+				f'Overpass request failed across configured endpoints: '
+				f'{" | ".join( errors[ -4: ] ) or "no successful responses"}' )
 		except Exception as e:
 			if isinstance( e, Error ):
 				raise
