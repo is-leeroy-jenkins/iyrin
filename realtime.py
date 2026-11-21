@@ -238,7 +238,7 @@ def initialize_live_world_state( ) -> None:
 		'live_world_satellites': False, 'live_world_satellite_group': 'stations',
 		'live_world_satellite_limit': 100, 'live_world_satellite_propagation_attempts': 0,
 		'live_world_satellite_propagation_failures': 0, 'live_world_vessels': False,
-		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY', '' ) or '',
+		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '',
 		'live_world_vessel_radius': 2.0, 'live_world_vessel_limit': 100,
 		'live_world_earthquakes': False, 'live_world_earthquake_feed': 'all_day.geojson',
 		'live_world_earthquake_min_magnitude': 1.0, 'live_world_fires': False,
@@ -313,6 +313,18 @@ def initialize_live_world_state( ) -> None:
 	for key, value in defaults.items( ):
 		if key not in st.session_state:
 			st.session_state[ key ] = value
+
+	# Refresh environment-backed credentials without replacing explicit sidebar overrides.
+	client_id = os.getenv( 'OPENSKY_CLIENT_ID' ) or os.getenv( 'OPENSKY_API_CLIENT_ID' )
+	client_secret = (os.getenv( 'OPENSKY_API_CLIENT_SECRET' )
+		or os.getenv( 'OPENSKY_API_CREDENTIALS' ))
+	ais_key = os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY
+	if client_id and not st.session_state.get( 'opensky_api_client_id_user_override', False ):
+		st.session_state[ 'opensky_api_client_id' ] = client_id
+	if client_secret and not st.session_state.get( 'opensky_api_credentials_user_override', False ):
+		st.session_state[ 'opensky_api_credentials' ] = client_secret
+	if ais_key and not st.session_state.get( 'live_world_aisstream_api_key', '' ):
+		st.session_state[ 'live_world_aisstream_api_key' ] = ais_key
 
 def get_live_world_layers( ) -> Dict[ str, bool ]:
 	'''
