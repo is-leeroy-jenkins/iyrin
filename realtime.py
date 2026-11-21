@@ -3426,6 +3426,10 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_aircraft.
+		longitude (float): Forwarded unchanged to fetch_live_aircraft.
+
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
 	"""
@@ -3437,6 +3441,10 @@ def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.Data
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_military_aircraft.
+		longitude (float): Forwarded unchanged to fetch_live_military_aircraft.
+
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
 	"""
@@ -3447,6 +3455,10 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_vessels.
+		longitude (float): Forwarded unchanged to fetch_live_vessels.
 
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
@@ -3481,6 +3493,10 @@ def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_fires.
+		longitude (float): Forwarded unchanged to fetch_live_fires.
+
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
 	"""
@@ -3491,6 +3507,10 @@ def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFra
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_infrastructure.
+		longitude (float): Forwarded unchanged to fetch_live_infrastructure.
 
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
@@ -3505,6 +3525,14 @@ def fetch_cached_live_world_overpass( source_key: str, latitude: float,
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		source_key (str): Forwarded unchanged to fetch_cached_live_world_overpass.
+		latitude (float): Forwarded unchanged to fetch_cached_live_world_overpass.
+		longitude (float): Forwarded unchanged to fetch_cached_live_world_overpass.
+		radius_km (float): Forwarded unchanged to fetch_cached_live_world_overpass.
+		categories (tuple[ str, ... ]): Forwarded unchanged to fetch_cached_live_world_overpass.
+		max_results (int): Forwarded unchanged to fetch_cached_live_world_overpass.
+
 	Returns:
 		Dict[ str, Any ]: Result from the corresponding Live World service method.
 	"""
@@ -3516,6 +3544,10 @@ def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_cameras.
+		longitude (float): Forwarded unchanged to fetch_live_cameras.
+
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
 	"""
@@ -3526,6 +3558,10 @@ def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_map_layers.
+		longitude (float): Forwarded unchanged to fetch_live_map_layers.
 
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
@@ -3563,6 +3599,12 @@ def resolve_live_world_measurement_point( key: str, latitude: float,
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		key (str): Forwarded unchanged to resolve_live_world_measurement_point.
+		latitude (float): Forwarded unchanged to resolve_live_world_measurement_point.
+		longitude (float): Forwarded unchanged to resolve_live_world_measurement_point.
+		endpoint (str): Forwarded unchanged to resolve_live_world_measurement_point.
+
 	Returns:
 		Dict[ str, object ]: Result from the corresponding Live World service method.
 	"""
@@ -3573,6 +3615,10 @@ def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dic
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to calculate_live_world_measurement.
+		longitude (float): Forwarded unchanged to calculate_live_world_measurement.
 
 	Returns:
 		Dict[ str, object ]: Result from the corresponding Live World service method.
@@ -3630,6 +3676,11 @@ def resolve_live_world_analysis_origin( key: str, latitude: float,
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		key (str): Forwarded unchanged to resolve_live_world_analysis_origin.
+		latitude (float): Forwarded unchanged to resolve_live_world_analysis_origin.
+		longitude (float): Forwarded unchanged to resolve_live_world_analysis_origin.
+
 	Returns:
 		Dict[ str, object ]: Result from the corresponding Live World service method.
 	"""
@@ -3641,6 +3692,10 @@ def calculate_live_world_cross_layer_analysis( latitude: float,
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to calculate_live_world_cross_layer_analysis.
+		longitude (float): Forwarded unchanged to calculate_live_world_cross_layer_analysis.
 
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
@@ -3665,6 +3720,11 @@ def resolve_live_world_geofence_origin( key: str, latitude: float,
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		key (str): Forwarded unchanged to resolve_live_world_geofence_origin.
+		latitude (float): Forwarded unchanged to resolve_live_world_geofence_origin.
+		longitude (float): Forwarded unchanged to resolve_live_world_geofence_origin.
+
 	Returns:
 		Dict[ str, object ]: Result from the corresponding Live World service method.
 	"""
@@ -3676,6 +3736,10 @@ def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.Dat
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		latitude (float): Forwarded unchanged to calculate_live_world_geofence.
+		longitude (float): Forwarded unchanged to calculate_live_world_geofence.
+
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
 	"""
@@ -3686,6 +3750,9 @@ def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		df_geofence (pd.DataFrame): Forwarded unchanged to update_live_world_geofence_events.
 
 	Returns:
 		None: Result from the corresponding Live World service method.
@@ -3720,6 +3787,9 @@ def get_live_world_history_window_hours( window: str ) -> int:
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		window (str): Forwarded unchanged to get_live_world_history_window_hours.
+
 	Returns:
 		int: Result from the corresponding Live World service method.
 	"""
@@ -3753,6 +3823,9 @@ def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		df_entities (pd.DataFrame): Forwarded unchanged to update_live_world_tracking.
+
 	Returns:
 		None: Result from the corresponding Live World service method.
 	"""
@@ -3777,6 +3850,16 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		source_key (str): Forwarded unchanged to update_live_world_source_state.
+		status (str): Forwarded unchanged to update_live_world_source_state.
+		error (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		stale (bool): Forwarded unchanged to update_live_world_source_state. Default: False.
+		attempted_at (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		successful_at (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		error_type (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		http_status (int): Forwarded unchanged to update_live_world_source_state. Default: 0.
+
 	Returns:
 		None: Result from the corresponding Live World service method.
 	"""
@@ -3789,6 +3872,10 @@ def refresh_live_world_source( source_key: str,
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		source_key (str): Forwarded unchanged to refresh_live_world_source.
+		fetcher (Callable[ [ ], pd.DataFrame ]): Forwarded unchanged to refresh_live_world_source.
+
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
 	"""
@@ -3799,6 +3886,10 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to refresh_live_world_data.
+		longitude (float): Forwarded unchanged to refresh_live_world_data.
 
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
@@ -3811,6 +3902,10 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		latitude (float): Forwarded unchanged to render_live_world_map.
+		longitude (float): Forwarded unchanged to render_live_world_map.
+
 	Returns:
 		None: Result from the corresponding Live World service method.
 	"""
@@ -3822,6 +3917,11 @@ def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> flo
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
 
+	Args:
+		metadata (object): Forwarded unchanged to get_metadata_number.
+		key (str): Forwarded unchanged to get_metadata_number.
+		default (float): Forwarded unchanged to get_metadata_number. Default: 0.0.
+
 	Returns:
 		float: Result from the corresponding Live World service method.
 	"""
@@ -3832,6 +3932,9 @@ def make_live_world_display_frame( df_frame: pd.DataFrame ) -> pd.DataFrame:
 
 	Purpose:
 		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		df_frame (pd.DataFrame): Forwarded unchanged to make_live_world_display_frame.
 
 	Returns:
 		pd.DataFrame: Result from the corresponding Live World service method.
