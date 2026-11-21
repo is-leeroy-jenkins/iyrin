@@ -459,11 +459,9 @@ def initialize_api_credential_state( ) -> None:
 					'1', 'true', 'yes', 'on' )
 			else:
 				st.session_state[ key ] = default or ''
-
 	if reset_requested:
-		defaults: Dict[ str, str ] = {
-			name: value or '' for name, value in cfg.API_CREDENTIAL_DEFAULTS.items( )
-		}
+		defaults: Dict[ str, str ] = { name: value or '' for name, value in
+			cfg.API_CREDENTIAL_DEFAULTS.items( ) }
 		apply_api_credential_values( defaults, validate_pairs=False )
 
 def apply_api_credential_values( values: Dict[ str, str ],
