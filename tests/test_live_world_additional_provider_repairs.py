@@ -49,6 +49,7 @@ class LiveWorldAdditionalProviderTests(unittest.TestCase):
             'Dict': Dict,
             'List': List,
             'Error': SourceFailure,
+            'throw_if': lambda name, value: None,
             'Logger': lambda: SimpleNamespace(write=lambda exception: None),
         }
         module = ast.fix_missing_locations(ast.Module(
