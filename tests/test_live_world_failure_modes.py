@@ -339,12 +339,11 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
         module = ast.fix_missing_locations(ast.Module(body=[func], type_ignores=[]))
         exec(compile(module, str(ROOT / 'realtime.py'), 'exec'), namespace)
         fetcher = Mock(side_effect=AssertionError('Provider must not be called'))
-        service = SimpleNamespace(state=state,
-            update_live_world_source_state=record_source_status)
-        service.world = SimpleNamespace(
-            state=SimpleNamespace(initialize_live_world_state=lambda: None),
+        service = SimpleNamespace(
+            state=state,
+            state_service=SimpleNamespace(initialize_live_world_state=lambda: None),
             validation=SimpleNamespace(throw_if=lambda name, value: None),
-            refresh=SimpleNamespace(update_live_world_source_state=record_source_status),
+            update_live_world_source_state=record_source_status,
         )
         result = namespace['refresh_live_world_source'](service, 'vessels', fetcher)
         fetcher.assert_not_called()
