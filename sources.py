@@ -860,10 +860,6 @@ class OverpassInfrastructure( OverpassClient ):
 
 		'''
 		try:
-			if not isinstance( tags, dict ):
-				raise TypeError( 'tags must be a dictionary.' )
-			if not tags:
-				return ''
 			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
 				return 'Airports'
@@ -884,7 +880,7 @@ class OverpassInfrastructure( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassInfrastructure'
-			exception.method = 'OverpassInfrastructure.classify_infrastructure'
+			exception.method = 'classify_infrastructure( self, **args )'
 			Logger( ).write( exception )
 			raise exception
 
