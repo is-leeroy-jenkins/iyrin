@@ -2244,11 +2244,10 @@ def append_geocoding_map_result( query: str, source: str, result: object ) -> No
 # ------------ PIPELINE UTILITIES
 
 EMBEDDING_MODELS: Dict[ str, List[ str ] ] = {
-		'OpenAI': [ 'text-embedding-3-small', 'text-embedding-3-large' ],
-		'Google Generative AI': [ 'gemini-embedding-2-preview' ], 'Mistral AI': [
-				'mistral-embed' ],
-		'Hugging Face': [ 'sentence-transformers/all-MiniLM-L6-v2',
-				'sentence-transformers/all-mpnet-base-v2' ], 'Local GGUF': [ 'Local GGUF' ], }
+	'OpenAI': [ 'text-embedding-3-small', 'text-embedding-3-large' ],
+	'Google Generative AI': [ 'gemini-embedding-2-preview' ], 'Mistral AI': [ 'mistral-embed' ],
+	'Hugging Face': [ 'sentence-transformers/all-MiniLM-L6-v2',
+		'sentence-transformers/all-mpnet-base-v2' ], 'Local GGUF': [ 'Local GGUF' ], }
 
 def render_processing_inputs( key_prefix: str, collection_name: str ) -> Dict[ str, object ]:
 	"""Render Foo-style chunking, embedding, and vector-storage controls.

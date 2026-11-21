@@ -23,6 +23,7 @@
 
 from __future__ import annotations
 from boogr import Error, Logger
+import config as cfg
 import datetime as dt
 from email.utils import parsedate_to_datetime
 import json
@@ -312,7 +313,7 @@ class AisStreamLive( ):
 	max_retries: int
 	retry_delay: float
 
-	def __init__( self, api_key: str, timeout: int=5, max_retries: int=2,
+	def __init__( self,  timeout: int=5, max_retries: int=2,
 			retry_delay: float=0.5 ) -> None:
 		'''
 
@@ -329,7 +330,7 @@ class AisStreamLive( ):
 			None
 
 		'''
-		self.api_key = api_key
+		self.api_key = cfg.AISSTREAM_API_KEY
 		if type( timeout ) is not int or timeout < 1:
 			raise ValueError( 'timeout must be a positive integer.' )
 		if type( max_retries ) is not int or max_retries < 0:
@@ -954,9 +955,8 @@ class OverpassCameras( OverpassClient ):
 
 		'''
 		super( ).__init__( timeout=timeout )
-		self.category_filters = {
-				'CCTV / Surveillance': [ '["man_made"="surveillance"]',
-				                         '["surveillance:type"="camera"]' ],
+		self.category_filters = { 'CCTV / Surveillance': [ '["man_made"="surveillance"]',
+			'["surveillance:type"="camera"]' ],
 			'Web Cameras': [ '["webcam"]', '["contact:webcam"]' ], }
 
 	def fetch_cameras( self, latitude: float, longitude: float, radius_km: float,
@@ -1116,11 +1116,9 @@ class OverpassMapLayers( OverpassClient ):
 			'Emergency Services': [ '["amenity"="police"]', '["amenity"="fire_station"]' ],
 			'Healthcare': [ '["amenity"="hospital"]', '["amenity"="clinic"]' ],
 			'EV Charging': [ '["amenity"="charging_station"]' ],
-			'Communications': [
-				'["man_made"="tower"]["tower:type"="communication"]',
+			'Communications': [ '["man_made"="tower"]["tower:type"="communication"]',
 				'["man_made"="mast"]["tower:type"="communication"]' ],
-			'Launch Sites': [ '["aeroway"="spaceport"]', '["man_made"="launch_pad"]' ],
-		}
+			'Launch Sites': [ '["aeroway"="spaceport"]', '["man_made"="launch_pad"]' ], }
 
 	def fetch_features( self, latitude: float, longitude: float, radius_km: float,
 			categories: List[ str ], max_results: int ) -> Dict[ str, Any ]:
