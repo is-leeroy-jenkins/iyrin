@@ -144,10 +144,11 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         self.assertEqual('GOOGLE_ACCOUNT_CREDENTIALS',
             fields['GOOGLE_ACCOUNT_FILE'][1])
 
-    def test_credential_editor_requires_private_single_user_mode(self) -> None:
-        """Process-wide credential mutations must be opt-in for private deployments."""
+    def test_credential_editor_is_available_without_environment_gate(self) -> None:
+        """The complete credentials form must be visible without an opt-in flag."""
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
-        self.assertIn("os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) != '1'", source)
+        self.assertNotIn('IYRIN_SINGLE_USER_MODE', source)
+        self.assertIn("initialize_api_credential_state( )\n\nwith st.sidebar:", source)
         self.assertIn("with st.form( 'api_credentials_form'", source)
         self.assertIn("st.form_submit_button( 'Apply'", source)
         self.assertIn("st.form_submit_button( 'Reset to OS Defaults'", source)

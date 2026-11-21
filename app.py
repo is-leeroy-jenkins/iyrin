@@ -545,21 +545,15 @@ def render_api_credential_controls( ) -> None:
 
 	Purpose:
 		Expose every registered OS-backed credential, with explicit Apply/Reset
-		operations restricted to an operator-enabled single-user deployment.
+		operations available directly through the existing credentials sidebar.
 
 	Returns:
 		None: Draws sidebar controls and applies approved changes.
 	"""
 	st.markdown( '#### 🔒 Credentials' )
 	with st.expander( label='API', expanded=False ):
-		if os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) != '1':
-			st.warning( 'API credential editing is disabled for multi-user safety. '
-				'Set IYRIN_SINGLE_USER_MODE=1 in a private, single-user deployment '
-				'and restart Streamlit to enable the editor.' )
-			return
-
-		st.caption( 'Configured values originate from config.py and OS environment '
-			'variables. Apply modifies process-wide configuration: private single-user use only.' )
+		st.caption( 'Values default to config.py environment settings. Apply updates '
+			'process-wide credentials; use this editor only in a trusted, access-controlled app.' )
 		with st.form( 'api_credentials_form', clear_on_submit=False ):
 			for group in (
 				'AI & Language Models', 'Geospatial & Mapping', 'Aviation & Maritime',
@@ -3264,8 +3258,7 @@ style_subheaders( )
 # ==============================================================================
 st.logo( cfg.LOGO, size='Large' )
 
-if os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) == '1':
-	initialize_api_credential_state( )
+initialize_api_credential_state( )
 
 with st.sidebar:
 	# ------------------------------------------------------------------------------
