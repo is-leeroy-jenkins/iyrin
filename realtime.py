@@ -341,7 +341,6 @@ class LiveWorldState:
 		return { key: bool( self.state.get( f'live_world_{key}', False ) )
 			for key in LIVE_WORLD_LAYERS }
 
-
 	def clear_live_world_data(self) -> None:
 		'''
 			Clear retrieved Live World Data while preserving layer selections and map controls.
@@ -528,7 +527,8 @@ class LiveWorldProviders:
 	camera_client: OverpassCameras | None
 	map_layers_client: OverpassMapLayers | None
 
-	def __init__( self, state_service: LiveWorldState, geometry: LiveWorldGeometry, entities: LiveWorldEntities, validation: LiveWorldValidation ) -> None:
+	def __init__( self, state_service: LiveWorldState, geometry: LiveWorldGeometry,
+		entities: LiveWorldEntities, validation: LiveWorldValidation ) -> None:
 		"""Initialize the service's explicit dependencies.
 
 		Purpose:
@@ -1322,7 +1322,8 @@ class LiveWorldAnalytics:
 	geometry: LiveWorldGeometry
 	validation: LiveWorldValidation
 
-	def __init__( self, state_service: LiveWorldState, geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
+	def __init__( self, state_service: LiveWorldState, geometry: LiveWorldGeometry,
+		validation: LiveWorldValidation ) -> None:
 		"""Initialize the service's explicit dependencies.
 
 		Purpose:
@@ -1444,7 +1445,8 @@ class LiveWorldAnalytics:
 		return { 'Label': f'{entity_type} | {row[ "Name" ]}', 'Latitude': float( row[ 'Latitude' ] ),
 			'Longitude': float( row[ 'Longitude' ] ), }
 
-	def calculate_live_world_measurement(self,  latitude: float, longitude: float ) -> Dict[ str, object ]:
+	def calculate_live_world_measurement(self,  latitude: float,
+		longitude: float ) -> Dict[ str, object ]:
 		'''
 			Calculate distance and initial bearing between the configured measurement endpoints.
 
@@ -2066,7 +2068,9 @@ class LiveWorldRefresh:
 	entities: LiveWorldEntities
 	validation: LiveWorldValidation
 
-	def __init__( self, state_service: LiveWorldState, providers: LiveWorldProviders, history: LiveWorldHistory, entities: LiveWorldEntities, validation: LiveWorldValidation ) -> None:
+	def __init__( self, state_service: LiveWorldState, providers: LiveWorldProviders,
+		history: LiveWorldHistory, entities: LiveWorldEntities,
+		validation: LiveWorldValidation ) -> None:
 		"""Initialize the service's explicit dependencies.
 
 		Purpose:
@@ -2641,7 +2645,9 @@ class LiveWorldRendering:
 	geometry: LiveWorldGeometry
 	validation: LiveWorldValidation
 
-	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics, history: LiveWorldHistory, refresh_service: LiveWorldRefresh, entities: LiveWorldEntities, geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
+	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics,
+		history: LiveWorldHistory, refresh_service: LiveWorldRefresh, entities: LiveWorldEntities,
+		geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
 		"""Initialize the service's explicit dependencies.
 
 		Purpose:
