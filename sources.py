@@ -28,6 +28,7 @@ import datetime as dt
 from email.utils import parsedate_to_datetime
 import json
 import math
+import threading
 import time
 from typing import Any, Dict, List
 import requests
@@ -75,6 +76,8 @@ class OpenSkyLive( ):
 		token_url (str): OpenSky OAuth token endpoint.
 		states_url (str): OpenSky aircraft state endpoint.
 		access_token (str): Most recently obtained OAuth access token.
+		access_token_expires_at (float): Monotonic timestamp for proactive token refresh.
+		token_lock (threading.Lock): Synchronizes token acquisition across requests.
 		response (Response | None): Most recent HTTP response.
 	"""
 	client_id: str
@@ -83,6 +86,7 @@ class OpenSkyLive( ):
 	token_url: str
 	states_url: str
 	access_token: str
+	access_token_expires_at: float
 	response: Response | None
 
 	def __init__( self, timeout: int=20 ) -> None:
@@ -106,37 +110,50 @@ class OpenSkyLive( ):
 			'protocol/openid-connect/token' )
 		self.states_url = 'https://opensky-network.org/api/states/all'
 		self.access_token = ''
+		self.access_token_expires_at = 0.0
+		self.token_lock = threading.Lock( )
 		self.response = None
 
 	def get_access_token( self ) -> str:
-		'''
+		"""Return a reusable OpenSky OAuth2 access token.
 
 		Purpose:
-			Obtain an OpenSky OAuth2 access token using the configured API Client.
+			Obtains and caches a client-credentials access token, refreshing it before
+			expiration. Uses instance credentials assigned from config.py.
 
 		Returns:
-			str: Bearer access token, or an empty string when credentials were not supplied.
+			str: Valid Bearer token, or an empty string for anonymous access.
 
-		'''
+		Raises:
+			Error: Raised when credentials are incomplete or OAuth authentication fails.
+		"""
 		try:
 			if not self.client_id and not self.client_secret:
 				return ''
 			if not self.client_id or not self.client_secret:
 				raise ValueError( 'OpenSky OAuth requires both an API client ID and a client secret.' )
-	
-			data = { 'grant_type': 'client_credentials', 'client_id': self.client_id,
-				'client_secret': self.client_secret, }
-			self.response = requests.post( self.token_url, data=data, timeout=self.timeout )
-			if self.response.status_code in (401, 403):
-				raise requests.HTTPError(
-					f'OpenSky OAuth token request rejected (HTTP {self.response.status_code}). '
-					'Confirm the configured API client ID and client secret.',
-					response=self.response )
-			self.response.raise_for_status( )
-			payload = self.response.json( ) or { }
-			self.access_token = str( payload.get( 'access_token', '' ) or '' )
-			throw_if( 'access_token', self.access_token )
-			return self.access_token
+
+			with self.token_lock:
+				if self.access_token and time.monotonic( ) < self.access_token_expires_at:
+					return self.access_token
+
+				self.token_data = { 'grant_type': 'client_credentials',
+					'client_id': self.client_id, 'client_secret': self.client_secret, }
+				self.response = requests.post( self.token_url, data=self.token_data,
+					timeout=self.timeout )
+				if self.response.status_code in (401, 403):
+					raise requests.HTTPError(
+						f'OpenSky OAuth token request rejected (HTTP {self.response.status_code}). '
+						'Confirm the configured API client ID and client secret.',
+						response=self.response )
+				self.response.raise_for_status( )
+				self.token_payload = self.response.json( ) or { }
+				self.access_token = str( self.token_payload.get( 'access_token', '' ) or '' )
+				throw_if( 'access_token', self.access_token )
+				self.token_lifetime = float( self.token_payload.get( 'expires_in', 0 ) or 0 )
+				self.access_token_expires_at = (time.monotonic( )
+					+ max( 0.0, self.token_lifetime - 30.0 ))
+				return self.access_token
 		except Exception as e:
 			if isinstance( e, Error ):
 				raise
