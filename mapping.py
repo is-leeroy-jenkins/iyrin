@@ -1961,7 +1961,8 @@ class StaticMap( ):
 			Logger( ).write( exception )
 			raise exception
 	
-	def pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None:
+	def pin( self, lat: float, lng: float, zoom: int=12, size: str='400x300',
+			scale: int=1 ) -> str | None:
 		"""
 
 			Purpose:
@@ -1980,6 +1981,9 @@ class StaticMap( ):
 				size (str):
 					Image dimensions in WxH format.
 
+			scale (int):
+					Google Static Maps image resolution multiplier, 1 or 2.
+
 			Returns:
 				str | None:
 					Fully-qualified URL string suitable for embedding.
@@ -1990,21 +1994,27 @@ class StaticMap( ):
 			throw_if( 'lng', lng )
 			latitude, longitude = self.validate_coordinate( lat, lng )
 			zoom_value = max( 1, min( int( zoom or 12 ), 20 ) )
+			if type( scale ) is not int or scale not in ( 1, 2 ):
+				raise ValueError( 'scale must be 1 or 2.' )
 			size_value = size or '400x300'
 			marker_value = f'{latitude},{longitude}'			
 			self.latitude = latitude
 			self.longitude = longitude
 			self.zoom = zoom_value
 			self.size = size_value
+			self.scale = scale
 			self.markers = marker_value			
 			self.params = { 'center': f'{self.latitude},{self.longitude}',
-					'zoom': str( self.zoom ), 'size': self.size, 'markers': self.markers }
+					'zoom': str( self.zoom ), 'size': self.size, 'scale': self.scale,
+					'markers': self.markers }
 			return self.build_url( self.params )		
 		except Exception as e:
 			exception = Error( e )
 			exception.module = 'mapping'
 			exception.cause = 'StaticMap'
-			exception.method = "pin( self, lat: float, lng: float, zoom: int=12, size: int='400x300' ) -> str | None"
+			exception.method = (
+				"pin( self, lat: float, lng: float, zoom: int=12, "
+				"size: str='400x300', scale: int=1 ) -> str | None" )
 			Logger( ).write( exception )
 			raise exception
 	
