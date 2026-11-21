@@ -511,27 +511,18 @@ def apply_api_credential_values( values: Dict[ str, str ],
 			os.environ.pop( env_name, None )
 
 	cfg.OPENSKY_API_CREDENTIALS = cfg.OPENSKY_CLIENT_SECRET
-	legacy_state = {
-		'GOOGLE_API_KEY': 'google_api_key',
-		'GOOGLEMAPS_API_KEY': 'googlemaps_api_key',
-		'GEOCODING_API_KEY': 'geocoding_api_key',
-		'GOOGLE_CSE_ID': 'google_cse_id',
+	legacy_state = { 'GOOGLE_API_KEY': 'google_api_key', 'GOOGLEMAPS_API_KEY':
+		'googlemaps_api_key',
+		'GEOCODING_API_KEY': 'geocoding_api_key', 'GOOGLE_CSE_ID': 'google_cse_id',
 		'GOOGLE_CLOUD_PROJECT_ID': 'google_cloud_project_id',
 		'GOOGLE_CLOUD_LOCATION': 'google_cloud_location',
-		'GOOGLE_WEATHER_API_KEY': 'google_weather_api_key',
-		'GOVINFO_API_KEY': 'govinfo_api_key',
-		'NASA_API_KEY': 'nasa_api_key',
-		'AIRNOW_API_KEY': 'airnow_api_key',
-		'OPENAQ_API_KEY': 'openaq_api_key',
-		'NASA_EARTHDATA_TOKEN': 'nasa_earthdata_token',
-		'FIRMS_MAP_KEY': 'firms_map_key',
-		'PURPLEAIR_API_KEY': 'purpleair_api_key',
-		'OPENAI_API_KEY': 'openai_api_key',
-		'GEMINI_API_KEY': 'gemini_api_key',
-		'XAI_API_KEY': 'xai_api_key',
-		'CLAUDE_API_KEY': 'claude_api_key',
-		'MISTRAL_API_KEY': 'mistral_api_key',
-	}
+		'GOOGLE_WEATHER_API_KEY': 'google_weather_api_key', 'GOVINFO_API_KEY': 'govinfo_api_key',
+		'NASA_API_KEY': 'nasa_api_key', 'AIRNOW_API_KEY': 'airnow_api_key',
+		'OPENAQ_API_KEY': 'openaq_api_key', 'NASA_EARTHDATA_TOKEN': 'nasa_earthdata_token',
+		'FIRMS_MAP_KEY': 'firms_map_key', 'PURPLEAIR_API_KEY': 'purpleair_api_key',
+		'OPENAI_API_KEY': 'openai_api_key', 'GEMINI_API_KEY': 'gemini_api_key',
+		'XAI_API_KEY': 'xai_api_key', 'CLAUDE_API_KEY': 'claude_api_key',
+		'MISTRAL_API_KEY': 'mistral_api_key', }
 	for config_name, state_key in legacy_state.items( ):
 		st.session_state[ state_key ] = values[ config_name ]
 
@@ -558,8 +549,7 @@ def render_api_credential_controls( ) -> None:
 			for group in (
 				'AI & Language Models', 'Geospatial & Mapping', 'Aviation & Maritime',
 				'Environmental & Scientific', 'Government & Public Data',
-				'Cloud, Storage & Integrations',
-			):
+				'Cloud, Storage & Integrations', ):
 				with st.container( border=True ):
 					st.markdown( f'**{group}**' )
 					for config_name, field in cfg.API_CREDENTIAL_FIELDS.items( ):
