@@ -1981,7 +1981,7 @@ class StaticMap( ):
 				size (str):
 					Image dimensions in WxH format.
 
-			scale (int):
+				scale (int):
 					Google Static Maps image resolution multiplier, 1 or 2.
 
 			Returns:
