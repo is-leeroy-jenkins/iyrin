@@ -415,17 +415,14 @@ def get_live_world_geofence_status( ) -> Dict[ str, object ]:
     try:
         snapshot = dict( st.session_state.get( 'live_world_geofence_snapshot', { } ) or { } )
         events = list( st.session_state.get( 'live_world_geofence_events', [ ] ) or [ ] )
-        return {
-            'Enabled': bool( st.session_state.get( 'live_world_geofencing', False ) ),
-            'Origin': str( st.session_state.get( 'live_world_geofence_origin', 'Current Location' ) ),
-            'RadiusNM': float( st.session_state.get( 'live_world_geofence_radius_nm', 50 ) ),
-            'EntityTypes': list( st.session_state.get( 'live_world_geofence_entity_types', [ ] ) or [ ] ),
-            'CurrentMemberCount': len( snapshot ),
-            'CurrentMembers': list( snapshot.values( ) ),
-            'EventCount': len( events ),
-            'Events': events,
-        }
-
+        return { 'Enabled': bool( st.session_state.get( 'live_world_geofencing', False ) ),
+	        'Origin': str( st.session_state.get( 'live_world_geofence_origin', 'Current Location'
+	        ) ),
+	        'RadiusNM': float( st.session_state.get( 'live_world_geofence_radius_nm', 50 ) ),
+	        'EntityTypes': list( st.session_state.get( 'live_world_geofence_entity_types',
+		        [ ] ) or [ ] ),
+	        'CurrentMemberCount': len( snapshot ), 'CurrentMembers': list( snapshot.values( ) ),
+	        'EventCount': len( events ), 'Events': events, }
 
     except Exception as exc:
         exception = Error( exc )

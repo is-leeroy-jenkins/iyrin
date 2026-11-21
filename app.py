@@ -863,26 +863,22 @@ def get_location_state( ) -> Dict[ str, object ]:
 	Returns:
 		Dict[ str, object ]: Value produced by this operation.
 	"""
-	return {
-			'coordinates': st.session_state.get( 'coordinates', ( ) ),
-			'latitude': st.session_state.get( 'latitude', 0.0 ),
-			'longitude': st.session_state.get( 'longitude', 0.0 ),
-			'location': st.session_state.get( 'location', '' ),
-			'country': st.session_state.get( 'country', '' ),
-			'state': st.session_state.get( 'state', '' ),
-			'city': st.session_state.get( 'city', '' ),
-			'zipcode': st.session_state.get( 'zipcode', '' ),
-			'description': st.session_state.get( 'description', '' ),
-			'origin': st.session_state.get( 'origin', '' ),
-			'destination': st.session_state.get( 'destination', '' ),
-			'radius': st.session_state.get( 'radius', 25.0 ),
-			'zoom': st.session_state.get( 'zoom', 8 ),
-			'map_size': st.session_state.get( 'map_size', '600x400' ),
-			'year': st.session_state.get( 'year', dt.datetime.now( ).year ),
-			'month': st.session_state.get( 'month', dt.datetime.now( ).month ),
-			'day': st.session_state.get( 'day', dt.datetime.now( ).day ),
-			'calendar_date': st.session_state.get( 'calendar_date', dt.date.today( ) ),
-	}
+	return { 'coordinates': st.session_state.get( 'coordinates', ( ) ),
+		'latitude': st.session_state.get( 'latitude', 0.0 ),
+		'longitude': st.session_state.get( 'longitude', 0.0 ),
+		'location': st.session_state.get( 'location', '' ),
+		'country': st.session_state.get( 'country', '' ),
+		'state': st.session_state.get( 'state', '' ), 'city': st.session_state.get( 'city', '' ),
+		'zipcode': st.session_state.get( 'zipcode', '' ),
+		'description': st.session_state.get( 'description', '' ),
+		'origin': st.session_state.get( 'origin', '' ),
+		'destination': st.session_state.get( 'destination', '' ),
+		'radius': st.session_state.get( 'radius', 25.0 ), 'zoom': st.session_state.get( 'zoom', 8 ),
+		'map_size': st.session_state.get( 'map_size', '600x400' ),
+		'year': st.session_state.get( 'year', dt.datetime.now( ).year ),
+		'month': st.session_state.get( 'month', dt.datetime.now( ).month ),
+		'day': st.session_state.get( 'day', dt.datetime.now( ).day ),
+		'calendar_date': st.session_state.get( 'calendar_date', dt.date.today( ) ), }
 
 def set_location_state( location: Optional[ str ] = None, city: Optional[ str ] = None,
 	state: Optional[ str ] = None, country: Optional[ str ] = None, zipcode: Optional[ str ] =  None,
@@ -1214,7 +1210,6 @@ def update_location_state_from_browser_geolocation( geo: Dict[ str, object ] ) -
 			latitude=float( latitude ),
 			longitude=float( longitude ) )
 		st.session_state[ 'active_location_source' ] = 'browser'
-		
 		st.session_state[ 'browser_geolocation' ] = geo
 		st.session_state[ 'browser_geolocation_loaded' ] = True
 		st.session_state[ 'browser_geolocation_permission_denied' ] = False
