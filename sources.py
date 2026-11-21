@@ -170,12 +170,6 @@ class OpenSkyLive( ):
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
 			throw_if( 'radius_degrees', radius_degrees )
-			if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
-				raise ValueError( 'latitude must be between -90 and 90 degrees.' )
-			if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
-				raise ValueError( 'longitude must be between -180 and 180 degrees.' )
-			if type( radius_degrees ) not in (int, float) or not 0 < radius_degrees <= 180:
-				raise ValueError( 'radius_degrees must be positive and no greater than 180.' )
 			self.latitude = latitude
 			self.longitude = longitude
 			self.radius_degrees = radius_degrees
@@ -183,12 +177,8 @@ class OpenSkyLive( ):
 			self.lamax = min( 90.0, self.latitude + self.radius_degrees )
 			self.lomin = max( -180.0, self.longitude - self.radius_degrees )
 			self.lomax = min( 180.0, self.longitude + self.radius_degrees )
-			self.params = {
-				'lamin': self.lamin,
-				'lomin': self.lomin,
-				'lamax': self.lamax,
-				'lomax': self.lomax,
-			}
+			self.params = { 'lamin': self.lamin, 'lomin': self.lomin, 'lamax': self.lamax,
+				'lomax': self.lomax, }
 			self.headers: Dict[ str, str ] = { }
 			self.access_token = self.get_access_token( )
 			if self.access_token:
@@ -331,12 +321,6 @@ class AisStreamLive( ):
 
 		'''
 		self.api_key = cfg.AISSTREAM_API_KEY
-		if type( timeout ) is not int or timeout < 1:
-			raise ValueError( 'timeout must be a positive integer.' )
-		if type( max_retries ) is not int or max_retries < 0:
-			raise ValueError( 'max_retries must be a nonnegative integer.' )
-		if type( retry_delay ) not in (int, float) or retry_delay < 0:
-			raise ValueError( 'retry_delay must be nonnegative and numeric.' )
 		self.timeout = timeout
 		self.max_retries = max_retries
 		self.retry_delay = retry_delay
@@ -644,12 +628,6 @@ class OverpassClient( ):
 			None
 
 		'''
-		if type( timeout ) is not int or timeout < 1:
-			raise ValueError( 'timeout must be a positive integer.' )
-		if type( retries ) is not int or retries < 0:
-			raise ValueError( 'retries must be a nonnegative integer.' )
-		if type( retry_delay ) not in (int, float) or retry_delay < 0:
-			raise ValueError( 'retry_delay must be nonnegative and numeric.' )
 		self.timeout = timeout
 		self.retries = retries
 		self.retry_delay = retry_delay
@@ -684,8 +662,6 @@ class OverpassClient( ):
 		"""
 		try:
 			throw_if( 'query', query )
-			if not isinstance( query, str ):
-				raise TypeError( 'query must be a string.' )
 			self.query = query
 			self.deadline = time.monotonic( ) + self.timeout * len( self.endpoints )
 			transient_statuses = { 406, 429, 500, 502, 503, 504 }
@@ -825,18 +801,6 @@ class OverpassInfrastructure( OverpassClient ):
 			self.radius_km = float( radius_km )
 			self.categories = list( categories )
 			self.max_results = int( max_results )
-			if self.latitude < -90.0 or self.latitude > 90.0:
-				raise ValueError( 'Argument "latitude" must be between -90 and 90.' )
-			if self.longitude < -180.0 or self.longitude > 180.0:
-				raise ValueError( 'Argument "longitude" must be between -180 and 180.' )
-			if self.radius_km <= 0.0:
-				raise ValueError( 'Argument "radius_km" must be greater than zero.' )
-			if self.max_results < 1:
-				raise ValueError( 'Argument "max_results" must be greater than zero.' )
-			for category in self.categories:
-				if category not in self.category_filters:
-					raise ValueError( f'Unsupported infrastructure category: {category}' )
-	
 			radius_meters = int( self.radius_km * 1000.0 )
 			selectors: List[ str ] = [ ]
 			for category in self.categories:
