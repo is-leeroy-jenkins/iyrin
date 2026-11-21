@@ -55,6 +55,7 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 from requests.exceptions import HTTPError
+from boogr import Error
 import config as cfg
 from fetchers import Firms, USGSEarthquakes
 from history import (clear_live_world_history, get_live_world_history_snapshots,
