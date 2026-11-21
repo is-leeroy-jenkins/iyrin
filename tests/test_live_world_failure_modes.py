@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import datetime as dt
+import threading
 from email.utils import format_datetime, parsedate_to_datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -153,6 +154,7 @@ def load_production_class(name: str, request_post: Mock,
         'Error': WrappedProviderError,
         'Logger': lambda: SimpleNamespace(write=lambda exception: None),
         'time': clock,
+        'threading': threading,
         'dt': dt,
         'parsedate_to_datetime': parsedate_to_datetime,
         'requests': SimpleNamespace(
