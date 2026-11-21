@@ -7841,8 +7841,8 @@ elif mode == 'Astronomical Data':
 					          'fireballs' ], key='astro_nearby_mode' )
 				nearby_timeout = st.slider( 'Timeout', min_value=1, max_value=60, value=20,
 					key='astro_nearby_timeout' )
-				nearby_start_date = ''
-				nearby_end_date = ''
+				nearby_start_date = 'now'
+				nearby_end_date = '+60'
 				nearby_query = ''
 				nearby_query_type = 'sstr'
 				nearby_dist_max = '10LD'
@@ -7862,14 +7862,14 @@ elif mode == 'Astronomical Data':
 				if nearby_mode == 'close_approaches':
 					nearby_c1, nearby_c2 = st.columns( 2 )
 					with nearby_c1:
-						nearby_start_date = st.text_input( 'Start Date', placeholder='YYYY-MM-DD',
+						nearby_start_date = st.text_input( 'Start Date', value='now', placeholder='YYYY-MM-DD or now',
 							key='astro_nearby_start_date' )
 						nearby_dist_max = st.text_input( 'Maximum Distance', value='10LD',
 							key='astro_nearby_dist_max' )
 						nearby_sort = st.selectbox( 'Sort', [ 'date', 'dist' ],
 							key='astro_nearby_sort' )
 					with nearby_c2:
-						nearby_end_date = st.text_input( 'End Date', placeholder='YYYY-MM-DD',
+						nearby_end_date = st.text_input( 'End Date', value='+60', placeholder='YYYY-MM-DD or +days',
 							key='astro_nearby_end_date' )
 						nearby_body = st.selectbox( 'Body', [ 'Earth', 'Moon', 'Mars', 'Juptr' ],
 							key='astro_nearby_body' )
