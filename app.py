@@ -561,7 +561,8 @@ def render_api_credential_controls( ) -> None:
 							st.checkbox( label, key=widget_key,
 								help=f'Environment variable: {env_name}' )
 						else:
-							st.text_input( label, key=widget_key, type=field_type,
+							st.text_input( label, key=widget_key,
+								type='password' if field_type == 'password' else 'default',
 								help=f'Environment variable: {env_name}' )
 
 			apply_button = st.form_submit_button( 'Apply', type='primary' )
