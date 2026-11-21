@@ -24,6 +24,7 @@
 from __future__ import annotations
 from boogr import Error, Logger
 import datetime as dt
+from email.utils import parsedate_to_datetime
 import json
 import math
 import time
@@ -727,7 +728,13 @@ class OverpassClient( ):
 								try:
 									delay = max( delay, float( retry_after ) )
 								except ValueError:
-									pass
+									try:
+										retry_at = parsedate_to_datetime( retry_after )
+										if retry_at.tzinfo is not None:
+											delay = max( delay, (retry_at -
+												dt.datetime.now( dt.timezone.utc ) ).total_seconds( ) )
+									except ( TypeError, ValueError, OverflowError ):
+										pass
 						remaining = self.deadline - time.monotonic( )
 						if delay >= remaining:
 							break
