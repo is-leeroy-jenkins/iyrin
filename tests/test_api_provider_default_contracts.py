@@ -180,6 +180,22 @@ class ApiDefaultContractTests(unittest.TestCase):
             source)
         self.assertIn("location_required_sources.add( 'fires' )", source)
 
+    def test_jpl_close_approach_defaults_use_documented_relative_dates(self) -> None:
+        """JPL accepts date-min=now and date-max=+60, not empty date strings."""
+        tree = ast.parse((ROOT / 'fetchers.py').read_text(encoding='utf-8'))
+        cls = next(node for node in tree.body
+            if isinstance(node, ast.ClassDef) and node.name == 'NearbyObjects')
+        method = next(node for node in cls.body
+            if isinstance(node, ast.FunctionDef) and node.name == 'fetch')
+        arguments = [argument.arg for argument in method.args.args]
+        first_default = len(arguments) - len(method.args.defaults)
+        defaults = {arguments[first_default + index]: ast.literal_eval(value)
+            for index, value in enumerate(method.args.defaults)}
+        self.assertEqual('close_approaches', defaults['mode'])
+        self.assertEqual('now', defaults['start_date'])
+        self.assertEqual('+60', defaults['end_date'])
+        self.assertEqual('10LD', defaults['dist_max'])
+
     def test_nhats_defaults_use_documented_integer_enum_values(self) -> None:
         """JPL NHATS dv, dur, stay, launch, h and occ must be valid enums."""
         tree = ast.parse((ROOT / 'fetchers.py').read_text(encoding='utf-8'))
