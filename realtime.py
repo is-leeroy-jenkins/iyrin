@@ -1635,6 +1635,8 @@ class LiveWorldAnalytics:
 			Dict[str, object]: Resolved endpoints, distances, and initial bearing.
 
 		'''
+		throw_if( 'latitude', latitude )
+		throw_if( 'longitude', longitude )
 		start = resolve_live_world_measurement_point(
 			str( st.session_state[ 'live_world_measurement_start' ] ), latitude, longitude, 'start' )
 		end = resolve_live_world_measurement_point(
