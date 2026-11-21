@@ -3413,8 +3413,9 @@ ensure_active_location_state( )
 # Mapping Tools
 # ==============================================================================
 if mode == 'Mapping Tools':
-	geocoding_tab, distances_tab, timezones_tab, static_maps_tab = \
-		st.tabs( [ 'Geocoding', 'Distances', 'Time Zones', 'Static Maps' ] )
+	geocoding_tab, distances_tab, timezones_tab, static_maps_tab, street_tab, satellites_tab = \
+		st.tabs( [ 'Geocoding', 'Distances', 'Time Zones', 'Static Maps', 'Street',
+			'Satellites' ] )
 
 	with geocoding_tab:
 		left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
@@ -3729,40 +3730,64 @@ if mode == 'Mapping Tools':
 			map_url = st.session_state.get( 'maps_last_url', '' )
 			if map_url:
 				blue_divider( )
-				map_tab, street_tab, earth_tab = st.tabs( [ 'Map', 'Street', 'Earth' ] )
-				with map_tab:
-					st.markdown( '##### Static Map Result' )
-					st.image( map_url, width='stretch' )
-					st.code( map_url )
-				map_latitude = float( st.session_state.get( 'maps_last_latitude',
-					get_global_latitude_default( ) ) )
-				map_longitude = float( st.session_state.get( 'maps_last_longitude',
-					get_global_longitude_default( ) ) )
-				map_center = f'{map_latitude:.6f},{map_longitude:.6f}'
-				map_embed_key = cfg.GOOGLEMAPS_API_KEY
-				with street_tab:
-					if not map_embed_key:
-						st.warning( 'Google Maps API key is required for Street View.' )
-					else:
-						street_url = ( 'https://www.google.com/maps/embed/v1/streetview?'
-							+ urlencode( { 'key': map_embed_key, 'location': map_center } ) )
-						components.iframe( street_url, height=650, scrolling=False )
-						st.caption( 'Street View availability depends on Google imagery coverage. '
-							'The Maps Embed API must be enabled for your API key.' )
-				with earth_tab:
-					st.caption( 'Google Earth does not provide an embeddable web viewer. '
-						'This tab displays Google Maps satellite imagery instead.' )
-					if not map_embed_key:
-						st.warning( 'Google Maps API key is required for satellite imagery.' )
-					else:
-						satellite_url = ( 'https://www.google.com/maps/embed/v1/view?'
-							+ urlencode( { 'key': map_embed_key, 'center': map_center,
-								'zoom': int( st.session_state.get( 'maps_zoom', 8 ) ),
-								'maptype': 'satellite' } ) )
-						components.iframe( satellite_url, height=650, scrolling=False )
-					earth_url = ( 'https://earth.google.com/web/search/'
-						+ urlencode( { 'q': map_center } ).split( '=', 1 )[ 1 ] )
-					st.link_button( 'Open Google Earth', earth_url )
+				st.markdown( '##### Static Map Result' )
+				st.image( map_url, width='stretch' )
+				st.code( map_url )
+
+	# ----- Street View and satellite imagery share the same Mapping Tools tab bar.
+	# Prefer the most recently generated map position, otherwise use global coordinates.
+	map_position_available = ('maps_last_latitude' in st.session_state
+		and 'maps_last_longitude' in st.session_state)
+	if map_position_available:
+		view_latitude = st.session_state[ 'maps_last_latitude' ]
+		view_longitude = st.session_state[ 'maps_last_longitude' ]
+	elif has_valid_global_coordinates( ):
+		view_latitude = get_global_latitude_default( )
+		view_longitude = get_global_longitude_default( )
+	else:
+		view_latitude = None
+		view_longitude = None
+	map_embed_key = cfg.GOOGLEMAPS_API_KEY
+
+	with street_tab:
+		left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+		with center:
+			st.subheader( 'Street View' )
+			st.divider( )
+			if view_latitude is None or view_longitude is None:
+				st.info( 'Set global coordinates or generate a static map to view Street View.' )
+			elif not map_embed_key:
+				st.warning( 'Google Maps API key is required for Street View.' )
+			else:
+				map_center = f'{float( view_latitude ):.6f},{float( view_longitude ):.6f}'
+				street_url = ( 'https://www.google.com/maps/embed/v1/streetview?'
+					+ urlencode( { 'key': map_embed_key, 'location': map_center } ) )
+				components.iframe( street_url, height=650, scrolling=False )
+				st.caption( 'Street View availability depends on imagery coverage. '
+					'The Google Maps Embed API must be enabled for your API key.' )
+
+	with satellites_tab:
+		left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+		with center:
+			st.subheader( 'Satellite View' )
+			st.divider( )
+			if view_latitude is None or view_longitude is None:
+				st.info( 'Set global coordinates or generate a static map to view satellite imagery.' )
+			else:
+				map_center = f'{float( view_latitude ):.6f},{float( view_longitude ):.6f}'
+				st.caption( 'Google Maps satellite imagery is used because Google Earth '
+					'does not provide an embeddable web viewer.' )
+				if not map_embed_key:
+					st.warning( 'Google Maps API key is required for satellite imagery.' )
+				else:
+					satellite_url = ( 'https://www.google.com/maps/embed/v1/view?'
+						+ urlencode( { 'key': map_embed_key, 'center': map_center,
+							'zoom': int( st.session_state.get( 'maps_zoom', 8 ) ),
+							'maptype': 'satellite' } ) )
+					components.iframe( satellite_url, height=650, scrolling=False )
+				earth_url = ( 'https://earth.google.com/web/search/'
+					+ urlencode( { 'q': map_center } ).split( '=', 1 )[ 1 ] )
+				st.link_button( 'Open Google Earth', earth_url )
 
 # ==============================================================================
 # MAP MODE
