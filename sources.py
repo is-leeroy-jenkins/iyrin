@@ -863,6 +863,7 @@ class OverpassInfrastructure( OverpassClient ):
 				raise TypeError( 'tags must be a dictionary.' )
 			if not tags:
 				return ''
+			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
 				return 'Airports'
 			if tags.get( 'harbour' ) == 'yes' or tags.get( 'amenity' ) == 'ferry_terminal':
@@ -1026,6 +1027,7 @@ class OverpassCameras( OverpassClient ):
 				raise TypeError( 'tags must be a dictionary.' )
 			if not tags:
 				return ''
+			throw_if( 'tags', tags )
 			if tags.get( 'webcam' ) or tags.get( 'contact:webcam' ):
 				return 'Web Cameras'
 			if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
@@ -1188,6 +1190,7 @@ class OverpassMapLayers( OverpassClient ):
 				raise TypeError( 'tags must be a dictionary.' )
 			if not tags:
 				return ''
+			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
 				return 'Launch Sites'
 			if tags.get( 'amenity' ) == 'bicycle_rental':
