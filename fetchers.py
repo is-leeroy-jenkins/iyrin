@@ -4252,8 +4252,8 @@ class NearbyObjects( Fetcher ):
 			Logger( ).write( exception )
 			raise exception from e
 
-	def fetch( self, mode: str='close_approaches', start_date: str='',
-			end_date: str='', query: str='', query_type: str='sstr',
+	def fetch( self, mode: str='close_approaches', start_date: str='now',
+			end_date: str='+60', query: str='', query_type: str='sstr',
 			dist_max: str='10LD', body: str='Earth', sort: str='date',
 			limit: int=20, dv: int=6, dur: int=360,
 			stay: int=8, launch: str='2020-2045', h: int=26,
@@ -4273,9 +4273,9 @@ class NearbyObjects( Fetcher ):
 				- nhats_object
 				- fireballs
 
-			start_date (str): Date lower bound for close_approaches.
+			start_date (str): Date lower bound; defaults to the JPL-supported now token.
 
-			end_date (str): Date upper bound for close_approaches.
+			end_date (str): Date upper bound; defaults to the JPL-supported +60 days token.
 
 			query (str): Object query or designation for object_lookup or nhats_object.
 
