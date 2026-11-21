@@ -171,7 +171,7 @@ API_CREDENTIAL_FIELDS: Dict[ str, tuple[ str, str, str, str ] ] = {
 
 # Preserve original OS-derived defaults even after single-user runtime overrides.
 API_CREDENTIAL_DEFAULTS: Dict[ str, str | None ] = {
-	name: vars( )[ name ] for name in API_CREDENTIAL_FIELDS
+	name: globals( )[ name ] for name in API_CREDENTIAL_FIELDS
 }
 
 
