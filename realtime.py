@@ -748,11 +748,9 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	initialize_live_world_state( )
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
-	client_id = str( st.session_state.get( 'opensky_api_client_id', '' ) or '' )
-	client_secret = str( st.session_state.get( 'opensky_api_credentials', '' ) or '' )
 	radius = float( st.session_state[ 'live_world_aircraft_radius' ] )
 	airborne_only = bool( st.session_state[ 'live_world_aircraft_airborne_only' ] )
-	service = OpenSkyLive( client_id=client_id, client_secret=client_secret, timeout=20 )
+	service = OpenSkyLive( timeout=20 )
 	result = service.fetch_states( latitude=latitude, longitude=longitude,
 		radius_degrees=radius ) or { }
 	states = result.get( 'states', [ ] ) or [ ]
@@ -947,12 +945,9 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	initialize_live_world_state( )
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
-	api_key = str( st.session_state.get( 'live_world_aisstream_api_key', '' )
-		or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '' )
-	throw_if( 'live_world_aisstream_api_key', api_key )
 	radius = float( st.session_state[ 'live_world_vessel_radius' ] )
 	limit = int( st.session_state[ 'live_world_vessel_limit' ] )
-	service = AisStreamLive( api_key=api_key, timeout=5 )
+	service = AisStreamLive( timeout=5 )
 	result = service.fetch_positions( latitude=latitude, longitude=longitude,
 		radius_degrees=radius, max_messages=limit, duration_seconds=3.0 )
 	entities_by_mmsi: Dict[ str, GeoEntity ] = { }
@@ -2218,13 +2213,11 @@ def refresh_live_world_source( source_key: str,
 	attempted_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
 	update_live_world_source_state(
 		source_key, 'Refreshing', attempted_at=attempted_at )
-	if (source_key == 'vessels'
-			and not (st.session_state.get( 'live_world_aisstream_api_key', '' )
-				or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY)):
+	if source_key == 'vessels' and not cfg.AISSTREAM_API_KEY:
 		st.session_state[ frame_key ] = previous_frame
 		update_live_world_source_state(
 			source_key, 'Configuration Required',
-			error='Enter an AIS Stream API key in the existing Mapping sidebar controls.',
+			error='Set AISSTREAM_API_KEY in the OS environment and restart the application.',
 			stale=not previous_frame.empty, attempted_at=attempted_at,
 			error_type='MissingCredentials' )
 		return previous_frame
