@@ -23,21 +23,20 @@ class FakeSocket:
         """Initialize a single provider position report."""
         self.subscription = ''
         self.closed = False
+        self.frames = [json.dumps({'MessageType': 'SubscriptionConfirmation',
+            'Message': {'CompressionEnabled': True}}), json.dumps({
+            'MessageType': 'PositionReport',
+            'MetaData': {'Latitude': 38.0, 'Longitude': -77.0}})]
 
     def send(self, payload: str) -> None:
         """Capture the exact subscription sent to the provider."""
         self.subscription = payload
 
-    def settimeout(self, seconds: float) -> None:
-        """Accept the requested WebSocket receive timeout."""
-        self.timeout = seconds
-
-    def recv(self) -> str:
-        """Return one valid vessel position envelope."""
-        return json.dumps({
-            'MessageType': 'PositionReport',
-            'MetaData': {'Latitude': 38.0, 'Longitude': -77.0},
-        })
+    def recv(self, timeout: float) -> str:
+        """Return a frame or simulate a closed subscription connection."""
+        if not self.frames:
+            raise ConnectionError('No remaining frames from provider')
+        return self.frames.pop(0)
 
     def close(self) -> None:
         """Close the mock socket using the provider contract."""
@@ -64,8 +63,7 @@ class AisStreamValidationTests(unittest.TestCase):
             'math': math,
             'json': json,
             'time': __import__('time'),
-            'create_connection': lambda url, timeout: self.socket,
-            'WebSocketTimeoutException': TimeoutError,
+            'connect': lambda url, open_timeout, compression, close_timeout: self.socket,
         }
         module = ast.fix_missing_locations(ast.Module(
             body=[guard, method], type_ignores=[]))
@@ -96,6 +94,31 @@ class AisStreamValidationTests(unittest.TestCase):
         self.assertEqual('test-key', subscription['APIKey'])
         self.assertTrue(self.socket.closed)
         self.assertEqual(1, self.source.max_messages)
+
+    def test_missing_subscription_confirmation_fails(self) -> None:
+        """Reject a position feed that never acknowledges the subscription."""
+        self.socket.frames = [json.dumps({'MessageType': 'PositionReport',
+            'MetaData': {'Latitude': 38.0, 'Longitude': -77.0}})]
+        with self.assertRaises(SourceError):
+            self.fetch(self.source, 38.0, -77.0, 2.0, 1, 0.01)
+
+    def test_explicit_compression_rejection_fails(self) -> None:
+        """Require CompressionEnabled true in the documented confirmation."""
+        self.socket.frames = [json.dumps({
+            'MessageType': 'SubscriptionConfirmation',
+            'Message': {'CompressionEnabled': False},
+        })]
+        with self.assertRaises(SourceError):
+            self.fetch(self.source, 38.0, -77.0, 2.0, 1, 0.01)
+
+    def test_missing_compression_acknowledgement_fails(self) -> None:
+        """Do not silently accept an incomplete confirmation payload."""
+        self.socket.frames = [json.dumps({
+            'MessageType': 'SubscriptionConfirmation', 'Message': {},
+        })]
+        with self.assertRaises(SourceError):
+            self.fetch(self.source, 38.0, -77.0, 2.0, 1, 0.01)
+
 
 
 if __name__ == '__main__':

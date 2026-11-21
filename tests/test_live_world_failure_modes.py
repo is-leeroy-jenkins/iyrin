@@ -281,6 +281,19 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
         self.assertIn('overpass-api.de', str(context.exception))
         self.assertLessEqual(self.clock.now, 4.0)
 
+    def test_overpass_http_200_remark_is_not_a_success(self) -> None:
+        """Reject Overpass JSON that reports a server-side timeout in remark."""
+        request_post = Mock(return_value=FakeResponse(200, {
+            'elements': [],
+            'remark': 'runtime error: Query timed out after 25 seconds.',
+        }))
+        provider = load_production_class('OverpassClient', request_post,
+            self.clock)(timeout=5, retries=0)
+        with self.assertRaises(WrappedProviderError) as context:
+            provider.execute('[out:json];node(1);out;')
+        self.assertIn('Query timed out', str(context.exception))
+        request_post.assert_called_once()
+
     def test_missing_ais_key_preserves_stale_frame_without_fetching(self) -> None:
         """Mark vessel configuration as required without invoking its fetcher."""
         source = (ROOT / 'realtime.py').read_text(encoding='utf-8')
