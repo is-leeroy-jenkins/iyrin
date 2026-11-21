@@ -923,6 +923,7 @@ def calculate_live_world_distance_nm( latitude_a: float, longitude_a: float,
 	delta_lon = math.radians( float( longitude_b ) - float( longitude_a ) )
 	value = (math.sin( delta_lat / 2.0 ) ** 2
 		+ math.cos( lat_a ) * math.cos( lat_b ) * math.sin( delta_lon / 2.0 ) ** 2)
+	value = min( 1.0, max( 0.0, value ) )
 	central_angle = 2.0 * math.atan2( math.sqrt( value ), math.sqrt( 1.0 - value ) )
 	return 3440.065 * central_angle
 
@@ -1200,6 +1201,9 @@ def fetch_live_earthquakes( ) -> pd.DataFrame:
 			latitude_value = float( latitude )
 			longitude_value = float( longitude )
 		except ( TypeError, ValueError ):
+			continue
+
+		if not is_valid_live_world_coordinates( latitude_value, longitude_value ):
 			continue
 
 		if magnitude_value < min_magnitude:
@@ -2560,7 +2564,9 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 
 	st.divider( )
 	st.subheader( '🌐 Live World Data' )
-	if not any( get_live_world_layers( ).values( ) ):
+	if (not any( get_live_world_layers( ).values( ) )
+			and not st.session_state[ 'live_world_historical_replay' ]
+			and not st.session_state[ 'live_world_measurements' ]):
 		st.info( 'Select at least one implemented Live World layer in the sidebar.' )
 		return
 
