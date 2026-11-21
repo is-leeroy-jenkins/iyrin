@@ -29,6 +29,7 @@ arxiv
 wikipedia
 playwright
 websocket-client
+websockets>=14,<17
 langchain-text-splitters
 langchain-openai
 langchain-google-genai
