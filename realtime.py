@@ -2970,9 +2970,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 				st.error( f'Historical Replay failed: {st.session_state[ "live_world_history_last_error" ]}' )
 			st.caption( f'Replay snapshot: '
 			            f'{st.session_state.get( "live_world_history_snapshot", "" ) or "None"}' )
-			st.caption( f'Last refre'
-			            f'sh inserted {int( st.session_state.get( "live_world_history_last_saved",
-				            0 ) ):,} historical observations.' )
+			last_saved = int( st.session_state.get( 'live_world_history_last_saved', 0 ) )
+			st.caption( f'Last refresh inserted {last_saved:,} historical observations.' )
 			if df_history.empty:
 				st.info( 'No persisted observations match the selected replay window and entity types.' )
 			else:
