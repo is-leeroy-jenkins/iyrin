@@ -317,6 +317,8 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
         namespace: Dict[str, Any] = {
             'pd': pd,
             'dt': dt,
+            'os': SimpleNamespace(getenv=lambda name: ''),
+            'cfg': SimpleNamespace(AISSTREAM_API_KEY=''),
             'st': SimpleNamespace(session_state=state),
             'Callable': Any,
             'Error': WrappedProviderError,
