@@ -1180,10 +1180,6 @@ class OverpassMapLayers( OverpassClient ):
 
 		'''
 		try:
-			if not isinstance( tags, dict ):
-				raise TypeError( 'tags must be a dictionary.' )
-			if not tags:
-				return ''
 			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
 				return 'Launch Sites'
@@ -1207,7 +1203,7 @@ class OverpassMapLayers( OverpassClient ):
 			exception = Error( e )
 			exception.module = 'sources'
 			exception.cause = 'OverpassMapLayers'
-			exception.method = 'OverpassMapLayers.classify_feature'
+			exception.method = 'classify_feature( )'
 			Logger( ).write( exception )
 			raise exception
 
