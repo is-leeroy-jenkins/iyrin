@@ -232,13 +232,10 @@ def initialize_live_world_state( ) -> None:
 	'''
 	defaults: Dict[ str, object ] = { 'live_world_enabled': False, 'live_world_aircraft': False,
 		'live_world_aircraft_radius': 2.0, 'live_world_aircraft_airborne_only': True,
-		'opensky_api_client_id': cfg.OPENSKY_CLIENT_ID or '',
-		'opensky_api_credentials': cfg.OPENSKY_API_CREDENTIALS or '',
 		'live_world_military_aircraft': False, 'live_world_military_radius_nm': 250,
 		'live_world_satellites': False, 'live_world_satellite_group': 'stations',
 		'live_world_satellite_limit': 100, 'live_world_satellite_propagation_attempts': 0,
 		'live_world_satellite_propagation_failures': 0, 'live_world_vessels': False,
-		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '',
 		'live_world_vessel_radius': 2.0, 'live_world_vessel_limit': 100,
 		'live_world_earthquakes': False, 'live_world_earthquake_feed': 'all_day.geojson',
 		'live_world_earthquake_min_magnitude': 1.0, 'live_world_fires': False,
@@ -314,14 +311,6 @@ def initialize_live_world_state( ) -> None:
 		if key not in st.session_state:
 			st.session_state[ key ] = value
 
-	# Refresh environment-backed credentials without replacing explicit sidebar overrides.
-	client_id = os.getenv( 'OPENSKY_CLIENT_ID' ) or os.getenv( 'OPENSKY_API_CLIENT_ID' )
-	client_secret = (os.getenv( 'OPENSKY_API_CLIENT_SECRET' )
-		or os.getenv( 'OPENSKY_API_CREDENTIALS' ))
-	if client_id and not st.session_state.get( 'opensky_api_client_id_user_override', False ):
-		st.session_state[ 'opensky_api_client_id' ] = client_id
-	if client_secret and not st.session_state.get( 'opensky_api_credentials_user_override', False ):
-		st.session_state[ 'opensky_api_credentials' ] = client_secret
 
 def get_live_world_layers( ) -> Dict[ str, bool ]:
 	'''
@@ -351,11 +340,6 @@ def render_live_world_sidebar( ) -> None:
 
 	'''
 	initialize_live_world_state( )
-	# Populate the keyed AIS input before Streamlit instantiates its widget.
-	if not st.session_state.get( 'live_world_aisstream_api_key', '' ):
-		api_key = os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY
-		if api_key:
-			st.session_state[ 'live_world_aisstream_api_key' ] = api_key
 	with st.expander( '🌐 Mapping', expanded=False ):
 		st.checkbox( 'Enable Live Map', key='live_world_enabled' )
 		st.divider( )
@@ -379,9 +363,7 @@ def render_live_world_sidebar( ) -> None:
 				key='live_world_satellite_limit' )
 		st.checkbox( LIVE_WORLD_LAYERS[ 'vessels' ], key='live_world_vessels' )
 		if st.session_state[ 'live_world_vessels' ]:
-			st.text_input( 'AIS Stream API Key', type='password',
-				key='live_world_aisstream_api_key', help='Uses AISSTREAM_API_KEY when configured '
-				                                         'in the environment.' )
+			st.caption( 'AIS Stream credentials are read from AISSTREAM_API_KEY in config.py.' )
 			st.slider( 'Vessel Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
 				key='live_world_vessel_radius' )
 			st.slider( 'Vessel Message Limit', min_value=10, max_value=250, step=10,
