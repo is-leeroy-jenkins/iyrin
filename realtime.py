@@ -192,7 +192,6 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, (list, tuple, dict, set) ) and not value:
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
-
 def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 	'''
 		Convert normalized GeoEntity objects into the Live World DataFrame contract.
@@ -750,7 +749,6 @@ def fetch_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 		radius_degrees=radius ) or { }
 	states = result.get( 'states', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
-
 	for state in states:
 		if not isinstance( state, list ) or len( state ) < 17:
 			continue
@@ -865,7 +863,6 @@ def fetch_military_aircraft( latitude: float, longitude: float ) -> pd.DataFrame
 		radius_nm=radius_nm ) or { }
 	rows = result.get( 'ac', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
-
 	for index, row in enumerate( rows ):
 		if not isinstance( row, dict ):
 			continue
@@ -946,7 +943,6 @@ def fetch_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	result = service.fetch_positions( latitude=latitude, longitude=longitude,
 		radius_degrees=radius, max_messages=limit, duration_seconds=3.0 )
 	entities_by_mmsi: Dict[ str, GeoEntity ] = { }
-
 	for index, envelope in enumerate( result ):
 		metadata_source = envelope.get( 'MetaData', { } ) or { }
 		message_type = str( envelope.get( 'MessageType', '' ) or '' )
@@ -984,10 +980,9 @@ def fetch_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 			'Position Accuracy': body.get( 'PositionAccuracy', None ),
 			'RAIM': body.get( 'Raim', None ), }
 		entity_id = mmsi or f'AIS-{index + 1}'
-		entities_by_mmsi[
-			entity_id ] = GeoEntity( entity_id=entity_id, entity_type='Vessel', name=ship_name or
-		                                                                             entity_id,
-			latitude=lat, longitude=lon, altitude=0.0, heading=heading_value, speed=speed_mps,
+		entities_by_mmsi[ entity_id ] = GeoEntity( entity_id=entity_id,
+			entity_type='Vessel', name=ship_name or entity_id, latitude=lat, longitude=lon,
+			altitude=0.0, heading=heading_value, speed=speed_mps,
 			timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ), source='AIS Stream',
 			metadata=metadata )
 
@@ -1139,7 +1134,6 @@ def fetch_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	st.session_state[ 'live_world_firms_truncated' ] = len( rows ) > max_records
 	rows = rows[ :max_records ]
 	entities: List[ GeoEntity ] = [ ]
-
 	for index, row in enumerate( rows ):
 		latitude_value = get_row_value( row, [ 'latitude', 'Latitude' ] )
 		longitude_value = get_row_value( row, [ 'longitude', 'Longitude' ] )
@@ -1168,9 +1162,10 @@ def fetch_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 			'Version': get_row_value( row, [ 'version', 'Version' ] ), }
 		entity_id = (
 			f'FIRMS-{source}-{acq_date}-{acq_time}-{lat:.5f}-{lon:.5f}' )
-		entities.append( GeoEntity( entity_id=entity_id, entity_type='Fire', name=f'Active Fire - '
-		                                                                          f'{satellite}',
-			latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0, timestamp=f'{acq_date} {acq_time}'.strip( ), source='NASA FIRMS', metadata=metadata ) )
+		entities.append( GeoEntity( entity_id=entity_id, entity_type='Fire',
+			name=f'Active Fire - {satellite}', latitude=lat, longitude=lon, altitude=0.0,
+			heading=0.0, speed=0.0, timestamp=f'{acq_date} {acq_time}'.strip( ),
+			source='NASA FIRMS', metadata=metadata ) )
 
 	st.session_state[ 'live_world_firms_result' ] = result
 	return entities_to_dataframe( entities )
@@ -1304,7 +1299,6 @@ def fetch_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 	elements = result.get( 'elements', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
 	observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
-
 	for element in elements:
 		if not isinstance( element, dict ):
 			continue
@@ -1371,7 +1365,6 @@ def fetch_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 	elements = result.get( 'elements', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
 	observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
-
 	for element in elements:
 		if not isinstance( element, dict ):
 			continue
@@ -2258,8 +2251,7 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 			frame_key = source[ 'frame_key' ]
 			enabled_key = source[ 'enabled_key' ]
 			if st.session_state[ enabled_key ]:
-				df_source = refresh_live_source(
-					source_key, fetchers[ source_key ] )
+				df_source = refresh_live_source( source_key, fetchers[ source_key ] )
 				if not df_source.empty:
 					frames.append( df_source )
 			else:
@@ -2443,7 +2435,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	df_infrastructure = df_map[ df_map[ 'EntityType' ] == 'Infrastructure' ].copy( )
 	df_cameras = df_map[ df_map[ 'EntityType' ] == 'Camera' ].copy( )
 	df_map_layers = df_map[ df_map[ 'EntityType' ] == 'Map Feature' ].copy( )
-
 	df_analysis = pd.DataFrame( )
 	analysis_origin: Dict[ str, object ] = { }
 	analysis_error = ''
@@ -2649,8 +2640,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 
 		df_tracked_point = df_tracking.tail( 1 ).copy( )
 		df_tracked_point[ 'Radius' ] = 15000.0 * point_scale
-		layers.append( pdk.Layer(
-			'ScatterplotLayer', data=df_tracked_point,
+		layers.append( pdk.Layer( 'ScatterplotLayer', data=df_tracked_point,
 			get_position='[Longitude, Latitude]', get_radius='Radius',
 			get_fill_color=[ 0, 255, 170, 80 ], get_line_color=[ 0, 255, 170, 255 ],
 			line_width_min_pixels=3, radius_min_pixels=10, radius_max_pixels=40,
@@ -2786,7 +2776,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 				key='live_world_fire_table', use_container_width=True,
 				disabled=True, hide_index=True )
 
-
 	with infrastructure_tab:
 		if df_infrastructure.empty:
 			st.info( 'No infrastructure features are loaded.' )
@@ -2801,7 +2790,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			st.data_editor( df_display[ [ 'EntityId', 'Category', 'Name', 'Latitude', 'Longitude',
 				'Source', 'Metadata' ] ], key='live_world_infrastructure_table',
 				use_container_width=True, disabled=True, hide_index=True )
-
 
 	with cameras_tab:
 		if df_cameras.empty:
@@ -2821,7 +2809,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			st.data_editor( df_display[ [ 'EntityId', 'Category', 'Name', 'Latitude', 'Longitude',
 				'WebURL', 'Source', 'Metadata' ] ], key='live_world_camera_table',
 				use_container_width=True, disabled=True, hide_index=True )
-
 
 	with map_layers_tab:
 		if df_map_layers.empty:
@@ -2850,7 +2837,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			st.data_editor( df_tracking, key='live_world_tracking_table',
 				use_container_width=True, disabled=True, hide_index=True )
 
-
 	with measurements_tab:
 		if not st.session_state[ 'live_world_measurements' ]:
 			st.info( 'Enable Measurements & Annotations in the sidebar.' )
@@ -2871,8 +2857,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			else:
 				st.data_editor( df_annotations, key='live_world_annotation_table',
 					use_container_width=True, disabled=True, hide_index=True )
-
-
 
 	with analysis_tab:
 		if not st.session_state[ 'live_world_cross_layer_analysis' ]:
