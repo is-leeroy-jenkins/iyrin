@@ -178,8 +178,9 @@ class LiveWorldValidation:
 		Validate required public arguments shared by Live World operations.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		None: This stateless utility does not retain instance attributes.
 	"""
+
 
 	@staticmethod
 	def throw_if( name: str, value: object ) -> None:
@@ -207,17 +208,33 @@ class LiveWorldValidation:
 			raise ValueError( f'Argument "{name}" cannot be empty.' )
 
 class LiveWorldState:
-	"""Initialize, clear, and render Live World session state and sidebar controls.
+	"""Initialize and clear Live World session state without owning UI controls.
 
 	Purpose:
-		Initialize, clear, and render Live World session state and sidebar controls.
+		Initialize and clear Live World session state without owning UI controls.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		state (object): Session-specific Streamlit state mapping.
 	"""
 
-	@staticmethod
-	def initialize_live_world_state( ) -> None:
+
+	state: object
+
+	def __init__( self, session_state: object ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Initialize and clear Live World session state without owning unrelated workflows.
+
+		Args:
+			session_state (object): Current Streamlit session state mapping.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state = session_state
+
+	def initialize_live_world_state(self) -> None:
 		'''
 			Initialize isolated Live World Data state without modifying Iyr's existing mode state.
 
@@ -306,11 +323,10 @@ class LiveWorldState:
 			'live_world_point_scale': 1.0, }
 
 		for key, value in defaults.items( ):
-			if key not in st.session_state:
-				st.session_state[ key ] = value
+			if key not in self.state:
+				self.state[ key ] = value
 
-	@staticmethod
-	def get_live_world_layers( ) -> Dict[ str, bool ]:
+	def get_live_world_layers(self) -> Dict[ str, bool ]:
 		'''
 			Return the enabled state of every implemented Live World Data layer.
 
@@ -321,287 +337,12 @@ class LiveWorldState:
 			Dict[str, bool]: Enabled state keyed by layer identifier.
 
 		'''
-		initialize_live_world_state( )
-		return { key: bool( st.session_state.get( f'live_world_{key}', False ) )
+		self.initialize_live_world_state( )
+		return { key: bool( self.state.get( f'live_world_{key}', False ) )
 			for key in LIVE_WORLD_LAYERS }
 
-	@staticmethod
-	def render_live_world_sidebar( ) -> None:
-		'''
-			Render operational Live World Data controls in an isolated sidebar expander below.
 
-		Purpose:
-			Render operational Live World Data controls in an isolated sidebar expander below
-			Iyr's existing Mode expander.
-
-		Returns:
-			None: This operation has no return value.
-
-		'''
-		initialize_live_world_state( )
-		with st.expander( '🌐 Mapping', expanded=False ):
-			st.checkbox( 'Enable Live Map', key='live_world_enabled' )
-			st.divider( )
-			st.caption( 'Live Layers' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'aircraft' ], key='live_world_aircraft' )
-			if st.session_state[ 'live_world_aircraft' ]:
-				st.slider( 'Aircraft Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
-					key='live_world_aircraft_radius' )
-				st.checkbox( 'Airborne Only', key='live_world_aircraft_airborne_only' )
-				st.caption( 'OpenSky API Client credentials are used when configured.' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'military_aircraft' ], key='live_world_military_aircraft' )
-			if st.session_state[ 'live_world_military_aircraft' ]:
-				st.slider( 'Military Aircraft Radius (NM)', min_value=25, max_value=250, step=25,
-					key='live_world_military_radius_nm' )
-				st.caption( 'Military-tagged aircraft are retrieved from ADSB.lol.' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'satellites' ], key='live_world_satellites' )
-			if st.session_state[ 'live_world_satellites' ]:
-				st.selectbox( 'Satellite Group', options=[ 'stations', 'visual', 'weather', 'gps-ops',
-					'active' ], key='live_world_satellite_group' )
-				st.slider( 'Satellite Limit', min_value=10, max_value=500, step=10,
-					key='live_world_satellite_limit' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'vessels' ], key='live_world_vessels' )
-			if st.session_state[ 'live_world_vessels' ]:
-				st.caption( 'AIS Stream credentials are read from AISSTREAM_API_KEY in config.py.' )
-				st.slider( 'Vessel Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
-					key='live_world_vessel_radius' )
-				st.slider( 'Vessel Message Limit', min_value=10, max_value=250, step=10,
-					key='live_world_vessel_limit' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'earthquakes' ], key='live_world_earthquakes' )
-			if st.session_state[ 'live_world_earthquakes' ]:
-				st.selectbox( 'Earthquake Feed', options=[ 'all_hour.geojson', 'all_day.geojson',
-					'all_week.geojson', '2.5_day.geojson', '2.5_week.geojson', '4.5_day.geojson',
-					'4.5_week.geojson', 'significant_day.geojson',
-					'significant_week.geojson' ], key='live_world_earthquake_feed' )
-				st.slider( 'Minimum Magnitude', min_value=0.0, max_value=10.0, step=0.1,
-					key='live_world_earthquake_min_magnitude' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'fires' ], key='live_world_fires' )
-			if st.session_state[ 'live_world_fires' ]:
-				st.selectbox( 'FIRMS Source', options=[ 'VIIRS_NOAA21_NRT', 'VIIRS_NOAA20_NRT',
-					'VIIRS_SNPP_NRT', 'MODIS_NRT', 'LANDSAT_NRT' ], key='live_world_firms_source' )
-				st.slider( 'Fire Day Range', min_value=1, max_value=5, step=1,
-					key='live_world_firms_day_range' )
-				st.selectbox( 'Fire Area', options=[ 'Local Bounding Box',
-					'World' ], key='live_world_firms_area_mode' )
-				st.slider( 'Fire Record Limit', min_value=1000, max_value=50000, step=1000,
-					key='live_world_firms_max_records' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'measurements' ], key='live_world_measurements' )
-			if st.session_state[ 'live_world_measurements' ]:
-				measurement_options = get_live_world_measurement_options( )
-				measurement_keys = list( measurement_options.keys( ) )
-				if st.session_state[ 'live_world_measurement_start' ] not in measurement_keys:
-					st.session_state[ 'live_world_measurement_start' ] = 'Current Location'
-				if st.session_state[ 'live_world_measurement_end' ] not in measurement_keys:
-					st.session_state[ 'live_world_measurement_end' ] = 'Current Location'
-				measure_c1, measure_c2 = st.columns( 2 )
-				with measure_c1:
-					st.selectbox( 'Measure From', options=measurement_keys, format_func=lambda value:
-					measurement_options[ value ], key='live_world_measurement_start' )
-				with measure_c2:
-					st.selectbox( 'Measure To', options=measurement_keys, format_func=lambda value:
-					measurement_options[ value ], key='live_world_measurement_end' )
-				if st.session_state[ 'live_world_measurement_start' ] == 'Custom Point':
-					custom_start_c1, custom_start_c2 = st.columns( 2 )
-					with custom_start_c1:
-						st.number_input( 'Start Latitude', min_value=-90.0, max_value=90.0,
-							format='%.6f', key='live_world_measurement_custom_start_latitude' )
-					with custom_start_c2:
-						st.number_input( 'Start Longitude', min_value=-180.0, max_value=180.0,
-							format='%.6f', key='live_world_measurement_custom_start_longitude' )
-				if st.session_state[ 'live_world_measurement_end' ] == 'Custom Point':
-					custom_end_c1, custom_end_c2 = st.columns( 2 )
-					with custom_end_c1:
-						st.number_input( 'End Latitude', min_value=-90.0, max_value=90.0,
-							format='%.6f', key='live_world_measurement_custom_end_latitude' )
-					with custom_end_c2:
-						st.number_input( 'End Longitude', min_value=-180.0, max_value=180.0,
-							format='%.6f', key='live_world_measurement_custom_end_longitude' )
-				st.caption( 'Annotations' )
-				st.text_input( 'Annotation Label', key='live_world_annotation_label' )
-				annotation_c1, annotation_c2 = st.columns( 2 )
-				with annotation_c1:
-					st.number_input( 'Annotation Latitude', min_value=-90.0, max_value=90.0,
-						format='%.6f', key='live_world_annotation_latitude' )
-				with annotation_c2:
-					st.number_input( 'Annotation Longitude', min_value=-180.0, max_value=180.0,
-						format='%.6f', key='live_world_annotation_longitude' )
-				annotation_button_c1, annotation_button_c2 = st.columns( 2 )
-				with annotation_button_c1:
-					if st.button( 'Add Annotation', icon='📍', key='live_world_annotation_add',
-							width='stretch' ):
-						add_live_world_annotation( )
-				with annotation_button_c2:
-					if st.button( 'Clear Annotations', icon='🧹', key='live_world_annotation_clear',
-							width='stretch' ):
-						clear_live_world_annotations( )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'tracking' ], key='live_world_tracking' )
-			if st.session_state[ 'live_world_tracking' ]:
-				tracking_options = get_live_world_tracking_options( )
-				if tracking_options:
-					tracking_keys = list( tracking_options.keys( ) )
-					if st.session_state[ 'live_world_tracking_entity' ] not in tracking_keys:
-						st.session_state[ 'live_world_tracking_entity' ] = tracking_keys[ 0 ]
-					st.selectbox( 'Tracked Entity', options=tracking_keys, format_func=lambda value:
-					tracking_options[ value ], key='live_world_tracking_entity' )
-				else:
-					st.info( 'Refresh a moving Live World layer before selecting a tracked entity.' )
-				st.checkbox( 'Follow Tracked Entity', key='live_world_tracking_follow' )
-				st.slider( 'Trail Points', min_value=10, max_value=500, step=10,
-					key='live_world_tracking_max_points' )
-				if st.button( 'Clear Trail', icon='🧹', key='live_world_tracking_clear',
-						width='stretch' ):
-					clear_live_world_tracking( )
-			st.divider( )
-			refresh_c1, clear_c2 = st.columns( 2 )
-			with refresh_c1:
-				if st.button( 'Refresh', icon='🔄', key='live_world_refresh', width='stretch' ):
-					st.session_state[ 'live_world_refresh_requested' ] = True
-			with clear_c2:
-				if st.button( 'Clear', icon='🧹', key='live_world_clear', width='stretch' ):
-					clear_live_world_data( )
-			with st.expander( 'Additional Layers', expanded=False ):
-				st.checkbox( LIVE_WORLD_LAYERS[ 'infrastructure' ], key='live_world_infrastructure' )
-				if st.session_state[ 'live_world_infrastructure' ]:
-					st.multiselect( 'Infrastructure Categories', options=[ 'Airports', 'Ports',
-						'Power Plants', 'Dams', 'Data Centers',
-						'Military Installations' ], key='live_world_infrastructure_categories' )
-					infra_c1, infra_c2 = st.columns( 2 )
-					with infra_c1:
-						st.slider( 'Infrastructure Radius (KM)', min_value=10, max_value=250, step=10,
-							key='live_world_infrastructure_radius_km' )
-					with infra_c2:
-						st.slider( 'Infrastructure Limit', min_value=50, max_value=2000, step=50,
-							key='live_world_infrastructure_limit' )
-					st.caption( 'Infrastructure features are retrieved from OpenStreetMap via '
-					            'Overpass.' )
-				st.checkbox( LIVE_WORLD_LAYERS[ 'cameras' ], key='live_world_cameras' )
-				if st.session_state[ 'live_world_cameras' ]:
-					st.multiselect( 'Camera Categories', options=[ 'CCTV / Surveillance',
-						'Web Cameras' ], key='live_world_camera_categories' )
-					camera_c1, camera_c2 = st.columns( 2 )
-					with camera_c1:
-						st.slider( 'Camera Radius (KM)', min_value=1, max_value=100, step=1,
-							key='live_world_camera_radius_km' )
-					with camera_c2:
-						st.slider( 'Camera Limit', min_value=50, max_value=2000, step=50,
-							key='live_world_camera_limit' )
-					st.caption( 'Public camera locations and webcam tags are retrieved from '
-					            'OpenStreetMap via Overpass.' )
-				st.checkbox( LIVE_WORLD_LAYERS[ 'map_layers' ], key='live_world_map_layers' )
-				if st.session_state[ 'live_world_map_layers' ]:
-					st.multiselect( 'Map Layer Categories', options=[ 'Public Transit', 'Bike Share',
-						'Emergency Services', 'Healthcare', 'EV Charging', 'Communications',
-						'Launch Sites' ], key='live_world_map_layer_categories' )
-					map_layer_c1, map_layer_c2 = st.columns( 2 )
-					with map_layer_c1:
-						st.slider( 'Map Layer Radius (KM)', min_value=5, max_value=250, step=5,
-							key='live_world_map_layer_radius_km' )
-					with map_layer_c2:
-						st.slider( 'Map Layer Limit', min_value=50, max_value=5000, step=50,
-							key='live_world_map_layer_limit' )
-					st.caption( 'Contextual public map features are retrieved from OpenStreetMap via '
-					            'Overpass.' )
-				for label in LIVE_WORLD_PENDING_LAYERS.values( ):
-					st.checkbox( label, value=False, disabled=True )
-			with st.expander( 'AI & Advanced Tools', expanded=False ):
-				st.caption( 'Advanced tools operate on the currently loaded Live World entity frame.' )
-				st.checkbox(
-					AI_ADVANCED_TOOLS[ 'cross_layer_analysis' ],
-					key='live_world_cross_layer_analysis' )
-				if st.session_state[ 'live_world_cross_layer_analysis' ]:
-					analysis_options = get_live_world_analysis_origin_options( )
-					analysis_keys = list( analysis_options.keys( ) )
-					if st.session_state[ 'live_world_analysis_origin' ] not in analysis_keys:
-						st.session_state[ 'live_world_analysis_origin' ] = 'Current Location'
-					st.selectbox( 'Analysis Origin', options=analysis_keys, format_func=lambda value:
-					analysis_options[ value ], key='live_world_analysis_origin' )
-					if st.session_state[ 'live_world_analysis_origin' ] == 'Custom Point':
-						analysis_c1, analysis_c2 = st.columns( 2 )
-						with analysis_c1:
-							st.number_input( 'Analysis Latitude', min_value=-90.0, max_value=90.0,
-								format='%.6f', key='live_world_analysis_custom_latitude' )
-						with analysis_c2:
-							st.number_input( 'Analysis Longitude', min_value=-180.0, max_value=180.0,
-								format='%.6f', key='live_world_analysis_custom_longitude' )
-					st.slider( 'Analysis Radius (NM)', min_value=10, max_value=2500, step=10,
-						key='live_world_analysis_radius_nm' )
-					st.multiselect( 'Entity Types', options=[ 'Aircraft', 'Military Aircraft',
-						'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
-						'Map Feature' ], key='live_world_analysis_entity_types' )
-					st.slider( 'Analysis Result Limit', min_value=10, max_value=500, step=10,
-						key='live_world_analysis_limit' )
-				st.checkbox( AI_ADVANCED_TOOLS[ 'geofencing' ], key='live_world_geofencing' )
-				if st.session_state[ 'live_world_geofencing' ]:
-					geofence_options = get_live_world_geofence_origin_options( )
-					geofence_keys = list( geofence_options.keys( ) )
-					if st.session_state[ 'live_world_geofence_origin' ] not in geofence_keys:
-						st.session_state[ 'live_world_geofence_origin' ] = 'Current Location'
-					st.selectbox( 'Geofence Origin', options=geofence_keys, format_func=lambda value:
-					geofence_options[ value ], key='live_world_geofence_origin' )
-					if st.session_state[ 'live_world_geofence_origin' ] == 'Custom Point':
-						geofence_c1, geofence_c2 = st.columns( 2 )
-						with geofence_c1:
-							st.number_input( 'Geofence Latitude', min_value=-90.0, max_value=90.0,
-								format='%.6f', key='live_world_geofence_custom_latitude' )
-						with geofence_c2:
-							st.number_input( 'Geofence Longitude', min_value=-180.0, max_value=180.0,
-								format='%.6f', key='live_world_geofence_custom_longitude' )
-					st.slider( 'Geofence Radius (NM)', min_value=5, max_value=1000, step=5,
-						key='live_world_geofence_radius_nm' )
-					st.multiselect( 'Geofence Entity Types', options=[ 'Aircraft', 'Military Aircraft',
-						'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
-						'Map Feature' ], key='live_world_geofence_entity_types' )
-					st.slider( 'Geofence Event History', min_value=10, max_value=500, step=10,
-						key='live_world_geofence_event_limit' )
-					if st.button( 'Clear Geofence Events', icon='🧹',
-							key='live_world_geofence_clear_events', width='stretch' ):
-						clear_live_world_geofence_events( )
-				st.checkbox(
-					AI_ADVANCED_TOOLS[ 'historical_replay' ], key='live_world_historical_replay' )
-				if st.session_state[ 'live_world_historical_replay' ]:
-					st.checkbox( 'Persist Live World Refreshes', key='live_world_history_persist' )
-					history_c1, history_c2 = st.columns( 2 )
-					with history_c1:
-						st.selectbox( 'Replay Window', options=[ '1 Hour', '6 Hours', '24 Hours',
-							'7 Days', '30 Days', 'All Retained' ], key='live_world_history_window' )
-					with history_c2:
-						st.slider( 'Retention (Days)', min_value=1, max_value=365, step=1,
-							key='live_world_history_retention_days' )
-					st.slider( 'Max Rows / Source / Refresh', min_value=100, max_value=10000,
-						step=100, key='live_world_history_max_rows_per_source' )
-					st.multiselect( 'Replay Entity Types', options=[ 'Aircraft', 'Military Aircraft',
-						'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
-						'Map Feature' ], key='live_world_history_entity_types' )
-					st.slider( 'Replay Record Limit', min_value=100, max_value=25000, step=100,
-						key='live_world_history_limit' )
-					history_hours = get_live_world_history_window_hours( str(
-						st.session_state[ 'live_world_history_window' ] ) )
-					snapshot_options = get_live_world_history_snapshots( history_hours )
-					if snapshot_options:
-						if st.session_state[ 'live_world_history_snapshot' ] not in snapshot_options:
-							st.session_state[ 'live_world_history_snapshot' ] = snapshot_options[ 0 ]
-						st.selectbox( 'Replay Snapshot', options=snapshot_options,
-							key='live_world_history_snapshot' )
-					else:
-						st.session_state[ 'live_world_history_snapshot' ] = ''
-						st.caption( 'No persisted Live World snapshots are available in this window.' )
-					history_b1, history_b2 = st.columns( 2 )
-					with history_b1:
-						if st.button( 'Purge Expired', icon='🧹', key='live_world_history_purge',
-								width='stretch' ):
-							purge_live_world_history( int(
-								st.session_state[ 'live_world_history_retention_days' ] ) )
-					with history_b2:
-						if st.button( 'Clear History', icon='🗑️', key='live_world_history_clear',
-								width='stretch' ):
-							clear_live_world_history( )
-							st.session_state[ 'live_world_history_snapshot' ] = ''
-							st.session_state[ 'live_world_history_last_saved' ] = 0
-							st.session_state[ 'live_world_history_last_error' ] = ''
-				st.checkbox( AI_ADVANCED_TOOLS[ 'agent_tools' ], key='live_world_agent_tools' )
-
-	@staticmethod
-	def clear_live_world_data( ) -> None:
+	def clear_live_world_data(self) -> None:
 		'''
 			Clear retrieved Live World Data while preserving layer selections and map controls.
 
@@ -612,56 +353,56 @@ class LiveWorldState:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		st.session_state[ 'live_world_df_entities' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_aircraft' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_military_aircraft' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_satellites' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_vessels' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_earthquakes' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_fires' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_infrastructure' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_cameras' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_df_map_layers' ] = pd.DataFrame( )
-		st.session_state[ 'live_world_aircraft_result' ] = { }
-		st.session_state[ 'live_world_military_aircraft_result' ] = { }
-		st.session_state[ 'live_world_satellite_result' ] = [ ]
-		st.session_state[ 'live_world_satellite_propagation_attempts' ] = 0
-		st.session_state[ 'live_world_satellite_propagation_failures' ] = 0
-		st.session_state[ 'live_world_vessel_result' ] = [ ]
-		st.session_state[ 'live_world_earthquake_result' ] = { }
-		st.session_state[ 'live_world_firms_result' ] = { }
-		st.session_state[ 'live_world_firms_source_count' ] = 0
-		st.session_state[ 'live_world_firms_truncated' ] = False
-		st.session_state[ 'live_world_infrastructure_result' ] = { }
-		st.session_state[ 'live_world_camera_result' ] = { }
-		st.session_state[ 'live_world_map_layer_result' ] = { }
-		st.session_state[ 'live_world_tracking_history' ] = [ ]
-		st.session_state[ 'live_world_tracking_active_entity' ] = ''
-		st.session_state[ 'live_world_annotations' ] = [ ]
-		st.session_state[ 'live_world_geofence_events' ] = [ ]
-		st.session_state[ 'live_world_geofence_snapshot' ] = { }
-		st.session_state[ 'live_world_geofence_initialized' ] = False
-		st.session_state[ 'live_world_geofence_last_refresh_processed' ] = ''
-		st.session_state[ 'live_world_last_refresh' ] = ''
-		st.session_state[ 'live_world_refresh_id' ] = ''
-		st.session_state[ 'live_world_last_success' ] = ''
-		st.session_state[ 'live_world_last_error' ] = ''
-		st.session_state[ 'live_world_source_status' ] = {
+		self.initialize_live_world_state( )
+		self.state[ 'live_world_df_entities' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_aircraft' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_military_aircraft' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_satellites' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_vessels' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_earthquakes' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_fires' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_infrastructure' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_cameras' ] = pd.DataFrame( )
+		self.state[ 'live_world_df_map_layers' ] = pd.DataFrame( )
+		self.state[ 'live_world_aircraft_result' ] = { }
+		self.state[ 'live_world_military_aircraft_result' ] = { }
+		self.state[ 'live_world_satellite_result' ] = [ ]
+		self.state[ 'live_world_satellite_propagation_attempts' ] = 0
+		self.state[ 'live_world_satellite_propagation_failures' ] = 0
+		self.state[ 'live_world_vessel_result' ] = [ ]
+		self.state[ 'live_world_earthquake_result' ] = { }
+		self.state[ 'live_world_firms_result' ] = { }
+		self.state[ 'live_world_firms_source_count' ] = 0
+		self.state[ 'live_world_firms_truncated' ] = False
+		self.state[ 'live_world_infrastructure_result' ] = { }
+		self.state[ 'live_world_camera_result' ] = { }
+		self.state[ 'live_world_map_layer_result' ] = { }
+		self.state[ 'live_world_tracking_history' ] = [ ]
+		self.state[ 'live_world_tracking_active_entity' ] = ''
+		self.state[ 'live_world_annotations' ] = [ ]
+		self.state[ 'live_world_geofence_events' ] = [ ]
+		self.state[ 'live_world_geofence_snapshot' ] = { }
+		self.state[ 'live_world_geofence_initialized' ] = False
+		self.state[ 'live_world_geofence_last_refresh_processed' ] = ''
+		self.state[ 'live_world_last_refresh' ] = ''
+		self.state[ 'live_world_refresh_id' ] = ''
+		self.state[ 'live_world_last_success' ] = ''
+		self.state[ 'live_world_last_error' ] = ''
+		self.state[ 'live_world_source_status' ] = {
 			key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_source_errors' ] = {
+		self.state[ 'live_world_source_errors' ] = {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_source_error_types' ] = {
+		self.state[ 'live_world_source_error_types' ] = {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_source_http_status' ] = {
+		self.state[ 'live_world_source_http_status' ] = {
 			key: 0 for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_source_last_attempt' ] = {
+		self.state[ 'live_world_source_last_attempt' ] = {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_source_last_success' ] = {
+		self.state[ 'live_world_source_last_success' ] = {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_source_stale' ] = {
+		self.state[ 'live_world_source_stale' ] = {
 			key: False for key in LIVE_WORLD_DATA_SOURCES }
-		st.session_state[ 'live_world_refresh_requested' ] = False
+		self.state[ 'live_world_refresh_requested' ] = False
 
 class LiveWorldGeometry:
 	"""Calculate geographic bounds, coordinates, and distances.
@@ -670,8 +411,9 @@ class LiveWorldGeometry:
 		Calculate geographic bounds, coordinates, and distances.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		None: This stateless utility does not retain instance attributes.
 	"""
+
 
 	@staticmethod
 	def create_live_world_bounding_box( latitude: float, longitude: float,
@@ -691,8 +433,8 @@ class LiveWorldGeometry:
 			str: FIRMS west,south,east,north area-coordinate string.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
+		LiveWorldValidation.throw_if( 'latitude', latitude )
+		LiveWorldValidation.throw_if( 'longitude', longitude )
 		if type( latitude ) not in (int, float) or not -90 <= latitude <= 90:
 			raise ValueError( 'latitude must be between -90 and 90 degrees.' )
 		if type( longitude ) not in (int, float) or not -180 <= longitude <= 180:
@@ -742,10 +484,10 @@ class LiveWorldGeometry:
 			float: Great-circle distance in nautical miles.
 
 		'''
-		throw_if( 'latitude_a', latitude_a )
-		throw_if( 'longitude_a', longitude_a )
-		throw_if( 'latitude_b', latitude_b )
-		throw_if( 'longitude_b', longitude_b )
+		LiveWorldValidation.throw_if( 'latitude_a', latitude_a )
+		LiveWorldValidation.throw_if( 'longitude_a', longitude_a )
+		LiveWorldValidation.throw_if( 'latitude_b', latitude_b )
+		LiveWorldValidation.throw_if( 'longitude_b', longitude_b )
 		lat_a = math.radians( float( latitude_a ) )
 		lat_b = math.radians( float( latitude_b ) )
 		delta_lat = math.radians( float( latitude_b ) - float( latitude_a ) )
@@ -763,12 +505,62 @@ class LiveWorldProviders:
 		Retrieve and normalize data from live aircraft, vessel, satellite, and map providers.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Explicitly injected collaborator.
+		geometry (LiveWorldGeometry): Explicitly injected collaborator.
+		entities (LiveWorldEntities): Explicitly injected collaborator.
+		validation (LiveWorldValidation): Explicitly injected collaborator.
 	"""
 
-	@staticmethod
-	@st.cache_resource
-	def get_live_opensky_service( ) -> OpenSkyLive:
+
+	state: object
+	state_service: LiveWorldState
+	geometry: LiveWorldGeometry
+	entities: LiveWorldEntities
+	validation: LiveWorldValidation
+	opensky_client: OpenSkyLive | None
+	ais_client: AisStreamLive | None
+	firms_client: Firms | None
+	military_client: AdsbLolMilitary | None
+	satellite_client: CelesTrakLive | None
+	earthquake_client: USGSEarthquakes | None
+	infrastructure_client: OverpassInfrastructure | None
+	camera_client: OverpassCameras | None
+	map_layers_client: OverpassMapLayers | None
+
+	def __init__( self, state_service: LiveWorldState, geometry: LiveWorldGeometry, entities: LiveWorldEntities, validation: LiveWorldValidation ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Own lazy provider instances and coordinate session-scoped acquisition.
+
+		Args:
+			state_service (LiveWorldState): Required collaborator for this service.
+			geometry (LiveWorldGeometry): Required collaborator for this service.
+			entities (LiveWorldEntities): Required collaborator for this service.
+			validation (LiveWorldValidation): Required collaborator for this service.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.geometry = geometry
+		self.entities = entities
+		self.validation = validation
+		self.opensky_client = None
+		self.ais_client = None
+		self.firms_client = None
+		self.military_client = None
+		self.satellite_client = None
+		self.earthquake_client = None
+		self.infrastructure_client = None
+		self.camera_client = None
+		self.map_layers_client = None
+		self.overpass_cache = st.cache_data( ttl=300, max_entries=64,
+			show_spinner=False )( self.fetch_cached_live_world_overpass )
+
+	def get_live_opensky_service(self) -> OpenSkyLive:
 		"""Provide a reusable OpenSky client across Live World refreshes.
 
 		Purpose:
@@ -778,10 +570,11 @@ class LiveWorldProviders:
 		Returns:
 			OpenSkyLive: Shared client for configured OpenSky credentials.
 		"""
-		return OpenSkyLive( timeout=20 )
+		if self.opensky_client is None:
+			self.opensky_client = OpenSkyLive( timeout=20 )
+		return self.opensky_client
 
-	@staticmethod
-	def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_aircraft(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve current OpenSky aircraft state vectors around the Iyr/global location and.
 
@@ -797,12 +590,12 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized aircraft entities.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		radius = float( st.session_state[ 'live_world_aircraft_radius' ] )
-		airborne_only = bool( st.session_state[ 'live_world_aircraft_airborne_only' ] )
-		service = get_live_opensky_service( )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		radius = float( self.state[ 'live_world_aircraft_radius' ] )
+		airborne_only = bool( self.state[ 'live_world_aircraft_airborne_only' ] )
+		service = self.get_live_opensky_service( )
 		result = service.fetch_states( latitude=latitude, longitude=longitude,
 			radius_degrees=radius ) or { }
 		states = result.get( 'states', [ ] ) or [ ]
@@ -826,7 +619,7 @@ class LiveWorldProviders:
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
@@ -862,11 +655,10 @@ class LiveWorldProviders:
 				altitude=altitude_value, heading=heading_value, speed=velocity_value, timestamp=str(
 				state[ 4 ] or '' ), source='OpenSky Network', metadata=metadata ) )
 
-		st.session_state[ 'live_world_aircraft_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_aircraft_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_military_aircraft(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve ADSB.lol military-tagged aircraft and normalize aircraft within the.
 
@@ -882,11 +674,13 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized military-aircraft entities.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		radius_nm = float( st.session_state[ 'live_world_military_radius_nm' ] )
-		service = AdsbLolMilitary( timeout=20 )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		radius_nm = float( self.state[ 'live_world_military_radius_nm' ] )
+		if self.military_client is None:
+			self.military_client = AdsbLolMilitary( timeout=20 )
+		service = self.military_client
 		result = service.fetch_military( latitude=latitude, longitude=longitude,
 			radius_nm=radius_nm ) or { }
 		rows = result.get( 'ac', [ ] ) or [ ]
@@ -903,12 +697,12 @@ class LiveWorldProviders:
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
 
-			distance_nm = calculate_live_world_distance_nm( latitude, longitude, lat, lon )
+			distance_nm = self.geometry.calculate_live_world_distance_nm( latitude, longitude, lat, lon )
 			if distance_nm > radius_nm:
 				continue
 
@@ -944,11 +738,10 @@ class LiveWorldProviders:
 				timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ), source='ADSB.lol',
 				metadata=metadata ) )
 
-		st.session_state[ 'live_world_military_aircraft_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_military_aircraft_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_vessels(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve a bounded live AIS Stream vessel sample around the current Iyr location.
 
@@ -964,12 +757,14 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized vessel entities.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		radius = float( st.session_state[ 'live_world_vessel_radius' ] )
-		limit = int( st.session_state[ 'live_world_vessel_limit' ] )
-		service = AisStreamLive( timeout=5 )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		radius = float( self.state[ 'live_world_vessel_radius' ] )
+		limit = int( self.state[ 'live_world_vessel_limit' ] )
+		if self.ais_client is None:
+			self.ais_client = AisStreamLive( timeout=5 )
+		service = self.ais_client
 		result = service.fetch_positions( latitude=latitude, longitude=longitude,
 			radius_degrees=radius, max_messages=limit, duration_seconds=3.0 )
 		entities_by_mmsi: Dict[ str, GeoEntity ] = { }
@@ -987,7 +782,7 @@ class LiveWorldProviders:
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
@@ -1018,11 +813,10 @@ class LiveWorldProviders:
 				timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ), source='AIS Stream',
 				metadata=metadata )
 
-		st.session_state[ 'live_world_vessel_result' ] = result
-		return entities_to_dataframe( list( entities_by_mmsi.values( ) ) )
+		self.state[ 'live_world_vessel_result' ] = result
+		return self.entities.entities_to_dataframe( list( entities_by_mmsi.values( ) ) )
 
-	@staticmethod
-	def fetch_live_satellites( ) -> pd.DataFrame:
+	def fetch_live_satellites(self) -> pd.DataFrame:
 		'''
 			Retrieve current CelesTrak OMM records, propagate each orbit to the current UTC time,.
 
@@ -1034,17 +828,19 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized satellite entities.
 
 		'''
-		initialize_live_world_state( )
-		st.session_state[ 'live_world_satellite_propagation_attempts' ] = 0
-		st.session_state[ 'live_world_satellite_propagation_failures' ] = 0
-		group = str( st.session_state[ 'live_world_satellite_group' ] )
-		limit = int( st.session_state[ 'live_world_satellite_limit' ] )
-		service = CelesTrakLive( timeout=20 )
+		self.state_service.initialize_live_world_state( )
+		self.state[ 'live_world_satellite_propagation_attempts' ] = 0
+		self.state[ 'live_world_satellite_propagation_failures' ] = 0
+		group = str( self.state[ 'live_world_satellite_group' ] )
+		limit = int( self.state[ 'live_world_satellite_limit' ] )
+		if self.satellite_client is None:
+			self.satellite_client = CelesTrakLive( timeout=20 )
+		service = self.satellite_client
 		records = service.fetch_group( group=group, limit=limit )
 		when = dt.datetime.now( dt.timezone.utc )
 		entities: List[ GeoEntity ] = [ ]
 		failures = 0
-		st.session_state[ 'live_world_satellite_propagation_attempts' ] = len( records )
+		self.state[ 'live_world_satellite_propagation_attempts' ] = len( records )
 
 		for record in records:
 			try:
@@ -1064,15 +860,14 @@ class LiveWorldProviders:
 				position[ 'Altitude' ] ), heading=0.0, speed=float( position[
 				'Velocity' ] ), timestamp=when.isoformat( ), source='CelesTrak', metadata=metadata ) )
 
-		st.session_state[ 'live_world_satellite_propagation_failures' ] = failures
-		st.session_state[ 'live_world_satellite_result' ] = records
+		self.state[ 'live_world_satellite_propagation_failures' ] = failures
+		self.state[ 'live_world_satellite_result' ] = records
 		if records and not entities:
 			raise RuntimeError(
 				f'CelesTrak returned {len( records )} records but every propagation failed.' )
-		return entities_to_dataframe( entities )
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	def fetch_live_earthquakes( ) -> pd.DataFrame:
+	def fetch_live_earthquakes(self) -> pd.DataFrame:
 		'''
 			Retrieve the selected USGS earthquake feed through Iyr's existing provider and.
 
@@ -1084,10 +879,12 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized earthquake entities.
 
 		'''
-		initialize_live_world_state( )
-		feed = str( st.session_state[ 'live_world_earthquake_feed' ] )
-		min_magnitude = float( st.session_state[ 'live_world_earthquake_min_magnitude' ] )
-		service = USGSEarthquakes( )
+		self.state_service.initialize_live_world_state( )
+		feed = str( self.state[ 'live_world_earthquake_feed' ] )
+		min_magnitude = float( self.state[ 'live_world_earthquake_min_magnitude' ] )
+		if self.earthquake_client is None:
+			self.earthquake_client = USGSEarthquakes( )
+		service = self.earthquake_client
 		result = service.fetch( mode='feed', feed=feed, time=20 ) or { }
 		rows = result.get( 'rows', [ ] ) or [ ]
 		entities: List[ GeoEntity ] = [ ]
@@ -1106,7 +903,7 @@ class LiveWorldProviders:
 			except ( TypeError, ValueError ):
 				continue
 
-			if not is_valid_live_world_coordinates( latitude_value, longitude_value ):
+			if not self.geometry.is_valid_live_world_coordinates( latitude_value, longitude_value ):
 				continue
 
 			if magnitude_value < min_magnitude:
@@ -1129,11 +926,10 @@ class LiveWorldProviders:
 				timestamp=str( row.get( 'Time', '' ) or '' ), source='USGS Earthquakes',
 				metadata=metadata ) )
 
-		st.session_state[ 'live_world_earthquake_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_earthquake_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_fires(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve NASA FIRMS active-fire detections through Iyr's existing Firms provider.
 
@@ -1149,64 +945,65 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized FIRMS fire entities.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		st.session_state[ 'live_world_firms_source_count' ] = 0
-		st.session_state[ 'live_world_firms_truncated' ] = False
-		source = str( st.session_state[ 'live_world_firms_source' ] )
-		day_range = int( st.session_state[ 'live_world_firms_day_range' ] )
-		area_mode = str( st.session_state[ 'live_world_firms_area_mode' ] )
-		area_coordinates = 'world' if area_mode == 'World' else create_live_world_bounding_box(
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		self.state[ 'live_world_firms_source_count' ] = 0
+		self.state[ 'live_world_firms_truncated' ] = False
+		source = str( self.state[ 'live_world_firms_source' ] )
+		day_range = int( self.state[ 'live_world_firms_day_range' ] )
+		area_mode = str( self.state[ 'live_world_firms_area_mode' ] )
+		area_coordinates = 'world' if area_mode == 'World' else self.geometry.create_live_world_bounding_box(
 			latitude, longitude )
 
-		service = Firms( )
+		if self.firms_client is None:
+			self.firms_client = Firms( )
+		service = self.firms_client
 		result = service.fetch_area( source=source, area_coordinates=area_coordinates,
 			day_range=day_range, date='', time=20 ) or { }
 		rows = result.get( 'rows', [ ] ) or [ ]
-		max_records = int( st.session_state[ 'live_world_firms_max_records' ] )
-		st.session_state[ 'live_world_firms_source_count' ] = len( rows )
-		st.session_state[ 'live_world_firms_truncated' ] = len( rows ) > max_records
+		max_records = int( self.state[ 'live_world_firms_max_records' ] )
+		self.state[ 'live_world_firms_source_count' ] = len( rows )
+		self.state[ 'live_world_firms_truncated' ] = len( rows ) > max_records
 		rows = rows[ :max_records ]
 		entities: List[ GeoEntity ] = [ ]
 
 		for index, row in enumerate( rows ):
-			latitude_value = get_row_value( row, [ 'latitude', 'Latitude' ] )
-			longitude_value = get_row_value( row, [ 'longitude', 'Longitude' ] )
+			latitude_value = self.entities.get_row_value( row, [ 'latitude', 'Latitude' ] )
+			longitude_value = self.entities.get_row_value( row, [ 'longitude', 'Longitude' ] )
 			if latitude_value is None or longitude_value is None:
 				continue
 
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
 
-			acq_date = str( get_row_value( row,
+			acq_date = str( self.entities.get_row_value( row,
 				[ 'acq_date', 'Acq Date', 'Acquisition Date' ] ) or '' )
-			acq_time = str( get_row_value( row,
+			acq_time = str( self.entities.get_row_value( row,
 				[ 'acq_time', 'Acq Time', 'Acquisition Time' ] ) or '' )
-			satellite = str( get_row_value( row, [ 'satellite', 'Satellite' ] ) or source )
+			satellite = str( self.entities.get_row_value( row, [ 'satellite', 'Satellite' ] ) or source )
 			metadata = { 'Satellite': satellite,
-				'Instrument': get_row_value( row, [ 'instrument', 'Instrument' ] ),
-				'Confidence': get_row_value( row, [ 'confidence', 'Confidence' ] ),
-				'FRP': get_row_value( row, [ 'frp', 'FRP' ] ),
-				'Brightness': get_row_value( row, [ 'bright_ti4', 'brightness', 'Brightness',
-					'bright_t31' ] ), 'Day/Night': get_row_value( row, [ 'daynight', 'Day/Night' ] ),
-				'Version': get_row_value( row, [ 'version', 'Version' ] ), }
+				'Instrument': self.entities.get_row_value( row, [ 'instrument', 'Instrument' ] ),
+				'Confidence': self.entities.get_row_value( row, [ 'confidence', 'Confidence' ] ),
+				'FRP': self.entities.get_row_value( row, [ 'frp', 'FRP' ] ),
+				'Brightness': self.entities.get_row_value( row, [ 'bright_ti4', 'brightness', 'Brightness',
+					'bright_t31' ] ), 'Day/Night': self.entities.get_row_value( row, [ 'daynight', 'Day/Night' ] ),
+				'Version': self.entities.get_row_value( row, [ 'version', 'Version' ] ), }
 			entity_id = (
 				f'FIRMS-{source}-{acq_date}-{acq_time}-{lat:.5f}-{lon:.5f}' )
 			entities.append( GeoEntity( entity_id=entity_id, entity_type='Fire', name=f'Active Fire - '
 			                                                                          f'{satellite}',
 				latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0, timestamp=f'{acq_date} {acq_time}'.strip( ), source='NASA FIRMS', metadata=metadata ) )
 
-		st.session_state[ 'live_world_firms_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_firms_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_infrastructure(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve public infrastructure features from OpenStreetMap Overpass and normalize.
 
@@ -1222,15 +1019,17 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized infrastructure entities.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		categories = list( st.session_state.get( 'live_world_infrastructure_categories', [ ] ) or [ ] )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		categories = list( self.state.get( 'live_world_infrastructure_categories', [ ] ) or [ ] )
 		if not categories:
-			return entities_to_dataframe( [ ] )
-		radius_km = float( st.session_state[ 'live_world_infrastructure_radius_km' ] )
-		limit = int( st.session_state[ 'live_world_infrastructure_limit' ] )
-		service = OverpassInfrastructure( timeout=30 )
+			return self.entities.entities_to_dataframe( [ ] )
+		radius_km = float( self.state[ 'live_world_infrastructure_radius_km' ] )
+		limit = int( self.state[ 'live_world_infrastructure_limit' ] )
+		if self.infrastructure_client is None:
+			self.infrastructure_client = OverpassInfrastructure( timeout=30 )
+		service = self.infrastructure_client
 		result = service.fetch_infrastructure( latitude, longitude, radius_km, categories, limit )
 		elements = result.get( 'elements', [ ] ) or [ ]
 		entities: List[ GeoEntity ] = [ ]
@@ -1247,7 +1046,7 @@ class LiveWorldProviders:
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
@@ -1264,12 +1063,10 @@ class LiveWorldProviders:
 				latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0,
 				timestamp=observed_at, source='OpenStreetMap Overpass', metadata=metadata ) )
 
-		st.session_state[ 'live_world_infrastructure_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_infrastructure_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	@st.cache_data( ttl=300, max_entries=64, show_spinner=False )
-	def fetch_cached_live_world_overpass( source_key: str, latitude: float,
+	def fetch_cached_live_world_overpass(self,  source_key: str, latitude: float,
 			longitude: float, radius_km: float, categories: tuple[ str, ... ],
 			max_results: int ) -> Dict[ str, Any ]:
 		"""Retrieve cacheable public Overpass results for camera and contextual map layers.
@@ -1292,24 +1089,27 @@ class LiveWorldProviders:
 		Raises:
 			ValueError: Raised when the source is unsupported.
 		"""
-		throw_if( 'source_key', source_key )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'radius_km', radius_km )
-		throw_if( 'categories', categories )
-		throw_if( 'max_results', max_results )
+		self.validation.throw_if( 'source_key', source_key )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		self.validation.throw_if( 'radius_km', radius_km )
+		self.validation.throw_if( 'categories', categories )
+		self.validation.throw_if( 'max_results', max_results )
 		if source_key == 'cameras':
-			service = OverpassCameras( timeout=30 )
+			if self.camera_client is None:
+				self.camera_client = OverpassCameras( timeout=30 )
+			service = self.camera_client
 			return service.fetch_cameras( latitude, longitude, radius_km,
 				list( categories ), max_results )
 		if source_key == 'map_layers':
-			service = OverpassMapLayers( timeout=30 )
+			if self.map_layers_client is None:
+				self.map_layers_client = OverpassMapLayers( timeout=30 )
+			service = self.map_layers_client
 			return service.fetch_features( latitude, longitude, radius_km,
 				list( categories ), max_results )
 		raise ValueError( f'Unsupported cached Overpass source: {source_key}' )
 
-	@staticmethod
-	def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_cameras(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve public CCTV, surveillance-camera, and webcam features from OpenStreetMap.
 
@@ -1325,15 +1125,15 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized camera entities.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		categories = list( st.session_state.get( 'live_world_camera_categories', [ ] ) or [ ] )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		categories = list( self.state.get( 'live_world_camera_categories', [ ] ) or [ ] )
 		if not categories:
-			return entities_to_dataframe( [ ] )
-		radius_km = float( st.session_state[ 'live_world_camera_radius_km' ] )
-		limit = int( st.session_state[ 'live_world_camera_limit' ] )
-		result = fetch_cached_live_world_overpass( 'cameras', latitude, longitude,
+			return self.entities.entities_to_dataframe( [ ] )
+		radius_km = float( self.state[ 'live_world_camera_radius_km' ] )
+		limit = int( self.state[ 'live_world_camera_limit' ] )
+		result = self.overpass_cache( 'cameras', latitude, longitude,
 			radius_km, tuple( categories ), limit )
 		elements = result.get( 'elements', [ ] ) or [ ]
 		entities: List[ GeoEntity ] = [ ]
@@ -1350,7 +1150,7 @@ class LiveWorldProviders:
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
@@ -1373,11 +1173,10 @@ class LiveWorldProviders:
 				latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0,
 				timestamp=observed_at, source='OpenStreetMap Overpass', metadata=metadata ) )
 
-		st.session_state[ 'live_world_camera_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_camera_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
-	@staticmethod
-	def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
+	def fetch_live_map_layers(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Retrieve selected contextual public map features from OpenStreetMap Overpass and.
 
@@ -1393,15 +1192,15 @@ class LiveWorldProviders:
 			pd.DataFrame: Normalized contextual map features.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		categories = list( st.session_state.get( 'live_world_map_layer_categories', [ ] ) or [ ] )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		categories = list( self.state.get( 'live_world_map_layer_categories', [ ] ) or [ ] )
 		if not categories:
-			return entities_to_dataframe( [ ] )
-		radius_km = float( st.session_state[ 'live_world_map_layer_radius_km' ] )
-		limit = int( st.session_state[ 'live_world_map_layer_limit' ] )
-		result = fetch_cached_live_world_overpass( 'map_layers', latitude, longitude,
+			return self.entities.entities_to_dataframe( [ ] )
+		radius_km = float( self.state[ 'live_world_map_layer_radius_km' ] )
+		limit = int( self.state[ 'live_world_map_layer_limit' ] )
+		result = self.overpass_cache( 'map_layers', latitude, longitude,
 			radius_km, tuple( categories ), limit )
 		elements = result.get( 'elements', [ ] ) or [ ]
 		entities: List[ GeoEntity ] = [ ]
@@ -1418,7 +1217,7 @@ class LiveWorldProviders:
 			try:
 				lat = float( latitude_value )
 				lon = float( longitude_value )
-				if not is_valid_live_world_coordinates( lat, lon ):
+				if not self.geometry.is_valid_live_world_coordinates( lat, lon ):
 					continue
 			except ( TypeError, ValueError ):
 				continue
@@ -1437,8 +1236,8 @@ class LiveWorldProviders:
 				latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0,
 				timestamp=observed_at, source='OpenStreetMap Overpass', metadata=metadata ) )
 
-		st.session_state[ 'live_world_map_layer_result' ] = result
-		return entities_to_dataframe( entities )
+		self.state[ 'live_world_map_layer_result' ] = result
+		return self.entities.entities_to_dataframe( entities )
 
 class LiveWorldEntities:
 	"""Convert normalized geospatial entities to tabular data and extract row values.
@@ -1447,8 +1246,9 @@ class LiveWorldEntities:
 		Convert normalized geospatial entities to tabular data and extract row values.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		None: This stateless utility does not retain instance attributes.
 	"""
+
 
 	@staticmethod
 	def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
@@ -1468,7 +1268,7 @@ class LiveWorldEntities:
 		'''
 		if not isinstance( row, dict ):
 			raise TypeError( 'row must be a dictionary.' )
-		throw_if( 'keys', keys )
+		LiveWorldValidation.throw_if( 'keys', keys )
 		for key in keys:
 			if key in row:
 				return row[ key ]
@@ -1510,11 +1310,38 @@ class LiveWorldAnalytics:
 		Manage measurement, annotation, cross-layer analysis, and geofence operations.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Explicitly injected collaborator.
+		geometry (LiveWorldGeometry): Explicitly injected collaborator.
+		validation (LiveWorldValidation): Explicitly injected collaborator.
 	"""
 
-	@staticmethod
-	def get_live_world_tracking_options( ) -> Dict[ str, str ]:
+
+	state: object
+	state_service: LiveWorldState
+	geometry: LiveWorldGeometry
+	validation: LiveWorldValidation
+
+	def __init__( self, state_service: LiveWorldState, geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Coordinate analysis and geofencing using explicitly injected services.
+
+		Args:
+			state_service (LiveWorldState): Required collaborator for this service.
+			geometry (LiveWorldGeometry): Required collaborator for this service.
+			validation (LiveWorldValidation): Required collaborator for this service.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.geometry = geometry
+		self.validation = validation
+
+	def get_live_world_tracking_options(self) -> Dict[ str, str ]:
 		'''
 			Return selectable moving entities from the current Live World entity frame.
 
@@ -1525,8 +1352,8 @@ class LiveWorldAnalytics:
 			Dict[str, str]: Tracking keys mapped to human-readable labels.
 
 		'''
-		initialize_live_world_state( )
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		self.state_service.initialize_live_world_state( )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
 			return { }
 
@@ -1545,8 +1372,7 @@ class LiveWorldAnalytics:
 			options[ tracking_key ] = f'{entity_type} | {name} | {entity_id}'
 		return options
 
-	@staticmethod
-	def get_live_world_measurement_options( ) -> Dict[ str, str ]:
+	def get_live_world_measurement_options(self) -> Dict[ str, str ]:
 		'''
 			Return selectable measurement endpoints from current location and loaded entities.
 
@@ -1557,10 +1383,10 @@ class LiveWorldAnalytics:
 			Dict[str, str]: Measurement endpoint keys mapped to display labels.
 
 		'''
-		initialize_live_world_state( )
+		self.state_service.initialize_live_world_state( )
 		options: Dict[ str, str ] = { 'Current Location': 'Current Location',
 			'Custom Point': 'Custom Point', }
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
 			return options
 		for _, row in df_entities.iterrows( ):
@@ -1571,8 +1397,7 @@ class LiveWorldAnalytics:
 			options[ key ] = f'{entity_type} | {name} | {entity_id}'
 		return options
 
-	@staticmethod
-	def resolve_live_world_measurement_point( key: str, latitude: float,
+	def resolve_live_world_measurement_point(self,  key: str, latitude: float,
 			longitude: float, endpoint: str ) -> Dict[ str, object ]:
 		'''
 			Resolve one configured measurement endpoint into coordinates and a display label.
@@ -1590,27 +1415,27 @@ class LiveWorldAnalytics:
 			Dict[str, object]: Resolved endpoint label and coordinates.
 
 		'''
-		throw_if( 'key', key )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		throw_if( 'endpoint', endpoint )
+		self.validation.throw_if( 'key', key )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		self.validation.throw_if( 'endpoint', endpoint )
 		if key == 'Current Location':
 			return { 'Label': 'Current Location', 'Latitude': float( latitude ),
 				'Longitude': float( longitude ) }
 		if key == 'Custom Point':
 			if endpoint == 'start':
 				return { 'Label': 'Custom Start', 'Latitude': float(
-					st.session_state[ 'live_world_measurement_custom_start_latitude' ] ),
+					self.state[ 'live_world_measurement_custom_start_latitude' ] ),
 					'Longitude': float(
-						st.session_state[ 'live_world_measurement_custom_start_longitude' ] ), }
+						self.state[ 'live_world_measurement_custom_start_longitude' ] ), }
 			return { 'Label': 'Custom End',
-				'Latitude': float( st.session_state[ 'live_world_measurement_custom_end_latitude' ] ),
+				'Latitude': float( self.state[ 'live_world_measurement_custom_end_latitude' ] ),
 				'Longitude': float(
-					st.session_state[ 'live_world_measurement_custom_end_longitude' ] ), }
+					self.state[ 'live_world_measurement_custom_end_longitude' ] ), }
 		if not key.startswith( 'Entity::' ):
 			raise ValueError( f'Unknown measurement endpoint: {key}' )
 		_, entity_type, entity_id = key.split( '::', 2 )
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		df_match = df_entities[ (df_entities[ 'EntityType' ].astype( str ) == entity_type) & (
 					df_entities[ 'EntityId' ].astype( str ) == entity_id) ].copy( )
 		if df_match.empty:
@@ -1619,8 +1444,7 @@ class LiveWorldAnalytics:
 		return { 'Label': f'{entity_type} | {row[ "Name" ]}', 'Latitude': float( row[ 'Latitude' ] ),
 			'Longitude': float( row[ 'Longitude' ] ), }
 
-	@staticmethod
-	def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dict[ str, object ]:
+	def calculate_live_world_measurement(self,  latitude: float, longitude: float ) -> Dict[ str, object ]:
 		'''
 			Calculate distance and initial bearing between the configured measurement endpoints.
 
@@ -1635,13 +1459,13 @@ class LiveWorldAnalytics:
 			Dict[str, object]: Resolved endpoints, distances, and initial bearing.
 
 		'''
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		start = resolve_live_world_measurement_point(
-			str( st.session_state[ 'live_world_measurement_start' ] ), latitude, longitude, 'start' )
-		end = resolve_live_world_measurement_point(
-			str( st.session_state[ 'live_world_measurement_end' ] ), latitude, longitude, 'end' )
-		distance_nm = calculate_live_world_distance_nm(
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		start = self.resolve_live_world_measurement_point(
+			str( self.state[ 'live_world_measurement_start' ] ), latitude, longitude, 'start' )
+		end = self.resolve_live_world_measurement_point(
+			str( self.state[ 'live_world_measurement_end' ] ), latitude, longitude, 'end' )
+		distance_nm = self.geometry.calculate_live_world_distance_nm(
 			float( start[ 'Latitude' ] ), float( start[ 'Longitude' ] ),
 			float( end[ 'Latitude' ] ), float( end[ 'Longitude' ] ) )
 		lat_a = math.radians( float( start[ 'Latitude' ] ) )
@@ -1655,8 +1479,7 @@ class LiveWorldAnalytics:
 			'DistanceKM': distance_nm * 1.852, 'DistanceMiles': distance_nm * 1.150779448,
 			'Bearing': bearing, }
 
-	@staticmethod
-	def add_live_world_annotation( ) -> None:
+	def add_live_world_annotation(self) -> None:
 		'''
 			Add one labeled annotation to the in-session Live World annotation collection.
 
@@ -1667,19 +1490,18 @@ class LiveWorldAnalytics:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		label = str( st.session_state.get( 'live_world_annotation_label', '' ) or '' ).strip( )
-		throw_if( 'live_world_annotation_label', label )
-		latitude = float( st.session_state[ 'live_world_annotation_latitude' ] )
-		longitude = float( st.session_state[ 'live_world_annotation_longitude' ] )
-		annotations = list( st.session_state.get( 'live_world_annotations', [ ] ) or [ ] )
+		self.state_service.initialize_live_world_state( )
+		label = str( self.state.get( 'live_world_annotation_label', '' ) or '' ).strip( )
+		self.validation.throw_if( 'live_world_annotation_label', label )
+		latitude = float( self.state[ 'live_world_annotation_latitude' ] )
+		longitude = float( self.state[ 'live_world_annotation_longitude' ] )
+		annotations = list( self.state.get( 'live_world_annotations', [ ] ) or [ ] )
 		annotations.append( { 'AnnotationId': f'ANNOTATION-{len( annotations ) + 1}', 'Label': label,
 			'Latitude': latitude, 'Longitude': longitude,
 			'CreatedAt': dt.datetime.now( dt.timezone.utc ).isoformat( ), } )
-		st.session_state[ 'live_world_annotations' ] = annotations
+		self.state[ 'live_world_annotations' ] = annotations
 
-	@staticmethod
-	def clear_live_world_annotations( ) -> None:
+	def clear_live_world_annotations(self) -> None:
 		'''
 			Clear all in-session Live World annotations.
 
@@ -1690,11 +1512,10 @@ class LiveWorldAnalytics:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		st.session_state[ 'live_world_annotations' ] = [ ]
+		self.state_service.initialize_live_world_state( )
+		self.state[ 'live_world_annotations' ] = [ ]
 
-	@staticmethod
-	def get_live_world_annotation_frame( ) -> pd.DataFrame:
+	def get_live_world_annotation_frame(self) -> pd.DataFrame:
 		'''
 			Return current Live World annotations as a DataFrame.
 
@@ -1705,13 +1526,12 @@ class LiveWorldAnalytics:
 			pd.DataFrame: Annotation records.
 
 		'''
-		initialize_live_world_state( )
+		self.state_service.initialize_live_world_state( )
 		columns = [ 'AnnotationId', 'Label', 'Latitude', 'Longitude', 'CreatedAt' ]
-		return pd.DataFrame( st.session_state.get( 'live_world_annotations', [ ] ) or [ ],
+		return pd.DataFrame( self.state.get( 'live_world_annotations', [ ] ) or [ ],
 			columns=columns )
 
-	@staticmethod
-	def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
+	def get_live_world_analysis_origin_options(self) -> Dict[ str, str ]:
 		'''
 			Return selectable Cross-Layer Analysis origins from current location and loaded entities.
 
@@ -1722,10 +1542,10 @@ class LiveWorldAnalytics:
 			Dict[str, str]: Analysis origin keys mapped to display labels.
 
 		'''
-		initialize_live_world_state( )
+		self.state_service.initialize_live_world_state( )
 		options: Dict[ str, str ] = { 'Current Location': 'Current Location',
 			'Custom Point': 'Custom Point', }
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
 			return options
 		for _, row in df_entities.iterrows( ):
@@ -1736,8 +1556,7 @@ class LiveWorldAnalytics:
 			options[ key ] = f'{entity_type} | {name} | {entity_id}'
 		return options
 
-	@staticmethod
-	def resolve_live_world_analysis_origin( key: str, latitude: float,
+	def resolve_live_world_analysis_origin(self,  key: str, latitude: float,
 			longitude: float ) -> Dict[ str, object ]:
 		'''
 			Resolve the configured Cross-Layer Analysis origin into coordinates and a label.
@@ -1754,21 +1573,21 @@ class LiveWorldAnalytics:
 			Dict[str, object]: Resolved analysis origin.
 
 		'''
-		throw_if( 'key', key )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
+		self.validation.throw_if( 'key', key )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
 		if key == 'Current Location':
 			return { 'Label': 'Current Location', 'Latitude': float( latitude ),
 				'Longitude': float( longitude ), 'EntityType': '', 'EntityId': '' }
 		if key == 'Custom Point':
 			return { 'Label': 'Custom Point',
-				'Latitude': float( st.session_state[ 'live_world_analysis_custom_latitude' ] ),
-				'Longitude': float( st.session_state[ 'live_world_analysis_custom_longitude' ] ),
+				'Latitude': float( self.state[ 'live_world_analysis_custom_latitude' ] ),
+				'Longitude': float( self.state[ 'live_world_analysis_custom_longitude' ] ),
 				'EntityType': '', 'EntityId': '', }
 		if not key.startswith( 'Entity::' ):
 			raise ValueError( f'Unknown analysis origin: {key}' )
 		_, entity_type, entity_id = key.split( '::', 2 )
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		df_match = df_entities[
 			(df_entities[ 'EntityType' ].astype( str ) == entity_type)
 			& (df_entities[ 'EntityId' ].astype( str ) == entity_id) ].copy( )
@@ -1779,8 +1598,7 @@ class LiveWorldAnalytics:
 			'Longitude': float( row[ 'Longitude' ] ), 'EntityType': entity_type,
 			'EntityId': entity_id, }
 
-	@staticmethod
-	def calculate_live_world_cross_layer_analysis( latitude: float,
+	def calculate_live_world_cross_layer_analysis(self,  latitude: float,
 			longitude: float ) -> pd.DataFrame:
 		'''
 			Rank loaded Live World entities by distance from the configured analysis origin.
@@ -1796,20 +1614,20 @@ class LiveWorldAnalytics:
 			pd.DataFrame: Radius-filtered entities ordered by nearest distance.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
 		columns = [ 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude', 'Altitude',
 			'Heading', 'Speed', 'Timestamp', 'Source', 'Metadata', 'DistanceNM',
 			'DistanceKM', 'DistanceMiles', 'Bearing' ]
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
 			return pd.DataFrame( columns=columns )
-		entity_types = list( st.session_state.get( 'live_world_analysis_entity_types', [ ] ) or [ ] )
+		entity_types = list( self.state.get( 'live_world_analysis_entity_types', [ ] ) or [ ] )
 		if not entity_types:
 			return pd.DataFrame( columns=columns )
-		origin = resolve_live_world_analysis_origin(
-			str( st.session_state[ 'live_world_analysis_origin' ] ), latitude, longitude )
+		origin = self.resolve_live_world_analysis_origin(
+			str( self.state[ 'live_world_analysis_origin' ] ), latitude, longitude )
 		df_analysis = df_entities[ df_entities[ 'EntityType' ].isin( entity_types ) ].copy( )
 		if df_analysis.empty:
 			return pd.DataFrame( columns=columns )
@@ -1822,10 +1640,10 @@ class LiveWorldAnalytics:
 					and str( origin[ 'EntityId' ] ) == str( row[ 'EntityId' ] )
 					and str( origin[ 'EntityId' ] )):
 				continue
-			distance_nm = calculate_live_world_distance_nm(
+			distance_nm = self.geometry.calculate_live_world_distance_nm(
 				float( origin[ 'Latitude' ] ), float( origin[ 'Longitude' ] ),
 				float( row[ 'Latitude' ] ), float( row[ 'Longitude' ] ) )
-			if distance_nm > float( st.session_state[ 'live_world_analysis_radius_nm' ] ):
+			if distance_nm > float( self.state[ 'live_world_analysis_radius_nm' ] ):
 				continue
 			lat_a = math.radians( float( origin[ 'Latitude' ] ) )
 			lat_b = math.radians( float( row[ 'Latitude' ] ) )
@@ -1844,11 +1662,10 @@ class LiveWorldAnalytics:
 			return pd.DataFrame( columns=columns )
 		df_result = pd.DataFrame( rows )
 		df_result = df_result.sort_values( by='DistanceNM', ascending=True, kind='stable' )
-		limit = int( st.session_state[ 'live_world_analysis_limit' ] )
+		limit = int( self.state[ 'live_world_analysis_limit' ] )
 		return df_result.head( limit ).reset_index( drop=True )
 
-	@staticmethod
-	def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
+	def get_live_world_geofence_origin_options(self) -> Dict[ str, str ]:
 		'''
 			Return selectable Geofencing origins from current location and loaded entities.
 
@@ -1859,10 +1676,10 @@ class LiveWorldAnalytics:
 			Dict[str, str]: Geofence origin keys mapped to display labels.
 
 		'''
-		initialize_live_world_state( )
+		self.state_service.initialize_live_world_state( )
 		options: Dict[ str, str ] = { 'Current Location': 'Current Location',
 			'Custom Point': 'Custom Point', }
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
 			return options
 		for _, row in df_entities.iterrows( ):
@@ -1873,8 +1690,7 @@ class LiveWorldAnalytics:
 			options[ key ] = f'{entity_type} | {name} | {entity_id}'
 		return options
 
-	@staticmethod
-	def resolve_live_world_geofence_origin( key: str, latitude: float,
+	def resolve_live_world_geofence_origin(self,  key: str, latitude: float,
 			longitude: float ) -> Dict[ str, object ]:
 		'''
 			Resolve the configured Geofencing origin into coordinates and a display label.
@@ -1891,21 +1707,21 @@ class LiveWorldAnalytics:
 			Dict[str, object]: Resolved geofence origin.
 
 		'''
-		throw_if( 'key', key )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
+		self.validation.throw_if( 'key', key )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
 		if key == 'Current Location':
 			return { 'Label': 'Current Location', 'Latitude': float( latitude ),
 				'Longitude': float( longitude ), 'EntityType': '', 'EntityId': '' }
 		if key == 'Custom Point':
 			return { 'Label': 'Custom Point',
-				'Latitude': float( st.session_state[ 'live_world_geofence_custom_latitude' ] ),
-				'Longitude': float( st.session_state[ 'live_world_geofence_custom_longitude' ] ),
+				'Latitude': float( self.state[ 'live_world_geofence_custom_latitude' ] ),
+				'Longitude': float( self.state[ 'live_world_geofence_custom_longitude' ] ),
 				'EntityType': '', 'EntityId': '', }
 		if not key.startswith( 'Entity::' ):
 			raise ValueError( f'Unknown geofence origin: {key}' )
 		_, entity_type, entity_id = key.split( '::', 2 )
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		df_match = df_entities[
 			(df_entities[ 'EntityType' ].astype( str ) == entity_type)
 			& (df_entities[ 'EntityId' ].astype( str ) == entity_id) ].copy( )
@@ -1916,8 +1732,7 @@ class LiveWorldAnalytics:
 			'Longitude': float( row[ 'Longitude' ] ), 'EntityType': entity_type,
 			'EntityId': entity_id, }
 
-	@staticmethod
-	def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.DataFrame:
+	def calculate_live_world_geofence(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Return loaded Live World entities currently inside the configured circular geofence.
 
@@ -1932,20 +1747,20 @@ class LiveWorldAnalytics:
 			pd.DataFrame: Geofence members ordered by nearest distance.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
 		columns = [ 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude', 'Altitude',
 			'Heading', 'Speed', 'Timestamp', 'Source', 'Metadata', 'DistanceNM',
 			'DistanceKM', 'DistanceMiles', 'Bearing' ]
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
 			return pd.DataFrame( columns=columns )
-		entity_types = list( st.session_state.get( 'live_world_geofence_entity_types', [ ] ) or [ ] )
+		entity_types = list( self.state.get( 'live_world_geofence_entity_types', [ ] ) or [ ] )
 		if not entity_types:
 			return pd.DataFrame( columns=columns )
-		origin = resolve_live_world_geofence_origin(
-			str( st.session_state[ 'live_world_geofence_origin' ] ), latitude, longitude )
+		origin = self.resolve_live_world_geofence_origin(
+			str( self.state[ 'live_world_geofence_origin' ] ), latitude, longitude )
 		df_geofence = df_entities[ df_entities[ 'EntityType' ].isin( entity_types ) ].copy( )
 		df_geofence[ 'Latitude' ] = pd.to_numeric( df_geofence[ 'Latitude' ], errors='coerce' )
 		df_geofence[ 'Longitude' ] = pd.to_numeric( df_geofence[ 'Longitude' ], errors='coerce' )
@@ -1956,10 +1771,10 @@ class LiveWorldAnalytics:
 					and str( origin[ 'EntityId' ] ) == str( row[ 'EntityId' ] )
 					and str( origin[ 'EntityId' ] )):
 				continue
-			distance_nm = calculate_live_world_distance_nm(
+			distance_nm = self.geometry.calculate_live_world_distance_nm(
 				float( origin[ 'Latitude' ] ), float( origin[ 'Longitude' ] ),
 				float( row[ 'Latitude' ] ), float( row[ 'Longitude' ] ) )
-			if distance_nm > float( st.session_state[ 'live_world_geofence_radius_nm' ] ):
+			if distance_nm > float( self.state[ 'live_world_geofence_radius_nm' ] ):
 				continue
 			lat_a = math.radians( float( origin[ 'Latitude' ] ) )
 			lat_b = math.radians( float( row[ 'Latitude' ] ) )
@@ -1979,8 +1794,7 @@ class LiveWorldAnalytics:
 		return pd.DataFrame( rows ).sort_values(
 			by='DistanceNM', ascending=True, kind='stable' ).reset_index( drop=True )
 
-	@staticmethod
-	def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
+	def update_live_world_geofence_events(self,  df_geofence: pd.DataFrame ) -> None:
 		'''
 			Record entity entry and exit transitions for the configured geofence after refreshes.
 
@@ -1994,8 +1808,8 @@ class LiveWorldAnalytics:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'df_geofence', df_geofence )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'df_geofence', df_geofence )
 		current_snapshot: Dict[ str, Dict[ str, object ] ] = { }
 		for _, row in df_geofence.iterrows( ):
 			key = f'{row[ "EntityType" ]}::{row[ "EntityId" ]}'
@@ -2003,14 +1817,14 @@ class LiveWorldAnalytics:
 				'EntityType': str( row[ 'EntityType' ] ), 'Name': str( row[ 'Name' ] ),
 				'Latitude': float( row[ 'Latitude' ] ), 'Longitude': float( row[ 'Longitude' ] ),
 				'DistanceNM': float( row[ 'DistanceNM' ] ), 'Source': str( row[ 'Source' ] ), }
-		previous_snapshot = dict( st.session_state.get( 'live_world_geofence_snapshot', { } ) or { } )
-		if not st.session_state[ 'live_world_geofence_initialized' ]:
-			st.session_state[ 'live_world_geofence_snapshot' ] = current_snapshot
-			st.session_state[ 'live_world_geofence_initialized' ] = True
+		previous_snapshot = dict( self.state.get( 'live_world_geofence_snapshot', { } ) or { } )
+		if not self.state[ 'live_world_geofence_initialized' ]:
+			self.state[ 'live_world_geofence_snapshot' ] = current_snapshot
+			self.state[ 'live_world_geofence_initialized' ] = True
 			return
 		entered = sorted( set( current_snapshot ) - set( previous_snapshot ) )
 		exited = sorted( set( previous_snapshot ) - set( current_snapshot ) )
-		events = list( st.session_state.get( 'live_world_geofence_events', [ ] ) or [ ] )
+		events = list( self.state.get( 'live_world_geofence_events', [ ] ) or [ ] )
 		observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
 		for key in entered:
 			item = current_snapshot[ key ]
@@ -2026,12 +1840,11 @@ class LiveWorldAnalytics:
 				'Latitude': item[ 'Latitude' ], 'Longitude': item[ 'Longitude' ],
 				'DistanceNM': item[ 'DistanceNM' ], 'Source': item[ 'Source' ],
 				'ObservedAt': observed_at, } )
-		limit = int( st.session_state[ 'live_world_geofence_event_limit' ] )
-		st.session_state[ 'live_world_geofence_events' ] = events[ -limit: ]
-		st.session_state[ 'live_world_geofence_snapshot' ] = current_snapshot
+		limit = int( self.state[ 'live_world_geofence_event_limit' ] )
+		self.state[ 'live_world_geofence_events' ] = events[ -limit: ]
+		self.state[ 'live_world_geofence_snapshot' ] = current_snapshot
 
-	@staticmethod
-	def clear_live_world_geofence_events( ) -> None:
+	def clear_live_world_geofence_events(self) -> None:
 		'''
 			Clear Geofencing event history and reset the transition baseline.
 
@@ -2042,14 +1855,13 @@ class LiveWorldAnalytics:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		st.session_state[ 'live_world_geofence_events' ] = [ ]
-		st.session_state[ 'live_world_geofence_snapshot' ] = { }
-		st.session_state[ 'live_world_geofence_initialized' ] = False
-		st.session_state[ 'live_world_geofence_last_refresh_processed' ] = ''
+		self.state_service.initialize_live_world_state( )
+		self.state[ 'live_world_geofence_events' ] = [ ]
+		self.state[ 'live_world_geofence_snapshot' ] = { }
+		self.state[ 'live_world_geofence_initialized' ] = False
+		self.state[ 'live_world_geofence_last_refresh_processed' ] = ''
 
-	@staticmethod
-	def get_live_world_geofence_event_frame( ) -> pd.DataFrame:
+	def get_live_world_geofence_event_frame(self) -> pd.DataFrame:
 		'''
 			Return current Geofencing transition events as a DataFrame.
 
@@ -2060,10 +1872,10 @@ class LiveWorldAnalytics:
 			pd.DataFrame: Ordered Geofencing event history.
 
 		'''
-		initialize_live_world_state( )
+		self.state_service.initialize_live_world_state( )
 		columns = [ 'Event', 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude',
 			'DistanceNM', 'Source', 'ObservedAt' ]
-		return pd.DataFrame( st.session_state.get( 'live_world_geofence_events', [ ] ) or [ ],
+		return pd.DataFrame( self.state.get( 'live_world_geofence_events', [ ] ) or [ ],
 			columns=columns )
 
 class LiveWorldHistory:
@@ -2073,11 +1885,34 @@ class LiveWorldHistory:
 		Manage replay windows, tracking trails, and historical entity frames.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Explicitly injected collaborator.
+		validation (LiveWorldValidation): Explicitly injected collaborator.
 	"""
 
-	@staticmethod
-	def get_live_world_history_window_hours( window: str ) -> int:
+
+	state: object
+	state_service: LiveWorldState
+	validation: LiveWorldValidation
+
+	def __init__( self, state_service: LiveWorldState, validation: LiveWorldValidation ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Manage tracking and replay through session-scoped state.
+
+		Args:
+			state_service (LiveWorldState): Required collaborator for this service.
+			validation (LiveWorldValidation): Required collaborator for this service.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.validation = validation
+
+	def get_live_world_history_window_hours(self,  window: str ) -> int:
 		'''
 			Translate the Historical Replay window label into a lookback duration in hours.
 
@@ -2091,15 +1926,14 @@ class LiveWorldHistory:
 			int: Lookback duration in hours; zero means all retained history.
 
 		'''
-		throw_if( 'window', window )
+		self.validation.throw_if( 'window', window )
 		windows: Dict[ str, int ] = { '1 Hour': 1, '6 Hours': 6, '24 Hours': 24, '7 Days': 168,
 			'30 Days': 720, 'All Retained': 0, }
 		if window not in windows:
 			raise ValueError( f'Unsupported Historical Replay window: {window}' )
 		return windows[ window ]
 
-	@staticmethod
-	def load_live_world_replay_frame( ) -> pd.DataFrame:
+	def load_live_world_replay_frame(self) -> pd.DataFrame:
 		'''
 			Load Historical Replay observations using the current sidebar configuration.
 
@@ -2110,20 +1944,19 @@ class LiveWorldHistory:
 			pd.DataFrame: Persisted observations through the selected replay snapshot.
 
 		'''
-		initialize_live_world_state( )
-		snapshot = str( st.session_state.get( 'live_world_history_snapshot', '' ) or '' )
+		self.state_service.initialize_live_world_state( )
+		snapshot = str( self.state.get( 'live_world_history_snapshot', '' ) or '' )
 		if not snapshot:
 			return pd.DataFrame( )
-		entity_types = list( st.session_state.get( 'live_world_history_entity_types', [ ] ) or [ ] )
+		entity_types = list( self.state.get( 'live_world_history_entity_types', [ ] ) or [ ] )
 		if not entity_types:
 			return pd.DataFrame( )
-		hours = get_live_world_history_window_hours(
-			str( st.session_state[ 'live_world_history_window' ] ) )
+		hours = self.get_live_world_history_window_hours(
+			str( self.state[ 'live_world_history_window' ] ) )
 		return load_live_world_history( hours, entity_types, snapshot,
-			int( st.session_state[ 'live_world_history_limit' ] ) )
+			int( self.state[ 'live_world_history_limit' ] ) )
 
-	@staticmethod
-	def clear_live_world_tracking( ) -> None:
+	def clear_live_world_tracking(self) -> None:
 		'''
 			Clear the current tracking trail without changing the selected tracked entity.
 
@@ -2134,12 +1967,11 @@ class LiveWorldHistory:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		st.session_state[ 'live_world_tracking_history' ] = [ ]
-		st.session_state[ 'live_world_tracking_active_entity' ] = ''
+		self.state_service.initialize_live_world_state( )
+		self.state[ 'live_world_tracking_history' ] = [ ]
+		self.state[ 'live_world_tracking_active_entity' ] = ''
 
-	@staticmethod
-	def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
+	def update_live_world_tracking(self,  df_entities: pd.DataFrame ) -> None:
 		'''
 			Append the selected moving entity's newest position to its in-session trail.
 
@@ -2153,12 +1985,12 @@ class LiveWorldHistory:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'df_entities', df_entities )
-		if not st.session_state[ 'live_world_tracking' ]:
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'df_entities', df_entities )
+		if not self.state[ 'live_world_tracking' ]:
 			return
 
-		tracking_key = str( st.session_state.get( 'live_world_tracking_entity', '' ) or '' )
+		tracking_key = str( self.state.get( 'live_world_tracking_entity', '' ) or '' )
 		if not tracking_key or '::' not in tracking_key or df_entities.empty:
 			return
 
@@ -2169,11 +2001,11 @@ class LiveWorldHistory:
 		if df_match.empty:
 			return
 
-		active_entity = str( st.session_state.get(
+		active_entity = str( self.state.get(
 			'live_world_tracking_active_entity', '' ) or '' )
 		if active_entity != tracking_key:
-			st.session_state[ 'live_world_tracking_history' ] = [ ]
-			st.session_state[ 'live_world_tracking_active_entity' ] = tracking_key
+			self.state[ 'live_world_tracking_history' ] = [ ]
+			self.state[ 'live_world_tracking_active_entity' ] = tracking_key
 
 		row = df_match.iloc[ 0 ]
 		point = { 'EntityKey': tracking_key, 'EntityId': str( row[ 'EntityId' ] ),
@@ -2183,7 +2015,7 @@ class LiveWorldHistory:
 			'Speed': float( row[ 'Speed' ] ), 'Timestamp': str( row[ 'Timestamp' ] ),
 			'ObservedAt': dt.datetime.now( dt.timezone.utc ).isoformat( ), }
 
-		history = list( st.session_state.get( 'live_world_tracking_history', [ ] ) or [ ] )
+		history = list( self.state.get( 'live_world_tracking_history', [ ] ) or [ ] )
 		if history:
 			previous = history[ -1 ]
 			if (float( previous[ 'Latitude' ] ) == point[ 'Latitude' ]
@@ -2191,11 +2023,10 @@ class LiveWorldHistory:
 				return
 
 		history.append( point )
-		max_points = int( st.session_state[ 'live_world_tracking_max_points' ] )
-		st.session_state[ 'live_world_tracking_history' ] = history[ -max_points: ]
+		max_points = int( self.state[ 'live_world_tracking_max_points' ] )
+		self.state[ 'live_world_tracking_history' ] = history[ -max_points: ]
 
-	@staticmethod
-	def get_live_world_tracking_frame( ) -> pd.DataFrame:
+	def get_live_world_tracking_frame(self) -> pd.DataFrame:
 		'''
 			Return the current tracking trail as a DataFrame for rendering and inspection.
 
@@ -2206,8 +2037,8 @@ class LiveWorldHistory:
 			pd.DataFrame: Ordered tracking trail points.
 
 		'''
-		initialize_live_world_state( )
-		history = list( st.session_state.get( 'live_world_tracking_history', [ ] ) or [ ] )
+		self.state_service.initialize_live_world_state( )
+		history = list( self.state.get( 'live_world_tracking_history', [ ] ) or [ ] )
 		columns = [ 'EntityKey', 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude',
 			'Altitude', 'Heading', 'Speed', 'Timestamp', 'ObservedAt' ]
 		return pd.DataFrame( history, columns=columns )
@@ -2219,11 +2050,46 @@ class LiveWorldRefresh:
 		Isolate source status and coordinate multi-provider refresh operations.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Explicitly injected collaborator.
+		providers (LiveWorldProviders): Explicitly injected collaborator.
+		history (LiveWorldHistory): Explicitly injected collaborator.
+		entities (LiveWorldEntities): Explicitly injected collaborator.
+		validation (LiveWorldValidation): Explicitly injected collaborator.
 	"""
 
-	@staticmethod
-	def update_live_world_source_state( source_key: str, status: str, error: str='',
+
+	state: object
+	state_service: LiveWorldState
+	providers: LiveWorldProviders
+	history: LiveWorldHistory
+	entities: LiveWorldEntities
+	validation: LiveWorldValidation
+
+	def __init__( self, state_service: LiveWorldState, providers: LiveWorldProviders, history: LiveWorldHistory, entities: LiveWorldEntities, validation: LiveWorldValidation ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Orchestrate provider refreshes and historical tracking without a global service locator.
+
+		Args:
+			state_service (LiveWorldState): Required collaborator for this service.
+			providers (LiveWorldProviders): Required collaborator for this service.
+			history (LiveWorldHistory): Required collaborator for this service.
+			entities (LiveWorldEntities): Required collaborator for this service.
+			validation (LiveWorldValidation): Required collaborator for this service.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.providers = providers
+		self.history = history
+		self.entities = entities
+		self.validation = validation
+
+	def update_live_world_source_state(self,  source_key: str, status: str, error: str='',
 			stale: bool=False, attempted_at: str='', successful_at: str='',
 			error_type: str='', http_status: int=0 ) -> None:
 		'''
@@ -2247,19 +2113,19 @@ class LiveWorldRefresh:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'source_key', source_key )
-		throw_if( 'status', status )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'source_key', source_key )
+		self.validation.throw_if( 'status', status )
 		if source_key not in LIVE_WORLD_DATA_SOURCES:
 			raise ValueError( f'Unsupported Live World source: {source_key}' )
 
-		statuses = dict( st.session_state[ 'live_world_source_status' ] )
-		errors = dict( st.session_state[ 'live_world_source_errors' ] )
-		error_types = dict( st.session_state[ 'live_world_source_error_types' ] )
-		http_statuses = dict( st.session_state[ 'live_world_source_http_status' ] )
-		last_attempt = dict( st.session_state[ 'live_world_source_last_attempt' ] )
-		last_success = dict( st.session_state[ 'live_world_source_last_success' ] )
-		stale_state = dict( st.session_state[ 'live_world_source_stale' ] )
+		statuses = dict( self.state[ 'live_world_source_status' ] )
+		errors = dict( self.state[ 'live_world_source_errors' ] )
+		error_types = dict( self.state[ 'live_world_source_error_types' ] )
+		http_statuses = dict( self.state[ 'live_world_source_http_status' ] )
+		last_attempt = dict( self.state[ 'live_world_source_last_attempt' ] )
+		last_success = dict( self.state[ 'live_world_source_last_success' ] )
+		stale_state = dict( self.state[ 'live_world_source_stale' ] )
 		statuses[ source_key ] = status
 		errors[ source_key ] = error
 		error_types[ source_key ] = error_type
@@ -2269,16 +2135,15 @@ class LiveWorldRefresh:
 			last_attempt[ source_key ] = attempted_at
 		if successful_at:
 			last_success[ source_key ] = successful_at
-		st.session_state[ 'live_world_source_status' ] = statuses
-		st.session_state[ 'live_world_source_errors' ] = errors
-		st.session_state[ 'live_world_source_error_types' ] = error_types
-		st.session_state[ 'live_world_source_http_status' ] = http_statuses
-		st.session_state[ 'live_world_source_last_attempt' ] = last_attempt
-		st.session_state[ 'live_world_source_last_success' ] = last_success
-		st.session_state[ 'live_world_source_stale' ] = stale_state
+		self.state[ 'live_world_source_status' ] = statuses
+		self.state[ 'live_world_source_errors' ] = errors
+		self.state[ 'live_world_source_error_types' ] = error_types
+		self.state[ 'live_world_source_http_status' ] = http_statuses
+		self.state[ 'live_world_source_last_attempt' ] = last_attempt
+		self.state[ 'live_world_source_last_success' ] = last_success
+		self.state[ 'live_world_source_stale' ] = stale_state
 
-	@staticmethod
-	def refresh_live_world_source( source_key: str,
+	def refresh_live_world_source(self,  source_key: str,
 			fetcher: Callable[ [ ], pd.DataFrame ] ) -> pd.DataFrame:
 		'''
 			Refresh one enabled Live World provider while isolating provider failures from.
@@ -2295,23 +2160,23 @@ class LiveWorldRefresh:
 			pd.DataFrame: Current source frame, including retained stale data after a failure.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'source_key', source_key )
-		throw_if( 'fetcher', fetcher )
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'source_key', source_key )
+		self.validation.throw_if( 'fetcher', fetcher )
 		if source_key not in LIVE_WORLD_DATA_SOURCES:
 			raise ValueError( f'Unsupported Live World source: {source_key}' )
 
 		source = LIVE_WORLD_DATA_SOURCES[ source_key ]
 		frame_key = source[ 'frame_key' ]
-		previous_frame = st.session_state.get( frame_key, pd.DataFrame( ) )
+		previous_frame = self.state.get( frame_key, pd.DataFrame( ) )
 		if previous_frame is None or not isinstance( previous_frame, pd.DataFrame ):
 			previous_frame = pd.DataFrame( )
 		attempted_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
-		update_live_world_source_state(
+		self.update_live_world_source_state(
 			source_key, 'Refreshing', attempted_at=attempted_at )
 		if source_key == 'vessels' and not cfg.AISSTREAM_API_KEY:
-			st.session_state[ frame_key ] = previous_frame
-			update_live_world_source_state(
+			self.state[ frame_key ] = previous_frame
+			self.update_live_world_source_state(
 				source_key, 'Configuration Required',
 				error='Set AISSTREAM_API_KEY in the OS environment and restart the application.',
 				stale=not previous_frame.empty, attempted_at=attempted_at,
@@ -2321,16 +2186,16 @@ class LiveWorldRefresh:
 		try:
 			df_source = fetcher( )
 			if df_source is None:
-				df_source = entities_to_dataframe( [ ] )
+				df_source = self.entities.entities_to_dataframe( [ ] )
 			if not isinstance( df_source, pd.DataFrame ):
 				raise TypeError(
 					f'Live World source {source_key} must return a pandas DataFrame.' )
-			st.session_state[ frame_key ] = df_source
+			self.state[ frame_key ] = df_source
 			status = 'Success'
 			if (source_key == 'satellites'
-					and st.session_state.get( 'live_world_satellite_propagation_failures', 0 ) > 0):
+					and self.state.get( 'live_world_satellite_propagation_failures', 0 ) > 0):
 				status = 'Partial Success'
-			update_live_world_source_state(
+			self.update_live_world_source_state(
 				source_key, status, attempted_at=attempted_at,
 				successful_at=dt.datetime.now( dt.timezone.utc ).isoformat( ) )
 			return df_source
@@ -2344,15 +2209,14 @@ class LiveWorldRefresh:
 				if isinstance( original_error, HTTPError )
 				and original_error.response is not None else 0)
 			has_stale_data = not previous_frame.empty
-			st.session_state[ frame_key ] = previous_frame
-			update_live_world_source_state(
+			self.state[ frame_key ] = previous_frame
+			self.update_live_world_source_state(
 				source_key, 'Failed', error=str( ex ), stale=has_stale_data,
 				attempted_at=attempted_at, error_type=error_type,
 				http_status=http_status )
 			return previous_frame
 
-	@staticmethod
-	def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
+	def refresh_live_world_data(self,  latitude: float, longitude: float ) -> pd.DataFrame:
 		'''
 			Refresh every enabled implemented Live World layer independently and persist the.
 
@@ -2368,89 +2232,444 @@ class LiveWorldRefresh:
 			pd.DataFrame: Combined normalized entity data.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		st.session_state[ 'live_world_last_error' ] = ''
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		self.state[ 'live_world_last_error' ] = ''
 		fetchers: Dict[ str, Callable[ [ ], pd.DataFrame ] ] = {
-			'aircraft': lambda: fetch_live_aircraft( latitude, longitude ),
-			'military_aircraft': lambda: fetch_live_military_aircraft( latitude, longitude ),
-			'satellites': lambda: fetch_live_satellites( ),
-			'vessels': lambda: fetch_live_vessels( latitude, longitude ),
-			'earthquakes': lambda: fetch_live_earthquakes( ),
-			'fires': lambda: fetch_live_fires( latitude, longitude ),
-			'infrastructure': lambda: fetch_live_infrastructure( latitude, longitude ),
-			'cameras': lambda: fetch_live_cameras( latitude, longitude ),
-			'map_layers': lambda: fetch_live_map_layers( latitude, longitude ), }
+			'aircraft': lambda: self.providers.fetch_live_aircraft( latitude, longitude ),
+			'military_aircraft': lambda: self.providers.fetch_live_military_aircraft( latitude, longitude ),
+			'satellites': lambda: self.providers.fetch_live_satellites( ),
+			'vessels': lambda: self.providers.fetch_live_vessels( latitude, longitude ),
+			'earthquakes': lambda: self.providers.fetch_live_earthquakes( ),
+			'fires': lambda: self.providers.fetch_live_fires( latitude, longitude ),
+			'infrastructure': lambda: self.providers.fetch_live_infrastructure( latitude, longitude ),
+			'cameras': lambda: self.providers.fetch_live_cameras( latitude, longitude ),
+			'map_layers': lambda: self.providers.fetch_live_map_layers( latitude, longitude ), }
 
 		try:
 			frames: List[ pd.DataFrame ] = [ ]
 			for source_key, source in LIVE_WORLD_DATA_SOURCES.items( ):
 				frame_key = source[ 'frame_key' ]
 				enabled_key = source[ 'enabled_key' ]
-				if st.session_state[ enabled_key ]:
-					df_source = refresh_live_world_source(
+				if self.state[ enabled_key ]:
+					df_source = self.refresh_live_world_source(
 						source_key, fetchers[ source_key ] )
 					if not df_source.empty:
 						frames.append( df_source )
 				else:
-					st.session_state[ frame_key ] = pd.DataFrame( )
-					update_live_world_source_state(
+					self.state[ frame_key ] = pd.DataFrame( )
+					self.update_live_world_source_state(
 						source_key, 'Disabled', error='', stale=False )
 
 			df_entities = pd.concat( frames,
-				ignore_index=True ) if frames else entities_to_dataframe( [ ] )
-			st.session_state[ 'live_world_df_entities' ] = df_entities
-			update_live_world_tracking( df_entities )
+				ignore_index=True ) if frames else self.entities.entities_to_dataframe( [ ] )
+			self.state[ 'live_world_df_entities' ] = df_entities
+			self.history.update_live_world_tracking( df_entities )
 			observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
-			st.session_state[ 'live_world_refresh_id' ] = observed_at
-			st.session_state[ 'live_world_last_refresh' ] = dt.datetime.now( ).strftime(
+			self.state[ 'live_world_refresh_id' ] = observed_at
+			self.state[ 'live_world_last_refresh' ] = dt.datetime.now( ).strftime(
 				'%Y-%m-%d %H:%M:%S' )
 
-			statuses = dict( st.session_state[ 'live_world_source_status' ] )
-			errors = dict( st.session_state[ 'live_world_source_errors' ] )
+			statuses = dict( self.state[ 'live_world_source_status' ] )
+			errors = dict( self.state[ 'live_world_source_errors' ] )
 			failures: List[ str ] = [ ]
 			for source_key, status in statuses.items( ):
 				if status not in ( 'Failed', 'Configuration Required' ):
 					continue
 				label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
 				failures.append( f'{label}: {errors.get( source_key, "" )}' )
-			st.session_state[ 'live_world_last_error' ] = '; '.join( failures )
+			self.state[ 'live_world_last_error' ] = '; '.join( failures )
 			if not failures:
-				st.session_state[ 'live_world_last_success' ] = observed_at
+				self.state[ 'live_world_last_success' ] = observed_at
 
-			if (st.session_state[ 'live_world_historical_replay' ]
-					and st.session_state[ 'live_world_history_persist' ] and not failures):
+			if (self.state[ 'live_world_historical_replay' ]
+					and self.state[ 'live_world_history_persist' ] and not failures):
 				try:
-					st.session_state[ 'live_world_history_last_saved' ] = persist_live_world_history(
+					self.state[ 'live_world_history_last_saved' ] = persist_live_world_history(
 						df_entities, observed_at, observed_at,
-						int( st.session_state[ 'live_world_history_max_rows_per_source' ] ) )
+						int( self.state[ 'live_world_history_max_rows_per_source' ] ) )
 					purge_live_world_history(
-						int( st.session_state[ 'live_world_history_retention_days' ] ) )
-					st.session_state[ 'live_world_history_last_error' ] = ''
+						int( self.state[ 'live_world_history_retention_days' ] ) )
+					self.state[ 'live_world_history_last_error' ] = ''
 				except Exception as history_ex:
-					st.session_state[ 'live_world_history_last_saved' ] = 0
-					st.session_state[ 'live_world_history_last_error' ] = str( history_ex )
+					self.state[ 'live_world_history_last_saved' ] = 0
+					self.state[ 'live_world_history_last_error' ] = str( history_ex )
 			elif failures:
-				st.session_state[ 'live_world_history_last_saved' ] = 0
+				self.state[ 'live_world_history_last_saved' ] = 0
 
 			return df_entities
 
 		finally:
-			st.session_state[ 'live_world_refresh_requested' ] = False
+			self.state[ 'live_world_refresh_requested' ] = False
 
-class LiveWorldRendering:
-	"""Render the complete Live World map and related display data.
+class LiveWorldSidebar:
+	"""Render session-specific Live World sidebar controls.
 
 	Purpose:
-		Render the complete Live World map and related display data.
+		Provide the Live World operational control surface independently of map rendering.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Session initialization and clear operations.
+		analytics (LiveWorldAnalytics): Measurement, annotation, and geofence actions.
+		history (LiveWorldHistory): Tracking and replay actions.
+	"""
+	state: object
+	state_service: LiveWorldState
+	analytics: LiveWorldAnalytics
+	history: LiveWorldHistory
+
+	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics,
+			history: LiveWorldHistory ) -> None:
+		"""Initialize the sidebar's explicit service dependencies.
+
+		Purpose:
+			Bind sidebar controls to the current session's state and workflow services.
+
+		Args:
+			state_service (LiveWorldState): Session state and reset operations.
+			analytics (LiveWorldAnalytics): Analysis and annotation operations.
+			history (LiveWorldHistory): History and tracking operations.
+
+		Returns:
+			None: Initializes the sidebar collaborators.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.analytics = analytics
+		self.history = history
+
+	def render_live_world_sidebar(self) -> None:
+		'''
+			Render operational Live World Data controls in an isolated sidebar expander below.
+
+		Purpose:
+			Render operational Live World Data controls in an isolated sidebar expander below
+			Iyr's existing Mode expander.
+
+		Returns:
+			None: This operation has no return value.
+
+		'''
+		self.state_service.initialize_live_world_state( )
+		with st.expander( '🌐 Mapping', expanded=False ):
+			st.checkbox( 'Enable Live Map', key='live_world_enabled' )
+			st.divider( )
+			st.caption( 'Live Layers' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'aircraft' ], key='live_world_aircraft' )
+			if self.state[ 'live_world_aircraft' ]:
+				st.slider( 'Aircraft Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
+					key='live_world_aircraft_radius' )
+				st.checkbox( 'Airborne Only', key='live_world_aircraft_airborne_only' )
+				st.caption( 'OpenSky API Client credentials are used when configured.' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'military_aircraft' ], key='live_world_military_aircraft' )
+			if self.state[ 'live_world_military_aircraft' ]:
+				st.slider( 'Military Aircraft Radius (NM)', min_value=25, max_value=250, step=25,
+					key='live_world_military_radius_nm' )
+				st.caption( 'Military-tagged aircraft are retrieved from ADSB.lol.' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'satellites' ], key='live_world_satellites' )
+			if self.state[ 'live_world_satellites' ]:
+				st.selectbox( 'Satellite Group', options=[ 'stations', 'visual', 'weather', 'gps-ops',
+					'active' ], key='live_world_satellite_group' )
+				st.slider( 'Satellite Limit', min_value=10, max_value=500, step=10,
+					key='live_world_satellite_limit' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'vessels' ], key='live_world_vessels' )
+			if self.state[ 'live_world_vessels' ]:
+				st.caption( 'AIS Stream credentials are read from AISSTREAM_API_KEY in config.py.' )
+				st.slider( 'Vessel Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
+					key='live_world_vessel_radius' )
+				st.slider( 'Vessel Message Limit', min_value=10, max_value=250, step=10,
+					key='live_world_vessel_limit' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'earthquakes' ], key='live_world_earthquakes' )
+			if self.state[ 'live_world_earthquakes' ]:
+				st.selectbox( 'Earthquake Feed', options=[ 'all_hour.geojson', 'all_day.geojson',
+					'all_week.geojson', '2.5_day.geojson', '2.5_week.geojson', '4.5_day.geojson',
+					'4.5_week.geojson', 'significant_day.geojson',
+					'significant_week.geojson' ], key='live_world_earthquake_feed' )
+				st.slider( 'Minimum Magnitude', min_value=0.0, max_value=10.0, step=0.1,
+					key='live_world_earthquake_min_magnitude' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'fires' ], key='live_world_fires' )
+			if self.state[ 'live_world_fires' ]:
+				st.selectbox( 'FIRMS Source', options=[ 'VIIRS_NOAA21_NRT', 'VIIRS_NOAA20_NRT',
+					'VIIRS_SNPP_NRT', 'MODIS_NRT', 'LANDSAT_NRT' ], key='live_world_firms_source' )
+				st.slider( 'Fire Day Range', min_value=1, max_value=5, step=1,
+					key='live_world_firms_day_range' )
+				st.selectbox( 'Fire Area', options=[ 'Local Bounding Box',
+					'World' ], key='live_world_firms_area_mode' )
+				st.slider( 'Fire Record Limit', min_value=1000, max_value=50000, step=1000,
+					key='live_world_firms_max_records' )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'measurements' ], key='live_world_measurements' )
+			if self.state[ 'live_world_measurements' ]:
+				measurement_options = self.analytics.get_live_world_measurement_options( )
+				measurement_keys = list( measurement_options.keys( ) )
+				if self.state[ 'live_world_measurement_start' ] not in measurement_keys:
+					self.state[ 'live_world_measurement_start' ] = 'Current Location'
+				if self.state[ 'live_world_measurement_end' ] not in measurement_keys:
+					self.state[ 'live_world_measurement_end' ] = 'Current Location'
+				measure_c1, measure_c2 = st.columns( 2 )
+				with measure_c1:
+					st.selectbox( 'Measure From', options=measurement_keys, format_func=lambda value:
+					measurement_options[ value ], key='live_world_measurement_start' )
+				with measure_c2:
+					st.selectbox( 'Measure To', options=measurement_keys, format_func=lambda value:
+					measurement_options[ value ], key='live_world_measurement_end' )
+				if self.state[ 'live_world_measurement_start' ] == 'Custom Point':
+					custom_start_c1, custom_start_c2 = st.columns( 2 )
+					with custom_start_c1:
+						st.number_input( 'Start Latitude', min_value=-90.0, max_value=90.0,
+							format='%.6f', key='live_world_measurement_custom_start_latitude' )
+					with custom_start_c2:
+						st.number_input( 'Start Longitude', min_value=-180.0, max_value=180.0,
+							format='%.6f', key='live_world_measurement_custom_start_longitude' )
+				if self.state[ 'live_world_measurement_end' ] == 'Custom Point':
+					custom_end_c1, custom_end_c2 = st.columns( 2 )
+					with custom_end_c1:
+						st.number_input( 'End Latitude', min_value=-90.0, max_value=90.0,
+							format='%.6f', key='live_world_measurement_custom_end_latitude' )
+					with custom_end_c2:
+						st.number_input( 'End Longitude', min_value=-180.0, max_value=180.0,
+							format='%.6f', key='live_world_measurement_custom_end_longitude' )
+				st.caption( 'Annotations' )
+				st.text_input( 'Annotation Label', key='live_world_annotation_label' )
+				annotation_c1, annotation_c2 = st.columns( 2 )
+				with annotation_c1:
+					st.number_input( 'Annotation Latitude', min_value=-90.0, max_value=90.0,
+						format='%.6f', key='live_world_annotation_latitude' )
+				with annotation_c2:
+					st.number_input( 'Annotation Longitude', min_value=-180.0, max_value=180.0,
+						format='%.6f', key='live_world_annotation_longitude' )
+				annotation_button_c1, annotation_button_c2 = st.columns( 2 )
+				with annotation_button_c1:
+					if st.button( 'Add Annotation', icon='📍', key='live_world_annotation_add',
+							width='stretch' ):
+						self.analytics.add_live_world_annotation( )
+				with annotation_button_c2:
+					if st.button( 'Clear Annotations', icon='🧹', key='live_world_annotation_clear',
+							width='stretch' ):
+						self.analytics.clear_live_world_annotations( )
+			st.checkbox( LIVE_WORLD_LAYERS[ 'tracking' ], key='live_world_tracking' )
+			if self.state[ 'live_world_tracking' ]:
+				tracking_options = self.analytics.get_live_world_tracking_options( )
+				if tracking_options:
+					tracking_keys = list( tracking_options.keys( ) )
+					if self.state[ 'live_world_tracking_entity' ] not in tracking_keys:
+						self.state[ 'live_world_tracking_entity' ] = tracking_keys[ 0 ]
+					st.selectbox( 'Tracked Entity', options=tracking_keys, format_func=lambda value:
+					tracking_options[ value ], key='live_world_tracking_entity' )
+				else:
+					st.info( 'Refresh a moving Live World layer before selecting a tracked entity.' )
+				st.checkbox( 'Follow Tracked Entity', key='live_world_tracking_follow' )
+				st.slider( 'Trail Points', min_value=10, max_value=500, step=10,
+					key='live_world_tracking_max_points' )
+				if st.button( 'Clear Trail', icon='🧹', key='live_world_tracking_clear',
+						width='stretch' ):
+					self.history.clear_live_world_tracking( )
+			st.divider( )
+			refresh_c1, clear_c2 = st.columns( 2 )
+			with refresh_c1:
+				if st.button( 'Refresh', icon='🔄', key='live_world_refresh', width='stretch' ):
+					self.state[ 'live_world_refresh_requested' ] = True
+			with clear_c2:
+				if st.button( 'Clear', icon='🧹', key='live_world_clear', width='stretch' ):
+					self.state_service.clear_live_world_data( )
+			with st.expander( 'Additional Layers', expanded=False ):
+				st.checkbox( LIVE_WORLD_LAYERS[ 'infrastructure' ], key='live_world_infrastructure' )
+				if self.state[ 'live_world_infrastructure' ]:
+					st.multiselect( 'Infrastructure Categories', options=[ 'Airports', 'Ports',
+						'Power Plants', 'Dams', 'Data Centers',
+						'Military Installations' ], key='live_world_infrastructure_categories' )
+					infra_c1, infra_c2 = st.columns( 2 )
+					with infra_c1:
+						st.slider( 'Infrastructure Radius (KM)', min_value=10, max_value=250, step=10,
+							key='live_world_infrastructure_radius_km' )
+					with infra_c2:
+						st.slider( 'Infrastructure Limit', min_value=50, max_value=2000, step=50,
+							key='live_world_infrastructure_limit' )
+					st.caption( 'Infrastructure features are retrieved from OpenStreetMap via '
+					            'Overpass.' )
+				st.checkbox( LIVE_WORLD_LAYERS[ 'cameras' ], key='live_world_cameras' )
+				if self.state[ 'live_world_cameras' ]:
+					st.multiselect( 'Camera Categories', options=[ 'CCTV / Surveillance',
+						'Web Cameras' ], key='live_world_camera_categories' )
+					camera_c1, camera_c2 = st.columns( 2 )
+					with camera_c1:
+						st.slider( 'Camera Radius (KM)', min_value=1, max_value=100, step=1,
+							key='live_world_camera_radius_km' )
+					with camera_c2:
+						st.slider( 'Camera Limit', min_value=50, max_value=2000, step=50,
+							key='live_world_camera_limit' )
+					st.caption( 'Public camera locations and webcam tags are retrieved from '
+					            'OpenStreetMap via Overpass.' )
+				st.checkbox( LIVE_WORLD_LAYERS[ 'map_layers' ], key='live_world_map_layers' )
+				if self.state[ 'live_world_map_layers' ]:
+					st.multiselect( 'Map Layer Categories', options=[ 'Public Transit', 'Bike Share',
+						'Emergency Services', 'Healthcare', 'EV Charging', 'Communications',
+						'Launch Sites' ], key='live_world_map_layer_categories' )
+					map_layer_c1, map_layer_c2 = st.columns( 2 )
+					with map_layer_c1:
+						st.slider( 'Map Layer Radius (KM)', min_value=5, max_value=250, step=5,
+							key='live_world_map_layer_radius_km' )
+					with map_layer_c2:
+						st.slider( 'Map Layer Limit', min_value=50, max_value=5000, step=50,
+							key='live_world_map_layer_limit' )
+					st.caption( 'Contextual public map features are retrieved from OpenStreetMap via '
+					            'Overpass.' )
+				for label in LIVE_WORLD_PENDING_LAYERS.values( ):
+					st.checkbox( label, value=False, disabled=True )
+			with st.expander( 'AI & Advanced Tools', expanded=False ):
+				st.caption( 'Advanced tools operate on the currently loaded Live World entity frame.' )
+				st.checkbox(
+					AI_ADVANCED_TOOLS[ 'cross_layer_analysis' ],
+					key='live_world_cross_layer_analysis' )
+				if self.state[ 'live_world_cross_layer_analysis' ]:
+					analysis_options = self.analytics.get_live_world_analysis_origin_options( )
+					analysis_keys = list( analysis_options.keys( ) )
+					if self.state[ 'live_world_analysis_origin' ] not in analysis_keys:
+						self.state[ 'live_world_analysis_origin' ] = 'Current Location'
+					st.selectbox( 'Analysis Origin', options=analysis_keys, format_func=lambda value:
+					analysis_options[ value ], key='live_world_analysis_origin' )
+					if self.state[ 'live_world_analysis_origin' ] == 'Custom Point':
+						analysis_c1, analysis_c2 = st.columns( 2 )
+						with analysis_c1:
+							st.number_input( 'Analysis Latitude', min_value=-90.0, max_value=90.0,
+								format='%.6f', key='live_world_analysis_custom_latitude' )
+						with analysis_c2:
+							st.number_input( 'Analysis Longitude', min_value=-180.0, max_value=180.0,
+								format='%.6f', key='live_world_analysis_custom_longitude' )
+					st.slider( 'Analysis Radius (NM)', min_value=10, max_value=2500, step=10,
+						key='live_world_analysis_radius_nm' )
+					st.multiselect( 'Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+						'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+						'Map Feature' ], key='live_world_analysis_entity_types' )
+					st.slider( 'Analysis Result Limit', min_value=10, max_value=500, step=10,
+						key='live_world_analysis_limit' )
+				st.checkbox( AI_ADVANCED_TOOLS[ 'geofencing' ], key='live_world_geofencing' )
+				if self.state[ 'live_world_geofencing' ]:
+					geofence_options = self.analytics.get_live_world_geofence_origin_options( )
+					geofence_keys = list( geofence_options.keys( ) )
+					if self.state[ 'live_world_geofence_origin' ] not in geofence_keys:
+						self.state[ 'live_world_geofence_origin' ] = 'Current Location'
+					st.selectbox( 'Geofence Origin', options=geofence_keys, format_func=lambda value:
+					geofence_options[ value ], key='live_world_geofence_origin' )
+					if self.state[ 'live_world_geofence_origin' ] == 'Custom Point':
+						geofence_c1, geofence_c2 = st.columns( 2 )
+						with geofence_c1:
+							st.number_input( 'Geofence Latitude', min_value=-90.0, max_value=90.0,
+								format='%.6f', key='live_world_geofence_custom_latitude' )
+						with geofence_c2:
+							st.number_input( 'Geofence Longitude', min_value=-180.0, max_value=180.0,
+								format='%.6f', key='live_world_geofence_custom_longitude' )
+					st.slider( 'Geofence Radius (NM)', min_value=5, max_value=1000, step=5,
+						key='live_world_geofence_radius_nm' )
+					st.multiselect( 'Geofence Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+						'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+						'Map Feature' ], key='live_world_geofence_entity_types' )
+					st.slider( 'Geofence Event History', min_value=10, max_value=500, step=10,
+						key='live_world_geofence_event_limit' )
+					if st.button( 'Clear Geofence Events', icon='🧹',
+							key='live_world_geofence_clear_events', width='stretch' ):
+						self.analytics.clear_live_world_geofence_events( )
+				st.checkbox(
+					AI_ADVANCED_TOOLS[ 'historical_replay' ], key='live_world_historical_replay' )
+				if self.state[ 'live_world_historical_replay' ]:
+					st.checkbox( 'Persist Live World Refreshes', key='live_world_history_persist' )
+					history_c1, history_c2 = st.columns( 2 )
+					with history_c1:
+						st.selectbox( 'Replay Window', options=[ '1 Hour', '6 Hours', '24 Hours',
+							'7 Days', '30 Days', 'All Retained' ], key='live_world_history_window' )
+					with history_c2:
+						st.slider( 'Retention (Days)', min_value=1, max_value=365, step=1,
+							key='live_world_history_retention_days' )
+					st.slider( 'Max Rows / Source / Refresh', min_value=100, max_value=10000,
+						step=100, key='live_world_history_max_rows_per_source' )
+					st.multiselect( 'Replay Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+						'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+						'Map Feature' ], key='live_world_history_entity_types' )
+					st.slider( 'Replay Record Limit', min_value=100, max_value=25000, step=100,
+						key='live_world_history_limit' )
+					history_hours = self.history.get_live_world_history_window_hours( str(
+						self.state[ 'live_world_history_window' ] ) )
+					snapshot_options = get_live_world_history_snapshots( history_hours )
+					if snapshot_options:
+						if self.state[ 'live_world_history_snapshot' ] not in snapshot_options:
+							self.state[ 'live_world_history_snapshot' ] = snapshot_options[ 0 ]
+						st.selectbox( 'Replay Snapshot', options=snapshot_options,
+							key='live_world_history_snapshot' )
+					else:
+						self.state[ 'live_world_history_snapshot' ] = ''
+						st.caption( 'No persisted Live World snapshots are available in this window.' )
+					history_b1, history_b2 = st.columns( 2 )
+					with history_b1:
+						if st.button( 'Purge Expired', icon='🧹', key='live_world_history_purge',
+								width='stretch' ):
+							purge_live_world_history( int(
+								self.state[ 'live_world_history_retention_days' ] ) )
+					with history_b2:
+						if st.button( 'Clear History', icon='🗑️', key='live_world_history_clear',
+								width='stretch' ):
+							clear_live_world_history( )
+							self.state[ 'live_world_history_snapshot' ] = ''
+							self.state[ 'live_world_history_last_saved' ] = 0
+							self.state[ 'live_world_history_last_error' ] = ''
+				st.checkbox( AI_ADVANCED_TOOLS[ 'agent_tools' ], key='live_world_agent_tools' )
+
+class LiveWorldRendering:
+	"""Render the Live World sidebar, operational map, and related display data.
+
+	Purpose:
+		Render the Live World sidebar, operational map, and related display data.
+
+	Attributes:
+		state (object): Session-specific Streamlit state mapping.
+		state_service (LiveWorldState): Explicitly injected collaborator.
+		analytics (LiveWorldAnalytics): Explicitly injected collaborator.
+		history (LiveWorldHistory): Explicitly injected collaborator.
+		refresh (LiveWorldRefresh): Explicitly injected collaborator.
+		entities (LiveWorldEntities): Explicitly injected collaborator.
+		geometry (LiveWorldGeometry): Explicitly injected collaborator.
+		validation (LiveWorldValidation): Explicitly injected collaborator.
 	"""
 
-	@staticmethod
-	def render_live_world_map( latitude: float, longitude: float ) -> None:
+
+	state: object
+	state_service: LiveWorldState
+	analytics: LiveWorldAnalytics
+	history: LiveWorldHistory
+	refresh: LiveWorldRefresh
+	entities: LiveWorldEntities
+	geometry: LiveWorldGeometry
+	validation: LiveWorldValidation
+
+	def __init__( self, state_service: LiveWorldState, analytics: LiveWorldAnalytics, history: LiveWorldHistory, refresh_service: LiveWorldRefresh, entities: LiveWorldEntities, geometry: LiveWorldGeometry, validation: LiveWorldValidation ) -> None:
+		"""Initialize the service's explicit dependencies.
+
+		Purpose:
+			Render sidebar and map using explicitly injected session services.
+
+		Args:
+			state_service (LiveWorldState): Required collaborator for this service.
+			analytics (LiveWorldAnalytics): Required collaborator for this service.
+			history (LiveWorldHistory): Required collaborator for this service.
+			refresh_service (LiveWorldRefresh): Required collaborator for this service.
+			entities (LiveWorldEntities): Required collaborator for this service.
+			geometry (LiveWorldGeometry): Required collaborator for this service.
+			validation (LiveWorldValidation): Required collaborator for this service.
+
+		Returns:
+			None: Initializes the service's retained dependencies.
+		"""
+		self.state_service = state_service
+		self.state = state_service.state
+		self.analytics = analytics
+		self.history = history
+		self.refresh = refresh_service
+		self.entities = entities
+		self.geometry = geometry
+		self.validation = validation
+
+
+	def render_live_world_map(self,  latitude: float, longitude: float ) -> None:
 		'''
 			Render normalized Live World entities on an operational PyDeck map with metrics,.
 
@@ -2466,35 +2685,35 @@ class LiveWorldRendering:
 			None: This operation has no return value.
 
 		'''
-		initialize_live_world_state( )
-		throw_if( 'latitude', latitude )
-		throw_if( 'longitude', longitude )
-		if not st.session_state[ 'live_world_enabled' ]:
+		self.state_service.initialize_live_world_state( )
+		self.validation.throw_if( 'latitude', latitude )
+		self.validation.throw_if( 'longitude', longitude )
+		if not self.state[ 'live_world_enabled' ]:
 			return
 
 		st.divider( )
 		st.subheader( '🌐 Live World Data' )
-		if (not any( get_live_world_layers( ).values( ) )
-				and not st.session_state[ 'live_world_historical_replay' ]
-				and not st.session_state[ 'live_world_measurements' ]):
+		if (not any( self.state_service.get_live_world_layers( ).values( ) )
+				and not self.state[ 'live_world_historical_replay' ]
+				and not self.state[ 'live_world_measurements' ]):
 			st.info( 'Select at least one implemented Live World layer in the sidebar.' )
 			return
 
-		if st.session_state[ 'live_world_refresh_requested' ]:
+		if self.state[ 'live_world_refresh_requested' ]:
 			try:
 				with st.spinner( 'Refreshing Live World Data...' ):
-					refresh_live_world_data( latitude, longitude )
+					self.refresh.refresh_live_world_data( latitude, longitude )
 			except Exception as ex:
 				st.error( f'Live World refresh failed before provider isolation completed: {ex}' )
 
-		source_status = dict( st.session_state[ 'live_world_source_status' ] )
-		source_errors = dict( st.session_state[ 'live_world_source_errors' ] )
-		source_stale = dict( st.session_state[ 'live_world_source_stale' ] )
+		source_status = dict( self.state[ 'live_world_source_status' ] )
+		source_errors = dict( self.state[ 'live_world_source_errors' ] )
+		source_stale = dict( self.state[ 'live_world_source_stale' ] )
 		for source_key, status in source_status.items( ):
 			if status == 'Partial Success' and source_key == 'satellites':
-				failures = int( st.session_state.get(
+				failures = int( self.state.get(
 					'live_world_satellite_propagation_failures', 0 ) )
-				attempts = int( st.session_state.get(
+				attempts = int( self.state.get(
 					'live_world_satellite_propagation_attempts', 0 ) )
 				st.warning( f'Satellites: {failures} of {attempts} orbit propagations failed.' )
 			if status == 'Configuration Required':
@@ -2511,22 +2730,22 @@ class LiveWorldRendering:
 				message += ' Showing data from the previous successful refresh.'
 			st.error( message )
 		if (source_status.get( 'fires', '' ) == 'Success'
-				and st.session_state.get( 'live_world_firms_truncated', False )):
-			loaded_count = len( st.session_state.get( 'live_world_df_fires', pd.DataFrame( ) ).index )
-			source_count = int( st.session_state.get( 'live_world_firms_source_count', loaded_count ) )
+				and self.state.get( 'live_world_firms_truncated', False )):
+			loaded_count = len( self.state.get( 'live_world_df_fires', pd.DataFrame( ) ).index )
+			source_count = int( self.state.get( 'live_world_firms_source_count', loaded_count ) )
 			st.warning(
 				f'Fires: displaying {loaded_count:,} of {source_count:,} FIRMS records for this refresh.' )
 
-		df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
+		df_entities = self.state.get( 'live_world_df_entities', pd.DataFrame( ) )
 		if df_entities is None or df_entities.empty:
-			if not (st.session_state[ 'live_world_measurements' ]
-					or st.session_state[ 'live_world_historical_replay' ]):
+			if not (self.state[ 'live_world_measurements' ]
+					or self.state[ 'live_world_historical_replay' ]):
 				if any( value in ( 'Failed', 'Configuration Required' ) for value in source_status.values( ) ):
 					st.info( 'No records are available because the enabled Live World source refresh failed.' )
 				else:
 					st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
 				return
-			df_entities = entities_to_dataframe( [ ] )
+			df_entities = self.entities.entities_to_dataframe( [ ] )
 
 		df_map = df_entities.copy( )
 		df_map[ 'MetadataText' ] = df_map[ 'Metadata' ].map(
@@ -2534,12 +2753,12 @@ class LiveWorldRendering:
 		df_map[ 'Latitude' ] = pd.to_numeric( df_map[ 'Latitude' ], errors='coerce' )
 		df_map[ 'Longitude' ] = pd.to_numeric( df_map[ 'Longitude' ], errors='coerce' )
 		df_map = df_map.dropna( subset=[ 'Latitude', 'Longitude' ] )
-		if (df_map.empty and not st.session_state[ 'live_world_measurements' ]
-				and not st.session_state[ 'live_world_historical_replay' ]):
+		if (df_map.empty and not self.state[ 'live_world_measurements' ]
+				and not self.state[ 'live_world_historical_replay' ]):
 			st.info( 'Live World data does not contain usable map coordinates.' )
 			return
 
-		last_refresh = str( st.session_state.get( 'live_world_last_refresh', '' ) or 'Not refreshed' )
+		last_refresh = str( self.state.get( 'live_world_last_refresh', '' ) or 'Not refreshed' )
 		metric_c1, metric_c2, metric_c3, metric_c4, metric_c5 = st.columns( 5, border=True )
 		metric_c1.metric( 'Entities', f'{len( df_map ):,}' )
 		metric_c2.metric( 'Aircraft',
@@ -2575,7 +2794,7 @@ class LiveWorldRendering:
 				key='live_world_point_scale' )
 
 		layers: List[ pdk.Layer ] = [ ]
-		point_scale = float( st.session_state[ 'live_world_point_scale' ] )
+		point_scale = float( self.state[ 'live_world_point_scale' ] )
 		df_aircraft = df_map[ df_map[ 'EntityType' ] == 'Aircraft' ].copy( )
 		df_military = df_map[ df_map[ 'EntityType' ] == 'Military Aircraft' ].copy( )
 		df_satellites = df_map[ df_map[ 'EntityType' ] == 'Satellite' ].copy( )
@@ -2589,14 +2808,14 @@ class LiveWorldRendering:
 		df_analysis = pd.DataFrame( )
 		analysis_origin: Dict[ str, object ] = { }
 		analysis_error = ''
-		if st.session_state[ 'live_world_cross_layer_analysis' ]:
+		if self.state[ 'live_world_cross_layer_analysis' ]:
 			try:
-				analysis_origin = resolve_live_world_analysis_origin(
-					str( st.session_state[ 'live_world_analysis_origin' ] ), latitude, longitude )
-				df_analysis = calculate_live_world_cross_layer_analysis( latitude, longitude )
+				analysis_origin = self.analytics.resolve_live_world_analysis_origin(
+					str( self.state[ 'live_world_analysis_origin' ] ), latitude, longitude )
+				df_analysis = self.analytics.calculate_live_world_cross_layer_analysis( latitude, longitude )
 				df_analysis_origin = pd.DataFrame( [ analysis_origin ] )
 				df_analysis_origin[ 'Radius' ] = float(
-					st.session_state[ 'live_world_analysis_radius_nm' ] ) * 1852.0
+					self.state[ 'live_world_analysis_radius_nm' ] ) * 1852.0
 				layers.append( pdk.Layer( 'ScatterplotLayer', data=df_analysis_origin,
 					get_position='[Longitude, Latitude]', get_radius='Radius',
 					get_fill_color=[ 80, 180, 255, 20 ], get_line_color=[ 80, 180, 255, 180 ],
@@ -2622,14 +2841,14 @@ class LiveWorldRendering:
 		df_geofence = pd.DataFrame( )
 		geofence_origin: Dict[ str, object ] = { }
 		geofence_error = ''
-		if st.session_state[ 'live_world_geofencing' ]:
+		if self.state[ 'live_world_geofencing' ]:
 			try:
-				geofence_origin = resolve_live_world_geofence_origin(
-					str( st.session_state[ 'live_world_geofence_origin' ] ), latitude, longitude )
-				df_geofence = calculate_live_world_geofence( latitude, longitude )
+				geofence_origin = self.analytics.resolve_live_world_geofence_origin(
+					str( self.state[ 'live_world_geofence_origin' ] ), latitude, longitude )
+				df_geofence = self.analytics.calculate_live_world_geofence( latitude, longitude )
 				df_geofence_origin = pd.DataFrame( [ geofence_origin ] )
 				df_geofence_origin[ 'Radius' ] = float(
-					st.session_state[ 'live_world_geofence_radius_nm' ] ) * 1852.0
+					self.state[ 'live_world_geofence_radius_nm' ] ) * 1852.0
 				layers.append( pdk.Layer( 'ScatterplotLayer', data=df_geofence_origin,
 					get_position='[Longitude, Latitude]', get_radius='Radius',
 					get_fill_color=[ 255, 80, 80, 15 ], get_line_color=[ 255, 80, 80, 190 ],
@@ -2649,15 +2868,15 @@ class LiveWorldRendering:
 						get_fill_color=[ 255, 80, 80, 45 ], get_line_color=[ 255, 80, 80, 255 ],
 						line_width_min_pixels=2, radius_min_pixels=7, radius_max_pixels=28,
 						filled=True, stroked=True, pickable=True ) )
-				last_refresh = str( st.session_state.get( 'live_world_refresh_id', '' ) or '' )
-				last_processed = str( st.session_state.get(
+				last_refresh = str( self.state.get( 'live_world_refresh_id', '' ) or '' )
+				last_processed = str( self.state.get(
 					'live_world_geofence_last_refresh_processed', '' ) or '' )
-				if not st.session_state[ 'live_world_geofence_initialized' ]:
-					update_live_world_geofence_events( df_geofence )
-					st.session_state[ 'live_world_geofence_last_refresh_processed' ] = last_refresh
+				if not self.state[ 'live_world_geofence_initialized' ]:
+					self.analytics.update_live_world_geofence_events( df_geofence )
+					self.state[ 'live_world_geofence_last_refresh_processed' ] = last_refresh
 				elif last_refresh and last_refresh != last_processed:
-					update_live_world_geofence_events( df_geofence )
-					st.session_state[ 'live_world_geofence_last_refresh_processed' ] = last_refresh
+					self.analytics.update_live_world_geofence_events( df_geofence )
+					self.state[ 'live_world_geofence_last_refresh_processed' ] = last_refresh
 			except Exception as ex:
 				geofence_error = str( ex )
 
@@ -2699,7 +2918,7 @@ class LiveWorldRendering:
 
 		if not df_earthquakes.empty:
 			df_earthquakes[ 'Magnitude' ] = df_earthquakes[ 'Metadata' ].map(
-				lambda value: get_metadata_number( value, 'Magnitude', 0.0 ) )
+				lambda value: self.get_metadata_number( value, 'Magnitude', 0.0 ) )
 			df_earthquakes[ 'Radius' ] = df_earthquakes[ 'Magnitude' ].map(
 				lambda value: max( 4000.0, (float( value ) + 1.0) * 9000.0 * point_scale ) )
 			layers.append( pdk.Layer(
@@ -2720,9 +2939,9 @@ class LiveWorldRendering:
 
 		df_measurement = pd.DataFrame( )
 		measurement_result: Dict[ str, object ] = { }
-		if st.session_state[ 'live_world_measurements' ]:
+		if self.state[ 'live_world_measurements' ]:
 			try:
-				measurement_result = calculate_live_world_measurement( latitude, longitude )
+				measurement_result = self.analytics.calculate_live_world_measurement( latitude, longitude )
 				start = measurement_result[ 'Start' ]
 				end = measurement_result[ 'End' ]
 				df_measurement = pd.DataFrame( [ start, end ] )
@@ -2741,8 +2960,8 @@ class LiveWorldRendering:
 			except Exception as ex:
 				measurement_result = { 'Error': str( ex ) }
 
-		df_annotations = get_live_world_annotation_frame( )
-		if st.session_state[ 'live_world_measurements' ] and not df_annotations.empty:
+		df_annotations = self.analytics.get_live_world_annotation_frame( )
+		if self.state[ 'live_world_measurements' ] and not df_annotations.empty:
 			df_annotation_points = df_annotations.copy( )
 			df_annotation_points[ 'Radius' ] = 9000.0 * point_scale
 			layers.append( pdk.Layer( 'ScatterplotLayer', data=df_annotation_points,
@@ -2779,8 +2998,8 @@ class LiveWorldRendering:
 				line_width_min_pixels=1, radius_min_pixels=4, radius_max_pixels=26,
 				filled=True, stroked=True, pickable=True ) )
 
-		df_tracking = get_live_world_tracking_frame( )
-		if st.session_state[ 'live_world_tracking' ] and not df_tracking.empty:
+		df_tracking = self.history.get_live_world_tracking_frame( )
+		if self.state[ 'live_world_tracking' ] and not df_tracking.empty:
 			if len( df_tracking ) > 1:
 				path_data = [ {
 					'Path': df_tracking[ [ 'Longitude', 'Latitude' ] ].values.tolist( ) } ]
@@ -2803,21 +3022,21 @@ class LiveWorldRendering:
 		if not (-90.0 <= center_latitude <= 90.0 and -180.0 <= center_longitude <= 180.0):
 			center_latitude = float( df_map[ 'Latitude' ].median( ) )
 			center_longitude = float( df_map[ 'Longitude' ].median( ) )
-		if (st.session_state[ 'live_world_geofencing' ] and geofence_origin
-				and not st.session_state[ 'live_world_cross_layer_analysis' ]):
+		if (self.state[ 'live_world_geofencing' ] and geofence_origin
+				and not self.state[ 'live_world_cross_layer_analysis' ]):
 			center_latitude = float( geofence_origin[ 'Latitude' ] )
 			center_longitude = float( geofence_origin[ 'Longitude' ] )
-		if (st.session_state[ 'live_world_cross_layer_analysis' ] and analysis_origin):
+		if (self.state[ 'live_world_cross_layer_analysis' ] and analysis_origin):
 			center_latitude = float( analysis_origin[ 'Latitude' ] )
 			center_longitude = float( analysis_origin[ 'Longitude' ] )
-		if (st.session_state[ 'live_world_tracking' ]
-				and st.session_state[ 'live_world_tracking_follow' ]
+		if (self.state[ 'live_world_tracking' ]
+				and self.state[ 'live_world_tracking_follow' ]
 				and not df_tracking.empty):
 			center_latitude = float( df_tracking.iloc[ -1 ][ 'Latitude' ] )
 			center_longitude = float( df_tracking.iloc[ -1 ][ 'Longitude' ] )
 
 		view_state = pdk.ViewState( latitude=center_latitude, longitude=center_longitude,
-			zoom=int( st.session_state[ 'live_world_zoom' ] ), pitch=0 )
+			zoom=int( self.state[ 'live_world_zoom' ] ), pitch=0 )
 		tooltip = { 'html': ('<b>{EntityType}</b><br/><b>{Name}</b><br/>'
 		                     '<b>Source:</b> {Source}<br/><b>Time:</b> {Timestamp}<br/>'
 		                     '<b>Coordinates:</b> {Latitude}, {Longitude}<br/>'
@@ -2828,15 +3047,15 @@ class LiveWorldRendering:
 				'fontSize': '12px', }, }
 		df_history = pd.DataFrame( )
 		df_history_latest = pd.DataFrame( )
-		if st.session_state[ 'live_world_historical_replay' ]:
+		if self.state[ 'live_world_historical_replay' ]:
 			try:
-				df_history = load_live_world_replay_frame( )
+				df_history = self.history.load_live_world_replay_frame( )
 				if not df_history.empty:
 					df_history_latest = df_history.sort_values( by='ObservedAt', kind='stable' ).groupby(
 						[ 'EntityType', 'EntityId' ], as_index=False ).last( )
 					df_replay_points = df_history_latest.copy( )
 					df_replay_points[ 'Radius' ] = 7000.0 * float(
-						st.session_state[ 'live_world_point_scale' ] )
+						self.state[ 'live_world_point_scale' ] )
 					layers.append( pdk.Layer( 'ScatterplotLayer', data=df_replay_points,
 						get_position='[Longitude, Latitude]', get_radius='Radius',
 						get_fill_color=[ 180, 120, 255, 180 ], get_line_color=[ 240, 220, 255, 255 ],
@@ -2856,10 +3075,10 @@ class LiveWorldRendering:
 							get_path='Path', get_color=[ 180, 120, 255, 210 ],
 							get_width=3, width_min_pixels=2, pickable=True ) )
 			except Exception as history_ex:
-				st.session_state[ 'live_world_history_last_error' ] = str( history_ex )
+				self.state[ 'live_world_history_last_error' ] = str( history_ex )
 
 		deck = pdk.Deck( layers=layers, initial_view_state=view_state,
-			map_style=map_style_options[ st.session_state[ 'live_world_map_style' ] ], tooltip=tooltip )
+			map_style=map_style_options[ self.state[ 'live_world_map_style' ] ], tooltip=tooltip )
 		st.pydeck_chart( deck, use_container_width=True )
 		(entities_tab, aircraft_tab, military_tab, satellites_tab, vessels_tab, earthquakes_tab,
 			fires_tab, infrastructure_tab, cameras_tab, map_layers_tab, tracking_tab,
@@ -2870,61 +3089,61 @@ class LiveWorldRendering:
 			'🕓 Historical Replay', '🤖 Agent Tools' ] )
 
 		with entities_tab:
-			st.data_editor( make_live_world_display_frame( df_map ), key='live_world_entities_table',
+			st.data_editor( self.make_live_world_display_frame( df_map ), key='live_world_entities_table',
 				use_container_width=True, disabled=True, hide_index=True )
 
 		with aircraft_tab:
-			df_aircraft_records = st.session_state.get( 'live_world_df_aircraft', pd.DataFrame( ) )
+			df_aircraft_records = self.state.get( 'live_world_df_aircraft', pd.DataFrame( ) )
 			if df_aircraft_records is None or df_aircraft_records.empty:
 				st.info( 'No aircraft records loaded.' )
 			else:
-				st.data_editor( make_live_world_display_frame( df_aircraft_records ),
+				st.data_editor( self.make_live_world_display_frame( df_aircraft_records ),
 					key='live_world_aircraft_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
 		with military_tab:
-			df_military_records = st.session_state.get(
+			df_military_records = self.state.get(
 				'live_world_df_military_aircraft', pd.DataFrame( ) )
 			if df_military_records is None or df_military_records.empty:
 				st.info( 'No military aircraft records loaded.' )
 			else:
-				st.data_editor( make_live_world_display_frame( df_military_records ),
+				st.data_editor( self.make_live_world_display_frame( df_military_records ),
 					key='live_world_military_aircraft_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
 		with satellites_tab:
-			df_satellite_records = st.session_state.get( 'live_world_df_satellites', pd.DataFrame( ) )
+			df_satellite_records = self.state.get( 'live_world_df_satellites', pd.DataFrame( ) )
 			if df_satellite_records is None or df_satellite_records.empty:
 				st.info( 'No satellite records loaded.' )
 			else:
-				st.data_editor( make_live_world_display_frame( df_satellite_records ),
+				st.data_editor( self.make_live_world_display_frame( df_satellite_records ),
 					key='live_world_satellite_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
 		with vessels_tab:
-			df_vessel_records = st.session_state.get( 'live_world_df_vessels', pd.DataFrame( ) )
+			df_vessel_records = self.state.get( 'live_world_df_vessels', pd.DataFrame( ) )
 			if df_vessel_records is None or df_vessel_records.empty:
 				st.info( 'No vessel records loaded.' )
 			else:
-				st.data_editor( make_live_world_display_frame( df_vessel_records ),
+				st.data_editor( self.make_live_world_display_frame( df_vessel_records ),
 					key='live_world_vessel_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
 		with earthquakes_tab:
-			df_quakes = st.session_state.get( 'live_world_df_earthquakes', pd.DataFrame( ) )
+			df_quakes = self.state.get( 'live_world_df_earthquakes', pd.DataFrame( ) )
 			if df_quakes is None or df_quakes.empty:
 				st.info( 'No earthquake records loaded.' )
 			else:
-				st.data_editor( make_live_world_display_frame( df_quakes ),
+				st.data_editor( self.make_live_world_display_frame( df_quakes ),
 					key='live_world_earthquake_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
 		with fires_tab:
-			df_fire_records = st.session_state.get( 'live_world_df_fires', pd.DataFrame( ) )
+			df_fire_records = self.state.get( 'live_world_df_fires', pd.DataFrame( ) )
 			if df_fire_records is None or df_fire_records.empty:
 				st.info( 'No fire records loaded.' )
 			else:
-				st.data_editor( make_live_world_display_frame( df_fire_records ),
+				st.data_editor( self.make_live_world_display_frame( df_fire_records ),
 					key='live_world_fire_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
@@ -2976,7 +3195,7 @@ class LiveWorldRendering:
 				map_c2.metric( 'Categories', f'{categories.nunique( ):,}' )
 				df_display = df_map_layers.copy( )
 				df_display[ 'Category' ] = categories
-				st.data_editor( make_live_world_display_frame( df_display[ [
+				st.data_editor( self.make_live_world_display_frame( df_display[ [
 					'EntityId', 'Category', 'Name', 'Latitude', 'Longitude', 'Source', 'Metadata' ] ] ),
 					key='live_world_map_layers_table', use_container_width=True,
 					disabled=True, hide_index=True )
@@ -2994,7 +3213,7 @@ class LiveWorldRendering:
 
 
 		with measurements_tab:
-			if not st.session_state[ 'live_world_measurements' ]:
+			if not self.state[ 'live_world_measurements' ]:
 				st.info( 'Enable Measurements & Annotations in the sidebar.' )
 			else:
 				if 'Error' in measurement_result:
@@ -3017,7 +3236,7 @@ class LiveWorldRendering:
 
 
 		with analysis_tab:
-			if not st.session_state[ 'live_world_cross_layer_analysis' ]:
+			if not self.state[ 'live_world_cross_layer_analysis' ]:
 				st.info( 'Enable Cross-Layer Analysis in AI & Advanced Tools.' )
 			elif analysis_error:
 				st.error( f'Cross-Layer Analysis failed: {analysis_error}' )
@@ -3028,32 +3247,32 @@ class LiveWorldRendering:
 				analysis_c1, analysis_c2, analysis_c3, analysis_c4 = st.columns( 4, border=True )
 				analysis_c1.metric( 'Entities in Radius', f'{len( df_analysis ):,}' )
 				analysis_c2.metric( 'Radius (NM)',
-					f'{int( st.session_state[ "live_world_analysis_radius_nm" ] ):,}' )
+					f'{int( self.state[ "live_world_analysis_radius_nm" ] ):,}' )
 				analysis_c3.metric( 'Nearest Entity', str( nearest[ 'Name' ] ) )
 				analysis_c4.metric( 'Nearest Distance (NM)', f'{float( nearest[ "DistanceNM" ] ):,.2f}' )
 				st.caption( f'Origin: {analysis_origin[ "Label" ]}' )
 				df_nearest_by_type = df_analysis.sort_values( by='DistanceNM', kind='stable' ).groupby(
 					'EntityType', as_index=False ).first( )
 				st.markdown( '**Nearest by Entity Type**' )
-				st.data_editor( make_live_world_display_frame( df_nearest_by_type ),
+				st.data_editor( self.make_live_world_display_frame( df_nearest_by_type ),
 					key='live_world_analysis_nearest_by_type_table', use_container_width=True,
 					disabled=True, hide_index=True )
 				st.markdown( '**Entities Within Radius**' )
-				st.data_editor( make_live_world_display_frame( df_analysis ),
+				st.data_editor( self.make_live_world_display_frame( df_analysis ),
 					key='live_world_analysis_table', use_container_width=True,
 					disabled=True, hide_index=True )
 
 		with geofence_tab:
-			if not st.session_state[ 'live_world_geofencing' ]:
+			if not self.state[ 'live_world_geofencing' ]:
 				st.info( 'Enable Geofencing in AI & Advanced Tools.' )
 			elif geofence_error:
 				st.error( f'Geofencing failed: {geofence_error}' )
 			else:
-				df_geofence_events = get_live_world_geofence_event_frame( )
+				df_geofence_events = self.analytics.get_live_world_geofence_event_frame( )
 				geofence_c1, geofence_c2, geofence_c3, geofence_c4 = st.columns( 4, border=True )
 				geofence_c1.metric( 'Inside Geofence', f'{len( df_geofence ):,}' )
 				geofence_c2.metric( 'Radius (NM)',
-					f'{float( st.session_state[ "live_world_geofence_radius_nm" ] ):,.0f}' )
+					f'{float( self.state[ "live_world_geofence_radius_nm" ] ):,.0f}' )
 				geofence_c3.metric( 'Events', f'{len( df_geofence_events ):,}' )
 				last_event = str( df_geofence_events.iloc[ -1 ][ 'Event' ] ) if not df_geofence_events.empty else 'None'
 				geofence_c4.metric( 'Last Event', last_event )
@@ -3063,7 +3282,7 @@ class LiveWorldRendering:
 					st.info( 'No selected Live World entities are currently inside the geofence.' )
 				else:
 					st.markdown( '**Entities Inside Geofence**' )
-					st.data_editor( make_live_world_display_frame( df_geofence ),
+					st.data_editor( self.make_live_world_display_frame( df_geofence ),
 						key='live_world_geofence_table', use_container_width=True,
 						disabled=True, hide_index=True )
 				st.markdown( '**Entry / Exit Events**' )
@@ -3074,7 +3293,7 @@ class LiveWorldRendering:
 						use_container_width=True, disabled=True, hide_index=True )
 
 		with history_tab:
-			if not st.session_state[ 'live_world_historical_replay' ]:
+			if not self.state[ 'live_world_historical_replay' ]:
 				st.info( 'Enable Historical Replay in AI & Advanced Tools.' )
 			else:
 				history_summary = get_live_world_history_summary( )
@@ -3083,26 +3302,26 @@ class LiveWorldRendering:
 				history_c2.metric( 'Snapshots', f'{int( history_summary[ "SnapshotCount" ] ):,}' )
 				history_c3.metric( 'Replay Records', f'{len( df_history ):,}' )
 				history_c4.metric( 'Replay Entities', f'{len( df_history_latest ):,}' )
-				if st.session_state[ 'live_world_history_last_error' ]:
-					st.error( f'Historical Replay failed: {st.session_state[ "live_world_history_last_error" ]}' )
+				if self.state[ 'live_world_history_last_error' ]:
+					st.error( f'Historical Replay failed: {self.state[ "live_world_history_last_error" ]}' )
 				st.caption( f'Replay snapshot: '
-				            f'{st.session_state.get( "live_world_history_snapshot", "" ) or "None"}' )
-				last_saved = int( st.session_state.get( 'live_world_history_last_saved', 0 ) )
+				            f'{self.state.get( "live_world_history_snapshot", "" ) or "None"}' )
+				last_saved = int( self.state.get( 'live_world_history_last_saved', 0 ) )
 				st.caption( f'Last refresh inserted {last_saved:,} historical observations.' )
 				if df_history.empty:
 					st.info( 'No persisted observations match the selected replay window and entity types.' )
 				else:
 					st.markdown( '**Replay Positions**' )
-					st.data_editor( make_live_world_display_frame( df_history_latest ),
+					st.data_editor( self.make_live_world_display_frame( df_history_latest ),
 						key='live_world_history_latest_table', use_container_width=True,
 						disabled=True, hide_index=True )
 					st.markdown( '**Historical Observations**' )
-					st.data_editor( make_live_world_display_frame( df_history ),
+					st.data_editor( self.make_live_world_display_frame( df_history ),
 						key='live_world_history_table', use_container_width=True,
 						disabled=True, hide_index=True )
 
 		with agent_tools_tab:
-			if not st.session_state[ 'live_world_agent_tools' ]:
+			if not self.state[ 'live_world_agent_tools' ]:
 				st.info( 'Enable Agent Tools in AI & Advanced Tools.' )
 			else:
 				provider_status = LIVE_WORLD_AGENT_TOOLS[ 'get_live_world_source_status' ]( )
@@ -3125,8 +3344,7 @@ class LiveWorldRendering:
 					'Provider-neutral tools operate on normalized Live World state and return '
 					'JSON-serializable results for external agent frameworks.' )
 
-	@staticmethod
-	def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> float:
+	def get_metadata_number(self,  metadata: object, key: str, default: float=0.0 ) -> float:
 		'''
 			Read a numeric value from a GeoEntity metadata dictionary for map sizing.
 
@@ -3142,7 +3360,7 @@ class LiveWorldRendering:
 			float: Numeric metadata value.
 
 		'''
-		throw_if( 'key', key )
+		self.validation.throw_if( 'key', key )
 		if not isinstance( metadata, dict ):
 			return default
 		try:
@@ -3150,8 +3368,7 @@ class LiveWorldRendering:
 		except ( TypeError, ValueError ):
 			return default
 
-	@staticmethod
-	def make_live_world_display_frame( df_frame: pd.DataFrame ) -> pd.DataFrame:
+	def make_live_world_display_frame(self,  df_frame: pd.DataFrame ) -> pd.DataFrame:
 		'''
 			Create a Streamlit-safe display copy of Live World entity data.
 
@@ -3165,7 +3382,7 @@ class LiveWorldRendering:
 			pd.DataFrame: Display-safe entity data.
 
 		'''
-		throw_if( 'df_frame', df_frame )
+		self.validation.throw_if( 'df_frame', df_frame )
 		df_display = df_frame.copy( )
 		if 'Metadata' in df_display.columns:
 			df_display[ 'Metadata' ] = df_display[ 'Metadata' ].map(
@@ -3175,66 +3392,659 @@ class LiveWorldRendering:
 				df_display = df_display.drop( columns=[ column ] )
 		return df_display
 
-class LiveWorld(LiveWorldValidation, LiveWorldState, LiveWorldGeometry, LiveWorldProviders,
-		LiveWorldEntities, LiveWorldAnalytics, LiveWorldHistory, LiveWorldRefresh,
-		LiveWorldRendering):
-	"""Unified class interface for the complete Live World workflow.
+class LiveWorld:
+	"""Session-owned composition root for Live World geospatial operations.
 
 	Purpose:
-		Expose categorized provider, map, state, analysis, tracking, and refresh methods
-		without duplicating mutable Streamlit state across user sessions.
+		Provide cohesive instance-owned services while retaining the historical
+		module-level callable interface for application compatibility.
 
 	Attributes:
-		None: All operations use the existing session-state and provider contracts.
+		session_state (object): Session-specific Streamlit state.
+		validation (LiveWorldValidation): Required argument checks.
+		state (LiveWorldState): Sidebar and session state operations.
+		geometry (LiveWorldGeometry): Stateless geographic calculations.
+		providers (LiveWorldProviders): Configured API provider ownership.
+		entities (LiveWorldEntities): Stateless entity serialization.
+		analytics (LiveWorldAnalytics): Session analytics, annotations, and geofences.
+		history (LiveWorldHistory): History and tracking workflows.
+		refresh (LiveWorldRefresh): Source refresh orchestration.
+		sidebar (LiveWorldSidebar): Sidebar operational controls.
+		rendering (LiveWorldRendering): Map and display assembly.
 	"""
-	pass
+	session_state: object
+	validation: LiveWorldValidation
+	state: LiveWorldState
+	geometry: LiveWorldGeometry
+	providers: LiveWorldProviders
+	entities: LiveWorldEntities
+	analytics: LiveWorldAnalytics
+	history: LiveWorldHistory
+	refresh: LiveWorldRefresh
+	sidebar: LiveWorldSidebar
+	rendering: LiveWorldRendering
 
-# Backwards-compatible function imports used by app.py, tooling, and existing integrations.
+	def __init__( self, session_state: object ) -> None:
+		"""Compose a one-way dependency graph for the current Streamlit session.
+
+		Purpose:
+			Construct state, pure utilities, provider services, analytics, history,
+			refresh orchestration, and UI rendering without parent back-references.
+
+		Args:
+			session_state (object): Session-specific Streamlit state mapping.
+
+		Returns:
+			None: Initializes explicitly connected collaborators.
+		"""
+		self.session_state = session_state
+		self.validation = LiveWorldValidation( )
+		self.geometry = LiveWorldGeometry( )
+		self.entities = LiveWorldEntities( )
+		self.state = LiveWorldState( self.session_state )
+		self.providers = LiveWorldProviders( self.state, self.geometry,
+			self.entities, self.validation )
+		self.analytics = LiveWorldAnalytics( self.state, self.geometry, self.validation )
+		self.history = LiveWorldHistory( self.state, self.validation )
+		self.refresh = LiveWorldRefresh( self.state, self.providers,
+			self.history, self.entities, self.validation )
+		self.sidebar = LiveWorldSidebar( self.state, self.analytics, self.history )
+		self.rendering = LiveWorldRendering( self.state, self.analytics,
+			self.history, self.refresh, self.entities, self.geometry, self.validation )
+
+def get_live_world( ) -> LiveWorld:
+	"""Get the session-owned Live World composition root.
+
+	Purpose:
+		Create one service graph for each Streamlit session, avoiding cross-session
+		sharing of credential-bearing provider clients and mutable tracking state.
+
+	Returns:
+		LiveWorld: Current session's controller and collaborating services.
+	"""
+	if 'live_world_controller' not in st.session_state:
+		st.session_state[ 'live_world_controller' ] = LiveWorld( st.session_state )
+	return st.session_state[ 'live_world_controller' ]
+
+# Module-level compatibility boundary: existing imports delegate to the current session.
 throw_if = LiveWorldValidation.throw_if
-initialize_live_world_state = LiveWorldState.initialize_live_world_state
-get_live_world_layers = LiveWorldState.get_live_world_layers
-render_live_world_sidebar = LiveWorldState.render_live_world_sidebar
-clear_live_world_data = LiveWorldState.clear_live_world_data
+
+def initialize_live_world_state( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldState service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).state.initialize_live_world_state(  )
+
+def get_live_world_layers( ) -> Dict[ str, bool ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldState service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		Dict[ str, bool ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).state.get_live_world_layers(  )
+
+def render_live_world_sidebar( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldState service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).sidebar.render_live_world_sidebar(  )
+
+def clear_live_world_data( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldState service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).state.clear_live_world_data(  )
 create_live_world_bounding_box = LiveWorldGeometry.create_live_world_bounding_box
 is_valid_live_world_coordinates = LiveWorldGeometry.is_valid_live_world_coordinates
-get_live_opensky_service = LiveWorldProviders.get_live_opensky_service
-fetch_live_aircraft = LiveWorldProviders.fetch_live_aircraft
 calculate_live_world_distance_nm = LiveWorldGeometry.calculate_live_world_distance_nm
-fetch_live_military_aircraft = LiveWorldProviders.fetch_live_military_aircraft
-fetch_live_vessels = LiveWorldProviders.fetch_live_vessels
-fetch_live_satellites = LiveWorldProviders.fetch_live_satellites
-fetch_live_earthquakes = LiveWorldProviders.fetch_live_earthquakes
-fetch_live_fires = LiveWorldProviders.fetch_live_fires
-fetch_live_infrastructure = LiveWorldProviders.fetch_live_infrastructure
-fetch_cached_live_world_overpass = LiveWorldProviders.fetch_cached_live_world_overpass
-fetch_live_cameras = LiveWorldProviders.fetch_live_cameras
-fetch_live_map_layers = LiveWorldProviders.fetch_live_map_layers
+
+def get_live_opensky_service( ) -> OpenSkyLive:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		OpenSkyLive: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.get_live_opensky_service(  )
+
+def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_aircraft.
+		longitude (float): Forwarded unchanged to fetch_live_aircraft.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_aircraft( latitude=latitude, longitude=longitude )
+
+def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_military_aircraft.
+		longitude (float): Forwarded unchanged to fetch_live_military_aircraft.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_military_aircraft( latitude=latitude, longitude=longitude )
+
+def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_vessels.
+		longitude (float): Forwarded unchanged to fetch_live_vessels.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_vessels( latitude=latitude, longitude=longitude )
+
+def fetch_live_satellites( ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_satellites(  )
+
+def fetch_live_earthquakes( ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_earthquakes(  )
+
+def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_fires.
+		longitude (float): Forwarded unchanged to fetch_live_fires.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_fires( latitude=latitude, longitude=longitude )
+
+def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_infrastructure.
+		longitude (float): Forwarded unchanged to fetch_live_infrastructure.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_infrastructure( latitude=latitude, longitude=longitude )
+
+def fetch_cached_live_world_overpass( source_key: str, latitude: float,
+			longitude: float, radius_km: float, categories: tuple[ str, ... ],
+			max_results: int ) -> Dict[ str, Any ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		source_key (str): Forwarded unchanged to fetch_cached_live_world_overpass.
+		latitude (float): Forwarded unchanged to fetch_cached_live_world_overpass.
+		longitude (float): Forwarded unchanged to fetch_cached_live_world_overpass.
+		radius_km (float): Forwarded unchanged to fetch_cached_live_world_overpass.
+		categories (tuple[ str, ... ]): Forwarded unchanged to fetch_cached_live_world_overpass.
+		max_results (int): Forwarded unchanged to fetch_cached_live_world_overpass.
+
+	Returns:
+		Dict[ str, Any ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_cached_live_world_overpass( source_key=source_key, latitude=latitude, longitude=longitude, radius_km=radius_km, categories=categories, max_results=max_results )
+
+def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_cameras.
+		longitude (float): Forwarded unchanged to fetch_live_cameras.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_cameras( latitude=latitude, longitude=longitude )
+
+def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldProviders service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to fetch_live_map_layers.
+		longitude (float): Forwarded unchanged to fetch_live_map_layers.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).providers.fetch_live_map_layers( latitude=latitude, longitude=longitude )
 get_row_value = LiveWorldEntities.get_row_value
 entities_to_dataframe = LiveWorldEntities.entities_to_dataframe
-get_live_world_tracking_options = LiveWorldAnalytics.get_live_world_tracking_options
-get_live_world_measurement_options = LiveWorldAnalytics.get_live_world_measurement_options
-resolve_live_world_measurement_point = LiveWorldAnalytics.resolve_live_world_measurement_point
-calculate_live_world_measurement = LiveWorldAnalytics.calculate_live_world_measurement
-add_live_world_annotation = LiveWorldAnalytics.add_live_world_annotation
-clear_live_world_annotations = LiveWorldAnalytics.clear_live_world_annotations
-get_live_world_annotation_frame = LiveWorldAnalytics.get_live_world_annotation_frame
-get_live_world_analysis_origin_options = LiveWorldAnalytics.get_live_world_analysis_origin_options
-resolve_live_world_analysis_origin = LiveWorldAnalytics.resolve_live_world_analysis_origin
-calculate_live_world_cross_layer_analysis = LiveWorldAnalytics.calculate_live_world_cross_layer_analysis
-get_live_world_geofence_origin_options = LiveWorldAnalytics.get_live_world_geofence_origin_options
-resolve_live_world_geofence_origin = LiveWorldAnalytics.resolve_live_world_geofence_origin
-calculate_live_world_geofence = LiveWorldAnalytics.calculate_live_world_geofence
-update_live_world_geofence_events = LiveWorldAnalytics.update_live_world_geofence_events
-clear_live_world_geofence_events = LiveWorldAnalytics.clear_live_world_geofence_events
-get_live_world_geofence_event_frame = LiveWorldAnalytics.get_live_world_geofence_event_frame
-get_live_world_history_window_hours = LiveWorldHistory.get_live_world_history_window_hours
-load_live_world_replay_frame = LiveWorldHistory.load_live_world_replay_frame
-clear_live_world_tracking = LiveWorldHistory.clear_live_world_tracking
-update_live_world_tracking = LiveWorldHistory.update_live_world_tracking
-get_live_world_tracking_frame = LiveWorldHistory.get_live_world_tracking_frame
-update_live_world_source_state = LiveWorldRefresh.update_live_world_source_state
-refresh_live_world_source = LiveWorldRefresh.refresh_live_world_source
-refresh_live_world_data = LiveWorldRefresh.refresh_live_world_data
-render_live_world_map = LiveWorldRendering.render_live_world_map
-get_metadata_number = LiveWorldRendering.get_metadata_number
-make_live_world_display_frame = LiveWorldRendering.make_live_world_display_frame
+
+def get_live_world_tracking_options( ) -> Dict[ str, str ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		Dict[ str, str ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.get_live_world_tracking_options(  )
+
+def get_live_world_measurement_options( ) -> Dict[ str, str ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		Dict[ str, str ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.get_live_world_measurement_options(  )
+
+def resolve_live_world_measurement_point( key: str, latitude: float,
+			longitude: float, endpoint: str ) -> Dict[ str, object ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		key (str): Forwarded unchanged to resolve_live_world_measurement_point.
+		latitude (float): Forwarded unchanged to resolve_live_world_measurement_point.
+		longitude (float): Forwarded unchanged to resolve_live_world_measurement_point.
+		endpoint (str): Forwarded unchanged to resolve_live_world_measurement_point.
+
+	Returns:
+		Dict[ str, object ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.resolve_live_world_measurement_point( key=key, latitude=latitude, longitude=longitude, endpoint=endpoint )
+
+def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dict[ str, object ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to calculate_live_world_measurement.
+		longitude (float): Forwarded unchanged to calculate_live_world_measurement.
+
+	Returns:
+		Dict[ str, object ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.calculate_live_world_measurement( latitude=latitude, longitude=longitude )
+
+def add_live_world_annotation( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).analytics.add_live_world_annotation(  )
+
+def clear_live_world_annotations( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).analytics.clear_live_world_annotations(  )
+
+def get_live_world_annotation_frame( ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.get_live_world_annotation_frame(  )
+
+def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		Dict[ str, str ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.get_live_world_analysis_origin_options(  )
+
+def resolve_live_world_analysis_origin( key: str, latitude: float,
+			longitude: float ) -> Dict[ str, object ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		key (str): Forwarded unchanged to resolve_live_world_analysis_origin.
+		latitude (float): Forwarded unchanged to resolve_live_world_analysis_origin.
+		longitude (float): Forwarded unchanged to resolve_live_world_analysis_origin.
+
+	Returns:
+		Dict[ str, object ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.resolve_live_world_analysis_origin( key=key, latitude=latitude, longitude=longitude )
+
+def calculate_live_world_cross_layer_analysis( latitude: float,
+			longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to calculate_live_world_cross_layer_analysis.
+		longitude (float): Forwarded unchanged to calculate_live_world_cross_layer_analysis.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.calculate_live_world_cross_layer_analysis( latitude=latitude, longitude=longitude )
+
+def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		Dict[ str, str ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.get_live_world_geofence_origin_options(  )
+
+def resolve_live_world_geofence_origin( key: str, latitude: float,
+			longitude: float ) -> Dict[ str, object ]:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		key (str): Forwarded unchanged to resolve_live_world_geofence_origin.
+		latitude (float): Forwarded unchanged to resolve_live_world_geofence_origin.
+		longitude (float): Forwarded unchanged to resolve_live_world_geofence_origin.
+
+	Returns:
+		Dict[ str, object ]: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.resolve_live_world_geofence_origin( key=key, latitude=latitude, longitude=longitude )
+
+def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to calculate_live_world_geofence.
+		longitude (float): Forwarded unchanged to calculate_live_world_geofence.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.calculate_live_world_geofence( latitude=latitude, longitude=longitude )
+
+def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		df_geofence (pd.DataFrame): Forwarded unchanged to update_live_world_geofence_events.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).analytics.update_live_world_geofence_events( df_geofence=df_geofence )
+
+def clear_live_world_geofence_events( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).analytics.clear_live_world_geofence_events(  )
+
+def get_live_world_geofence_event_frame( ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldAnalytics service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).analytics.get_live_world_geofence_event_frame(  )
+
+def get_live_world_history_window_hours( window: str ) -> int:
+	"""Compatibility entry point delegating to the session-owned LiveWorldHistory service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		window (str): Forwarded unchanged to get_live_world_history_window_hours.
+
+	Returns:
+		int: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).history.get_live_world_history_window_hours( window=window )
+
+def load_live_world_replay_frame( ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldHistory service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).history.load_live_world_replay_frame(  )
+
+def clear_live_world_tracking( ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldHistory service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).history.clear_live_world_tracking(  )
+
+def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldHistory service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		df_entities (pd.DataFrame): Forwarded unchanged to update_live_world_tracking.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).history.update_live_world_tracking( df_entities=df_entities )
+
+def get_live_world_tracking_frame( ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldHistory service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).history.get_live_world_tracking_frame(  )
+
+def update_live_world_source_state( source_key: str, status: str, error: str='',
+			stale: bool=False, attempted_at: str='', successful_at: str='',
+			error_type: str='', http_status: int=0 ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldRefresh service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		source_key (str): Forwarded unchanged to update_live_world_source_state.
+		status (str): Forwarded unchanged to update_live_world_source_state.
+		error (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		stale (bool): Forwarded unchanged to update_live_world_source_state. Default: False.
+		attempted_at (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		successful_at (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		error_type (str): Forwarded unchanged to update_live_world_source_state. Default: ''.
+		http_status (int): Forwarded unchanged to update_live_world_source_state. Default: 0.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).refresh.update_live_world_source_state( source_key=source_key, status=status, error=error, stale=stale, attempted_at=attempted_at, successful_at=successful_at, error_type=error_type, http_status=http_status )
+
+def refresh_live_world_source( source_key: str,
+			fetcher: Callable[ [ ], pd.DataFrame ] ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldRefresh service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		source_key (str): Forwarded unchanged to refresh_live_world_source.
+		fetcher (Callable[ [ ], pd.DataFrame ]): Forwarded unchanged to refresh_live_world_source.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).refresh.refresh_live_world_source( source_key=source_key, fetcher=fetcher )
+
+def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldRefresh service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to refresh_live_world_data.
+		longitude (float): Forwarded unchanged to refresh_live_world_data.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).refresh.refresh_live_world_data( latitude=latitude, longitude=longitude )
+
+def render_live_world_map( latitude: float, longitude: float ) -> None:
+	"""Compatibility entry point delegating to the session-owned LiveWorldRendering service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		latitude (float): Forwarded unchanged to render_live_world_map.
+		longitude (float): Forwarded unchanged to render_live_world_map.
+
+	Returns:
+		None: Result from the corresponding Live World service method.
+	"""
+	get_live_world( ).rendering.render_live_world_map( latitude=latitude, longitude=longitude )
+
+def get_metadata_number( metadata: object, key: str, default: float=0.0 ) -> float:
+	"""Compatibility entry point delegating to the session-owned LiveWorldRendering service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		metadata (object): Forwarded unchanged to get_metadata_number.
+		key (str): Forwarded unchanged to get_metadata_number.
+		default (float): Forwarded unchanged to get_metadata_number. Default: 0.0.
+
+	Returns:
+		float: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).rendering.get_metadata_number( metadata=metadata, key=key, default=default )
+
+def make_live_world_display_frame( df_frame: pd.DataFrame ) -> pd.DataFrame:
+	"""Compatibility entry point delegating to the session-owned LiveWorldRendering service.
+
+	Purpose:
+		Preserve existing public module imports without coupling service design to them.
+
+	Args:
+		df_frame (pd.DataFrame): Forwarded unchanged to make_live_world_display_frame.
+
+	Returns:
+		pd.DataFrame: Result from the corresponding Live World service method.
+	"""
+	return get_live_world( ).rendering.make_live_world_display_frame( df_frame=df_frame )
+

@@ -97,7 +97,7 @@ class LiveWorldProviderRepairsTests( unittest.TestCase ):
         """Verify that historical mode bypasses the live-entities early return."""
         source = (self.root / 'realtime.py').read_text( encoding='utf-8' )
         self.assertIn(
-            "or st.session_state[ 'live_world_historical_replay' ]", source )
+            "or self.state[ 'live_world_historical_replay' ]", source )
         self.assertIn( "live_world_refresh_id", source )
         self.assertIn( "live_world_last_success", source )
 

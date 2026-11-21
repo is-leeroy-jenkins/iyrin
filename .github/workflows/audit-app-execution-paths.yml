@@ -78,8 +78,11 @@ jobs:
                                    and '| None' not in ast.unparse(arg.annotation)
                                    and 'Optional[' not in ast.unparse(arg.annotation)]
                       guarded = {node.args[0].value for node in ast.walk(fn)
-                                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-                                 and node.func.id == 'throw_if' and node.args
+                                 if isinstance(node, ast.Call)
+                                 and ((isinstance(node.func, ast.Name) and node.func.id == 'throw_if')
+                                      or (isinstance(node.func, ast.Attribute)
+                                          and node.func.attr == 'throw_if'))
+                                 and node.args
                                  and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)}
                       exceptions = exempt_required.get((filename, cls.name, fn.name), set())
                       for arg in necessary:

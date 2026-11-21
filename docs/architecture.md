@@ -15,8 +15,8 @@
 
 ## Live World Service Classes
 
-`realtime.py` encapsulates Live World operations into a stateless service interface,
-`LiveWorld`, backed by the following responsibility-specific classes:
+`realtime.py` exposes a session-owned `LiveWorld` composition root whose
+collaborators encapsulate state, dependency ownership, and business behavior through explicit constructor injection:
 
 | Class | Responsibility |
 |---|---|
@@ -28,12 +28,25 @@
 | `LiveWorldAnalytics` | Measurements, annotations, cross-layer analysis, and geofencing |
 | `LiveWorldHistory` | Tracking, history, and replay |
 | `LiveWorldRefresh` | Per-provider refresh isolation, status, and stale-data handling |
+| `LiveWorldSidebar` | Session-specific sidebar controls and interactions |
 | `LiveWorldRendering` | PyDeck map rendering and display frame construction |
 
-`LiveWorld` inherits these static service methods, and the original module-level
-function names remain aliases to their class implementations for existing callers.
-State remains in `st.session_state`; class instances do not store user-specific data.
-Streamlit's OpenSky provider cache and Overpass data cache are preserved.
+`LiveWorld` creates and owns one instance of each collaborating service per
+Streamlit session, stored under `st.session_state['live_world_controller']`.
+Collaborators receive only their required dependencies through constructors;
+none holds a back-reference to the composition root. `LiveWorldSidebar`
+owns operational sidebar controls, `LiveWorldRendering` owns map presentation,
+and `LiveWorldState` owns initialization and clearing.
+Stateful service operations use instance methods and retain a reference to that
+session's state mapping; configured provider clients are initialized lazily and
+owned by `LiveWorldProviders`. OpenSky OAuth tokens are therefore cached within
+the user's session-owned provider instance, rather than on a global cached
+resource. Overpass results retain the five-minute Streamlit data-cache behavior.
+
+Only the stateless validation, geometry, and entity-serialization utilities
+remain static methods. The previous module-level callable names remain thin
+compatibility functions delegating to the active session's service instances.
+Those compatibility functions do not constrain the internal class architecture.
 
 NASA FIRMS credentials originate from `cfg.FIRMS_MAP_KEY` in its provider
 constructor, where `config.py` resolves `FIRMS_MAP_KEY` or the legacy
