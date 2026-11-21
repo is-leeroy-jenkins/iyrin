@@ -22991,8 +22991,8 @@ class Firms( Fetcher ):
 			
 			try:
 				df_csv = pd.read_csv( io.StringIO( self.csv_text ) )
-			except pd.errors.EmptyDataError:
-				return [ ]
+			except pd.errors.EmptyDataError as ex:
+				raise ValueError( 'FIRMS returned a nonempty response without CSV columns.' ) from ex
 			required_columns = { 'latitude', 'longitude', 'acq_date' }
 			if not required_columns.issubset( df_csv.columns ):
 				raise ValueError( 'FIRMS response is not a valid detection CSV.' )
