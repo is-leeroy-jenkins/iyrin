@@ -58,7 +58,7 @@ class LiveWorldProviderRepairsTests( unittest.TestCase ):
         self.assertNotIn( "st.session_state.get( 'opensky_api_credentials', '' )", realtime )
         self.assertNotIn( 'st.session_state.opensky_api_credentials', app )
         self.assertIn( "OPENSKY_CLIENT_ID = os.getenv(", config )
-        self.assertIn( "OPENSKY_CLIENT_SECRET = (os.getenv(", config )
+        self.assertIn( "OPENSKY_CLIENT_SECRET = os.getenv(", config )
 
     def test_long_exception_keeps_diagnostics_without_exposing_secrets( self ) -> None:
         """Retain verbose exception messages without losing secret redaction."""
