@@ -433,7 +433,7 @@ class AisStreamLive( ):
 							raise RuntimeError( f'Rejected the subscription: {provider_error}' )
 						if payload.get( 'MessageType' ) == 'SubscriptionConfirmation':
 							confirmation = payload.get( 'Message', { } ) or { }
-							if confirmation.get( 'CompressionEnabled' ) is False:
+							if confirmation.get( 'CompressionEnabled' ) is not True:
 								raise RuntimeError( 'AIS Stream did not negotiate compression.' )
 							confirmed = True
 					observed_at = time.monotonic( )
