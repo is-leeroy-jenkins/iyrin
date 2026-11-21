@@ -107,5 +107,52 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
         self.assertNotIn("'live_world_aisstream_api_key' ] = api_key", source)
 
 
+    def test_credential_registry_covers_configuration_inventory(self) -> None:
+        """Every canonical OS-backed application credential has a sidebar definition."""
+        tree = ast.parse((ROOT / 'config.py').read_text(encoding='utf-8'))
+        registry_node = next(node for node in tree.body
+            if isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == 'API_CREDENTIAL_FIELDS')
+        fields = ast.literal_eval(registry_node.value)
+
+        configured = set()
+        for node in tree.body:
+            if not isinstance(node, ast.Assign) or not node.targets:
+                continue
+            target = node.targets[0]
+            if not isinstance(target, ast.Name):
+                continue
+            source = ast.get_source_segment(
+                (ROOT / 'config.py').read_text(encoding='utf-8'), node) or ''
+            if 'os.getenv(' in source and (
+                '_API_KEY' in target.id or '_TOKEN' in target.id
+                or '_SECRET' in target.id or '_CLIENT_ID' in target.id
+                or target.id in ('FIRMS_MAP_KEY', 'GOOGLE_ACCOUNT_FILE',
+                    'GOOGLE_CSE_ID', 'GOOGLE_CLOUD_PROJECT_ID',
+                    'GOOGLE_CLOUD_LOCATION', 'GOOGLE_GENAI_USE_VERTEXAI',
+                    'GOOGLE_DRIVE_TOKEN_PATH', 'GOOGLE_DRIVE_FOLDER_ID',
+                    'CHROMA_TENET_ID', 'OPENSKY_CLIENT_ID', 'SKYMAP_TOKEN')
+            ):
+                configured.add(target.id)
+
+        self.assertEqual(configured, set(fields))
+        self.assertEqual(48, len(fields))
+        self.assertEqual('OPENSKY_CLIENT_SECRET',
+            fields['OPENSKY_CLIENT_SECRET'][1])
+        self.assertEqual('NEWSAPI_API_KEY', fields['NEWS_API_KEY'][1])
+        self.assertEqual('GOOGLE_ACCOUNT_CREDENTIALS',
+            fields['GOOGLE_ACCOUNT_FILE'][1])
+
+    def test_credential_editor_requires_private_single_user_mode(self) -> None:
+        """Process-wide credential mutations must be opt-in for private deployments."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn("os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) != '1'", source)
+        self.assertIn("with st.form( 'api_credentials_form'", source)
+        self.assertIn("st.form_submit_button( 'Apply'", source)
+        self.assertIn("st.form_submit_button( 'Reset to OS Defaults'", source)
+        self.assertIn("get_opensky_service.clear( )", source)
+
+
 if __name__ == '__main__':
     unittest.main()
