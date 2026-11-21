@@ -48,6 +48,7 @@ def load_production_functions(path: str, class_name: str,
         if isinstance(node, ast.FunctionDef) and node.name in method_names]
     namespace: Dict[str, Any] = {
         'Any': Any, 'Dict': Dict, 'List': List, 'math': math,
+        'pd': pd, 'dt': dt, 'Callable': __import__('typing').Callable,
         'throw_if': lambda name, value: None,
         'Error': ProviderError,
         'Logger': lambda: SimpleNamespace(write=lambda exception: None),
