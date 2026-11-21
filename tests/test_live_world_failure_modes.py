@@ -155,13 +155,25 @@ def load_production_class(name: str, request_post: Mock,
             RequestException=requests.RequestException,
             HTTPError=requests.HTTPError,
         ),
-        'throw_if': lambda argument, value: (
-            (_ for _ in ()).throw(ValueError(f'Missing {argument}'))
-            if value is None or value == '' else None),
+        'throw_if': validate_required,
     }
     module = ast.fix_missing_locations(ast.Module(body=[cls], type_ignores=[]))
     exec(compile(module, str(ROOT / 'sources.py'), 'exec'), namespace)
     return namespace[name]
+
+
+def validate_required(name: str, value: object) -> None:
+    """Reject missing mandatory provider inputs.
+
+    Args:
+        name (str): Input name.
+        value (object): Candidate input value.
+
+    Raises:
+        ValueError: When a required value is missing.
+    """
+    if value is None or value == '':
+        raise ValueError(f'Missing {name}')
 
 
 class LiveWorldFailureRegressionTests(unittest.TestCase):
@@ -262,6 +274,29 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
             'live_world_df_vessels': previous,
         }
         statuses: list[dict[str, Any]] = []
+        def record_source_status(source_key: str, status: str, error: str='',
+                stale: bool=False, attempted_at: str='', successful_at: str='',
+                error_type: str='', http_status: int=0) -> None:
+            """Capture provider status without mutating unrelated session state.
+
+            Args:
+                source_key (str): Provider identifier.
+                status (str): Provider state.
+                error (str): Optional diagnostic.
+                stale (bool): Whether retained data is from a previous refresh.
+                attempted_at (str): Attempt timestamp.
+                successful_at (str): Success timestamp.
+                error_type (str): Underlying exception type.
+                http_status (int): HTTP error status.
+
+            Returns:
+                None: Captures the provider-state update.
+            """
+            statuses.append({'source': source_key, 'status': status,
+                'error': error, 'stale': stale, 'attempted_at': attempted_at,
+                'successful_at': successful_at, 'error_type': error_type,
+                'http_status': http_status})
+
         namespace: Dict[str, Any] = {
             'pd': pd,
             'dt': dt,
@@ -276,9 +311,7 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
             },
             'initialize_live_world_state': lambda: None,
             'throw_if': lambda name, value: None,
-            'update_live_world_source_state': lambda source, status,
-                **options: statuses.append({'source': source,
-                    'status': status, **options}),
+            'update_live_world_source_state': record_source_status,
         }
         module = ast.fix_missing_locations(ast.Module(body=[func], type_ignores=[]))
         exec(compile(module, str(ROOT / 'realtime.py'), 'exec'), namespace)
