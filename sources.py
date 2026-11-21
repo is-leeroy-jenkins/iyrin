@@ -38,7 +38,8 @@ from astropy.time import Time
 from requests import Response
 from sgp4 import omm
 from sgp4.api import Satrec
-from websocket import WebSocket, WebSocketTimeoutException, create_connection
+from websockets.sync.client import connect
+from websockets.sync.connection import ClientConnection
 
 def throw_if( name: str, value: object ) -> None:
 	"""Validate a required runtime value.
@@ -317,7 +318,7 @@ class AisStreamLive( ):
 	api_key: str
 	timeout: int
 	url: str
-	socket: WebSocket | None
+	socket: ClientConnection | None
 	max_retries: int
 	retry_delay: float
 
@@ -402,29 +403,24 @@ class AisStreamLive( ):
 				'FilterMessageTypes': [ 'PositionReport', 'StandardClassBPositionReport',
 					'ExtendedClassBPositionReport', 'LongRangeAisBroadcastMessage', ], }
 			messages: List[ Dict[ str, Any ] ] = [ ]
-			started = time.monotonic( )
 			last_error = ''
 			for attempt in range( self.max_retries + 1 ):
-				remaining_window = self.duration_seconds - (time.monotonic( ) - started)
-				if remaining_window <= 0.0:
-					break
-	
 				try:
-					self.socket = create_connection( self.url, timeout=self.timeout )
+					self.socket = connect( self.url, open_timeout=self.timeout,
+						compression='deflate', close_timeout=1 )
 					self.socket.send( json.dumps( self.subscription ) )
-					while len( messages ) < self.max_messages:
-						remaining = self.duration_seconds - (time.monotonic( ) - started)
+					confirmation_deadline = time.monotonic( ) + 3.0
+					confirmed = False
+					while not confirmed:
+						remaining = confirmation_deadline - time.monotonic( )
 						if remaining <= 0.0:
-							return messages
-	
-						self.socket.settimeout( min( 1.0, max( 0.1, remaining ) ) )
+							raise TimeoutError( 'AIS Stream subscription confirmation timed out.' )
 						try:
-							frame = self.socket.recv( )
-						except WebSocketTimeoutException:
+							frame = self.socket.recv( timeout=min( 1.0, remaining ) )
+						except TimeoutError:
 							continue
-	
 						if frame is None or frame == '':
-							raise ConnectionError( 'AIS Stream closed the WebSocket connection.' )
+							raise ConnectionError( 'AIS Stream closed before subscription confirmation.' )
 						if isinstance( frame, bytes ):
 							frame = frame.decode( 'utf-8' )
 						try:
@@ -437,15 +433,45 @@ class AisStreamLive( ):
 						if provider_error:
 							raise RuntimeError( f'Rejected the subscription: {provider_error}' )
 						if payload.get( 'MessageType' ) == 'SubscriptionConfirmation':
+							confirmation = payload.get( 'Message', { } ) or { }
+							if confirmation.get( 'CompressionEnabled' ) is False:
+								raise RuntimeError( 'AIS Stream did not negotiate compression.' )
+							confirmed = True
+					observed_at = time.monotonic( )
+					while len( messages ) < self.max_messages:
+						remaining = self.duration_seconds - (time.monotonic( ) - observed_at)
+						if remaining <= 0.0:
+							return messages
+						try:
+							frame = self.socket.recv( timeout=min( 1.0, remaining ) )
+						except TimeoutError:
+							continue
+						if frame is None or frame == '':
+							raise ConnectionError( 'AIS Stream closed the WebSocket connection.' )
+						if isinstance( frame, bytes ):
+							frame = frame.decode( 'utf-8' )
+						try:
+							payload = json.loads( frame )
+						except json.JSONDecodeError:
+							continue
+						if not isinstance( payload, dict ):
+							continue
+						provider_error = str( payload.get( 'Error', payload.get( 'error', '' ) ) or '' )
+						if provider_error:
+							raise RuntimeError( f'AIS Stream error: {provider_error}' )
+						if payload.get( 'MessageType' ) == 'SubscriptionConfirmation':
 							continue
 						metadata = payload.get( 'MetaData', { } ) or { }
+						if not isinstance( metadata, dict ):
+							continue
 						if metadata.get( 'Latitude' ) is None or metadata.get( 'Longitude' ) is None:
 							continue
 						messages.append( payload )
 					return messages
-	
 				except Exception as ex:
 					last_error = str( ex )
+					if messages:
+						return messages
 				finally:
 					if self.socket is not None:
 						try:
@@ -453,20 +479,13 @@ class AisStreamLive( ):
 						except Exception:
 							pass
 						self.socket = None
-	
 				if attempt < self.max_retries:
-					remaining = self.duration_seconds - (time.monotonic( ) - started)
-					if remaining <= 0.0:
-						break
-					delay = min( self.retry_delay * (2 ** attempt), remaining )
+					delay = self.retry_delay * (2 ** attempt)
 					if delay > 0.0:
 						time.sleep( delay )
-	
-			if messages:
-				return messages
 			if last_error:
-				_alert = f'Failed after {self.max_retries + 1} connection attempts: {last_error}'
-				raise RuntimeError( _alert )
+				raise RuntimeError(
+					f'Failed after {self.max_retries + 1} connection attempts: {last_error}' )
 			return messages
 		except Exception as e:
 			if isinstance( e, Error ):
@@ -698,6 +717,8 @@ class OverpassClient( ):
 						payload = self.response.json( )
 						if not isinstance( payload, dict ):
 							raise TypeError( 'Overpass response must be a dictionary.' )
+						if payload.get( 'remark' ):
+							raise RuntimeError( f'Overpass query rejected: {payload["remark"]}' )
 						return payload
 					except ( requests.RequestException, TypeError, ValueError ) as ex:
 						category = type( ex ).__name__
@@ -706,8 +727,9 @@ class OverpassClient( ):
 							detail += f' (HTTP {status_code})'
 						errors.append( detail )
 						if status_code and status_code not in transient_statuses:
-							raise RuntimeError(
-								f'Overpass permanent request failure: {detail}' ) from ex
+							raise requests.HTTPError(
+								f'Overpass permanent request failure: {detail}',
+								response=self.response ) from ex
 						if isinstance( ex, ( TypeError, ValueError ) ):
 							raise RuntimeError(
 								f'Overpass response validation failed: {detail}' ) from ex
@@ -1043,7 +1065,7 @@ class OverpassCameras( OverpassClient ):
 			if not tags:
 				return ''
 			throw_if( 'tags', tags )
-			if tags.get( 'webcam' ) or tags.get( 'contact:webcam' ):
+			if 'webcam' in tags or 'contact:webcam' in tags:
 				return 'Web Cameras'
 			if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
 				return 'CCTV / Surveillance'
