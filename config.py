@@ -63,7 +63,7 @@ STYLE_ID = r'86d00019936c16f936cc936c'
 STYLE_NAME = r'uap-dark'
 
 # ----------- API KEYS
-
+AISSTREAM_API_KEY = os.getenv( 'AISSTREAM_API_KEY' )
 AIRNOW_API_KEY = os.getenv( 'AIRNOW_API_KEY' )
 CLAUDE_API_KEY = os.getenv( 'CLAUDE_API_KEY' )
 CONGRESS_API_KEY = os.getenv( 'CONGRESS_API_KEY' )
