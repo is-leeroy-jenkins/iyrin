@@ -711,6 +711,19 @@ def is_valid_live_world_coordinates( latitude: float, longitude: float ) -> bool
 		and math.isfinite( latitude ) and math.isfinite( longitude )
 		and -90.0 <= latitude <= 90.0 and -180.0 <= longitude <= 180.0)
 
+@st.cache_resource
+def get_live_opensky_service( ) -> OpenSkyLive:
+	"""Provide a reusable OpenSky client across Live World refreshes.
+
+	Purpose:
+		Preserves the provider's cached OAuth token between aircraft requests.
+		OpenSky credentials are initialized by its constructor from config.py.
+
+	Returns:
+		OpenSkyLive: Shared client for configured OpenSky credentials.
+	"""
+	return OpenSkyLive( timeout=20 )
+
 def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
 		Retrieve current OpenSky aircraft state vectors around the Iyr/global location and.
@@ -732,7 +745,7 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	throw_if( 'longitude', longitude )
 	radius = float( st.session_state[ 'live_world_aircraft_radius' ] )
 	airborne_only = bool( st.session_state[ 'live_world_aircraft_airborne_only' ] )
-	service = OpenSkyLive( timeout=20 )
+	service = get_live_opensky_service( )
 	result = service.fetch_states( latitude=latitude, longitude=longitude,
 		radius_degrees=radius ) or { }
 	states = result.get( 'states', [ ] ) or [ ]
