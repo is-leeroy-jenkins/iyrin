@@ -148,6 +148,8 @@ def load_production_class(name: str, request_post: Mock,
         'Dict': Dict,
         'List': List,
         'Response': FakeResponse,
+        'cfg': SimpleNamespace(OPENSKY_CLIENT_ID='client-id',
+            OPENSKY_API_CLIENT_SECRET='private-client-secret'),
         'Error': WrappedProviderError,
         'Logger': lambda: SimpleNamespace(write=lambda exception: None),
         'time': clock,
@@ -193,8 +195,7 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
     def test_opensky_unauthorized_preserves_http_status_and_hides_secrets(self) -> None:
         """Classify rejected OAuth credentials without revealing their values."""
         request_post = Mock(return_value=FakeResponse(401, {'error': 'invalid_client'}))
-        provider = load_production_class('OpenSkyLive', request_post, self.clock)(
-            client_id='client-id', client_secret='private-client-secret')
+        provider = load_production_class('OpenSkyLive', request_post, self.clock)()
         with self.assertRaises(WrappedProviderError) as context:
             provider.get_access_token()
         self.assertIsInstance(context.exception.error, requests.HTTPError)
@@ -207,8 +208,8 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
     def test_opensky_partial_credentials_fail_before_network(self) -> None:
         """Reject incomplete credential pairs without contacting OAuth."""
         request_post = Mock()
-        provider = load_production_class('OpenSkyLive', request_post, self.clock)(
-            client_id='client-id', client_secret='')
+        provider = load_production_class('OpenSkyLive', request_post, self.clock)()
+        provider.client_secret = ''
         with self.assertRaises(WrappedProviderError) as context:
             provider.get_access_token()
         self.assertIsInstance(context.exception.error, ValueError)
