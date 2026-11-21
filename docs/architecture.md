@@ -16,7 +16,7 @@
 ## Live World Service Classes
 
 `realtime.py` exposes a session-owned `LiveWorld` composition root whose
-collaborators encapsulate state, dependency ownership, and business behavior:
+collaborators encapsulate state, dependency ownership, and business behavior through explicit constructor injection:
 
 | Class | Responsibility |
 |---|---|
@@ -32,6 +32,9 @@ collaborators encapsulate state, dependency ownership, and business behavior:
 
 `LiveWorld` creates and owns one instance of each collaborating service per
 Streamlit session, stored under `st.session_state['live_world_controller']`.
+Collaborators receive only their required dependencies through constructors;
+none holds a back-reference to the composition root. `LiveWorldRendering`
+owns both sidebar and map UI, while `LiveWorldState` owns initialization and clearing.
 Stateful service operations use instance methods and retain a reference to that
 session's state mapping; configured provider clients are initialized lazily and
 owned by `LiveWorldProviders`. OpenSky OAuth tokens are therefore cached within
