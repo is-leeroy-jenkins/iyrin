@@ -358,13 +358,13 @@ Each field defaults to the value captured when `config.py` reads the OS
 environment. Changes take effect only when **Apply** is selected, and
 **Reset to OS Defaults** restores those original values.
 
-**Security:** Process-wide credential overrides are deliberately disabled by
-default. To enable the editor in a private **single-user** Streamlit instance,
-set the OS environment variable `IYRIN_SINGLE_USER_MODE=1` and restart the
-application. Overrides modify the process environment and `config.py`, and
-therefore are **not isolated across concurrent sessions**. Do not enable this
-mode on public or multi-user deployments. Credentials are never written to
-the repository or persisted beyond the current process by this editor.
+**Security:** The Credentials → API editor is directly available in the
+sidebar without any extra environment variable. Since the fields expose
+OS-derived secrets and Apply updates process-wide `os.environ` and `config.py`
+values, restrict access to the application to trusted operators. These
+overrides are **not isolated across concurrent Streamlit sessions**, so do
+not expose this editor in a public or untrusted multi-user deployment.
+The editor does not persist credentials to repository files or disk.
 OpenSky's cached provider is invalidated when its client credentials change.
 
 | Environment Variable      | Service                          |
