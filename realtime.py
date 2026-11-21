@@ -696,6 +696,32 @@ def create_world_bounding_box( latitude: float, longitude: float,
 	north = min( 90.0, latitude + delta )
 	return f'{west:.6f},{south:.6f},{east:.6f},{north:.6f}'
 
+def create_world_bounding_boxes( latitude: float, longitude: float,
+		delta: float=2.0 ) -> List[ str ]:
+	"""Build one or two valid FIRMS boxes without losing coverage at the date line.
+
+	Purpose:
+		Split longitude ranges crossing 180 degrees into independent west,south,
+		east,north rectangles supported by NASA's Area API.
+
+	Args:
+		latitude (float): Bounding-box center latitude.
+		longitude (float): Bounding-box center longitude.
+		delta (float): Positive half-width in decimal degrees.
+
+	Returns:
+		List[str]: One or two FIRMS area-coordinate strings.
+	"""
+	area = create_world_bounding_box( latitude, longitude, delta )
+	if longitude - delta >= -180.0 and longitude + delta <= 180.0:
+		return [ area ]
+	west, south, east, north = area.split( ',' )
+	if longitude - delta < -180.0:
+		return [ f'{longitude - delta + 360.0:.6f},{south},180.000000,{north}',
+			f'-180.000000,{south},{east},{north}' ]
+	return [ f'{west},{south},180.000000,{north}',
+		f'-180.000000,{south},{longitude + delta - 360.0:.6f},{north}' ]
+
 def is_valid_world_coordinates( latitude: float, longitude: float ) -> bool:
 	"""Determine whether provider coordinates are finite and geographically valid.
 
@@ -1126,13 +1152,15 @@ def fetch_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 	source = str( st.session_state[ 'live_world_firms_source' ] )
 	day_range = int( st.session_state[ 'live_world_firms_day_range' ] )
 	area_mode = str( st.session_state[ 'live_world_firms_area_mode' ] )
-	area_coordinates = 'world' if area_mode == 'World' else create_world_bounding_box(
+	area_coordinates = [ 'world' ] if area_mode == 'World' else create_world_bounding_boxes(
 		latitude, longitude )
 
 	service = Firms( )
-	result = service.fetch_area( source=source, area_coordinates=area_coordinates,
-		day_range=day_range, date='', time=20 ) or { }
-	rows = result.get( 'rows', [ ] ) or [ ]
+	rows: List[ Dict[ str, Any ] ] = [ ]
+	for area in area_coordinates:
+		result = service.fetch_area( source=source, area_coordinates=area,
+			day_range=day_range, date='', time=20 ) or { }
+		rows.extend( result.get( 'rows', [ ] ) or [ ] )
 	max_records = int( st.session_state[ 'live_world_firms_max_records' ] )
 	st.session_state[ 'live_world_firms_source_count' ] = len( rows )
 	st.session_state[ 'live_world_firms_truncated' ] = len( rows ) > max_records
