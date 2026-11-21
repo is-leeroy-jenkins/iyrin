@@ -878,6 +878,10 @@ class OverpassInfrastructure( OverpassClient ):
 
 		'''
 		try:
+			if not isinstance( tags, dict ):
+				raise TypeError( 'tags must be a dictionary.' )
+			if not tags:
+				return ''
 			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) in [ 'aerodrome', 'heliport' ]:
 				return 'Airports'
@@ -1198,6 +1202,10 @@ class OverpassMapLayers( OverpassClient ):
 
 		'''
 		try:
+			if not isinstance( tags, dict ):
+				raise TypeError( 'tags must be a dictionary.' )
+			if not tags:
+				return ''
 			throw_if( 'tags', tags )
 			if tags.get( 'aeroway' ) == 'spaceport' or tags.get( 'man_made' ) == 'launch_pad':
 				return 'Launch Sites'
