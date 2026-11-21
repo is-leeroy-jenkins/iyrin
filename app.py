@@ -52,7 +52,7 @@ from excel import Excel
 from storage import InMemoryCache, SQLiteCache, SQLiteDatabase
 from langchain_core.documents import Document
 from lxml import etree
-from realtime import render_live_world_map, render_live_world_sidebar
+from realtime import render_live_world_map, render_world_sidebar
 from loaders import (TextLoader, CsvLoader, PdfLoader, WordLoader, PowerPointLoader,
 	ExcelLoader, MarkdownLoader, HtmlLoader, JsonLoader, WikiLoader, GithubLoader, WebLoader,
 	ArXivLoader, XmlLoader, PubMedSearchLoader, OpenCityLoader,
@@ -3340,7 +3340,7 @@ with st.sidebar:
 
 	# ------- Live World Data
 	st.markdown( '#### 📡 Live Data' )
-	render_live_world_sidebar( )
+	render_world_sidebar( )
 	
 	# -------- Settings
 	blue_divider( )
