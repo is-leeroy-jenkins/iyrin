@@ -1066,7 +1066,10 @@ class OverpassCameras( OverpassClient ):
 			throw_if( 'tags', tags )
 			if 'webcam' in tags or 'contact:webcam' in tags:
 				return 'Web Cameras'
-			if tags.get( 'man_made' ) == 'surveillance' or tags.get( 'surveillance:type' ) == 'camera':
+			# OSM surveillance features can represent guards and other non-camera monitoring.
+			if tags.get( 'surveillance:type' ) in ( 'camera', 'ALPR' ):
+				return 'CCTV / Surveillance'
+			if tags.get( 'man_made' ) == 'surveillance' and 'camera:type' in tags:
 				return 'CCTV / Surveillance'
 			return ''
 		except Exception as e:
