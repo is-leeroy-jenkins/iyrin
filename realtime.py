@@ -230,143 +230,85 @@ def initialize_live_world_state( ) -> None:
 		None: This operation has no return value.
 
 	'''
-	defaults: Dict[ str, object ] = {
-		'live_world_enabled': False,
-		'live_world_aircraft': False,
-		'live_world_aircraft_radius': 2.0,
-		'live_world_aircraft_airborne_only': True,
+	defaults: Dict[ str, object ] = { 'live_world_enabled': False, 'live_world_aircraft': False,
+		'live_world_aircraft_radius': 2.0, 'live_world_aircraft_airborne_only': True,
 		'opensky_api_client_id': cfg.OPENSKY_CLIENT_ID or '',
 		'opensky_api_credentials': cfg.OPENSKY_API_CREDENTIALS or '',
-		'live_world_military_aircraft': False,
-		'live_world_military_radius_nm': 250,
-		'live_world_satellites': False,
-		'live_world_satellite_group': 'stations',
-		'live_world_satellite_limit': 100,
-		'live_world_satellite_propagation_attempts': 0,
-		'live_world_satellite_propagation_failures': 0,
-		'live_world_vessels': False,
+		'live_world_military_aircraft': False, 'live_world_military_radius_nm': 250,
+		'live_world_satellites': False, 'live_world_satellite_group': 'stations',
+		'live_world_satellite_limit': 100, 'live_world_satellite_propagation_attempts': 0,
+		'live_world_satellite_propagation_failures': 0, 'live_world_vessels': False,
 		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY', '' ) or '',
-		'live_world_vessel_radius': 2.0,
-		'live_world_vessel_limit': 100,
-		'live_world_earthquakes': False,
-		'live_world_earthquake_feed': 'all_day.geojson',
-		'live_world_earthquake_min_magnitude': 1.0,
-		'live_world_fires': False,
-		'live_world_firms_source': 'VIIRS_NOAA21_NRT',
-		'live_world_firms_day_range': 1,
-		'live_world_firms_area_mode': 'Local Bounding Box',
-		'live_world_firms_max_records': 10000,
-		'live_world_firms_source_count': 0,
-		'live_world_firms_truncated': False,
-		'live_world_infrastructure': False,
-		'live_world_infrastructure_radius_km': 50,
-		'live_world_infrastructure_categories': [
-			'Airports', 'Ports', 'Power Plants', 'Dams', 'Data Centers' ],
-		'live_world_infrastructure_limit': 500,
-		'live_world_cameras': False,
+		'live_world_vessel_radius': 2.0, 'live_world_vessel_limit': 100,
+		'live_world_earthquakes': False, 'live_world_earthquake_feed': 'all_day.geojson',
+		'live_world_earthquake_min_magnitude': 1.0, 'live_world_fires': False,
+		'live_world_firms_source': 'VIIRS_NOAA21_NRT', 'live_world_firms_day_range': 1,
+		'live_world_firms_area_mode': 'Local Bounding Box', 'live_world_firms_max_records': 10000,
+		'live_world_firms_source_count': 0, 'live_world_firms_truncated': False,
+		'live_world_infrastructure': False, 'live_world_infrastructure_radius_km': 50,
+		'live_world_infrastructure_categories': [ 'Airports', 'Ports', 'Power Plants', 'Dams',
+			'Data Centers' ], 'live_world_infrastructure_limit': 500, 'live_world_cameras': False,
 		'live_world_camera_radius_km': 25,
 		'live_world_camera_categories': [ 'CCTV / Surveillance', 'Web Cameras' ],
-		'live_world_camera_limit': 500,
-		'live_world_map_layers': False,
+		'live_world_camera_limit': 500, 'live_world_map_layers': False,
 		'live_world_map_layer_radius_km': 50,
-		'live_world_map_layer_categories': [
-			'Public Transit', 'Bike Share', 'Emergency Services', 'Healthcare',
-			'EV Charging', 'Communications', 'Launch Sites' ],
-		'live_world_map_layer_limit': 1000,
-		'live_world_tracking': False,
-		'live_world_tracking_entity': '',
-		'live_world_tracking_active_entity': '',
-		'live_world_tracking_follow': True,
-		'live_world_tracking_max_points': 100,
-		'live_world_tracking_history': [ ],
-		'live_world_measurements': False,
+		'live_world_map_layer_categories': [ 'Public Transit', 'Bike Share', 'Emergency Services',
+			'Healthcare', 'EV Charging', 'Communications', 'Launch Sites' ],
+		'live_world_map_layer_limit': 1000, 'live_world_tracking': False,
+		'live_world_tracking_entity': '', 'live_world_tracking_active_entity': '',
+		'live_world_tracking_follow': True, 'live_world_tracking_max_points': 100,
+		'live_world_tracking_history': [ ], 'live_world_measurements': False,
 		'live_world_measurement_start': 'Current Location',
 		'live_world_measurement_end': 'Current Location',
 		'live_world_measurement_custom_start_latitude': 0.0,
 		'live_world_measurement_custom_start_longitude': 0.0,
 		'live_world_measurement_custom_end_latitude': 0.0,
-		'live_world_measurement_custom_end_longitude': 0.0,
-		'live_world_annotation_label': '',
-		'live_world_annotation_latitude': 0.0,
-		'live_world_annotation_longitude': 0.0,
-		'live_world_annotations': [ ],
-		'live_world_cross_layer_analysis': False,
+		'live_world_measurement_custom_end_longitude': 0.0, 'live_world_annotation_label': '',
+		'live_world_annotation_latitude': 0.0, 'live_world_annotation_longitude': 0.0,
+		'live_world_annotations': [ ], 'live_world_cross_layer_analysis': False,
 		'live_world_analysis_origin': 'Current Location',
-		'live_world_analysis_custom_latitude': 0.0,
-		'live_world_analysis_custom_longitude': 0.0,
+		'live_world_analysis_custom_latitude': 0.0, 'live_world_analysis_custom_longitude': 0.0,
 		'live_world_analysis_radius_nm': 250,
-		'live_world_analysis_entity_types': [
-			'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel', 'Earthquake', 'Fire',
-			'Infrastructure', 'Camera', 'Map Feature' ],
-		'live_world_analysis_limit': 100,
-		'live_world_geofencing': False,
+		'live_world_analysis_entity_types': [ 'Aircraft', 'Military Aircraft', 'Satellite',
+			'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ],
+		'live_world_analysis_limit': 100, 'live_world_geofencing': False,
 		'live_world_geofence_origin': 'Current Location',
-		'live_world_geofence_custom_latitude': 0.0,
-		'live_world_geofence_custom_longitude': 0.0,
+		'live_world_geofence_custom_latitude': 0.0, 'live_world_geofence_custom_longitude': 0.0,
 		'live_world_geofence_radius_nm': 50,
-		'live_world_geofence_entity_types': [
-			'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel', 'Earthquake', 'Fire',
-			'Infrastructure', 'Camera', 'Map Feature' ],
-		'live_world_geofence_event_limit': 100,
-		'live_world_geofence_events': [ ],
-		'live_world_geofence_snapshot': { },
-		'live_world_geofence_initialized': False,
-		'live_world_geofence_last_refresh_processed': '',
-		'live_world_historical_replay': False,
-		'live_world_history_persist': False,
-		'live_world_history_retention_days': 30,
-		'live_world_history_max_rows_per_source': 5000,
-		'live_world_history_window': '24 Hours',
-		'live_world_history_entity_types': [
-			'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel', 'Earthquake', 'Fire',
-			'Infrastructure', 'Camera', 'Map Feature' ],
-		'live_world_history_limit': 5000,
-		'live_world_history_snapshot': '',
-		'live_world_history_last_saved': 0,
-		'live_world_history_last_error': '',
-		'live_world_agent_tools': False,
-		'live_world_refresh_requested': False,
-		'live_world_last_refresh': '',
-		'live_world_refresh_id': '',
-		'live_world_last_success': '',
+		'live_world_geofence_entity_types': [ 'Aircraft', 'Military Aircraft', 'Satellite',
+			'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ],
+		'live_world_geofence_event_limit': 100, 'live_world_geofence_events': [ ],
+		'live_world_geofence_snapshot': { }, 'live_world_geofence_initialized': False,
+		'live_world_geofence_last_refresh_processed': '', 'live_world_historical_replay': False,
+		'live_world_history_persist': False, 'live_world_history_retention_days': 30,
+		'live_world_history_max_rows_per_source': 5000, 'live_world_history_window': '24 Hours',
+		'live_world_history_entity_types': [ 'Aircraft', 'Military Aircraft', 'Satellite',
+			'Vessel',
+			'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ],
+		'live_world_history_limit': 5000, 'live_world_history_snapshot': '',
+		'live_world_history_last_saved': 0, 'live_world_history_last_error': '',
+		'live_world_agent_tools': False, 'live_world_refresh_requested': False,
+		'live_world_last_refresh': '', 'live_world_refresh_id': '', 'live_world_last_success': '',
 		'live_world_last_error': '',
-		'live_world_source_status': {
-			key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_source_errors': {
-			key: '' for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_source_error_types': {
-			key: '' for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_source_http_status': {
-			key: 0 for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_source_last_attempt': {
-			key: '' for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_source_last_success': {
-			key: '' for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_source_stale': {
-			key: False for key in LIVE_WORLD_DATA_SOURCES },
-		'live_world_df_entities': pd.DataFrame( ),
-		'live_world_df_aircraft': pd.DataFrame( ),
+		'live_world_source_status': { key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_errors': { key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_error_types': { key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_http_status': { key: 0 for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_last_attempt': { key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_last_success': { key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_stale': { key: False for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_df_entities': pd.DataFrame( ), 'live_world_df_aircraft': pd.DataFrame( ),
 		'live_world_df_military_aircraft': pd.DataFrame( ),
-		'live_world_df_satellites': pd.DataFrame( ),
-		'live_world_df_vessels': pd.DataFrame( ),
-		'live_world_df_earthquakes': pd.DataFrame( ),
-		'live_world_df_fires': pd.DataFrame( ),
-		'live_world_df_infrastructure': pd.DataFrame( ),
-		'live_world_df_cameras': pd.DataFrame( ),
-		'live_world_df_map_layers': pd.DataFrame( ),
-		'live_world_aircraft_result': { },
-		'live_world_military_aircraft_result': { },
-		'live_world_satellite_result': [ ],
-		'live_world_vessel_result': [ ],
-		'live_world_earthquake_result': { },
-		'live_world_firms_result': { },
-		'live_world_infrastructure_result': { },
-		'live_world_camera_result': { },
-		'live_world_map_layer_result': { },
-		'live_world_map_style': 'Carto Dark Matter',
-		'live_world_zoom': 4,
-		'live_world_point_scale': 1.0,
-	}
+		'live_world_df_satellites': pd.DataFrame( ), 'live_world_df_vessels': pd.DataFrame( ),
+		'live_world_df_earthquakes': pd.DataFrame( ), 'live_world_df_fires': pd.DataFrame( ),
+		'live_world_df_infrastructure': pd.DataFrame( ), 'live_world_df_cameras': pd.DataFrame( ),
+		'live_world_df_map_layers': pd.DataFrame( ), 'live_world_aircraft_result': { },
+		'live_world_military_aircraft_result': { }, 'live_world_satellite_result': [ ],
+		'live_world_vessel_result': [ ], 'live_world_earthquake_result': { },
+		'live_world_firms_result': { }, 'live_world_infrastructure_result': { },
+		'live_world_camera_result': { }, 'live_world_map_layer_result': { },
+		'live_world_map_style': 'Carto Dark Matter', 'live_world_zoom': 4,
+		'live_world_point_scale': 1.0, }
 
 	for key, value in defaults.items( ):
 		if key not in st.session_state:
@@ -406,62 +348,48 @@ def render_live_world_sidebar( ) -> None:
 		st.caption( 'Live Layers' )
 		st.checkbox( LIVE_WORLD_LAYERS[ 'aircraft' ], key='live_world_aircraft' )
 		if st.session_state[ 'live_world_aircraft' ]:
-			st.slider( 'Aircraft Radius (Degrees)', min_value=0.25, max_value=10.0,
-				step=0.25, key='live_world_aircraft_radius' )
+			st.slider( 'Aircraft Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
+				key='live_world_aircraft_radius' )
 			st.checkbox( 'Airborne Only', key='live_world_aircraft_airborne_only' )
 			st.caption( 'OpenSky API Client credentials are used when configured.' )
-
-		st.checkbox( LIVE_WORLD_LAYERS[ 'military_aircraft' ],
-			key='live_world_military_aircraft' )
+		st.checkbox( LIVE_WORLD_LAYERS[ 'military_aircraft' ], key='live_world_military_aircraft' )
 		if st.session_state[ 'live_world_military_aircraft' ]:
-			st.slider( 'Military Aircraft Radius (NM)', min_value=25, max_value=250,
-				step=25, key='live_world_military_radius_nm' )
+			st.slider( 'Military Aircraft Radius (NM)', min_value=25, max_value=250, step=25,
+				key='live_world_military_radius_nm' )
 			st.caption( 'Military-tagged aircraft are retrieved from ADSB.lol.' )
-
 		st.checkbox( LIVE_WORLD_LAYERS[ 'satellites' ], key='live_world_satellites' )
 		if st.session_state[ 'live_world_satellites' ]:
-			st.selectbox( 'Satellite Group',
-				options=[ 'stations', 'visual', 'weather', 'gps-ops', 'active' ],
-				key='live_world_satellite_group' )
+			st.selectbox( 'Satellite Group', options=[ 'stations', 'visual', 'weather', 'gps-ops',
+				'active' ], key='live_world_satellite_group' )
 			st.slider( 'Satellite Limit', min_value=10, max_value=500, step=10,
 				key='live_world_satellite_limit' )
-
 		st.checkbox( LIVE_WORLD_LAYERS[ 'vessels' ], key='live_world_vessels' )
 		if st.session_state[ 'live_world_vessels' ]:
 			st.text_input( 'AIS Stream API Key', type='password',
-				key='live_world_aisstream_api_key',
-				help='Uses AISSTREAM_API_KEY when configured in the environment.' )
-			st.slider( 'Vessel Radius (Degrees)', min_value=0.25, max_value=10.0,
-				step=0.25, key='live_world_vessel_radius' )
+				key='live_world_aisstream_api_key', help='Uses AISSTREAM_API_KEY when configured '
+				                                         'in the environment.' )
+			st.slider( 'Vessel Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
+				key='live_world_vessel_radius' )
 			st.slider( 'Vessel Message Limit', min_value=10, max_value=250, step=10,
 				key='live_world_vessel_limit' )
-
 		st.checkbox( LIVE_WORLD_LAYERS[ 'earthquakes' ], key='live_world_earthquakes' )
 		if st.session_state[ 'live_world_earthquakes' ]:
-			st.selectbox(
-				'Earthquake Feed',
-				options=[
-					'all_hour.geojson', 'all_day.geojson', 'all_week.geojson',
-					'2.5_day.geojson', '2.5_week.geojson', '4.5_day.geojson',
-					'4.5_week.geojson', 'significant_day.geojson',
-					'significant_week.geojson' ],
-				key='live_world_earthquake_feed' )
-			st.slider( 'Minimum Magnitude', min_value=0.0, max_value=10.0,
-				step=0.1, key='live_world_earthquake_min_magnitude' )
-
+			st.selectbox( 'Earthquake Feed', options=[ 'all_hour.geojson', 'all_day.geojson',
+				'all_week.geojson', '2.5_day.geojson', '2.5_week.geojson', '4.5_day.geojson',
+				'4.5_week.geojson', 'significant_day.geojson',
+				'significant_week.geojson' ], key='live_world_earthquake_feed' )
+			st.slider( 'Minimum Magnitude', min_value=0.0, max_value=10.0, step=0.1,
+				key='live_world_earthquake_min_magnitude' )
 		st.checkbox( LIVE_WORLD_LAYERS[ 'fires' ], key='live_world_fires' )
 		if st.session_state[ 'live_world_fires' ]:
-			st.selectbox( 'FIRMS Source',
-				options=[ 'VIIRS_NOAA21_NRT', 'VIIRS_NOAA20_NRT', 'VIIRS_SNPP_NRT',
-					'MODIS_NRT', 'LANDSAT_NRT' ],
-				key='live_world_firms_source' )
+			st.selectbox( 'FIRMS Source', options=[ 'VIIRS_NOAA21_NRT', 'VIIRS_NOAA20_NRT',
+				'VIIRS_SNPP_NRT', 'MODIS_NRT', 'LANDSAT_NRT' ], key='live_world_firms_source' )
 			st.slider( 'Fire Day Range', min_value=1, max_value=5, step=1,
 				key='live_world_firms_day_range' )
-			st.selectbox( 'Fire Area', options=[ 'Local Bounding Box', 'World' ],
-				key='live_world_firms_area_mode' )
+			st.selectbox( 'Fire Area', options=[ 'Local Bounding Box',
+				'World' ], key='live_world_firms_area_mode' )
 			st.slider( 'Fire Record Limit', min_value=1000, max_value=50000, step=1000,
 				key='live_world_firms_max_records' )
-
 		st.checkbox( LIVE_WORLD_LAYERS[ 'measurements' ], key='live_world_measurements' )
 		if st.session_state[ 'live_world_measurements' ]:
 			measurement_options = get_live_world_measurement_options( )
@@ -472,13 +400,11 @@ def render_live_world_sidebar( ) -> None:
 				st.session_state[ 'live_world_measurement_end' ] = 'Current Location'
 			measure_c1, measure_c2 = st.columns( 2 )
 			with measure_c1:
-				st.selectbox( 'Measure From', options=measurement_keys,
-					format_func=lambda value: measurement_options[ value ],
-					key='live_world_measurement_start' )
+				st.selectbox( 'Measure From', options=measurement_keys, format_func=lambda value:
+				measurement_options[ value ], key='live_world_measurement_start' )
 			with measure_c2:
-				st.selectbox( 'Measure To', options=measurement_keys,
-					format_func=lambda value: measurement_options[ value ],
-					key='live_world_measurement_end' )
+				st.selectbox( 'Measure To', options=measurement_keys, format_func=lambda value:
+				measurement_options[ value ], key='live_world_measurement_end' )
 			if st.session_state[ 'live_world_measurement_start' ] == 'Custom Point':
 				custom_start_c1, custom_start_c2 = st.columns( 2 )
 				with custom_start_c1:
@@ -495,7 +421,6 @@ def render_live_world_sidebar( ) -> None:
 				with custom_end_c2:
 					st.number_input( 'End Longitude', min_value=-180.0, max_value=180.0,
 						format='%.6f', key='live_world_measurement_custom_end_longitude' )
-
 			st.caption( 'Annotations' )
 			st.text_input( 'Annotation Label', key='live_world_annotation_label' )
 			annotation_c1, annotation_c2 = st.columns( 2 )
@@ -514,7 +439,6 @@ def render_live_world_sidebar( ) -> None:
 				if st.button( 'Clear Annotations', icon='🧹', key='live_world_annotation_clear',
 						width='stretch' ):
 					clear_live_world_annotations( )
-
 		st.checkbox( LIVE_WORLD_LAYERS[ 'tracking' ], key='live_world_tracking' )
 		if st.session_state[ 'live_world_tracking' ]:
 			tracking_options = get_live_world_tracking_options( )
@@ -522,9 +446,8 @@ def render_live_world_sidebar( ) -> None:
 				tracking_keys = list( tracking_options.keys( ) )
 				if st.session_state[ 'live_world_tracking_entity' ] not in tracking_keys:
 					st.session_state[ 'live_world_tracking_entity' ] = tracking_keys[ 0 ]
-				st.selectbox( 'Tracked Entity', options=tracking_keys,
-					format_func=lambda value: tracking_options[ value ],
-					key='live_world_tracking_entity' )
+				st.selectbox( 'Tracked Entity', options=tracking_keys, format_func=lambda value:
+				tracking_options[ value ], key='live_world_tracking_entity' )
 			else:
 				st.info( 'Refresh a moving Live World layer before selecting a tracked entity.' )
 			st.checkbox( 'Follow Tracked Entity', key='live_world_tracking_follow' )
@@ -533,75 +456,70 @@ def render_live_world_sidebar( ) -> None:
 			if st.button( 'Clear Trail', icon='🧹', key='live_world_tracking_clear',
 					width='stretch' ):
 				clear_live_world_tracking( )
-
 		st.divider( )
 		refresh_c1, clear_c2 = st.columns( 2 )
 		with refresh_c1:
 			if st.button( 'Refresh', icon='🔄', key='live_world_refresh', width='stretch' ):
 				st.session_state[ 'live_world_refresh_requested' ] = True
-
 		with clear_c2:
 			if st.button( 'Clear', icon='🧹', key='live_world_clear', width='stretch' ):
 				clear_live_world_data( )
-
 		with st.expander( 'Additional Layers', expanded=False ):
 			st.checkbox( LIVE_WORLD_LAYERS[ 'infrastructure' ], key='live_world_infrastructure' )
 			if st.session_state[ 'live_world_infrastructure' ]:
-				st.multiselect( 'Infrastructure Categories',
-					options=[ 'Airports', 'Ports', 'Power Plants', 'Dams', 'Data Centers',
-						'Military Installations' ], key='live_world_infrastructure_categories' )
+				st.multiselect( 'Infrastructure Categories', options=[ 'Airports', 'Ports',
+					'Power Plants', 'Dams', 'Data Centers',
+					'Military Installations' ], key='live_world_infrastructure_categories' )
 				infra_c1, infra_c2 = st.columns( 2 )
 				with infra_c1:
-					st.slider( 'Infrastructure Radius (KM)', min_value=10, max_value=250,
-						step=10, key='live_world_infrastructure_radius_km' )
+					st.slider( 'Infrastructure Radius (KM)', min_value=10, max_value=250, step=10,
+						key='live_world_infrastructure_radius_km' )
 				with infra_c2:
-					st.slider( 'Infrastructure Limit', min_value=50, max_value=2000,
-						step=50, key='live_world_infrastructure_limit' )
-				st.caption( 'Infrastructure features are retrieved from OpenStreetMap via Overpass.' )
-
+					st.slider( 'Infrastructure Limit', min_value=50, max_value=2000, step=50,
+						key='live_world_infrastructure_limit' )
+				st.caption( 'Infrastructure features are retrieved from OpenStreetMap via '
+				            'Overpass.' )
 			st.checkbox( LIVE_WORLD_LAYERS[ 'cameras' ], key='live_world_cameras' )
 			if st.session_state[ 'live_world_cameras' ]:
-				st.multiselect( 'Camera Categories',
-					options=[ 'CCTV / Surveillance', 'Web Cameras' ],
-					key='live_world_camera_categories' )
+				st.multiselect( 'Camera Categories', options=[ 'CCTV / Surveillance',
+					'Web Cameras' ], key='live_world_camera_categories' )
 				camera_c1, camera_c2 = st.columns( 2 )
 				with camera_c1:
-					st.slider( 'Camera Radius (KM)', min_value=1, max_value=100,
-						step=1, key='live_world_camera_radius_km' )
+					st.slider( 'Camera Radius (KM)', min_value=1, max_value=100, step=1,
+						key='live_world_camera_radius_km' )
 				with camera_c2:
-					st.slider( 'Camera Limit', min_value=50, max_value=2000,
-						step=50, key='live_world_camera_limit' )
-				st.caption( 'Public camera locations and webcam tags are retrieved from OpenStreetMap via Overpass.' )
-
+					st.slider( 'Camera Limit', min_value=50, max_value=2000, step=50,
+						key='live_world_camera_limit' )
+				st.caption( 'Public camera locations and webcam tags are retrieved from '
+				            'OpenStreetMap via Overpass.' )
 			st.checkbox( LIVE_WORLD_LAYERS[ 'map_layers' ], key='live_world_map_layers' )
 			if st.session_state[ 'live_world_map_layers' ]:
-				st.multiselect( 'Map Layer Categories',
-					options=[ 'Public Transit', 'Bike Share', 'Emergency Services', 'Healthcare',
-						'EV Charging', 'Communications', 'Launch Sites' ],
-					key='live_world_map_layer_categories' )
+				st.multiselect( 'Map Layer Categories', options=[ 'Public Transit', 'Bike Share',
+					'Emergency Services', 'Healthcare', 'EV Charging', 'Communications',
+					'Launch Sites' ], key='live_world_map_layer_categories' )
 				map_layer_c1, map_layer_c2 = st.columns( 2 )
 				with map_layer_c1:
-					st.slider( 'Map Layer Radius (KM)', min_value=5, max_value=250,
-						step=5, key='live_world_map_layer_radius_km' )
+					st.slider( 'Map Layer Radius (KM)', min_value=5, max_value=250, step=5,
+						key='live_world_map_layer_radius_km' )
 				with map_layer_c2:
-					st.slider( 'Map Layer Limit', min_value=50, max_value=5000,
-						step=50, key='live_world_map_layer_limit' )
-				st.caption( 'Contextual public map features are retrieved from OpenStreetMap via Overpass.' )
+					st.slider( 'Map Layer Limit', min_value=50, max_value=5000, step=50,
+						key='live_world_map_layer_limit' )
+				st.caption( 'Contextual public map features are retrieved from OpenStreetMap via '
+				            'Overpass.' )
 			for label in LIVE_WORLD_PENDING_LAYERS.values( ):
 				st.checkbox( label, value=False, disabled=True )
-
 		with st.expander( 'AI & Advanced Tools', expanded=False ):
 			st.caption( 'Advanced tools operate on the currently loaded Live World entity frame.' )
-			st.checkbox( AI_ADVANCED_TOOLS[ 'cross_layer_analysis' ],
+			st.checkbox(
+				AI_ADVANCED_TOOLS[ 'cross_layer_analysis' ],
 				key='live_world_cross_layer_analysis' )
 			if st.session_state[ 'live_world_cross_layer_analysis' ]:
 				analysis_options = get_live_world_analysis_origin_options( )
 				analysis_keys = list( analysis_options.keys( ) )
 				if st.session_state[ 'live_world_analysis_origin' ] not in analysis_keys:
 					st.session_state[ 'live_world_analysis_origin' ] = 'Current Location'
-				st.selectbox( 'Analysis Origin', options=analysis_keys,
-					format_func=lambda value: analysis_options[ value ],
-					key='live_world_analysis_origin' )
+				st.selectbox( 'Analysis Origin', options=analysis_keys, format_func=lambda value:
+				analysis_options[ value ], key='live_world_analysis_origin' )
 				if st.session_state[ 'live_world_analysis_origin' ] == 'Custom Point':
 					analysis_c1, analysis_c2 = st.columns( 2 )
 					with analysis_c1:
@@ -610,24 +528,21 @@ def render_live_world_sidebar( ) -> None:
 					with analysis_c2:
 						st.number_input( 'Analysis Longitude', min_value=-180.0, max_value=180.0,
 							format='%.6f', key='live_world_analysis_custom_longitude' )
-				st.slider( 'Analysis Radius (NM)', min_value=10, max_value=2500,
-					step=10, key='live_world_analysis_radius_nm' )
-				st.multiselect( 'Entity Types',
-					options=[ 'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel',
-						'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ],
-					key='live_world_analysis_entity_types' )
-				st.slider( 'Analysis Result Limit', min_value=10, max_value=500,
-					step=10, key='live_world_analysis_limit' )
-
+				st.slider( 'Analysis Radius (NM)', min_value=10, max_value=2500, step=10,
+					key='live_world_analysis_radius_nm' )
+				st.multiselect( 'Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+					'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+					'Map Feature' ], key='live_world_analysis_entity_types' )
+				st.slider( 'Analysis Result Limit', min_value=10, max_value=500, step=10,
+					key='live_world_analysis_limit' )
 			st.checkbox( AI_ADVANCED_TOOLS[ 'geofencing' ], key='live_world_geofencing' )
 			if st.session_state[ 'live_world_geofencing' ]:
 				geofence_options = get_live_world_geofence_origin_options( )
 				geofence_keys = list( geofence_options.keys( ) )
 				if st.session_state[ 'live_world_geofence_origin' ] not in geofence_keys:
 					st.session_state[ 'live_world_geofence_origin' ] = 'Current Location'
-				st.selectbox( 'Geofence Origin', options=geofence_keys,
-					format_func=lambda value: geofence_options[ value ],
-					key='live_world_geofence_origin' )
+				st.selectbox( 'Geofence Origin', options=geofence_keys, format_func=lambda value:
+				geofence_options[ value ], key='live_world_geofence_origin' )
 				if st.session_state[ 'live_world_geofence_origin' ] == 'Custom Point':
 					geofence_c1, geofence_c2 = st.columns( 2 )
 					with geofence_c1:
@@ -636,39 +551,36 @@ def render_live_world_sidebar( ) -> None:
 					with geofence_c2:
 						st.number_input( 'Geofence Longitude', min_value=-180.0, max_value=180.0,
 							format='%.6f', key='live_world_geofence_custom_longitude' )
-				st.slider( 'Geofence Radius (NM)', min_value=5, max_value=1000,
-					step=5, key='live_world_geofence_radius_nm' )
-				st.multiselect( 'Geofence Entity Types',
-					options=[ 'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel',
-						'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ],
-					key='live_world_geofence_entity_types' )
-				st.slider( 'Geofence Event History', min_value=10, max_value=500,
-					step=10, key='live_world_geofence_event_limit' )
+				st.slider( 'Geofence Radius (NM)', min_value=5, max_value=1000, step=5,
+					key='live_world_geofence_radius_nm' )
+				st.multiselect( 'Geofence Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+					'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+					'Map Feature' ], key='live_world_geofence_entity_types' )
+				st.slider( 'Geofence Event History', min_value=10, max_value=500, step=10,
+					key='live_world_geofence_event_limit' )
 				if st.button( 'Clear Geofence Events', icon='🧹',
 						key='live_world_geofence_clear_events', width='stretch' ):
 					clear_live_world_geofence_events( )
-
-			st.checkbox( AI_ADVANCED_TOOLS[ 'historical_replay' ],
-				key='live_world_historical_replay' )
+			st.checkbox(
+				AI_ADVANCED_TOOLS[ 'historical_replay' ], key='live_world_historical_replay' )
 			if st.session_state[ 'live_world_historical_replay' ]:
 				st.checkbox( 'Persist Live World Refreshes', key='live_world_history_persist' )
 				history_c1, history_c2 = st.columns( 2 )
 				with history_c1:
-					st.selectbox( 'Replay Window',
-						options=[ '1 Hour', '6 Hours', '24 Hours', '7 Days', '30 Days', 'All Retained' ],
-						key='live_world_history_window' )
+					st.selectbox( 'Replay Window', options=[ '1 Hour', '6 Hours', '24 Hours',
+						'7 Days', '30 Days', 'All Retained' ], key='live_world_history_window' )
 				with history_c2:
 					st.slider( 'Retention (Days)', min_value=1, max_value=365, step=1,
 						key='live_world_history_retention_days' )
 				st.slider( 'Max Rows / Source / Refresh', min_value=100, max_value=10000,
 					step=100, key='live_world_history_max_rows_per_source' )
-				st.multiselect( 'Replay Entity Types',
-					options=[ 'Aircraft', 'Military Aircraft', 'Satellite', 'Vessel',
-						'Earthquake', 'Fire', 'Infrastructure', 'Camera', 'Map Feature' ], key='live_world_history_entity_types' )
+				st.multiselect( 'Replay Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+					'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+					'Map Feature' ], key='live_world_history_entity_types' )
 				st.slider( 'Replay Record Limit', min_value=100, max_value=25000, step=100,
 					key='live_world_history_limit' )
-				history_hours = get_live_world_history_window_hours(
-					str( st.session_state[ 'live_world_history_window' ] ) )
+				history_hours = get_live_world_history_window_hours( str(
+					st.session_state[ 'live_world_history_window' ] ) )
 				snapshot_options = get_live_world_history_snapshots( history_hours )
 				if snapshot_options:
 					if st.session_state[ 'live_world_history_snapshot' ] not in snapshot_options:
@@ -682,8 +594,8 @@ def render_live_world_sidebar( ) -> None:
 				with history_b1:
 					if st.button( 'Purge Expired', icon='🧹', key='live_world_history_purge',
 							width='stretch' ):
-						purge_live_world_history(
-							int( st.session_state[ 'live_world_history_retention_days' ] ) )
+						purge_live_world_history( int(
+							st.session_state[ 'live_world_history_retention_days' ] ) )
 				with history_b2:
 					if st.button( 'Clear History', icon='🗑️', key='live_world_history_clear',
 							width='stretch' ):
@@ -873,34 +785,18 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 			heading_value = float( heading ) if heading is not None else 0.0
 		except ( TypeError, ValueError ):
 			heading_value = 0.0
-
-		metadata = {
-			'ICAO24': icao24,
-			'Callsign': callsign,
-			'Origin Country': state[ 2 ],
-			'Time Position': state[ 3 ],
-			'Last Contact': state[ 4 ],
-			'Barometric Altitude': baro_altitude,
-			'Geometric Altitude': geo_altitude,
-			'Vertical Rate': state[ 11 ] if len( state ) > 11 else None,
-			'On Ground': on_ground,
+		metadata = { 'ICAO24': icao24, 'Callsign': callsign, 'Origin Country': state[ 2 ],
+			'Time Position': state[ 3 ], 'Last Contact': state[ 4 ],
+			'Barometric Altitude': baro_altitude, 'Geometric Altitude': geo_altitude,
+			'Vertical Rate': state[ 11 ] if len( state ) > 11 else None, 'On Ground': on_ground,
 			'Squawk': state[ 14 ] if len( state ) > 14 else None,
 			'SPI': state[ 15 ] if len( state ) > 15 else None,
 			'Position Source': state[ 16 ] if len( state ) > 16 else None,
-			'Category': state[ 17 ] if len( state ) > 17 else None,
-		}
-		entities.append( GeoEntity(
-			entity_id=icao24 or f'OPENSKY-{len( entities ) + 1}',
-			entity_type='Aircraft',
-			name=callsign or icao24,
-			latitude=lat,
-			longitude=lon,
-			altitude=altitude_value,
-			heading=heading_value,
-			speed=velocity_value,
-			timestamp=str( state[ 4 ] or '' ),
-			source='OpenSky Network',
-			metadata=metadata ) )
+			'Category': state[ 17 ] if len( state ) > 17 else None, }
+		entities.append( GeoEntity( entity_id=icao24 or f'OPENSKY-{len( entities ) + 1}',
+			entity_type='Aircraft', name=callsign or icao24, latitude=lat, longitude=lon,
+			altitude=altitude_value, heading=heading_value, speed=velocity_value, timestamp=str(
+			state[ 4 ] or '' ), source='OpenSky Network', metadata=metadata ) )
 
 	st.session_state[ 'live_world_aircraft_result' ] = result
 	return entities_to_dataframe( entities )
@@ -1002,32 +898,17 @@ def fetch_live_military_aircraft( latitude: float, longitude: float ) -> pd.Data
 		hex_id = str( row.get( 'hex', '' ) or '' ).strip( )
 		flight = str( row.get( 'flight', '' ) or '' ).strip( )
 		registration = str( row.get( 'r', '' ) or '' ).strip( )
-		metadata = {
-			'ICAO Hex': hex_id,
-			'Callsign': flight,
-			'Registration': registration,
-			'Aircraft Type': row.get( 't', '' ),
-			'Description': row.get( 'desc', '' ),
-			'Category': row.get( 'category', '' ),
-			'Squawk': row.get( 'squawk', '' ),
-			'Emergency': row.get( 'emergency', '' ),
-			'DB Flags': row.get( 'dbFlags', 1 ),
-			'Altitude (ft)': altitude,
-			'Ground Speed (kt)': ground_speed,
+		metadata = { 'ICAO Hex': hex_id, 'Callsign': flight, 'Registration': registration,
+			'Aircraft Type': row.get( 't', '' ), 'Description': row.get( 'desc', '' ),
+			'Category': row.get( 'category', '' ), 'Squawk': row.get( 'squawk', '' ),
+			'Emergency': row.get( 'emergency', '' ), 'DB Flags': row.get( 'dbFlags', 1 ),
+			'Altitude (ft)': altitude, 'Ground Speed (kt)': ground_speed,
 			'Vertical Rate': row.get( 'baro_rate', row.get( 'geom_rate', None ) ),
-			'Distance (NM)': round( distance_nm, 2 ),
-		}
-		entities.append( GeoEntity(
-			entity_id=hex_id or f'ADSBLOL-MIL-{index + 1}',
-			entity_type='Military Aircraft',
-			name=flight or registration or hex_id,
-			latitude=lat,
-			longitude=lon,
-			altitude=altitude_meters,
-			heading=heading_value,
-			speed=speed_mps,
-			timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ),
-			source='ADSB.lol',
+			'Distance (NM)': round( distance_nm, 2 ), }
+		entities.append( GeoEntity( entity_id=hex_id or f'ADSBLOL-MIL-{index + 1}',
+			entity_type='Military Aircraft', name=flight or registration or hex_id, latitude=lat,
+			longitude=lon, altitude=altitude_meters, heading=heading_value, speed=speed_mps,
+			timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ), source='ADSB.lol',
 			metadata=metadata ) )
 
 	st.session_state[ 'live_world_military_aircraft_result' ] = result
@@ -1091,29 +972,18 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 			heading_value = float( heading ) if heading is not None else 0.0
 		except ( TypeError, ValueError ):
 			heading_value = 0.0
-
-		metadata = {
-			'MMSI': mmsi,
-			'Message Type': message_type,
-			'Speed Over Ground (kt)': speed_knots,
-			'Course Over Ground': body.get( 'Cog', None ),
+		metadata = { 'MMSI': mmsi, 'Message Type': message_type,
+			'Speed Over Ground (kt)': speed_knots, 'Course Over Ground': body.get( 'Cog', None ),
 			'True Heading': body.get( 'TrueHeading', None ),
 			'Navigational Status': body.get( 'NavigationalStatus', None ),
 			'Position Accuracy': body.get( 'PositionAccuracy', None ),
-			'RAIM': body.get( 'Raim', None ),
-		}
+			'RAIM': body.get( 'Raim', None ), }
 		entity_id = mmsi or f'AIS-{index + 1}'
-		entities_by_mmsi[ entity_id ] = GeoEntity(
-			entity_id=entity_id,
-			entity_type='Vessel',
-			name=ship_name or entity_id,
-			latitude=lat,
-			longitude=lon,
-			altitude=0.0,
-			heading=heading_value,
-			speed=speed_mps,
-			timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ),
-			source='AIS Stream',
+		entities_by_mmsi[
+			entity_id ] = GeoEntity( entity_id=entity_id, entity_type='Vessel', name=ship_name or
+		                                                                             entity_id,
+			latitude=lat, longitude=lon, altitude=0.0, heading=heading_value, speed=speed_mps,
+			timestamp=dt.datetime.now( dt.timezone.utc ).isoformat( ), source='AIS Stream',
 			metadata=metadata )
 
 	st.session_state[ 'live_world_vessel_result' ] = result
@@ -1152,25 +1022,14 @@ def fetch_live_satellites( ) -> pd.DataFrame:
 
 		catalog_number = str( position.get( 'CatalogNumber', '' ) or '' )
 		name = str( position.get( 'Name', '' ) or catalog_number )
-		metadata = {
-			'Catalog Number': catalog_number,
-			'Object ID': position.get( 'ObjectId', '' ),
+		metadata = { 'Catalog Number': catalog_number, 'Object ID': position.get( 'ObjectId', '' ),
 			'Epoch': position.get( 'Epoch', '' ),
-			'Classification': position.get( 'Classification', '' ),
-			'Group': group,
-		}
-		entities.append( GeoEntity(
-			entity_id=catalog_number or name,
-			entity_type='Satellite',
-			name=name,
-			latitude=float( position[ 'Latitude' ] ),
-			longitude=float( position[ 'Longitude' ] ),
-			altitude=float( position[ 'Altitude' ] ),
-			heading=0.0,
-			speed=float( position[ 'Velocity' ] ),
-			timestamp=when.isoformat( ),
-			source='CelesTrak',
-			metadata=metadata ) )
+			'Classification': position.get( 'Classification', '' ), 'Group': group, }
+		entities.append( GeoEntity( entity_id=catalog_number or name, entity_type='Satellite',
+			name=name, latitude=float(
+			position[ 'Latitude' ] ), longitude=float( position[ 'Longitude' ] ), altitude=float(
+			position[ 'Altitude' ] ), heading=0.0, speed=float( position[
+			'Velocity' ] ), timestamp=when.isoformat( ), source='CelesTrak', metadata=metadata ) )
 
 	st.session_state[ 'live_world_satellite_propagation_failures' ] = failures
 	st.session_state[ 'live_world_satellite_result' ] = records
@@ -1226,27 +1085,14 @@ def fetch_live_earthquakes( ) -> pd.DataFrame:
 			depth_value = 0.0
 
 		entity_id = str( row.get( 'Id', '' ) or f'USGS-{index + 1}' )
-		metadata = {
-			'Magnitude': magnitude_value,
-			'Depth (km)': depth_value,
-			'Alert': row.get( 'Alert', '' ),
-			'Status': row.get( 'Status', '' ),
-			'Tsunami': row.get( 'Tsunami', None ),
-			'Felt Reports': row.get( 'Felt Reports', None ),
-			'Event Type': row.get( 'Event Type', '' ),
-			'URL': row.get( 'URL', '' ),
-		}
-		entities.append( GeoEntity(
-			entity_id=entity_id,
-			entity_type='Earthquake',
-			name=str( row.get( 'Place', '' ) or entity_id ),
-			latitude=latitude_value,
-			longitude=longitude_value,
-			altitude=-depth_value,
-			heading=0.0,
-			speed=0.0,
-			timestamp=str( row.get( 'Time', '' ) or '' ),
-			source='USGS Earthquakes',
+		metadata = { 'Magnitude': magnitude_value, 'Depth (km)': depth_value,
+			'Alert': row.get( 'Alert', '' ), 'Status': row.get( 'Status', '' ),
+			'Tsunami': row.get( 'Tsunami', None ), 'Felt Reports': row.get( 'Felt Reports', None ),
+			'Event Type': row.get( 'Event Type', '' ), 'URL': row.get( 'URL', '' ), }
+		entities.append( GeoEntity( entity_id=entity_id, entity_type='Earthquake', name=str(
+			row.get( 'Place', '' ) or entity_id ), latitude=latitude_value,
+			longitude=longitude_value, altitude=-depth_value, heading=0.0, speed=0.0,
+			timestamp=str( row.get( 'Time', '' ) or '' ), source='USGS Earthquakes',
 			metadata=metadata ) )
 
 	st.session_state[ 'live_world_earthquake_result' ] = result
@@ -1280,12 +1126,8 @@ def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 		latitude, longitude )
 
 	service = Firms( )
-	result = service.fetch_area(
-		source=source,
-		area_coordinates=area_coordinates,
-		day_range=day_range,
-		date='',
-		time=20 ) or { }
+	result = service.fetch_area( source=source, area_coordinates=area_coordinates,
+		day_range=day_range, date='', time=20 ) or { }
 	rows = result.get( 'rows', [ ] ) or [ ]
 	max_records = int( st.session_state[ 'live_world_firms_max_records' ] )
 	st.session_state[ 'live_world_firms_source_count' ] = len( rows )
@@ -1312,30 +1154,18 @@ def fetch_live_fires( latitude: float, longitude: float ) -> pd.DataFrame:
 		acq_time = str( get_row_value( row,
 			[ 'acq_time', 'Acq Time', 'Acquisition Time' ] ) or '' )
 		satellite = str( get_row_value( row, [ 'satellite', 'Satellite' ] ) or source )
-		metadata = {
-			'Satellite': satellite,
+		metadata = { 'Satellite': satellite,
 			'Instrument': get_row_value( row, [ 'instrument', 'Instrument' ] ),
 			'Confidence': get_row_value( row, [ 'confidence', 'Confidence' ] ),
 			'FRP': get_row_value( row, [ 'frp', 'FRP' ] ),
-			'Brightness': get_row_value( row,
-				[ 'bright_ti4', 'brightness', 'Brightness', 'bright_t31' ] ),
-			'Day/Night': get_row_value( row, [ 'daynight', 'Day/Night' ] ),
-			'Version': get_row_value( row, [ 'version', 'Version' ] ),
-		}
+			'Brightness': get_row_value( row, [ 'bright_ti4', 'brightness', 'Brightness',
+				'bright_t31' ] ), 'Day/Night': get_row_value( row, [ 'daynight', 'Day/Night' ] ),
+			'Version': get_row_value( row, [ 'version', 'Version' ] ), }
 		entity_id = (
 			f'FIRMS-{source}-{acq_date}-{acq_time}-{lat:.5f}-{lon:.5f}' )
-		entities.append( GeoEntity(
-			entity_id=entity_id,
-			entity_type='Fire',
-			name=f'Active Fire - {satellite}',
-			latitude=lat,
-			longitude=lon,
-			altitude=0.0,
-			heading=0.0,
-			speed=0.0,
-			timestamp=f'{acq_date} {acq_time}'.strip( ),
-			source='NASA FIRMS',
-			metadata=metadata ) )
+		entities.append( GeoEntity( entity_id=entity_id, entity_type='Fire', name=f'Active Fire - '
+		                                                                          f'{satellite}',
+			latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0, timestamp=f'{acq_date} {acq_time}'.strip( ), source='NASA FIRMS', metadata=metadata ) )
 
 	st.session_state[ 'live_world_firms_result' ] = result
 	return entities_to_dataframe( entities )
@@ -1391,28 +1221,12 @@ def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFra
 		osm_id = str( element.get( 'id', '' ) or '' )
 		entity_id = f'OSM-{osm_type}-{osm_id}'
 		name = str( tags.get( 'name', '' ) or tags.get( 'operator', '' ) or f'{category} {osm_id}' )
-		metadata = {
-			'Category': category,
-			'OSM Type': osm_type,
-			'OSM ID': osm_id,
-			'Operator': tags.get( 'operator', '' ),
-			'IATA': tags.get( 'iata', '' ),
-			'ICAO': tags.get( 'icao', '' ),
-			'Website': tags.get( 'website', '' ),
-			'Tags': tags,
-		}
-		entities.append( GeoEntity(
-			entity_id=entity_id,
-			entity_type='Infrastructure',
-			name=name,
-			latitude=lat,
-			longitude=lon,
-			altitude=0.0,
-			heading=0.0,
-			speed=0.0,
-			timestamp=observed_at,
-			source='OpenStreetMap Overpass',
-			metadata=metadata ) )
+		metadata = { 'Category': category, 'OSM Type': osm_type, 'OSM ID': osm_id,
+			'Operator': tags.get( 'operator', '' ), 'IATA': tags.get( 'iata', '' ),
+			'ICAO': tags.get( 'icao', '' ), 'Website': tags.get( 'website', '' ), 'Tags': tags, }
+		entities.append( GeoEntity( entity_id=entity_id, entity_type='Infrastructure', name=name,
+			latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0,
+			timestamp=observed_at, source='OpenStreetMap Overpass', metadata=metadata ) )
 
 	st.session_state[ 'live_world_infrastructure_result' ] = result
 	return entities_to_dataframe( entities )
@@ -1471,29 +1285,15 @@ def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 			or tags.get( 'website', '' ) or tags.get( 'url', '' ) or '' )
 		name = str( tags.get( 'name', '' ) or tags.get( 'operator', '' )
 			or f'{category} {osm_id}' )
-		metadata = {
-			'Category': category,
-			'OSM Type': osm_type,
-			'OSM ID': osm_id,
+		metadata = { 'Category': category, 'OSM Type': osm_type, 'OSM ID': osm_id,
 			'Operator': tags.get( 'operator', '' ),
 			'Surveillance Type': tags.get( 'surveillance:type', '' ),
 			'Surveillance Zone': tags.get( 'surveillance:zone', '' ),
 			'Direction': tags.get( 'camera:direction', tags.get( 'direction', '' ) ),
-			'Web URL': web_url,
-			'Tags': tags,
-		}
-		entities.append( GeoEntity(
-			entity_id=entity_id,
-			entity_type='Camera',
-			name=name,
-			latitude=lat,
-			longitude=lon,
-			altitude=0.0,
-			heading=0.0,
-			speed=0.0,
-			timestamp=observed_at,
-			source='OpenStreetMap Overpass',
-			metadata=metadata ) )
+			'Web URL': web_url, 'Tags': tags, }
+		entities.append( GeoEntity( entity_id=entity_id, entity_type='Camera', name=name,
+			latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0,
+			timestamp=observed_at, source='OpenStreetMap Overpass', metadata=metadata ) )
 
 	st.session_state[ 'live_world_camera_result' ] = result
 	return entities_to_dataframe( entities )
@@ -1550,29 +1350,13 @@ def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 		entity_id = f'OSM-MAP-{osm_type}-{osm_id}'
 		name = str( tags.get( 'name', '' ) or tags.get( 'operator', '' )
 			or tags.get( 'brand', '' ) or f'{category} {osm_id}' )
-		metadata = {
-			'Category': category,
-			'OSM Type': osm_type,
-			'OSM ID': osm_id,
-			'Operator': tags.get( 'operator', '' ),
-			'Network': tags.get( 'network', '' ),
-			'Website': tags.get( 'website', '' ),
-			'Amenity': tags.get( 'amenity', '' ),
-			'Public Transport': tags.get( 'public_transport', '' ),
-			'Tags': tags,
-		}
-		entities.append( GeoEntity(
-			entity_id=entity_id,
-			entity_type='Map Feature',
-			name=name,
-			latitude=lat,
-			longitude=lon,
-			altitude=0.0,
-			heading=0.0,
-			speed=0.0,
-			timestamp=observed_at,
-			source='OpenStreetMap Overpass',
-			metadata=metadata ) )
+		metadata = { 'Category': category, 'OSM Type': osm_type, 'OSM ID': osm_id,
+			'Operator': tags.get( 'operator', '' ), 'Network': tags.get( 'network', '' ),
+			'Website': tags.get( 'website', '' ), 'Amenity': tags.get( 'amenity', '' ),
+			'Public Transport': tags.get( 'public_transport', '' ), 'Tags': tags, }
+		entities.append( GeoEntity( entity_id=entity_id, entity_type='Map Feature', name=name,
+			latitude=lat, longitude=lon, altitude=0.0, heading=0.0, speed=0.0,
+			timestamp=observed_at, source='OpenStreetMap Overpass', metadata=metadata ) )
 
 	st.session_state[ 'live_world_map_layer_result' ] = result
 	return entities_to_dataframe( entities )
@@ -1621,18 +1405,10 @@ def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
 
 	rows: List[ Dict[ str, object ] ] = [ ]
 	for entity in entities:
-		rows.append( {
-			'EntityId': entity.entity_id,
-			'EntityType': entity.entity_type,
-			'Name': entity.name,
-			'Latitude': entity.latitude,
-			'Longitude': entity.longitude,
-			'Altitude': entity.altitude,
-			'Heading': entity.heading,
-			'Speed': entity.speed,
-			'Timestamp': entity.timestamp,
-			'Source': entity.source,
-			'Metadata': entity.metadata,
+		rows.append( { 'EntityId': entity.entity_id, 'EntityType': entity.entity_type,
+			'Name': entity.name, 'Latitude': entity.latitude, 'Longitude': entity.longitude,
+			'Altitude': entity.altitude, 'Heading': entity.heading, 'Speed': entity.speed,
+			'Timestamp': entity.timestamp, 'Source': entity.source, 'Metadata': entity.metadata,
 		} )
 	return pd.DataFrame( rows, columns=columns )
 
@@ -1679,10 +1455,8 @@ def get_live_world_measurement_options( ) -> Dict[ str, str ]:
 
 	'''
 	initialize_live_world_state( )
-	options: Dict[ str, str ] = {
-		'Current Location': 'Current Location',
-		'Custom Point': 'Custom Point',
-	}
+	options: Dict[ str, str ] = { 'Current Location': 'Current Location',
+		'Custom Point': 'Custom Point', }
 	df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
 	if df_entities is None or df_entities.empty:
 		return options
@@ -1721,31 +1495,25 @@ def resolve_live_world_measurement_point( key: str, latitude: float,
 			'Longitude': float( longitude ) }
 	if key == 'Custom Point':
 		if endpoint == 'start':
-			return {
-				'Label': 'Custom Start',
-				'Latitude': float( st.session_state[ 'live_world_measurement_custom_start_latitude' ] ),
-				'Longitude': float( st.session_state[ 'live_world_measurement_custom_start_longitude' ] ),
-			}
-		return {
-			'Label': 'Custom End',
+			return { 'Label': 'Custom Start', 'Latitude': float(
+				st.session_state[ 'live_world_measurement_custom_start_latitude' ] ),
+				'Longitude': float(
+					st.session_state[ 'live_world_measurement_custom_start_longitude' ] ), }
+		return { 'Label': 'Custom End',
 			'Latitude': float( st.session_state[ 'live_world_measurement_custom_end_latitude' ] ),
-			'Longitude': float( st.session_state[ 'live_world_measurement_custom_end_longitude' ] ),
-		}
+			'Longitude': float(
+				st.session_state[ 'live_world_measurement_custom_end_longitude' ] ), }
 	if not key.startswith( 'Entity::' ):
 		raise ValueError( f'Unknown measurement endpoint: {key}' )
 	_, entity_type, entity_id = key.split( '::', 2 )
 	df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
-	df_match = df_entities[
-		(df_entities[ 'EntityType' ].astype( str ) == entity_type)
-		& (df_entities[ 'EntityId' ].astype( str ) == entity_id) ].copy( )
+	df_match = df_entities[ (df_entities[ 'EntityType' ].astype( str ) == entity_type) & (
+				df_entities[ 'EntityId' ].astype( str ) == entity_id) ].copy( )
 	if df_match.empty:
 		raise ValueError( f'Measurement entity is no longer available: {entity_id}' )
 	row = df_match.iloc[ 0 ]
-	return {
-		'Label': f'{entity_type} | {row[ "Name" ]}',
-		'Latitude': float( row[ 'Latitude' ] ),
-		'Longitude': float( row[ 'Longitude' ] ),
-	}
+	return { 'Label': f'{entity_type} | {row[ "Name" ]}', 'Latitude': float( row[ 'Latitude' ] ),
+		'Longitude': float( row[ 'Longitude' ] ), }
 
 def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dict[ str, object ]:
 	'''
@@ -1776,14 +1544,9 @@ def calculate_live_world_measurement( latitude: float, longitude: float ) -> Dic
 	x = (math.cos( lat_a ) * math.sin( lat_b )
 		- math.sin( lat_a ) * math.cos( lat_b ) * math.cos( delta_lon ))
 	bearing = (math.degrees( math.atan2( y, x ) ) + 360.0) % 360.0
-	return {
-		'Start': start,
-		'End': end,
-		'DistanceNM': distance_nm,
-		'DistanceKM': distance_nm * 1.852,
-		'DistanceMiles': distance_nm * 1.150779448,
-		'Bearing': bearing,
-	}
+	return { 'Start': start, 'End': end, 'DistanceNM': distance_nm,
+		'DistanceKM': distance_nm * 1.852, 'DistanceMiles': distance_nm * 1.150779448,
+		'Bearing': bearing, }
 
 def add_live_world_annotation( ) -> None:
 	'''
@@ -1802,13 +1565,9 @@ def add_live_world_annotation( ) -> None:
 	latitude = float( st.session_state[ 'live_world_annotation_latitude' ] )
 	longitude = float( st.session_state[ 'live_world_annotation_longitude' ] )
 	annotations = list( st.session_state.get( 'live_world_annotations', [ ] ) or [ ] )
-	annotations.append( {
-		'AnnotationId': f'ANNOTATION-{len( annotations ) + 1}',
-		'Label': label,
-		'Latitude': latitude,
-		'Longitude': longitude,
-		'CreatedAt': dt.datetime.now( dt.timezone.utc ).isoformat( ),
-	} )
+	annotations.append( { 'AnnotationId': f'ANNOTATION-{len( annotations ) + 1}', 'Label': label,
+		'Latitude': latitude, 'Longitude': longitude,
+		'CreatedAt': dt.datetime.now( dt.timezone.utc ).isoformat( ), } )
 	st.session_state[ 'live_world_annotations' ] = annotations
 
 def clear_live_world_annotations( ) -> None:
@@ -1853,10 +1612,8 @@ def get_live_world_analysis_origin_options( ) -> Dict[ str, str ]:
 
 	'''
 	initialize_live_world_state( )
-	options: Dict[ str, str ] = {
-		'Current Location': 'Current Location',
-		'Custom Point': 'Custom Point',
-	}
+	options: Dict[ str, str ] = { 'Current Location': 'Current Location',
+		'Custom Point': 'Custom Point', }
 	df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
 	if df_entities is None or df_entities.empty:
 		return options
@@ -1892,13 +1649,10 @@ def resolve_live_world_analysis_origin( key: str, latitude: float,
 		return { 'Label': 'Current Location', 'Latitude': float( latitude ),
 			'Longitude': float( longitude ), 'EntityType': '', 'EntityId': '' }
 	if key == 'Custom Point':
-		return {
-			'Label': 'Custom Point',
+		return { 'Label': 'Custom Point',
 			'Latitude': float( st.session_state[ 'live_world_analysis_custom_latitude' ] ),
 			'Longitude': float( st.session_state[ 'live_world_analysis_custom_longitude' ] ),
-			'EntityType': '',
-			'EntityId': '',
-		}
+			'EntityType': '', 'EntityId': '', }
 	if not key.startswith( 'Entity::' ):
 		raise ValueError( f'Unknown analysis origin: {key}' )
 	_, entity_type, entity_id = key.split( '::', 2 )
@@ -1909,13 +1663,9 @@ def resolve_live_world_analysis_origin( key: str, latitude: float,
 	if df_match.empty:
 		raise ValueError( f'Analysis origin entity is no longer available: {entity_id}' )
 	row = df_match.iloc[ 0 ]
-	return {
-		'Label': f'{entity_type} | {row[ "Name" ]}',
-		'Latitude': float( row[ 'Latitude' ] ),
-		'Longitude': float( row[ 'Longitude' ] ),
-		'EntityType': entity_type,
-		'EntityId': entity_id,
-	}
+	return { 'Label': f'{entity_type} | {row[ "Name" ]}', 'Latitude': float( row[ 'Latitude' ] ),
+		'Longitude': float( row[ 'Longitude' ] ), 'EntityType': entity_type,
+		'EntityId': entity_id, }
 
 def calculate_live_world_cross_layer_analysis( latitude: float,
 		longitude: float ) -> pd.DataFrame:
@@ -1996,10 +1746,8 @@ def get_live_world_geofence_origin_options( ) -> Dict[ str, str ]:
 
 	'''
 	initialize_live_world_state( )
-	options: Dict[ str, str ] = {
-		'Current Location': 'Current Location',
-		'Custom Point': 'Custom Point',
-	}
+	options: Dict[ str, str ] = { 'Current Location': 'Current Location',
+		'Custom Point': 'Custom Point', }
 	df_entities = st.session_state.get( 'live_world_df_entities', pd.DataFrame( ) )
 	if df_entities is None or df_entities.empty:
 		return options
@@ -2035,13 +1783,10 @@ def resolve_live_world_geofence_origin( key: str, latitude: float,
 		return { 'Label': 'Current Location', 'Latitude': float( latitude ),
 			'Longitude': float( longitude ), 'EntityType': '', 'EntityId': '' }
 	if key == 'Custom Point':
-		return {
-			'Label': 'Custom Point',
+		return { 'Label': 'Custom Point',
 			'Latitude': float( st.session_state[ 'live_world_geofence_custom_latitude' ] ),
 			'Longitude': float( st.session_state[ 'live_world_geofence_custom_longitude' ] ),
-			'EntityType': '',
-			'EntityId': '',
-		}
+			'EntityType': '', 'EntityId': '', }
 	if not key.startswith( 'Entity::' ):
 		raise ValueError( f'Unknown geofence origin: {key}' )
 	_, entity_type, entity_id = key.split( '::', 2 )
@@ -2052,13 +1797,9 @@ def resolve_live_world_geofence_origin( key: str, latitude: float,
 	if df_match.empty:
 		raise ValueError( f'Geofence origin entity is no longer available: {entity_id}' )
 	row = df_match.iloc[ 0 ]
-	return {
-		'Label': f'{entity_type} | {row[ "Name" ]}',
-		'Latitude': float( row[ 'Latitude' ] ),
-		'Longitude': float( row[ 'Longitude' ] ),
-		'EntityType': entity_type,
-		'EntityId': entity_id,
-	}
+	return { 'Label': f'{entity_type} | {row[ "Name" ]}', 'Latitude': float( row[ 'Latitude' ] ),
+		'Longitude': float( row[ 'Longitude' ] ), 'EntityType': entity_type,
+		'EntityId': entity_id, }
 
 def calculate_live_world_geofence( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
@@ -2141,15 +1882,10 @@ def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 	current_snapshot: Dict[ str, Dict[ str, object ] ] = { }
 	for _, row in df_geofence.iterrows( ):
 		key = f'{row[ "EntityType" ]}::{row[ "EntityId" ]}'
-		current_snapshot[ key ] = {
-			'EntityId': str( row[ 'EntityId' ] ),
-			'EntityType': str( row[ 'EntityType' ] ),
-			'Name': str( row[ 'Name' ] ),
-			'Latitude': float( row[ 'Latitude' ] ),
-			'Longitude': float( row[ 'Longitude' ] ),
-			'DistanceNM': float( row[ 'DistanceNM' ] ),
-			'Source': str( row[ 'Source' ] ),
-		}
+		current_snapshot[ key ] = { 'EntityId': str( row[ 'EntityId' ] ),
+			'EntityType': str( row[ 'EntityType' ] ), 'Name': str( row[ 'Name' ] ),
+			'Latitude': float( row[ 'Latitude' ] ), 'Longitude': float( row[ 'Longitude' ] ),
+			'DistanceNM': float( row[ 'DistanceNM' ] ), 'Source': str( row[ 'Source' ] ), }
 	previous_snapshot = dict( st.session_state.get( 'live_world_geofence_snapshot', { } ) or { } )
 	if not st.session_state[ 'live_world_geofence_initialized' ]:
 		st.session_state[ 'live_world_geofence_snapshot' ] = current_snapshot
@@ -2161,22 +1897,18 @@ def update_live_world_geofence_events( df_geofence: pd.DataFrame ) -> None:
 	observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
 	for key in entered:
 		item = current_snapshot[ key ]
-		events.append( {
-			'Event': 'Entered', 'EntityId': item[ 'EntityId' ],
+		events.append( { 'Event': 'Entered', 'EntityId': item[ 'EntityId' ],
 			'EntityType': item[ 'EntityType' ], 'Name': item[ 'Name' ],
 			'Latitude': item[ 'Latitude' ], 'Longitude': item[ 'Longitude' ],
 			'DistanceNM': item[ 'DistanceNM' ], 'Source': item[ 'Source' ],
-			'ObservedAt': observed_at,
-		} )
+			'ObservedAt': observed_at, } )
 	for key in exited:
 		item = previous_snapshot[ key ]
-		events.append( {
-			'Event': 'Exited', 'EntityId': item[ 'EntityId' ],
+		events.append( { 'Event': 'Exited', 'EntityId': item[ 'EntityId' ],
 			'EntityType': item[ 'EntityType' ], 'Name': item[ 'Name' ],
 			'Latitude': item[ 'Latitude' ], 'Longitude': item[ 'Longitude' ],
 			'DistanceNM': item[ 'DistanceNM' ], 'Source': item[ 'Source' ],
-			'ObservedAt': observed_at,
-		} )
+			'ObservedAt': observed_at, } )
 	limit = int( st.session_state[ 'live_world_geofence_event_limit' ] )
 	st.session_state[ 'live_world_geofence_events' ] = events[ -limit: ]
 	st.session_state[ 'live_world_geofence_snapshot' ] = current_snapshot
@@ -2230,14 +1962,8 @@ def get_live_world_history_window_hours( window: str ) -> int:
 
 	'''
 	throw_if( 'window', window )
-	windows: Dict[ str, int ] = {
-		'1 Hour': 1,
-		'6 Hours': 6,
-		'24 Hours': 24,
-		'7 Days': 168,
-		'30 Days': 720,
-		'All Retained': 0,
-	}
+	windows: Dict[ str, int ] = { '1 Hour': 1, '6 Hours': 6, '24 Hours': 24, '7 Days': 168,
+		'30 Days': 720, 'All Retained': 0, }
 	if window not in windows:
 		raise ValueError( f'Unsupported Historical Replay window: {window}' )
 	return windows[ window ]
@@ -2317,19 +2043,12 @@ def update_live_world_tracking( df_entities: pd.DataFrame ) -> None:
 		st.session_state[ 'live_world_tracking_active_entity' ] = tracking_key
 
 	row = df_match.iloc[ 0 ]
-	point = {
-		'EntityKey': tracking_key,
-		'EntityId': str( row[ 'EntityId' ] ),
-		'EntityType': str( row[ 'EntityType' ] ),
-		'Name': str( row[ 'Name' ] ),
-		'Latitude': float( row[ 'Latitude' ] ),
-		'Longitude': float( row[ 'Longitude' ] ),
-		'Altitude': float( row[ 'Altitude' ] ),
-		'Heading': float( row[ 'Heading' ] ),
-		'Speed': float( row[ 'Speed' ] ),
-		'Timestamp': str( row[ 'Timestamp' ] ),
-		'ObservedAt': dt.datetime.now( dt.timezone.utc ).isoformat( ),
-	}
+	point = { 'EntityKey': tracking_key, 'EntityId': str( row[ 'EntityId' ] ),
+		'EntityType': str( row[ 'EntityType' ] ), 'Name': str( row[ 'Name' ] ),
+		'Latitude': float( row[ 'Latitude' ] ), 'Longitude': float( row[ 'Longitude' ] ),
+		'Altitude': float( row[ 'Altitude' ] ), 'Heading': float( row[ 'Heading' ] ),
+		'Speed': float( row[ 'Speed' ] ), 'Timestamp': str( row[ 'Timestamp' ] ),
+		'ObservedAt': dt.datetime.now( dt.timezone.utc ).isoformat( ), }
 
 	history = list( st.session_state.get( 'live_world_tracking_history', [ ] ) or [ ] )
 	if history:
@@ -2498,7 +2217,6 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
 	st.session_state[ 'live_world_last_error' ] = ''
-
 	fetchers: Dict[ str, Callable[ [ ], pd.DataFrame ] ] = {
 		'aircraft': lambda: fetch_live_aircraft( latitude, longitude ),
 		'military_aircraft': lambda: fetch_live_military_aircraft( latitude, longitude ),
@@ -2508,8 +2226,7 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 		'fires': lambda: fetch_live_fires( latitude, longitude ),
 		'infrastructure': lambda: fetch_live_infrastructure( latitude, longitude ),
 		'cameras': lambda: fetch_live_cameras( latitude, longitude ),
-		'map_layers': lambda: fetch_live_map_layers( latitude, longitude ),
-	}
+		'map_layers': lambda: fetch_live_map_layers( latitude, longitude ), }
 
 	try:
 		frames: List[ pd.DataFrame ] = [ ]
@@ -2609,7 +2326,11 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	source_stale = dict( st.session_state[ 'live_world_source_stale' ] )
 	for source_key, status in source_status.items( ):
 		if status == 'Partial Success' and source_key == 'satellites':
-			st.warning( f'Satellites: {int( st.session_state.get( "live_world_satellite_propagation_failures", 0 ) )} of {int( st.session_state.get( "live_world_satellite_propagation_attempts", 0 ) )} orbit propagations failed.' )
+			st.warning( f'Satellites: '
+			            f'{int( st.session_state.get( "live_world_satellite_propagation_failures"
+				            , 0 ) )} of '
+			            f'{
+			            int( st.session_state.get( "live_world_satellite_propagation_attempts", 0 ) )} orbit propagations failed.' )
 		if status != 'Failed':
 			continue
 		label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
@@ -2667,16 +2388,11 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	event_c4.metric( 'Cameras', f'{int( (df_map[ "EntityType" ] == "Camera").sum( ) ):,}' )
 	event_c5.metric( 'Map Features', f'{int( (df_map[ "EntityType" ] == "Map Feature").sum( ) ):,}' )
 	st.caption( f'Last refresh: {last_refresh}' )
-
 	map_style_options = {
 		'Carto Dark Matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
 		'Carto Positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
 		'Carto Voyager': 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-		'Dark': 'dark',
-		'Light': 'light',
-		'Road': 'road',
-		'Satellite': 'satellite',
-	}
+		'Dark': 'dark', 'Light': 'light', 'Road': 'road', 'Satellite': 'satellite', }
 	control_c1, control_c2, control_c3 = st.columns( 3, border=True )
 	with control_c1:
 		st.selectbox( 'Map Style', options=list( map_style_options.keys( ) ),
@@ -2931,20 +2647,14 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 
 	view_state = pdk.ViewState( latitude=center_latitude, longitude=center_longitude,
 		zoom=int( st.session_state[ 'live_world_zoom' ] ), pitch=0 )
-	tooltip = {
-		'html': (
-			'<b>{EntityType}</b><br/><b>{Name}</b><br/>'
-			'<b>Source:</b> {Source}<br/><b>Time:</b> {Timestamp}<br/>'
-			'<b>Coordinates:</b> {Latitude}, {Longitude}<br/>'
-			'<b>Altitude / Depth:</b> {Altitude}<br/>'
-			'<b>Speed:</b> {Speed}<br/><b>Heading:</b> {Heading}<br/>'
-			'<b>Metadata:</b> {MetadataText}' ),
-		'style': {
-			'backgroundColor': 'rgba(0, 0, 0, 0.88)',
-			'color': 'white',
-			'fontSize': '12px',
-		},
-	}
+	tooltip = { 'html': ('<b>{EntityType}</b><br/><b>{Name}</b><br/>'
+	                     '<b>Source:</b> {Source}<br/><b>Time:</b> {Timestamp}<br/>'
+	                     '<b>Coordinates:</b> {Latitude}, {Longitude}<br/>'
+	                     '<b>Altitude / Depth:</b> {Altitude}<br/>'
+	                     '<b>Speed:</b> {Speed}<br/><b>Heading:</b> {Heading}<br/>'
+	                     '<b>Metadata:</b> {MetadataText}'),
+		'style': { 'backgroundColor': 'rgba(0, 0, 0, 0.88)', 'color': 'white',
+			'fontSize': '12px', }, }
 	df_history = pd.DataFrame( )
 	df_history_latest = pd.DataFrame( )
 	if st.session_state[ 'live_world_historical_replay' ]:
@@ -2980,11 +2690,13 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	deck = pdk.Deck( layers=layers, initial_view_state=view_state,
 		map_style=map_style_options[ st.session_state[ 'live_world_map_style' ] ], tooltip=tooltip )
 	st.pydeck_chart( deck, use_container_width=True )
-
-	entities_tab, aircraft_tab, military_tab, satellites_tab, vessels_tab, earthquakes_tab, fires_tab, infrastructure_tab, cameras_tab, map_layers_tab, tracking_tab, measurements_tab, analysis_tab, geofence_tab, history_tab, agent_tools_tab = st.tabs(
-		[ '🌐 Entities', '✈️ Aircraft', '🛩️ Military', '🛰️ Satellites', '🚢 Vessels',
-			'📈 Earthquakes', '🔥 Fires', '📡 Infrastructure', '📷 Cameras', '🗺️ Map Layers', '🎯 Tracking',
-			'📏 Measurements', '🧭 Analysis', '🛡️ Geofence', '🕓 Historical Replay', '🤖 Agent Tools' ] )
+	(entities_tab, aircraft_tab, military_tab, satellites_tab, vessels_tab, earthquakes_tab,
+		fires_tab, infrastructure_tab, cameras_tab, map_layers_tab, tracking_tab,
+		measurements_tab, analysis_tab, geofence_tab, history_tab, agent_tools_tab) = st.tabs( [
+		'🌐 Entities', '✈️ Aircraft', '🛩️ Military', '🛰️ Satellites', '🚢 Vessels',
+		'📈 Earthquakes', '🔥 Fires', '📡 Infrastructure', '📷 Cameras', '🗺️ Map Layers',
+		'🎯 Tracking',  '📏 Measurements', '🧭 Analysis', '🛡️ Geofence',
+		'🕓 Historical Replay', '🤖 Agent Tools' ] )
 
 	with entities_tab:
 		st.data_editor( make_live_world_display_frame( df_map ), key='live_world_entities_table',
@@ -3202,8 +2914,11 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 			history_c4.metric( 'Replay Entities', f'{len( df_history_latest ):,}' )
 			if st.session_state[ 'live_world_history_last_error' ]:
 				st.error( f'Historical Replay failed: {st.session_state[ "live_world_history_last_error" ]}' )
-			st.caption( f'Replay snapshot: {st.session_state.get( "live_world_history_snapshot", "" ) or "None"}' )
-			st.caption( f'Last refresh inserted {int( st.session_state.get( "live_world_history_last_saved", 0 ) ):,} historical observations.' )
+			st.caption( f'Replay snapshot: '
+			            f'{st.session_state.get( "live_world_history_snapshot", "" ) or "None"}' )
+			st.caption( f'Last refre'
+			            f'sh inserted {int( st.session_state.get( "live_world_history_last_saved",
+				            0 ) ):,} historical observations.' )
 			if df_history.empty:
 				st.info( 'No persisted observations match the selected replay window and entity types.' )
 			else:
