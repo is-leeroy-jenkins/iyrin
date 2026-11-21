@@ -676,13 +676,17 @@ class OverpassClient( ):
 			self.query = query
 			transient_statuses = { 406, 429, 500, 502, 503, 504 }
 			errors: List[ str ] = [ ]
+			self.deadline = time.monotonic( ) + self.timeout * len( self.endpoints )
 			for endpoint in self.endpoints:
 				for attempt in range( self.retries + 1 ):
 					try:
 						self.url = endpoint
 						self.response = None
+						remaining = self.deadline - time.monotonic( )
+						if remaining <= 0.0:
+							raise TimeoutError( 'Overpass total request deadline exceeded.' )
 						self.response = requests.post( self.url, data={ 'data': self.query }, headers=self.headers,
-							timeout=self.timeout )
+							timeout=min( self.timeout, remaining ) )
 						status_code = int( self.response.status_code )
 						if status_code in transient_statuses and attempt < self.retries:
 							delay = self.retry_delay * (2 ** attempt)
