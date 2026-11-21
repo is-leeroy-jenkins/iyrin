@@ -1231,6 +1231,46 @@ def fetch_live_infrastructure( latitude: float, longitude: float ) -> pd.DataFra
 	st.session_state[ 'live_world_infrastructure_result' ] = result
 	return entities_to_dataframe( entities )
 
+@st.cache_data( ttl=300, max_entries=64, show_spinner=False )
+def fetch_cached_live_world_overpass( source_key: str, latitude: float,
+		longitude: float, radius_km: float, categories: tuple[ str, ... ],
+		max_results: int ) -> Dict[ str, Any ]:
+	"""Retrieve cacheable public Overpass results for camera and contextual map layers.
+
+	Purpose:
+		Cache successful public Overpass query results for five minutes without caching
+		transport failures, changing selected categories, or changing provider state.
+
+	Args:
+		source_key (str): Camera or contextual map source identifier.
+		latitude (float): Search center latitude.
+		longitude (float): Search center longitude.
+		radius_km (float): Search radius in kilometers.
+		categories (tuple[str, ...]): Selected OSM categories.
+		max_results (int): Maximum number of normalized features.
+
+	Returns:
+		Dict[str, Any]: Public Overpass result with the existing provider schema.
+
+	Raises:
+		ValueError: Raised when the source is unsupported.
+	"""
+	throw_if( 'source_key', source_key )
+	throw_if( 'latitude', latitude )
+	throw_if( 'longitude', longitude )
+	throw_if( 'radius_km', radius_km )
+	throw_if( 'categories', categories )
+	throw_if( 'max_results', max_results )
+	if source_key == 'cameras':
+		service = OverpassCameras( timeout=30 )
+		return service.fetch_cameras( latitude, longitude, radius_km,
+			list( categories ), max_results )
+	if source_key == 'map_layers':
+		service = OverpassMapLayers( timeout=30 )
+		return service.fetch_features( latitude, longitude, radius_km,
+			list( categories ), max_results )
+	raise ValueError( f'Unsupported cached Overpass source: {source_key}' )
+
 def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
 		Retrieve public CCTV, surveillance-camera, and webcam features from OpenStreetMap.
@@ -1255,8 +1295,8 @@ def fetch_live_cameras( latitude: float, longitude: float ) -> pd.DataFrame:
 		return entities_to_dataframe( [ ] )
 	radius_km = float( st.session_state[ 'live_world_camera_radius_km' ] )
 	limit = int( st.session_state[ 'live_world_camera_limit' ] )
-	service = OverpassCameras( timeout=30 )
-	result = service.fetch_cameras( latitude, longitude, radius_km, categories, limit )
+	result = fetch_cached_live_world_overpass( 'cameras', latitude, longitude,
+		radius_km, tuple( categories ), limit )
 	elements = result.get( 'elements', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
 	observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
@@ -1322,8 +1362,8 @@ def fetch_live_map_layers( latitude: float, longitude: float ) -> pd.DataFrame:
 		return entities_to_dataframe( [ ] )
 	radius_km = float( st.session_state[ 'live_world_map_layer_radius_km' ] )
 	limit = int( st.session_state[ 'live_world_map_layer_limit' ] )
-	service = OverpassMapLayers( timeout=30 )
-	result = service.fetch_features( latitude, longitude, radius_km, categories, limit )
+	result = fetch_cached_live_world_overpass( 'map_layers', latitude, longitude,
+		radius_km, tuple( categories ), limit )
 	elements = result.get( 'elements', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
 	observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
@@ -2163,6 +2203,15 @@ def refresh_live_world_source( source_key: str,
 	attempted_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
 	update_live_world_source_state(
 		source_key, 'Refreshing', attempted_at=attempted_at )
+	if (source_key == 'vessels'
+			and not st.session_state.get( 'live_world_aisstream_api_key', '' )):
+		st.session_state[ frame_key ] = previous_frame
+		update_live_world_source_state(
+			source_key, 'Configuration Required',
+			error='Enter an AIS Stream API key in the existing Mapping sidebar controls.',
+			stale=not previous_frame.empty, attempted_at=attempted_at,
+			error_type='MissingCredentials' )
+		return previous_frame
 
 	try:
 		df_source = fetcher( )
@@ -2256,7 +2305,7 @@ def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame
 		errors = dict( st.session_state[ 'live_world_source_errors' ] )
 		failures: List[ str ] = [ ]
 		for source_key, status in statuses.items( ):
-			if status != 'Failed':
+			if status not in ( 'Failed', 'Configuration Required' ):
 				continue
 			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
 			failures.append( f'{label}: {errors.get( source_key, "" )}' )
@@ -2331,6 +2380,11 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 				            , 0 ) )} of '
 			            f'{
 			            int( st.session_state.get( "live_world_satellite_propagation_attempts", 0 ) )} orbit propagations failed.' )
+		if status == 'Configuration Required':
+			label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
+			note = source_errors.get( source_key, '' ) or 'Credentials are required.'
+			st.warning( f'{label}: {note}' )
+			continue
 		if status != 'Failed':
 			continue
 		label = LIVE_WORLD_DATA_SOURCES[ source_key ][ 'label' ]
@@ -2350,7 +2404,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if df_entities is None or df_entities.empty:
 		if not (st.session_state[ 'live_world_measurements' ]
 				or st.session_state[ 'live_world_historical_replay' ]):
-			if any( value == 'Failed' for value in source_status.values( ) ):
+			if any( value in ( 'Failed', 'Configuration Required' ) for value in source_status.values( ) ):
 				st.info( 'No records are available because the enabled Live World source refresh failed.' )
 			else:
 				st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
