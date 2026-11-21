@@ -28,13 +28,15 @@ collaborators encapsulate state, dependency ownership, and business behavior thr
 | `LiveWorldAnalytics` | Measurements, annotations, cross-layer analysis, and geofencing |
 | `LiveWorldHistory` | Tracking, history, and replay |
 | `LiveWorldRefresh` | Per-provider refresh isolation, status, and stale-data handling |
+| `LiveWorldSidebar` | Session-specific sidebar controls and interactions |
 | `LiveWorldRendering` | PyDeck map rendering and display frame construction |
 
 `LiveWorld` creates and owns one instance of each collaborating service per
 Streamlit session, stored under `st.session_state['live_world_controller']`.
 Collaborators receive only their required dependencies through constructors;
-none holds a back-reference to the composition root. `LiveWorldRendering`
-owns both sidebar and map UI, while `LiveWorldState` owns initialization and clearing.
+none holds a back-reference to the composition root. `LiveWorldSidebar`
+owns operational sidebar controls, `LiveWorldRendering` owns map presentation,
+and `LiveWorldState` owns initialization and clearing.
 Stateful service operations use instance methods and retain a reference to that
 session's state mapping; configured provider clients are initialized lazily and
 owned by `LiveWorldProviders`. OpenSky OAuth tokens are therefore cached within
