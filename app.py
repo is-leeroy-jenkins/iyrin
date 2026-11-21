@@ -464,10 +464,11 @@ def initialize_api_credential_state( ) -> None:
 		defaults: Dict[ str, str ] = {
 			name: value or '' for name, value in cfg.API_CREDENTIAL_DEFAULTS.items( )
 		}
-		apply_api_credential_values( defaults )
+		apply_api_credential_values( defaults, validate_pairs=False )
 
 
-def apply_api_credential_values( values: Dict[ str, str ] ) -> None:
+def apply_api_credential_values( values: Dict[ str, str ],
+		validate_pairs: bool=True ) -> None:
 	"""Apply the authorized single-user credential configuration.
 
 	Purpose:
@@ -476,7 +477,8 @@ def apply_api_credential_values( values: Dict[ str, str ] ) -> None:
 		when its OAuth credentials change. This must not run in a multi-user app.
 
 	Args:
-		values (Dict[str, str]): Complete, validated set of configuration values.
+		values (Dict[str, str]): Complete set of configuration values.
+		validate_pairs (bool): Require complete OAuth credential pairs when applying.
 
 	Returns:
 		None: Applies changed values to process configuration and provider cache.
@@ -487,9 +489,11 @@ def apply_api_credential_values( values: Dict[ str, str ] ) -> None:
 	throw_if( 'values', values )
 	if set( values ) != set( cfg.API_CREDENTIAL_FIELDS ):
 		raise ValueError( 'Credential values must contain the full configured registry.' )
-	if bool( values[ 'OPENSKY_CLIENT_ID' ] ) != bool( values[ 'OPENSKY_CLIENT_SECRET' ] ):
+	if validate_pairs and (bool( values[ 'OPENSKY_CLIENT_ID' ] )
+			!= bool( values[ 'OPENSKY_CLIENT_SECRET' ] )):
 		raise ValueError( 'OpenSky requires both a client ID and client secret.' )
-	if bool( values[ 'O365_CLIENT_ID' ] ) != bool( values[ 'O365_CLIENT_SECRET' ] ):
+	if validate_pairs and (bool( values[ 'O365_CLIENT_ID' ] )
+			!= bool( values[ 'O365_CLIENT_SECRET' ] )):
 		raise ValueError( 'Microsoft 365 requires both a client ID and client secret.' )
 
 	changed: List[ str ] = [ ]
@@ -3259,7 +3263,8 @@ style_subheaders( )
 # ==============================================================================
 st.logo( cfg.LOGO, size='Large' )
 
-initialize_api_credential_state( )
+if os.getenv( 'IYRIN_SINGLE_USER_MODE', '0' ) == '1':
+	initialize_api_credential_state( )
 
 with st.sidebar:
 	# ------------------------------------------------------------------------------
