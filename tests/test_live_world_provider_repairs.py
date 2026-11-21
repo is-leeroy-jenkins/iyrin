@@ -30,8 +30,12 @@ def load_function( path: str, name: str, namespace: dict[str, Any] ) -> Any:
     """
     source = (ROOT / path).read_text( encoding='utf-8' )
     tree = ast.parse( source )
-    function = next( node for node in tree.body
-        if isinstance( node, ast.FunctionDef ) and node.name == name )
+    functions = [ node for node in tree.body if isinstance( node, ast.FunctionDef ) ]
+    if path == 'realtime.py':
+        functions.extend( method for cls in tree.body if isinstance( cls, ast.ClassDef )
+            for method in cls.body if isinstance( method, ast.FunctionDef ) )
+    function = next( node for node in functions if node.name == name )
+    function.decorator_list = []
     module = ast.fix_missing_locations( ast.Module( body=[ function ], type_ignores=[ ] ) )
     exec( compile( module, str( ROOT / path ), 'exec' ), namespace )
     return namespace[ name ]
