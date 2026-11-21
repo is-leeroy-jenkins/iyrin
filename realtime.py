@@ -54,6 +54,7 @@ from typing import Any, Callable, Dict, List
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+from requests.exceptions import HTTPError
 import config as cfg
 from fetchers import Firms, USGSEarthquakes
 from history import (clear_live_world_history, get_live_world_history_snapshots,
@@ -332,6 +333,10 @@ def initialize_live_world_state( ) -> None:
 			key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES },
 		'live_world_source_errors': {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_error_types': {
+			key: '' for key in LIVE_WORLD_DATA_SOURCES },
+		'live_world_source_http_status': {
+			key: 0 for key in LIVE_WORLD_DATA_SOURCES },
 		'live_world_source_last_attempt': {
 			key: '' for key in LIVE_WORLD_DATA_SOURCES },
 		'live_world_source_last_success': {
@@ -737,6 +742,10 @@ def clear_live_world_data( ) -> None:
 		key: 'Not Refreshed' for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_source_errors' ] = {
 		key: '' for key in LIVE_WORLD_DATA_SOURCES }
+	st.session_state[ 'live_world_source_error_types' ] = {
+		key: '' for key in LIVE_WORLD_DATA_SOURCES }
+	st.session_state[ 'live_world_source_http_status' ] = {
+		key: 0 for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_source_last_attempt' ] = {
 		key: '' for key in LIVE_WORLD_DATA_SOURCES }
 	st.session_state[ 'live_world_source_last_success' ] = {
@@ -2350,7 +2359,8 @@ def get_live_world_tracking_frame( ) -> pd.DataFrame:
 	return pd.DataFrame( history, columns=columns )
 
 def update_live_world_source_state( source_key: str, status: str, error: str='',
-		stale: bool=False, attempted_at: str='', successful_at: str='' ) -> None:
+		stale: bool=False, attempted_at: str='', successful_at: str='',
+		error_type: str='', http_status: int=0 ) -> None:
 	'''
 		Update the operational state for one Live World provider without changing any.
 
@@ -2365,6 +2375,8 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 		stale (bool): Whether retained source data predates the current refresh attempt.
 		attempted_at (str): UTC timestamp for the most recent refresh attempt.
 		successful_at (str): UTC timestamp for the most recent successful refresh.
+		error_type (str): Underlying provider exception class name.
+		http_status (int): HTTP status, or zero for non-HTTP exceptions.
 
 	Returns:
 		None: This operation has no return value.
@@ -2378,11 +2390,15 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 
 	statuses = dict( st.session_state[ 'live_world_source_status' ] )
 	errors = dict( st.session_state[ 'live_world_source_errors' ] )
+	error_types = dict( st.session_state[ 'live_world_source_error_types' ] )
+	http_statuses = dict( st.session_state[ 'live_world_source_http_status' ] )
 	last_attempt = dict( st.session_state[ 'live_world_source_last_attempt' ] )
 	last_success = dict( st.session_state[ 'live_world_source_last_success' ] )
 	stale_state = dict( st.session_state[ 'live_world_source_stale' ] )
 	statuses[ source_key ] = status
 	errors[ source_key ] = error
+	error_types[ source_key ] = error_type
+	http_statuses[ source_key ] = http_status
 	stale_state[ source_key ] = stale
 	if attempted_at:
 		last_attempt[ source_key ] = attempted_at
@@ -2390,6 +2406,8 @@ def update_live_world_source_state( source_key: str, status: str, error: str='',
 		last_success[ source_key ] = successful_at
 	st.session_state[ 'live_world_source_status' ] = statuses
 	st.session_state[ 'live_world_source_errors' ] = errors
+	st.session_state[ 'live_world_source_error_types' ] = error_types
+	st.session_state[ 'live_world_source_http_status' ] = http_statuses
 	st.session_state[ 'live_world_source_last_attempt' ] = last_attempt
 	st.session_state[ 'live_world_source_last_success' ] = last_success
 	st.session_state[ 'live_world_source_stale' ] = stale_state
@@ -2444,11 +2462,19 @@ def refresh_live_world_source( source_key: str,
 		return df_source
 
 	except Exception as ex:
+		original_error = ex
+		while isinstance( original_error, Error ):
+			original_error = original_error.error
+		error_type = type( original_error ).__name__
+		http_status = (original_error.response.status_code
+			if isinstance( original_error, HTTPError )
+			and original_error.response is not None else 0)
 		has_stale_data = not previous_frame.empty
 		st.session_state[ frame_key ] = previous_frame
 		update_live_world_source_state(
 			source_key, 'Failed', error=str( ex ), stale=has_stale_data,
-			attempted_at=attempted_at )
+			attempted_at=attempted_at, error_type=error_type,
+			http_status=http_status )
 		return previous_frame
 
 def refresh_live_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
