@@ -102,7 +102,7 @@ The Live World execution path is designed to keep independent providers operatio
 - Provider failures do not stop later enabled providers from refreshing.
 - Partial or stale refreshes are not persisted as new Historical Replay snapshots.
 - Shared Overpass client behavior for Infrastructure, Cameras, and Map Features, including identifying headers, bounded retry, and fallback endpoints.
-- OpenSky OAuth client-credential configuration with backward-compatible legacy environment aliases.
+- OpenSky OAuth client credentials loaded from `config.py`, with cached token reuse and proactive expiration handling.
 - Bounded Historical Replay persistence with configurable retention and per-source row limits.
 - State-fingerprint deduplication for Earthquakes, Fires, Infrastructure, Cameras, and Map Features while moving entities continue to persist for trajectory replay.
 - Historical replay limits select the newest records through the chosen snapshot and return them chronologically.
@@ -345,7 +345,7 @@ streamlit run app.py
 
 ## ⚙️ Configuration 
 
-Iyrin reads provider credentials from environment variables where required. Legacy `OPENSKY_API_CLIENT_ID`, `OPENSKY_API_CREDENTIALS`, and `NASA_FIRMS_MAP_KEY` names remain accepted as compatibility aliases.
+Iyrin reads provider credentials from OS environment variables through `config.py`. OpenSky uses `OPENSKY_CLIENT_ID` and `OPENSKY_API_CLIENT_SECRET`; AIS Stream uses `AISSTREAM_API_KEY`. Restart the application after changing these environment variables. `NASA_FIRMS_MAP_KEY` remains an accepted compatibility alias.
 
 | Environment Variable      | Service                          |
 |---------------------------|----------------------------------|
