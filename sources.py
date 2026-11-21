@@ -397,8 +397,21 @@ class AisStreamLive( ):
 			self.south = max( -90.0, self.latitude - self.radius_degrees )
 			self.west = max( -180.0, self.longitude - self.radius_degrees )
 			self.east = min( 180.0, self.longitude + self.radius_degrees )
+			west = self.longitude - self.radius_degrees
+			east = self.longitude + self.radius_degrees
+			if west < -180.0:
+				bounding_boxes = [
+					[ [ self.north, west + 360.0 ], [ self.south, 180.0 ] ],
+					[ [ self.north, -180.0 ], [ self.south, east ] ], ]
+			elif east > 180.0:
+				bounding_boxes = [
+					[ [ self.north, west ], [ self.south, 180.0 ] ],
+					[ [ self.north, -180.0 ], [ self.south, east - 360.0 ] ], ]
+			else:
+				bounding_boxes = [
+					[ [ self.north, west ], [ self.south, east ] ], ]
 			self.subscription = { 'APIKey': self.api_key,
-				'BoundingBoxes': [ [ [ self.north, self.west ], [ self.south, self.east ] ] ],
+				'BoundingBoxes': bounding_boxes,
 				'FilterMessageTypes': [ 'PositionReport', 'StandardClassBPositionReport',
 					'ExtendedClassBPositionReport', 'LongRangeAisBroadcastMessage', ], }
 			messages: List[ Dict[ str, Any ] ] = [ ]
