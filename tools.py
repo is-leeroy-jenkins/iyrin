@@ -451,12 +451,16 @@ def get_live_world_source_status( ) -> List[ Dict[ str, object ] ]:
         errors = dict( st.session_state.get( 'live_world_source_errors', { } ) or { } )
         last_attempt = dict( st.session_state.get( 'live_world_source_last_attempt', { } ) or { } )
         last_success = dict( st.session_state.get( 'live_world_source_last_success', { } ) or { } )
+        error_types = dict( st.session_state.get( 'live_world_source_error_types', { } ) or { } )
+        http_statuses = dict( st.session_state.get( 'live_world_source_http_status', { } ) or { } )
         stale = dict( st.session_state.get( 'live_world_source_stale', { } ) or { } )
         keys = sorted( set( statuses ) | set( errors ) | set( last_attempt ) | set( last_success ) )
         return [ {
             'Source': key,
             'Status': str( statuses.get( key, 'Not Refreshed' ) ),
             'Error': str( errors.get( key, '' ) ),
+            'ErrorType': str( error_types.get( key, '' ) ),
+            'HTTPStatus': int( http_statuses.get( key, 0 ) ),
             'LastAttempt': str( last_attempt.get( key, '' ) ),
             'LastSuccess': str( last_success.get( key, '' ) ),
             'Stale': bool( stale.get( key, False ) ),
