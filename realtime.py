@@ -178,7 +178,7 @@ class LiveWorldValidation:
 		Validate required public arguments shared by Live World operations.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		None: This stateless utility does not retain instance attributes.
 	"""
 
 
@@ -687,7 +687,7 @@ class LiveWorldGeometry:
 		Calculate geographic bounds, coordinates, and distances.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		None: This stateless utility does not retain instance attributes.
 	"""
 
 
@@ -1146,7 +1146,9 @@ class LiveWorldProviders:
 		self.world.state.initialize_live_world_state( )
 		feed = str( self.state[ 'live_world_earthquake_feed' ] )
 		min_magnitude = float( self.state[ 'live_world_earthquake_min_magnitude' ] )
-		service = USGSEarthquakes( )
+		if self.earthquake_client is None:
+			self.earthquake_client = USGSEarthquakes( )
+		service = self.earthquake_client
 		result = service.fetch( mode='feed', feed=feed, time=20 ) or { }
 		rows = result.get( 'rows', [ ] ) or [ ]
 		entities: List[ GeoEntity ] = [ ]
@@ -1218,7 +1220,9 @@ class LiveWorldProviders:
 		area_coordinates = 'world' if area_mode == 'World' else self.world.geometry.create_live_world_bounding_box(
 			latitude, longitude )
 
-		service = Firms( )
+		if self.firms_client is None:
+			self.firms_client = Firms( )
+		service = self.firms_client
 		result = service.fetch_area( source=source, area_coordinates=area_coordinates,
 			day_range=day_range, date='', time=20 ) or { }
 		rows = result.get( 'rows', [ ] ) or [ ]
@@ -1506,7 +1510,7 @@ class LiveWorldEntities:
 		Convert normalized geospatial entities to tabular data and extract row values.
 
 	Attributes:
-		None: Uses the existing module configuration and Streamlit session state.
+		None: This stateless utility does not retain instance attributes.
 	"""
 
 
@@ -3143,7 +3147,7 @@ class LiveWorldRendering:
 				analysis_c1, analysis_c2, analysis_c3, analysis_c4 = st.columns( 4, border=True )
 				analysis_c1.metric( 'Entities in Radius', f'{len( df_analysis ):,}' )
 				analysis_c2.metric( 'Radius (NM)',
-					f'{int( st.session_state[ "live_world_analysis_radius_nm" ] ):,}' )
+					f'{int( self.state[ "live_world_analysis_radius_nm" ] ):,}' )
 				analysis_c3.metric( 'Nearest Entity', str( nearest[ 'Name' ] ) )
 				analysis_c4.metric( 'Nearest Distance (NM)', f'{float( nearest[ "DistanceNM" ] ):,.2f}' )
 				st.caption( f'Origin: {analysis_origin[ "Label" ]}' )
@@ -3168,7 +3172,7 @@ class LiveWorldRendering:
 				geofence_c1, geofence_c2, geofence_c3, geofence_c4 = st.columns( 4, border=True )
 				geofence_c1.metric( 'Inside Geofence', f'{len( df_geofence ):,}' )
 				geofence_c2.metric( 'Radius (NM)',
-					f'{float( st.session_state[ "live_world_geofence_radius_nm" ] ):,.0f}' )
+					f'{float( self.state[ "live_world_geofence_radius_nm" ] ):,.0f}' )
 				geofence_c3.metric( 'Events', f'{len( df_geofence_events ):,}' )
 				last_event = str( df_geofence_events.iloc[ -1 ][ 'Event' ] ) if not df_geofence_events.empty else 'None'
 				geofence_c4.metric( 'Last Event', last_event )
@@ -3199,9 +3203,9 @@ class LiveWorldRendering:
 				history_c3.metric( 'Replay Records', f'{len( df_history ):,}' )
 				history_c4.metric( 'Replay Entities', f'{len( df_history_latest ):,}' )
 				if self.state[ 'live_world_history_last_error' ]:
-					st.error( f'Historical Replay failed: {st.session_state[ "live_world_history_last_error" ]}' )
+					st.error( f'Historical Replay failed: {self.state[ "live_world_history_last_error" ]}' )
 				st.caption( f'Replay snapshot: '
-				            f'{st.session_state.get( "live_world_history_snapshot", "" ) or "None"}' )
+				            f'{self.state.get( "live_world_history_snapshot", "" ) or "None"}' )
 				last_saved = int( self.state.get( 'live_world_history_last_saved', 0 ) )
 				st.caption( f'Last refresh inserted {last_saved:,} historical observations.' )
 				if df_history.empty:
