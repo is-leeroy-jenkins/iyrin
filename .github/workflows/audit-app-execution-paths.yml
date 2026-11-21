@@ -40,16 +40,6 @@ jobs:
           import ast
           from pathlib import Path
           errors = []
-          # These functions intentionally accept invalid/empty values as data: guards would
-          # change their documented predicate, fallback, or empty-result behavior.
-          exempt_required = {
-              ('realtime.py', 'LiveWorldValidation', 'throw_if'): {'name', 'value'},
-              ('realtime.py', 'LiveWorldGeometry', 'is_valid_live_world_coordinates'):
-                  {'latitude', 'longitude'},
-              ('realtime.py', 'LiveWorldEntities', 'get_row_value'): {'row'},
-              ('realtime.py', 'LiveWorldEntities', 'entities_to_dataframe'): {'entities'},
-              ('realtime.py', 'LiveWorldRendering', 'get_metadata_number'): {'metadata'},
-          }
           for filename in ('fetchers.py', 'generators.py', 'loaders.py', 'processors.py', 'realtime.py', 'sources.py', 'embedders.py', 'mapping.py', 'storage.py', 'excel.py', 'rates.py'):
               tree = ast.parse(Path(filename).read_text(encoding='utf-8'))
               for cls in (node for node in tree.body if isinstance(node, ast.ClassDef)):
@@ -78,15 +68,11 @@ jobs:
                                    and '| None' not in ast.unparse(arg.annotation)
                                    and 'Optional[' not in ast.unparse(arg.annotation)]
                       guarded = {node.args[0].value for node in ast.walk(fn)
-                                 if isinstance(node, ast.Call)
-                                 and ((isinstance(node.func, ast.Name) and node.func.id == 'throw_if')
-                                      or (isinstance(node.func, ast.Attribute)
-                                          and node.func.attr == 'throw_if'))
-                                 and node.args
+                                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                                 and node.func.id == 'throw_if' and node.args
                                  and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)}
-                      exceptions = exempt_required.get((filename, cls.name, fn.name), set())
                       for arg in necessary:
-                          if arg not in guarded and arg not in exceptions:
+                          if arg not in guarded:
                               errors.append(f'{cls.name}.{fn.name}:{fn.lineno}: missing throw_if for {arg}')
           print(f'fetchers.py/generators.py: {len(errors)} coding contract violations')
           for error in errors:
