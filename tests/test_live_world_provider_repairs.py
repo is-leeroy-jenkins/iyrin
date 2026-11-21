@@ -80,7 +80,7 @@ class LiveWorldProviderRepairsTests( unittest.TestCase ):
 
         namespace: dict[str, Any] = { 'math': math }
         validate = load_function(
-            'realtime.py', 'is_valid_live_world_coordinates', namespace )
+            'realtime.py', 'is_valid_world_coordinates', namespace )
         self.assertTrue( validate( 38.8951, -77.0364 ) )
         self.assertTrue( validate( 0.0, 0.0 ) )
         self.assertFalse( validate( math.nan, -77.0 ) )
