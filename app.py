@@ -290,14 +290,8 @@ if 'openaq_api_key' not in st.session_state:
 if 'nasa_earthdata_token' not in st.session_state:
 	st.session_state[ 'nasa_earthdata_token' ] = ''
 
-if 'opensky_api_client_id' not in st.session_state:
-	st.session_state[ 'opensky_api_client_id' ] = ''
-
 if 'firms_map_key' not in st.session_state:
 	st.session_state[ 'firms_map_key' ] = ''
-
-if 'opensky_api_credentials' not in st.session_state:
-	st.session_state[ 'opensky_api_credentials' ] = ''
 
 if 'purpleair_api_key' not in st.session_state:
 	st.session_state[ 'purpleair_api_key' ] = ''
@@ -374,23 +368,11 @@ if st.session_state.nasa_earthdata_token == '':
 		st.session_state.nasa_earthdata_token = default
 		os.environ[ 'NASA_EARTHDATA_TOKEN' ] = default
 
-if st.session_state.opensky_api_client_id == '':
-	default = cfg.OPENSKY_CLIENT_ID
-	if default:
-		st.session_state.opensky_api_client_id = default
-		os.environ[ 'OPENSKY_API_CLIENT_ID' ] = default
-
 if st.session_state.firms_map_key == '':
 	default = cfg.FIRMS_MAP_KEY
 	if default:
 		st.session_state.firms_map_key = default
 		os.environ[ 'FIRMS_MAP_KEY' ] = default
-
-if st.session_state.opensky_api_credentials == '':
-	default = cfg.OPENSKY_API_CLIENT_SECRET
-	if default:
-		st.session_state.opensky_api_credentials = default
-		os.environ[ 'OPENSKY_API_CREDENTIALS' ] = default
 
 if st.session_state.purpleair_api_key == '':
 	default = cfg.PURPLEAIR_API_KEY
@@ -3544,16 +3526,6 @@ with st.sidebar:
 			st.session_state.openaq_api_key = openaq_key
 			os.environ[ 'OPENAQ_API_KEY' ] = openaq_key
 		
-		opensky_client = st.text_input( 'Open Sky Client ID', type='password',
-			value=st.session_state.opensky_api_client_id or '',
-			help='Overrides OPENSKY_API_CLIENT_ID from config.py for this session only.' )
-		
-		if opensky_client and opensky_client != st.session_state.opensky_api_client_id:
-			st.session_state[ 'opensky_api_client_id_user_override' ] = True
-		if opensky_client:
-			st.session_state.opensky_api_client_id = opensky_client
-			os.environ[ 'OPENSKY_API_CLIENT_ID' ] = opensky_client
-		
 		firms_key = st.text_input( 'FIRMS Map Client', type='password',
 			value=st.session_state.firms_map_key or '',
 			help='Overrides FIRMS_MAP_KEY from config.py for this session only.' )
@@ -3562,17 +3534,6 @@ with st.sidebar:
 			st.session_state.firms_map_key = firms_key
 			os.environ[ 'FIRMS_MAP_KEY' ] = firms_key
 		
-		opensky_credentials = st.text_input( 'Open Sky API Client Secret', type='password',
-			value=st.session_state.opensky_api_credentials or '',
-			help='OAuth API client secret from OpenSky, not an account password. '
-			     'Overrides OPENSKY_API_CREDENTIALS for this session.' )
-		
-		if opensky_credentials and opensky_credentials != st.session_state.opensky_api_credentials:
-			st.session_state[ 'opensky_api_credentials_user_override' ] = True
-		if opensky_credentials:
-			st.session_state.opensky_api_credentials = opensky_credentials
-			os.environ[ 'OPENSKY_API_CREDENTIALS' ] = opensky_credentials
-			
 		purpleair_key = st.text_input( 'Purple Air API', type='password',
 			value=st.session_state.purpleair_api_key or '',
 			help='Overrides Purple Air API from config.py for this session only.' )
