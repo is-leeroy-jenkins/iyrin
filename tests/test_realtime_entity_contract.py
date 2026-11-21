@@ -29,13 +29,9 @@ class RealtimeEntityContractTests(unittest.TestCase):
         tree = ast.parse(source)
         entity = next(node for node in tree.body
                       if isinstance(node, ast.ClassDef) and node.name == 'GeoEntity')
-        services = next(node for node in tree.body
-                        if isinstance(node, ast.ClassDef)
-                        and node.name == 'LiveWorldEntities')
-        convert = next(node for node in services.body
+        convert = next(node for node in tree.body
                        if isinstance(node, ast.FunctionDef)
                        and node.name == 'entities_to_dataframe')
-        convert.decorator_list = []
         cls.has_dataclass_decorator = bool(entity.decorator_list)
         namespace = {'Any': Any, 'Dict': Dict, 'List': List,
                      'pd': SimpleNamespace(DataFrame=FakeFrame)}
