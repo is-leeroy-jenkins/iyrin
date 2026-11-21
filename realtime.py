@@ -232,13 +232,10 @@ def initialize_live_world_state( ) -> None:
 	'''
 	defaults: Dict[ str, object ] = { 'live_world_enabled': False, 'live_world_aircraft': False,
 		'live_world_aircraft_radius': 2.0, 'live_world_aircraft_airborne_only': True,
-		'opensky_api_client_id': cfg.OPENSKY_CLIENT_ID or '',
-		'opensky_api_credentials': cfg.OPENSKY_API_CREDENTIALS or '',
 		'live_world_military_aircraft': False, 'live_world_military_radius_nm': 250,
 		'live_world_satellites': False, 'live_world_satellite_group': 'stations',
 		'live_world_satellite_limit': 100, 'live_world_satellite_propagation_attempts': 0,
 		'live_world_satellite_propagation_failures': 0, 'live_world_vessels': False,
-		'live_world_aisstream_api_key': os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '',
 		'live_world_vessel_radius': 2.0, 'live_world_vessel_limit': 100,
 		'live_world_earthquakes': False, 'live_world_earthquake_feed': 'all_day.geojson',
 		'live_world_earthquake_min_magnitude': 1.0, 'live_world_fires': False,
@@ -314,14 +311,6 @@ def initialize_live_world_state( ) -> None:
 		if key not in st.session_state:
 			st.session_state[ key ] = value
 
-	# Refresh environment-backed credentials without replacing explicit sidebar overrides.
-	client_id = os.getenv( 'OPENSKY_CLIENT_ID' ) or os.getenv( 'OPENSKY_API_CLIENT_ID' )
-	client_secret = (os.getenv( 'OPENSKY_API_CLIENT_SECRET' )
-		or os.getenv( 'OPENSKY_API_CREDENTIALS' ))
-	if client_id and not st.session_state.get( 'opensky_api_client_id_user_override', False ):
-		st.session_state[ 'opensky_api_client_id' ] = client_id
-	if client_secret and not st.session_state.get( 'opensky_api_credentials_user_override', False ):
-		st.session_state[ 'opensky_api_credentials' ] = client_secret
 
 def get_live_world_layers( ) -> Dict[ str, bool ]:
 	'''
@@ -351,11 +340,6 @@ def render_live_world_sidebar( ) -> None:
 
 	'''
 	initialize_live_world_state( )
-	# Populate the keyed AIS input before Streamlit instantiates its widget.
-	if not st.session_state.get( 'live_world_aisstream_api_key', '' ):
-		api_key = os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY
-		if api_key:
-			st.session_state[ 'live_world_aisstream_api_key' ] = api_key
 	with st.expander( '🌐 Mapping', expanded=False ):
 		st.checkbox( 'Enable Live Map', key='live_world_enabled' )
 		st.divider( )
@@ -379,9 +363,7 @@ def render_live_world_sidebar( ) -> None:
 				key='live_world_satellite_limit' )
 		st.checkbox( LIVE_WORLD_LAYERS[ 'vessels' ], key='live_world_vessels' )
 		if st.session_state[ 'live_world_vessels' ]:
-			st.text_input( 'AIS Stream API Key', type='password',
-				key='live_world_aisstream_api_key', help='Uses AISSTREAM_API_KEY when configured '
-				                                         'in the environment.' )
+			st.caption( 'AIS Stream credentials are read from AISSTREAM_API_KEY in config.py.' )
 			st.slider( 'Vessel Radius (Degrees)', min_value=0.25, max_value=10.0, step=0.25,
 				key='live_world_vessel_radius' )
 			st.slider( 'Vessel Message Limit', min_value=10, max_value=250, step=10,
@@ -729,6 +711,19 @@ def is_valid_live_world_coordinates( latitude: float, longitude: float ) -> bool
 		and math.isfinite( latitude ) and math.isfinite( longitude )
 		and -90.0 <= latitude <= 90.0 and -180.0 <= longitude <= 180.0)
 
+@st.cache_resource
+def get_live_opensky_service( ) -> OpenSkyLive:
+	"""Provide a reusable OpenSky client across Live World refreshes.
+
+	Purpose:
+		Preserves the provider's cached OAuth token between aircraft requests.
+		OpenSky credentials are initialized by its constructor from config.py.
+
+	Returns:
+		OpenSkyLive: Shared client for configured OpenSky credentials.
+	"""
+	return OpenSkyLive( timeout=20 )
+
 def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	'''
 		Retrieve current OpenSky aircraft state vectors around the Iyr/global location and.
@@ -748,11 +743,9 @@ def fetch_live_aircraft( latitude: float, longitude: float ) -> pd.DataFrame:
 	initialize_live_world_state( )
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
-	client_id = str( st.session_state.get( 'opensky_api_client_id', '' ) or '' )
-	client_secret = str( st.session_state.get( 'opensky_api_credentials', '' ) or '' )
 	radius = float( st.session_state[ 'live_world_aircraft_radius' ] )
 	airborne_only = bool( st.session_state[ 'live_world_aircraft_airborne_only' ] )
-	service = OpenSkyLive( client_id=client_id, client_secret=client_secret, timeout=20 )
+	service = get_live_opensky_service( )
 	result = service.fetch_states( latitude=latitude, longitude=longitude,
 		radius_degrees=radius ) or { }
 	states = result.get( 'states', [ ] ) or [ ]
@@ -947,12 +940,9 @@ def fetch_live_vessels( latitude: float, longitude: float ) -> pd.DataFrame:
 	initialize_live_world_state( )
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
-	api_key = str( st.session_state.get( 'live_world_aisstream_api_key', '' )
-		or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY or '' )
-	throw_if( 'live_world_aisstream_api_key', api_key )
 	radius = float( st.session_state[ 'live_world_vessel_radius' ] )
 	limit = int( st.session_state[ 'live_world_vessel_limit' ] )
-	service = AisStreamLive( api_key=api_key, timeout=5 )
+	service = AisStreamLive( timeout=5 )
 	result = service.fetch_positions( latitude=latitude, longitude=longitude,
 		radius_degrees=radius, max_messages=limit, duration_seconds=3.0 )
 	entities_by_mmsi: Dict[ str, GeoEntity ] = { }
@@ -2218,13 +2208,11 @@ def refresh_live_world_source( source_key: str,
 	attempted_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
 	update_live_world_source_state(
 		source_key, 'Refreshing', attempted_at=attempted_at )
-	if (source_key == 'vessels'
-			and not (st.session_state.get( 'live_world_aisstream_api_key', '' )
-				or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY)):
+	if source_key == 'vessels' and not cfg.AISSTREAM_API_KEY:
 		st.session_state[ frame_key ] = previous_frame
 		update_live_world_source_state(
 			source_key, 'Configuration Required',
-			error='Enter an AIS Stream API key in the existing Mapping sidebar controls.',
+			error='Set AISSTREAM_API_KEY in the OS environment and restart the application.',
 			stale=not previous_frame.empty, attempted_at=attempted_at,
 			error_type='MissingCredentials' )
 		return previous_frame

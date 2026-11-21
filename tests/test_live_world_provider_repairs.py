@@ -46,16 +46,19 @@ class LiveWorldProviderRepairsTests( unittest.TestCase ):
 
     root: Path = ROOT
 
-    def test_opensky_credentials_use_identical_session_state_key( self ) -> None:
-        """Ensure the OpenSky settings control supplies the key read by the fetcher."""
+    def test_opensky_credentials_are_owned_by_provider_configuration( self ) -> None:
+        """Ensure OpenSky credentials are not propagated through the Streamlit UI."""
         app = (self.root / 'app.py').read_text( encoding='utf-8' )
         realtime = (self.root / 'realtime.py').read_text( encoding='utf-8' )
+        sources = (self.root / 'sources.py').read_text( encoding='utf-8' )
         config = (self.root / 'config.py').read_text( encoding='utf-8' )
-        self.assertIn( "st.session_state.opensky_api_credentials = opensky_credentials", app )
-        self.assertIn( "'opensky_api_credentials': cfg.OPENSKY_API_CREDENTIALS or ''", realtime )
-        self.assertIn( "st.session_state.get( 'opensky_api_credentials', '' )", realtime )
+        self.assertIn( 'self.client_id = cfg.OPENSKY_CLIENT_ID', sources )
+        self.assertIn( 'self.client_secret = cfg.OPENSKY_API_CLIENT_SECRET', sources )
+        self.assertIn( 'OpenSkyLive( timeout=20 )', realtime )
+        self.assertNotIn( "st.session_state.get( 'opensky_api_credentials', '' )", realtime )
+        self.assertNotIn( 'st.session_state.opensky_api_credentials', app )
+        self.assertIn( "OPENSKY_CLIENT_ID = os.getenv(", config )
         self.assertIn( "OPENSKY_API_CLIENT_SECRET = os.getenv(", config )
-        self.assertIn( "OPENSKY_API_CREDENTIALS = OPENSKY_API_CLIENT_SECRET", config )
 
     def test_long_exception_keeps_diagnostics_without_exposing_secrets( self ) -> None:
         """Retain verbose exception messages without losing secret redaction."""

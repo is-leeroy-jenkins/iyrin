@@ -59,8 +59,8 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
             AISSTREAM_API_KEY='configured-ais-key',
         )
 
-    def test_opensky_uses_current_process_environment(self) -> None:
-        """Refresh non-overridden credentials from process environment."""
+    def test_initialize_preserves_unrelated_state_without_credentials(self) -> None:
+        """Live World initialization must not copy API secrets into session state."""
         namespace: Dict[str, Any] = {
             'Dict': Dict,
             'pd': pd,
@@ -76,17 +76,14 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
                 'AISSTREAM_API_KEY': 'os-ais-key',
                 }, clear=False):
             initialize()
-            self.assertEqual('os-client', self.state['opensky_api_client_id'])
-            self.assertEqual('os-secret', self.state['opensky_api_credentials'])
-            self.assertEqual('os-ais-key', self.state['live_world_aisstream_api_key'])
-            self.state['opensky_api_client_id'] = 'stale-client'
-            self.state['opensky_api_credentials'] = 'stale-secret'
-            initialize()
-            self.assertEqual('os-client', self.state['opensky_api_client_id'])
-            self.assertEqual('os-secret', self.state['opensky_api_credentials'])
+            self.assertNotIn('opensky_api_client_id', self.state)
+            self.assertNotIn('opensky_api_credentials', self.state)
+            self.assertNotIn('live_world_aisstream_api_key', self.state)
+            self.assertIn('live_world_df_aircraft', self.state)
+            self.assertIn('live_world_df_vessels', self.state)
 
-    def test_explicit_opensky_override_is_retained(self) -> None:
-        """Preserve explicitly entered credentials when OS defaults are available."""
+    def test_existing_live_world_state_is_not_overwritten(self) -> None:
+        """The credential correction must not reset independent source settings."""
         namespace: Dict[str, Any] = {
             'Dict': Dict,
             'pd': pd,
@@ -96,27 +93,18 @@ class LiveWorldCredentialResolutionTests(unittest.TestCase):
             'LIVE_WORLD_DATA_SOURCES': {},
         }
         initialize = load_live_world_function('initialize_live_world_state', namespace)
-        with patch.dict(os.environ, {
-                'OPENSKY_CLIENT_ID': 'os-client',
-                'OPENSKY_API_CLIENT_SECRET': 'os-secret',
-                }, clear=False):
-            initialize()
-            self.state['opensky_api_client_id'] = 'manual-client'
-            self.state['opensky_api_credentials'] = 'manual-secret'
-            self.state['opensky_api_client_id_user_override'] = True
-            self.state['opensky_api_credentials_user_override'] = True
-            initialize()
-        self.assertEqual('manual-client', self.state['opensky_api_client_id'])
-        self.assertEqual('manual-secret', self.state['opensky_api_credentials'])
+        self.state['live_world_vessel_radius'] = 5.0
+        initialize()
+        self.assertEqual(5.0, self.state['live_world_vessel_radius'])
 
-    def test_ais_credentials_resolve_from_os_when_existing_state_empty(self) -> None:
-        """Use an OS-backed key instead of incorrectly marking vessels unconfigured."""
+    def test_ais_uses_configuration_not_session_override(self) -> None:
+        """The vessel fetcher must instantiate its cfg-backed provider without an API key."""
         source = (ROOT / 'realtime.py').read_text(encoding='utf-8')
-        self.assertIn("or os.getenv( 'AISSTREAM_API_KEY' ) or cfg.AISSTREAM_API_KEY",
-            source)
-        self.assertIn("if (source_key == 'vessels'", source)
-        self.assertIn("'live_world_aisstream_api_key' ] = api_key", source)
-        self.assertIn("with st.expander( '🌐 Mapping'", source)
+        provider = (ROOT / 'sources.py').read_text(encoding='utf-8')
+        self.assertIn("if source_key == 'vessels' and not cfg.AISSTREAM_API_KEY:", source)
+        self.assertIn('AisStreamLive( timeout=5 )', source)
+        self.assertIn('self.api_key = cfg.AISSTREAM_API_KEY', provider)
+        self.assertNotIn("'live_world_aisstream_api_key' ] = api_key", source)
 
 
 if __name__ == '__main__':
