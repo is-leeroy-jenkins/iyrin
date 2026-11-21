@@ -1,114 +1,114 @@
-[server]
-enableStaticServing = true
-fileWatcherType = "none"
-
-[[theme.fontFaces]]
-family = "gi-font"
-url = "app/static/fonts/ttf/G.I.-400.ttf"
-style = "normal"
-weight = 400
-
-[[theme.fontFaces]]
-family = "gi-font"
-url = "app/static/fonts/ttf/G.I.-530.ttf"
-style = "normal"
-weight = 530
-
-[[theme.fontFaces]]
-family = "gi-font"
-url = "app/static/fonts/ttf/G.I.-750.ttf"
-style = "normal"
-weight = 750
-
+# =============================================================================
+# PURSUE-inspired Streamlit Theme
+# Website reference: https://www.war.gov/ufo/
+# Purpose: Recreate the visual character of the PURSUE public-release portal.
+# NOTE: Colors and typography are approximated from published screenshots.
+#       This is not extracted or officially endorsed WAR.GOV CSS.
+# =============================================================================
 
 [theme]
-base = "dark"
-font = "gi-font"
-headingFont = "gi-font"
-codeFont = "monospace"
+base = 'dark'
 
-primaryColor = "#8AA6B6"
-backgroundColor = "#050A0F"
-secondaryBackgroundColor = "#091119"
-textColor = "#D6DDE2"
-linkColor = "#9DB4C2"
+# -----------------------------------------------------------------------------
+# Core palette: dark blue-black surfaces, restrained blue/cyan accents
+# -----------------------------------------------------------------------------
+primaryColor = '#36A8BD'
+backgroundColor = '#080D13'
+secondaryBackgroundColor = '#111A25'
+textColor = '#E8EDF2'
+linkColor = '#62C7D5'
 linkUnderline = false
-codeTextColor = "#C8D3DA"
-codeBackgroundColor = "#0D1720"
 
-baseRadius = "2px"
-buttonRadius = "2px"
-borderColor = "#22303B"
-dataframeBorderColor = "#22303B"
-dataframeHeaderBackgroundColor = "#0D1720"
+# -----------------------------------------------------------------------------
+# Semantic palette: retain warning/error/success distinctions on a dark surface
+# -----------------------------------------------------------------------------
+redColor = '#D97982'
+orangeColor = '#DFA16D'
+yellowColor = '#E2C378'
+greenColor = '#77C0A4'
+blueColor = '#5CAEC8'
+violetColor = '#AA9BD2'
+grayColor = '#9BA9B9'
 
+redBackgroundColor = '#332027'
+orangeBackgroundColor = '#34291E'
+yellowBackgroundColor = '#322D20'
+greenBackgroundColor = '#1B302D'
+blueBackgroundColor = '#1B2E3D'
+violetBackgroundColor = '#292638'
+grayBackgroundColor = '#202A35'
+
+redTextColor = '#F2A7AE'
+orangeTextColor = '#F1BC92'
+yellowTextColor = '#F2D997'
+greenTextColor = '#A2DCC8'
+blueTextColor = '#88D3E3'
+violetTextColor = '#CCBFEA'
+grayTextColor = '#B5C1CD'
+
+# -----------------------------------------------------------------------------
+# Typography: console-like hierarchy and compact document labels
+# -----------------------------------------------------------------------------
+font = 'monospace'
+headingFont = 'monospace'
+codeFont = 'monospace'
+baseFontSize = 14
+baseFontWeight = 400
+headingFontSizes = ['2rem', '1.625rem', '1.375rem', '1.2rem', '1.05rem', '0.95rem']
+headingFontWeights = [700, 700, 600, 600, 600, 600]
+metricValueFontSize = '2rem'
+metricValueFontWeight = 600
+codeFontSize = '0.875rem'
+codeFontWeight = 400
+codeBackgroundColor = '#111A25'
+codeTextColor = '#E8EDF2'
+
+# -----------------------------------------------------------------------------
+# Geometry, separation, top and bottom whitespace
+# -----------------------------------------------------------------------------
+baseRadius = '2px'
+buttonRadius = '2px'
+borderColor = '#344352'
+dataframeBorderColor = '#344352'
+dataframeHeaderBackgroundColor = '#1B2634'
+dataframeHeaderTextColor = '#E8EDF2'
 showWidgetBorder = true
 showSidebarBorder = true
+paddingTop = '1.5rem'
+paddingBottom = '3rem'
 
-baseFontSize = 16
-baseFontWeight = 400
-headingFontWeights = [750, 750, 750, 550, 550, 550]
-codeFontWeight = 400
-metricValueFontWeight = 500
-
+# -----------------------------------------------------------------------------
+# Chart palettes: ten entries required for sequential and diverging scales
+# -----------------------------------------------------------------------------
 chartCategoricalColors = [
-    "#8AA6B6",
-    "#526D7C",
-    "#89A98D",
-    "#C0A46B",
-    "#BD7777",
-    "#6C7F8B",
-    "#9DB4C2",
-    "#415965",
-    "#A8B4BB",
-    "#70848F"
+    '#36A8BD', '#668BB3', '#8499AA', '#7CB6A8', '#C5B17D',
+    '#AFA0C2', '#D28E80', '#5E7F8F', '#A3C5CC', '#8296B8'
 ]
-
 chartSequentialColors = [
-    "#0D1720",
-    "#16232C",
-    "#20313C",
-    "#2C414E",
-    "#3A5361",
-    "#4A6776",
-    "#5D7C8C",
-    "#7292A0",
-    "#8AA6B6",
-    "#B7C7D0"
+    '#0A131C', '#102334', '#163449', '#1B475A', '#205C6B',
+    '#267488', '#2B899F', '#36A8BD', '#72C7D0', '#B3E5E8'
 ]
-
 chartDivergingColors = [
-    "#7F4F4F",
-    "#996262",
-    "#B27777",
-    "#C89494",
-    "#D9B5B5",
-    "#D6DDE2",
-    "#B8C9D2",
-    "#95B1BF",
-    "#7398A9",
-    "#526D7C"
+    '#C68778', '#D3A397', '#DFC0B8', '#E5D8D1', '#CED9DE',
+    '#A6CCD4', '#7DB9C8', '#529FB5', '#347E9D', '#245B7F'
 ]
-
 
 [theme.sidebar]
-font = "gi-font"
-headingFont = "gi-font"
-codeFont = "monospace"
-
-primaryColor = "#8AA6B6"
-backgroundColor = "#091119"
-secondaryBackgroundColor = "#0D1720"
-textColor = "#C8D3DA"
-linkColor = "#9DB4C2"
+# Sidebar inherits the main theme where individual options are not overridden.
+backgroundColor = '#050608'
+secondaryBackgroundColor = '#1B2634'
+primaryColor = '#36A8BD'
+textColor = '#E8EDF2'
+linkColor = '#62C7D5'
 linkUnderline = false
-codeTextColor = "#C8D3DA"
-codeBackgroundColor = "#0D1720"
-
-baseRadius = "2px"
-buttonRadius = "2px"
-borderColor = "#22303B"
-dataframeBorderColor = "#22303B"
-dataframeHeaderBackgroundColor = "#0D1720"
-
+borderColor = '#344352'
+font = 'monospace'
+headingFont = 'monospace'
+codeFont = 'monospace'
+headingFontSizes = ['1.5rem', '1.25rem', '1.125rem', '1rem', '0.875rem', '0.75rem']
+headingFontWeights = [700, 700, 600, 600, 600, 600]
+baseRadius = '2px'
+buttonRadius = '2px'
 showWidgetBorder = true
+paddingTop = '1.5rem'
+paddingBottom = '2rem'

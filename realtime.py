@@ -192,6 +192,34 @@ def throw_if( name: str, value: object ) -> None:
 	if isinstance( value, (list, tuple, dict, set) ) and not value:
 		raise ValueError( f'Argument "{name}" cannot be empty.' )
 
+
+def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
+	'''
+		Convert normalized GeoEntity objects into the Live World DataFrame contract.
+
+	Purpose:
+		Convert normalized GeoEntity objects into the Live World DataFrame contract.
+
+	Args:
+		entities (List[GeoEntity]): Normalized geospatial entities.
+
+	Returns:
+		pd.DataFrame: Live World entity records.
+
+	'''
+	columns = [ 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude', 'Altitude',
+		'Heading', 'Speed', 'Timestamp', 'Source', 'Metadata' ]
+	if not entities:
+		return pd.DataFrame( columns=columns )
+
+	rows: List[ Dict[ str, object ] ] = [ ]
+	for entity in entities:
+		rows.append( { 'EntityId': entity.entity_id, 'EntityType': entity.entity_type,
+			'Name': entity.name, 'Latitude': entity.latitude, 'Longitude': entity.longitude,
+			'Altitude': entity.altitude, 'Heading': entity.heading, 'Speed': entity.speed,
+			'Timestamp': entity.timestamp, 'Source': entity.source, 'Metadata': entity.metadata } )
+	return pd.DataFrame( rows, columns=columns )
+
 def initialize_world_state( ) -> None:
 	'''
 		Initialize isolated Live World Data state without modifying Iyr's existing mode state.
@@ -1176,7 +1204,6 @@ def fetch_infrastructure( latitude: float, longitude: float ) -> pd.DataFrame:
 	elements = result.get( 'elements', [ ] ) or [ ]
 	entities: List[ GeoEntity ] = [ ]
 	observed_at = dt.datetime.now( dt.timezone.utc ).isoformat( )
-
 	for element in elements:
 		if not isinstance( element, dict ):
 			continue
@@ -1400,34 +1427,6 @@ def get_row_value( row: Dict[ str, Any ], keys: List[ str ] ) -> object:
 		if key in row:
 			return row[ key ]
 	return None
-
-def entities_to_dataframe( entities: List[ GeoEntity ] ) -> pd.DataFrame:
-	'''
-		Convert normalized GeoEntity objects into the Live World DataFrame contract.
-
-	Purpose:
-		Convert normalized GeoEntity objects into the Live World DataFrame contract.
-
-	Args:
-		entities (List[GeoEntity]): Normalized geospatial entities.
-
-	Returns:
-		pd.DataFrame: Live World entity records.
-
-	'''
-	columns = [ 'EntityId', 'EntityType', 'Name', 'Latitude', 'Longitude', 'Altitude',
-		'Heading', 'Speed', 'Timestamp', 'Source', 'Metadata' ]
-	if not entities:
-		return pd.DataFrame( columns=columns )
-
-	rows: List[ Dict[ str, object ] ] = [ ]
-	for entity in entities:
-		rows.append( { 'EntityId': entity.entity_id, 'EntityType': entity.entity_type,
-			'Name': entity.name, 'Latitude': entity.latitude, 'Longitude': entity.longitude,
-			'Altitude': entity.altitude, 'Heading': entity.heading, 'Speed': entity.speed,
-			'Timestamp': entity.timestamp, 'Source': entity.source, 'Metadata': entity.metadata,
-		} )
-	return pd.DataFrame( rows, columns=columns )
 
 def get_world_tracking_options( ) -> Dict[ str, str ]:
 	'''

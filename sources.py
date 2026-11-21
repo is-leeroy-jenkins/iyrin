@@ -145,7 +145,7 @@ class OpenSkyLive( ):
 					timeout=self.timeout )
 				if self.response.status_code in (401, 403):
 					raise requests.HTTPError(
-						f'OpenSky OAuth token request rejected (HTTP {self.response.status_code}). '
+						f'OpenSky OAuth token request rejected (HTTP {self.response.status_code}).'
 						'Confirm the configured API client ID and client secret.',
 						response=self.response )
 				self.response.raise_for_status( )
