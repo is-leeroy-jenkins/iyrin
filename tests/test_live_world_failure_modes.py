@@ -285,9 +285,10 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
         """Mark vessel configuration as required without invoking its fetcher."""
         source = (ROOT / 'realtime.py').read_text(encoding='utf-8')
         tree = ast.parse(source)
-        func = next(node for node in tree.body
-            if isinstance(node, ast.FunctionDef)
-            and node.name == 'refresh_live_world_source')
+        func = next(method for cls in tree.body if isinstance(cls, ast.ClassDef)
+            for method in cls.body if isinstance(method, ast.FunctionDef)
+            and method.name == 'refresh_live_world_source')
+        func.decorator_list = []
         previous = pd.DataFrame([{'EntityId': 'existing'}])
         state: Dict[str, Any] = {
             'live_world_aisstream_api_key': '',
