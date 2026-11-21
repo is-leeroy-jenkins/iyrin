@@ -85,24 +85,22 @@ class OpenSkyLive( ):
 	access_token: str
 	response: Response | None
 
-	def __init__( self, client_id: str='', client_secret: str='', timeout: int=20 ) -> None:
+	def __init__( self, timeout: int=20 ) -> None:
 		'''
 
 		Purpose:
-			Initialize OpenSky REST API access. Credentials are optional because OpenSky can
-			serve anonymous requests subject to the provider's current access limits.
+			Initialize OpenSky REST API access with credentials supplied by config.py.
+			Anonymous access remains available when both credentials are absent.
 
 		Args:
-			client_id (str): OpenSky API Client identifier.
-			client_secret (str): OpenSky API Client secret.
 			timeout (int): HTTP timeout in seconds.
 
 		Returns:
 			None
 
 		'''
-		self.client_id = client_id
-		self.client_secret = client_secret
+		self.client_id = cfg.OPENSKY_CLIENT_ID
+		self.client_secret = cfg.OPENSKY_API_CLIENT_SECRET
 		self.timeout = timeout
 		self.token_url = ( 'https://auth.opensky-network.org/auth/realms/opensky-network/'
 			'protocol/openid-connect/token' )
@@ -308,10 +306,9 @@ class AisStreamLive( ):
 		'''
 
 		Purpose:
-			Initialize AIS Stream server-side WebSocket access with bounded reconnect behavior.
+			Initialize AIS Stream with its OS-configured API key and bounded reconnect behavior.
 
 		Args:
-			api_key (str): AIS Stream API key.
 			timeout (int): WebSocket connection and receive timeout in seconds.
 			max_retries (int): Maximum reconnect attempts after the initial connection.
 			retry_delay (float): Initial reconnect delay in seconds.
@@ -354,6 +351,7 @@ class AisStreamLive( ):
 
 		'''
 		try:
+			throw_if( 'api_key', self.api_key )
 			throw_if( 'latitude', latitude )
 			throw_if( 'longitude', longitude )
 			throw_if( 'radius_degrees', radius_degrees )
