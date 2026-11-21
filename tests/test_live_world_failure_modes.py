@@ -150,7 +150,7 @@ def load_production_class(name: str, request_post: Mock,
         'List': List,
         'Response': FakeResponse,
         'cfg': SimpleNamespace(OPENSKY_CLIENT_ID='client-id',
-            OPENSKY_API_CLIENT_SECRET='private-client-secret'),
+            OPENSKY_CLIENT_SECRET='private-client-secret'),
         'Error': WrappedProviderError,
         'Logger': lambda: SimpleNamespace(write=lambda exception: None),
         'time': clock,
@@ -287,7 +287,7 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
         tree = ast.parse(source)
         func = next(node for node in tree.body
             if isinstance(node, ast.FunctionDef)
-            and node.name == 'refresh_live_world_source')
+            and node.name == 'refresh_live_source')
         previous = pd.DataFrame([{'EntityId': 'existing'}])
         state: Dict[str, Any] = {
             'live_world_aisstream_api_key': '',
@@ -331,14 +331,14 @@ class LiveWorldFailureRegressionTests(unittest.TestCase):
                     'frame_key': 'live_world_df_vessels',
                 },
             },
-            'initialize_live_world_state': lambda: None,
+            'initialize_world_state': lambda: None,
             'throw_if': lambda name, value: None,
-            'update_live_world_source_state': record_source_status,
+            'update_source_state': record_source_status,
         }
         module = ast.fix_missing_locations(ast.Module(body=[func], type_ignores=[]))
         exec(compile(module, str(ROOT / 'realtime.py'), 'exec'), namespace)
         fetcher = Mock(side_effect=AssertionError('Provider must not be called'))
-        result = namespace['refresh_live_world_source']('vessels', fetcher)
+        result = namespace['refresh_live_source']('vessels', fetcher)
         fetcher.assert_not_called()
         self.assertIs(result, previous)
         self.assertEqual('Configuration Required', statuses[-1]['status'])

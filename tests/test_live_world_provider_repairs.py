@@ -53,12 +53,12 @@ class LiveWorldProviderRepairsTests( unittest.TestCase ):
         sources = (self.root / 'sources.py').read_text( encoding='utf-8' )
         config = (self.root / 'config.py').read_text( encoding='utf-8' )
         self.assertIn( 'self.client_id = cfg.OPENSKY_CLIENT_ID', sources )
-        self.assertIn( 'self.client_secret = cfg.OPENSKY_API_CLIENT_SECRET', sources )
+        self.assertIn( 'self.client_secret = cfg.OPENSKY_CLIENT_SECRET', sources )
         self.assertIn( 'OpenSkyLive( timeout=20 )', realtime )
         self.assertNotIn( "st.session_state.get( 'opensky_api_credentials', '' )", realtime )
         self.assertNotIn( 'st.session_state.opensky_api_credentials', app )
         self.assertIn( "OPENSKY_CLIENT_ID = os.getenv(", config )
-        self.assertIn( "OPENSKY_API_CLIENT_SECRET = os.getenv(", config )
+        self.assertIn( "OPENSKY_CLIENT_SECRET = (os.getenv(", config )
 
     def test_long_exception_keeps_diagnostics_without_exposing_secrets( self ) -> None:
         """Retain verbose exception messages without losing secret redaction."""
@@ -80,7 +80,7 @@ class LiveWorldProviderRepairsTests( unittest.TestCase ):
 
         namespace: dict[str, Any] = { 'math': math }
         validate = load_function(
-            'realtime.py', 'is_valid_live_world_coordinates', namespace )
+            'realtime.py', 'is_valid_world_coordinates', namespace )
         self.assertTrue( validate( 38.8951, -77.0364 ) )
         self.assertTrue( validate( 0.0, 0.0 ) )
         self.assertFalse( validate( math.nan, -77.0 ) )
