@@ -101,8 +101,7 @@ O365_CLIENT_ID = os.getenv( 'O365_CLIENT_ID' )
 O365_CLIENT_SECRET = os.getenv( 'O365_CLIENT_SECRET' )
 OPENAQ_API_KEY = os.getenv( 'OPENAQ_API_KEY' )
 OPENSKY_CLIENT_ID = os.getenv( 'OPENSKY_CLIENT_ID' ) or os.getenv( 'OPENSKY_API_CLIENT_ID' )
-OPENSKY_API_CLIENT_SECRET = os.getenv( 'OPENSKY_API_CLIENT_SECRET' ) or os.getenv( 'OPENSKY_API_CREDENTIALS' )
-OPENSKY_API_CREDENTIALS = OPENSKY_API_CLIENT_SECRET
+OPENSKY_API_CREDENTIALS = os.getenv( 'OPENSKY_API_CREDENTIALS' )
 CENSUS_API_KEY = os.getenv( 'CENSUS_API_KEY' )
 SOCRATA_API_KEY = os.getenv( 'SOCRATA_API_KEY' )
 HEALTHDATA_API_KEY = os.getenv( 'HEALTHDATA_API_KEY' )
@@ -116,10 +115,9 @@ SKYMAP_TOKEN = os.getenv( 'SKY_MAP_TOKEN' )
 
 # -------------- SETTINGS
 
-MODES = [ 'Mapping Tools', 'Interactive Map', 'Local Data', 'Weather Data',
-          'Environmental Data', 'Geological Data', 'Astronomical Data',
-          'Celestial Map', 'Public Health', 'Artificial Intelligence',
-          'File Upload', 'Data Management' ]
+MODES = [ 'Mapping Tools', 'Interactive Map', 'Local Data', 'Weather Data', 'Environmental Data',
+	'Geological Data', 'Astronomical Data', 'Public Health', 'Celestial Map',
+	'Artificial Intelligence', 'File Upload', 'Data Management' ]
 
 
 AGENTS = ( 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '

@@ -4046,13 +4046,11 @@ if mode == 'Local Data':
 								document.metadata.setdefault( 'source', uploaded_file.name )
 							
 							documents.extend( loaded )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = "\n\n".join( d.page_content for d in documents if
-					                                         hasattr( d, 'page_content' ) \
-					                                         and isinstance( d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					
 					st.session_state.active_loader = 'TextLoader'
 					st.success( f'Loaded {len( documents )} text document(s).' )
@@ -4111,23 +4109,16 @@ if mode == 'Local Data':
 						loader = CsvLoader( )
 						documents = loader.load( path, columns=None, delimiter=delimiter,
 							quotechar=quotechar, ) or [ ]
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = "\n\n".join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.active_loader = 'CsvLoader'
-					
 					st.session_state[
 						'_loader_status' ] = f'Loaded {len( documents )} CSV document(s).'
 				
-				# ----------------------------
-				# ---- XML Loader
-				# ----------------------------
 				render_document_processing_actions( 'CsvLoader', 'csv' )
 			
 			# ------- PDF Loader
@@ -4236,11 +4227,9 @@ if mode == 'Local Data':
 								document.metadata[ 'loader' ] = 'PdfLoader'
 								document.metadata.setdefault( 'source', pdf.name )
 								document.metadata.setdefault( 'extract', 'legacy' )
-							
 							raw_text = '\n\n'.join( d.page_content for d in documents if
-							                        hasattr( d, 'page_content' ) and isinstance(
-								                        d.page_content,
-								                        str ) and d.page_content.strip( ) )
+								hasattr( d, 'page_content' ) and isinstance( d.page_content,
+									str ) and d.page_content.strip( ) )
 							
 							st.session_state.pdf_pages = None
 					
@@ -4413,9 +4402,6 @@ if mode == 'Local Data':
 						else:
 							st.warning( 'No Excel document content was loaded.' )
 				
-				# ----------------------------
-				# ------ Expander Markdown Loader
-				# ----------------------------
 				render_document_processing_actions( 'ExcelLoader', 'excel' )
 			
 			# ------- Markdown Loader
@@ -4477,9 +4463,6 @@ if mode == 'Local Data':
 					st.session_state.active_loader = 'MarkdownLoader'
 					st.success( f'Loaded {len( documents )} Markdown document(s).' )
 				
-				# ----------------------------
-				# ---- Expander HTML Loader
-				# ----------------------------
 				render_document_processing_actions( 'MarkdownLoader', 'md' )
 			
 			# ------- HTML Loader
@@ -4534,9 +4517,6 @@ if mode == 'Local Data':
 					st.session_state.active_loader = 'HtmlLoader'
 					st.success( f'Loaded {len( documents )} HTML document(s).' )
 				
-				# ----------------------------
-				# --------- Expander JSON Loader
-				# ----------------------------
 				render_document_processing_actions( 'HtmlLoader', 'html' )
 			
 			# ------- JSON Loader
@@ -4913,14 +4893,11 @@ if mode == 'Local Data':
 						document.metadata.setdefault( 'max_depth', int( max_depth ) )
 						document.metadata.setdefault( 'timeout', int( crawl_timeout ) )
 						document.metadata.setdefault( 'prevent_outside', bool( stay_on_domain ) )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -4992,14 +4969,11 @@ if mode == 'Local Data':
 						document.metadata.setdefault( 'source', email_file.name )
 						document.metadata.setdefault( 'mode', email_mode )
 						document.metadata.setdefault( 'attachments', email_attachments )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					
 					st.session_state.processed_text = None
 					st.session_state.lines = None
@@ -5065,13 +5039,11 @@ if mode == 'Local Data':
 						document.metadata[ 'loader' ] = 'PubMedSearchLoader'
 						document.metadata.setdefault( 'query', pubmed_query.strip( ) )
 						document.metadata.setdefault( 'max_docs', int( pubmed_max_docs ) )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d, 'page_content' ) \
-					                                         and isinstance( d.page_content, str ) \
-					                                         and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5146,13 +5118,11 @@ if mode == 'Local Data':
 						document.metadata.setdefault( 'city_id', open_city_id.strip( ) )
 						document.metadata.setdefault( 'dataset_id', open_city_dataset_id.strip( ) )
 						document.metadata.setdefault( 'limit', int( open_city_limit ) )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d, 'page_content' ) \
-					                                         and isinstance( d.page_content, str )
-					                                         and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5229,14 +5199,11 @@ if mode == 'Local Data':
 								f"{onedrive_drive_id.strip( )}:{onedrive_folder_path.strip( )}" )
 						else:
 							document.metadata.setdefault( 'source', onedrive_drive_id.strip( ), )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5308,14 +5275,11 @@ if mode == 'Local Data':
 						document.metadata.setdefault( 'blob', gcs_blob.strip( ) )
 						document.metadata.setdefault( 'source',
 							f"gs://{gcs_bucket.strip( )}/{gcs_blob.strip( )}" )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5420,14 +5384,11 @@ if mode == 'Local Data':
 							aws_file_endpoint_url.strip( ) or None )
 						document.metadata.setdefault( 'source',
 							f"s3://{aws_file_bucket.strip( )}/{aws_file_key.strip( )}" )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5512,13 +5473,11 @@ if mode == 'Local Data':
 						else:
 							document.metadata.setdefault( 'source',
 								f'gs://{gcs_bucket_name.strip( )}' )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d, 'page_content' ) \
-					                                         and isinstance(  d.page_content, str ) \
-					                                         and d.page_content.strip( ))
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5633,14 +5592,11 @@ if mode == 'Local Data':
 						else:
 							document.metadata.setdefault( 'source',
 								f's3://{aws_bucket_name.strip( )}' )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d,
-						                                         'page_content' ) and isinstance(
-						                                         d.page_content,
-						                                         str ) and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -5714,13 +5670,11 @@ if mode == 'Local Data':
 								f'{spfx_library_id.strip( )}:{spfx_folder_id.strip( )}' )
 						else:
 							document.metadata.setdefault( 'source', spfx_library_id.strip( ), )
-					
 					st.session_state.documents = documents
 					st.session_state.raw_documents = list( documents )
 					st.session_state.raw_text = '\n\n'.join( d.page_content for d in documents if
-					                                         hasattr( d, 'page_content' ) \
-					                                         and isinstance( d.page_content,  str ) \
-					                                         and d.page_content.strip( ) )
+						hasattr( d, 'page_content' ) and isinstance( d.page_content, str ) and
+						d.page_content.strip( ) )
 					st.session_state.processed_text = None
 					st.session_state.lines = None
 					st.session_state.chunked_documents = None
@@ -6123,11 +6077,8 @@ elif mode == 'Weather Data':
 
 					tides_begin_date = tides_begin.strftime( '%Y%m%d' )
 					tides_end_date = tides_end.strftime( '%Y%m%d' )
-
-					tides_datum = st.selectbox(
-						'Datum',
-						options=[ 'MLLW', 'MLW', 'MSL', 'MHW', 'MHHW', 'NAVD' ],
-						key='weather_tides_datum' )
+					tides_datum = st.selectbox( 'Datum', options=[ 'MLLW', 'MLW', 'MSL', 'MHW',
+						'MHHW', 'NAVD' ], key='weather_tides_datum' )
 
 					tides_units = st.selectbox( 'Units', options=[ 'metric', 'english' ],
 						key='weather_tides_units' )
@@ -6147,7 +6098,6 @@ elif mode == 'Weather Data':
 							use_container_width=True ):
 						try:
 							service = TidesAndCurrents( )
-
 							result = service.fetch( mode=tides_mode, station_id=tides_station_id,
 								begin_date=tides_begin_date, end_date=tides_end_date,
 								datum=tides_datum, units=tides_units, time_zone=tides_time_zone,
@@ -6181,7 +6131,7 @@ elif mode == 'Weather Data':
 # ENVIRONMENTAL DATA MODE
 # ==============================================================================
 elif mode == 'Environmental Data':
-	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Environmental Data' )
 		st.divider( )
@@ -6938,7 +6888,7 @@ elif mode == 'Environmental Data':
 # GEOLOGICAL DATA MODE
 # ==============================================================================
 elif mode == 'Geological Data':
-	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Geological Data' )
 		st.divider( )
@@ -7400,7 +7350,7 @@ elif mode == 'Geological Data':
 # ASTRONOMICAL MODE
 # ==============================================================================
 elif mode == 'Astronomical Data':
-	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Astronomical Data' )
 		st.divider( )
@@ -8241,7 +8191,7 @@ elif mode == 'Astronomical Data':
 # CELESTIAL MAP MODE
 # ==============================================================================
 elif mode == 'Celestial Map':
-	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Celestial Map' )
 		st.divider( )
@@ -9021,9 +8971,8 @@ elif mode == 'Public Health':
 			st.caption( 'API', help=cfg.UN_DATA )
 			UN_MODES = [ 'datasets', 'sdmx_query' ]
 			UN_QUERY_PRESETS = [ 'dataflow', 'datastructure', 'codelist', 'conceptscheme',
-			                     'dataflow/all/all/latest', 'datastructure/all/all/latest',
-			                     'codelist/all/all/latest', 'conceptscheme/all/all/latest',
-			                     'Custom...' ]
+				'dataflow/all/all/latest', 'datastructure/all/all/latest',
+				'codelist/all/all/latest', 'conceptscheme/all/all/latest', 'Custom...' ]
 			
 			def _clear_un_state( ) -> None:
 				"""
@@ -9150,10 +9099,9 @@ elif mode == 'Public Health':
 			st.caption( 'API', help=cfg.WORLD_POP_DATA )
 			WORLDPOP_MODES = [ 'catalog', 'search', 'raster_metadata' ]
 			WORLDPOP_ASSET_PRESETS = [ 'data/pop', 'data/pop/wpgp', 'data/pop/wpgp?iso3=GHA',
-			                           'data/pop/wpgp?iso3=AUS', 'data/pop/wpgp?iso3=USA',
-			                           'data/pop/wpgp?iso3=GBR', 'data/pop/wpgp?iso3=NGA',
-			                           'data/pop/wpgp?iso3=KEN', 'data/pop/wpgp?iso3=IND',
-			                           'data/pop/wpgp?iso3=BRA', 'Custom...' ]
+				'data/pop/wpgp?iso3=AUS', 'data/pop/wpgp?iso3=USA', 'data/pop/wpgp?iso3=GBR',
+				'data/pop/wpgp?iso3=NGA', 'data/pop/wpgp?iso3=KEN', 'data/pop/wpgp?iso3=IND',
+				'data/pop/wpgp?iso3=BRA', 'Custom...' ]
 			
 			def _clear_worldpop_state( ) -> None:
 				"""
@@ -9334,8 +9282,8 @@ elif mode == 'Public Health':
 			st.caption( 'API', help=cfg.CDC_WONDER )
 			WONDER_MODES = [ 'metadata_template', 'query_xml' ]
 			WONDER_DATASETS = [ 'D76', 'D140', 'D176', 'D158', 'D159', 'D160', 'D161', 'D162',
-			                    'D163', 'D164', 'D165', 'D166', 'D167', 'D168', 'D169', 'D170',
-			                    'D171', 'D172', 'D173', 'D174', 'D175', 'Other' ]
+				'D163', 'D164', 'D165', 'D166', 'D167', 'D168', 'D169', 'D170', 'D171', 'D172',
+				'D173', 'D174', 'D175', 'Other' ]
 			
 			def _clear_wonder_state( ) -> None:
 				"""
@@ -9731,7 +9679,7 @@ elif mode == 'Public Health':
 			'cdc_wonder': 'CDC Wonder', 'pub_med_search': 'Pub Med Search',
 			'open_city_data': 'Open City Data', }
 		if active_source:
-			st.caption( f"Active Source: {display_names.get( active_source, active_source )}" )
+			st.caption( f'Active Source: {display_names.get( active_source, active_source )}' )
 		
 		# -------- U.S. Census Bureau
 		if active_source == 'u_s_census_bureau':
@@ -10062,7 +10010,8 @@ elif mode == 'Public Health':
 						clean_asset_path = ''
 					elif worldpop_mode == 'raster_metadata':
 						selected_asset_path = (
-								worldpop_custom_asset_path if worldpop_asset_choice == 'Custom...' else worldpop_asset_choice)
+							worldpop_custom_asset_path if worldpop_asset_choice == 'Custom...'
+							else worldpop_asset_choice)
 						clean_asset_path = _validate_worldpop_asset_path( selected_asset_path )
 						clean_query = ''
 					else:
@@ -11690,10 +11639,9 @@ elif mode == 'File Upload':
 				if st.button( 'Load Document', key='file_upload_document_load' ):
 					try:
 						loaders = { '.txt': TextLoader, '.csv': CsvLoader, '.xlsx': ExcelLoader,
-						            '.xls': ExcelLoader, '.pdf': PdfLoader, '.docx': WordLoader,
-						            '.pptx': PowerPointLoader, '.md': MarkdownLoader,
-						            '.html': HtmlLoader, '.htm': HtmlLoader, '.json': JsonLoader,
-						            '.xml': XmlLoader, }
+							'.xls': ExcelLoader, '.pdf': PdfLoader, '.docx': WordLoader,
+							'.pptx': PowerPointLoader, '.md': MarkdownLoader, '.html': HtmlLoader,
+							'.htm': HtmlLoader, '.json': JsonLoader, '.xml': XmlLoader, }
 						throw_if( 'document_file', document_file )
 						count = load_uploaded_document( document_file, loaders,
 							promote_loader_documents )

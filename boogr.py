@@ -264,18 +264,17 @@ class Error( Exception ):
 			object.__setattr__( self, name, value )
 	
 	def __str__( self ) -> str:
-		"""Return a string representation of the wrapped error.
+		"""Return the sanitized original exception message.
 
 		Purpose:
-			Return the sanitized information string when available, otherwise return the sanitized
-			source exception message. If neither value is available, return an empty string.
-
-		
+			Expose the underlying exception message without replacing it
+			with the sanitized traceback. Preserve the existing traceback
+			and diagnostic metadata for logging.
 
 		Returns:
-			str: Sanitized error information string.
+			str: Sanitized original exception message.
 		"""
-		return self.info or self.message or ''
+		return self.message or ''
 	
 	def __dir__( self ) -> List[ str ]:
 		"""Return public member names used by callers and display surfaces.
