@@ -1226,6 +1226,10 @@ def bootstrap_browser_geolocation( geocoder: Geocoder ) -> None:
 		None: Initializes the active location using browser coordinates when available.
 	"""
 	try:
+		# An explicitly saved Static Maps location takes precedence until reset.
+		if (st.session_state.get( 'active_location_source' ) == 'static_map'
+				and has_valid_global_coordinates( )):
+			return
 		if not st.session_state.get( 'browser_geolocation_enabled', True ):
 			return
 		
@@ -1307,6 +1311,9 @@ def ensure_active_location_state( ) -> None:
 	Returns:
 		None: Ensures the application has initialized location state.
 	"""
+	if (st.session_state.get( 'active_location_source' ) == 'static_map'
+			and has_valid_global_coordinates( )):
+		return
 	browser_enabled = bool( st.session_state.get( 'browser_geolocation_enabled', True ) )
 	browser_loaded = bool( st.session_state.get( 'browser_geolocation_loaded', False ) )
 	browser_geo = st.session_state.get( 'browser_geolocation', None )
@@ -3363,6 +3370,8 @@ with st.sidebar:
 			st.warning( error )
 		
 		if st.button( 'Reset', key='browser_geolocation_reset', width='stretch' ):
+			if st.session_state.get( 'active_location_source' ) == 'static_map':
+				st.session_state[ 'active_location_source' ] = ''
 			st.session_state[ 'browser_geolocation' ] = None
 			st.session_state[ 'browser_geolocation_loaded' ] = False
 			st.session_state[ 'browser_geolocation_reverse_geocoded' ] = False
@@ -3703,6 +3712,10 @@ if mode == 'Mapping Tools':
 				save_coordinates = st.checkbox( 'Save Coordinates to Global State', value=True,
 					key='maps_save_coordinates' )
 
+			# Persist image preferences independently of the coordinate-save checkbox.
+			st.session_state[ 'zoom' ] = int( zoom )
+			st.session_state[ 'map_size' ] = str( size )
+
 			if st.button( 'Generate Map', icon='🗺️', key='maps_generate', width='content' ):
 				if use_global_coordinates and not has_global_coords:
 					st.warning( 'User coordinates are not set.' )
@@ -3711,9 +3724,11 @@ if mode == 'Mapping Tools':
 				else:
 					try:
 						if save_coordinates:
-							set_coordinates( lat, lng )
-							st.session_state[ 'zoom' ] = int( zoom )
-							st.session_state[ 'map_size' ] = str( size )
+							set_location_state( location=f'{lat:.6f}, {lng:.6f}',
+								city='', state='', country='', zipcode='',
+								description='Coordinates saved from Static Maps.',
+								latitude=lat, longitude=lng )
+							st.session_state[ 'active_location_source' ] = 'static_map'
 
 						url = static_maps.pin( lat=float( lat ), lng=float( lng ), zoom=int( zoom ),
 							size=str( size ), scale=2 )
@@ -3727,9 +3742,16 @@ if mode == 'Mapping Tools':
 
 			map_url = st.session_state.get( 'maps_last_url', '' )
 			if map_url:
+				# Keep the last generated location while applying image-control changes.
+				map_latitude = st.session_state[ 'maps_last_latitude' ]
+				map_longitude = st.session_state[ 'maps_last_longitude' ]
+				map_url = static_maps.pin( lat=map_latitude, lng=map_longitude,
+					zoom=int( zoom ), size=str( size ), scale=2 )
+				st.session_state[ 'maps_last_url' ] = map_url
 				blue_divider( )
 				st.markdown( '##### Static Map Result' )
 				st.image( map_url, width='stretch' )
+				st.caption( f'Map zoom: {zoom} · Image size: {size} (2× resolution)' )
 				st.code( map_url )
 
 	# ----- Street View and satellite imagery share the same Mapping Tools tab bar.
