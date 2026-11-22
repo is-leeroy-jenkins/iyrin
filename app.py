@@ -12027,22 +12027,15 @@ elif mode == 'Management':
 							if df_locations.empty:
 								st.info( 'No missing coordinate locations found.' )
 							else:
-								st.data_editor(
-									df_locations,
-									key='reports_geocode_locations',
-									use_container_width=True,
-									disabled=True )
+								st.data_editor( df_locations, key='reports_geocode_locations',
+									use_container_width=True, disabled=True )
 					
 						action_c1, action_c2, action_c3 = st.columns( [ 0.25, 0.25, 0.50 ] )
-					
 						with action_c1:
-							if st.button( 'Preview Geocoding', key='reports_geocode_preview_button',
-									width='stretch' ):
-								df_preview = preview_report_coordinate_updates(
-									table_name=table,
-									geocoder=geocoder,
-									places=places,
-									use_places=use_places,
+							if st.button( 'Preview Geocoding',
+									key='reports_geocode_preview_button', width='stretch' ):
+								df_preview = preview_report_coordinate_updates( table_name=table,
+									geocoder=geocoder, places=places, use_places=use_places,
 									limit=location_limit )
 							
 								st.session_state[ 'df_reports_geocode_preview' ] = df_preview
@@ -12332,7 +12325,7 @@ elif mode == 'Management':
 elif mode == 'Realtime':
 	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
-		st.subheader( 'Realtime' )
+		st.subheader( '🌐 World Data' )
 		st.divider( )
 		global_location = get_global_location_default( )
 		global_latitude = get_global_latitude_default( )
@@ -12342,7 +12335,7 @@ elif mode == 'Realtime':
 		location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
 		location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
 		blue_divider( )
-		realtime_c1, realtime_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
+		realtime_c1, realtime_c2 = st.columns( [ 0.25, 0.75 ], border=True, gap='xsmall' )
 		with realtime_c1:
 			render_world_sidebar( )
 		with realtime_c2:
