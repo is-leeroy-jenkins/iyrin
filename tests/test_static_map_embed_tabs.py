@@ -76,7 +76,30 @@ class StaticMapEmbedContractTests(unittest.TestCase):
         self.assertIn("https://www.google.com/maps/embed/v1/streetview?", source)
         self.assertIn("https://www.google.com/maps/embed/v1/view?", source)
         self.assertIn("'maptype': 'satellite'", source)
-        self.assertEqual(2, source.count("components.iframe( "))
+        self.assertEqual(1, source.count("components.iframe( "))
+        self.assertIn("st.link_button( 'Open Google Earth', earth_url )", source)
+
+    def test_satellites_default_to_photorealistic_3d(self) -> None:
+        """Render Google's 3D map component, not a tilted 2D iframe."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn("options=[ '3D Satellite', '2D Satellite' ]", source)
+        self.assertIn("key='maps_satellite_rendering'", source)
+        self.assertIn("elif satellite_mode == '3D Satellite':", source)
+        self.assertIn('<gmp-map-3d center=', source)
+        self.assertIn('mode="SATELLITE"', source)
+        self.assertIn('range="3000" tilt="65"', source)
+        self.assertIn("'libraries': 'maps3d'", source)
+        self.assertIn("maps.googleapis.com/maps/api/js?", source)
+        self.assertIn("components.html( maps3d_html, height=700, scrolling=False )", source)
+        self.assertIn("html_lib.escape( maps3d_script_url, quote=True )", source)
+
+    def test_satellite_2d_fallback_preserves_existing_google_embed(self) -> None:
+        """Keep 2D satellite imagery available without embedding Google Earth."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn("with satellites_tab:", source)
+        self.assertIn("https://www.google.com/maps/embed/v1/view?", source)
+        self.assertIn("'maptype': 'satellite'", source)
+        self.assertIn("components.iframe( satellite_url, height=700, scrolling=False )", source)
         self.assertIn("st.link_button( 'Open Google Earth', earth_url )", source)
         self.assertIn("cfg.GOOGLEMAPS_API_KEY", source)
 
