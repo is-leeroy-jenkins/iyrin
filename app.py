@@ -3773,16 +3773,60 @@ if mode == 'Mapping Tools':
 				st.info( 'Set global coordinates or generate a static map to view satellite imagery.' )
 			else:
 				map_center = f'{float( view_latitude ):.6f},{float( view_longitude ):.6f}'
-				st.caption( 'Google Maps satellite imagery is used because Google Earth '
-					'does not provide an embeddable web viewer.' )
+				satellite_mode = st.radio( 'Satellite Rendering',
+					options=[ '3D Satellite', '2D Satellite' ], horizontal=True,
+					key='maps_satellite_rendering' )
 				if not map_embed_key:
 					st.warning( 'Google Maps API key is required for satellite imagery.' )
+				elif satellite_mode == '3D Satellite':
+					st.caption( 'Interactive photorealistic 3D terrain and buildings where '
+						'Google imagery coverage is available. Drag to explore the map.' )
+					maps3d_script_url = ( 'https://maps.googleapis.com/maps/api/js?'
+						+ urlencode( { 'key': map_embed_key, 'v': 'weekly',
+								'loading': 'async', 'libraries': 'maps3d' } ) )
+					maps3d_html = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+html, body {{ width: 100%; height: 100%; margin: 0; overflow: hidden; }}
+gmp-map-3d {{ display: block; width: 100%; height: 100%; }}
+#map-error {{
+    display: none; padding: 18px; font-family: sans-serif;
+    color: #fafafa; background: #27272a;
+}}
+</style>
+</head>
+<body>
+<gmp-map-3d center="{map_center},0" range="3000" tilt="65"
+    heading="0" mode="SATELLITE"></gmp-map-3d>
+<div id="map-error" role="alert">Unable to load Google 3D Maps.
+Verify the Maps JavaScript API, billing, and browser graphics acceleration.
+Choose 2D Satellite above if 3D rendering is unavailable.</div>
+<script>
+function showMapError() {{
+    document.querySelector("gmp-map-3d").style.display = "none";
+    document.getElementById("map-error").style.display = "block";
+}}
+</script>
+<script async src="{html_lib.escape( maps3d_script_url, quote=True )}"
+    onerror="showMapError()"></script>
+</body>
+</html>
+"""
+					components.html( maps3d_html, height=700, scrolling=False )
+					st.caption( '3D requires the Maps JavaScript API, WebGL-capable '
+						'hardware acceleration, and applicable Google Maps billing. '
+						'Use 2D Satellite if the 3D viewer is unavailable.' )
 				else:
+					st.caption( 'Google Maps 2D satellite imagery.' )
 					satellite_url = ( 'https://www.google.com/maps/embed/v1/view?'
 						+ urlencode( { 'key': map_embed_key, 'center': map_center,
 							'zoom': int( st.session_state.get( 'maps_zoom', 8 ) ),
 							'maptype': 'satellite' } ) )
-					components.iframe( satellite_url, height=650, scrolling=False )
+					components.iframe( satellite_url, height=700, scrolling=False )
 				earth_url = ( 'https://earth.google.com/web/search/'
 					+ urlencode( { 'q': map_center } ).split( '=', 1 )[ 1 ] )
 				st.link_button( 'Open Google Earth', earth_url )
