@@ -71,7 +71,7 @@ class StaticMapEmbedContractTests(unittest.TestCase):
         self.assertLess(checkbox, zoom_assignment)
         self.assertLess(zoom_assignment, generate_button)
         self.assertLess(size_assignment, generate_button)
-        self.assertIn('if save_coordinates:\\n', section)
+        self.assertIn('if save_coordinates:', section)
         self.assertIn("set_location_state( location=f'{lat:.6f}, {lng:.6f}'", section)
         self.assertIn("st.session_state[ 'active_location_source' ] = 'static_map'",
             section)
