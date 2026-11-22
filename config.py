@@ -175,9 +175,9 @@ API_CREDENTIAL_DEFAULTS: Dict[ str, str | None ] = {
 
 # -------------- SETTINGS
 
-MODES = [ 'Mapping Tools', 'Interactive Map', 'Realtime', 'Local Data', 'Weather Data', 'Environmental Data',
-	'Geological Data', 'Astronomical Data', 'Public Health', 'Celestial Map',
-	'Artificial Intelligence', 'File Upload', 'Data Management' ]
+MODES = [ 'Tools', 'Mapping', 'Realtime', 'Data', 'Weather', 'Environmental',
+	'Geological', 'Astronomical', 'Health', 'Celestial',
+	'AI', 'Upload', 'Management' ]
 
 
 AGENTS = ( 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '

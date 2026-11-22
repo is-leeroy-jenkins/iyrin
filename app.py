@@ -3416,7 +3416,7 @@ ensure_active_location_state( )
 # ==============================================================================
 # Mapping Tools
 # ==============================================================================
-if mode == 'Mapping Tools':
+if mode == 'Tools':
 	geocoding_tab, distances_tab, timezones_tab, static_maps_tab, street_tab, satellites_tab = \
 		st.tabs( [ 'Geocoding', 'Distances', 'Time Zones', 'Static Maps', 'Street',
 			'Satellites' ] )
@@ -3853,7 +3853,7 @@ function showMapError() {{
 # ==============================================================================
 # MAP MODE
 # ==============================================================================
-elif mode == 'Interactive Map':
+elif mode == 'Mapping':
 	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
 	with center:
 		st.subheader( 'Interactive Map' )
@@ -3904,7 +3904,7 @@ elif mode == 'Interactive Map':
 # =============================================================================
 # DOCUMENT LOADING MODE
 # =============================================================================
-if mode == 'Local Data':
+if mode == 'Data':
 	tokens = st.session_state[ 'tokens' ]
 	documents = st.session_state[ 'documents' ]
 	raw_text = st.session_state[ 'raw_text' ]
@@ -5629,7 +5629,7 @@ if mode == 'Local Data':
 # ==============================================================================
 # WEATHER DATA MODE
 # ==============================================================================
-elif mode == 'Weather Data':
+elif mode == 'Weather':
 	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
 	with center:
 		st.subheader( 'Weather Data' )
@@ -6067,7 +6067,7 @@ elif mode == 'Weather Data':
 # ==============================================================================
 # ENVIRONMENTAL DATA MODE
 # ==============================================================================
-elif mode == 'Environmental Data':
+elif mode == 'Environmental':
 	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Environmental Data' )
@@ -6825,7 +6825,7 @@ elif mode == 'Environmental Data':
 # ==============================================================================
 # GEOLOGICAL DATA MODE
 # ==============================================================================
-elif mode == 'Geological Data':
+elif mode == 'Geological':
 	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Geological Data' )
@@ -7288,7 +7288,7 @@ elif mode == 'Geological Data':
 # ==============================================================================
 # ASTRONOMICAL MODE
 # ==============================================================================
-elif mode == 'Astronomical Data':
+elif mode == 'Astronomical':
 	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Astronomical Data' )
@@ -8126,7 +8126,7 @@ elif mode == 'Astronomical Data':
 # ==============================================================================
 # CELESTIAL MAP MODE
 # ==============================================================================
-elif mode == 'Celestial Map':
+elif mode == 'Celestial':
 	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Celestial Map' )
@@ -8207,7 +8207,7 @@ elif mode == 'Celestial Map':
 # ==============================================================================
 # DEMOGRAPHIC MODE
 # ==============================================================================
-elif mode == 'Public Health':
+elif mode == 'Health':
 	st.subheader( f'🩺 Population & Public Health' )
 	st.divider( )
 	demographic_location = get_global_location_default( )
@@ -10275,8 +10275,8 @@ elif mode == 'Public Health':
 # ==============================================================================
 # AI MODE
 # ==============================================================================
-elif mode == 'Artificial Intelligence':
-	st.subheader( '🧠  Generative AI' )
+elif mode == 'AI':
+	st.subheader( '🧠  Artificial Intelligence' )
 	st.divider( )
 	
 	# ---------- Generation Result State
@@ -11561,7 +11561,7 @@ elif mode == 'Artificial Intelligence':
 # ==============================================================================
 # DATA UPLOAD
 # ==============================================================================
-elif mode == 'File Upload':
+elif mode == 'Upload':
 	left, center, right = st.columns( [ 0.05, 0.90, 0.05 ] )
 	with center:
 		
@@ -11664,7 +11664,7 @@ elif mode == 'File Upload':
 # ==============================================================================
 # DATA MANAGEMENT MODE
 # ==============================================================================
-elif mode == 'Data Management':
+elif mode == 'Management':
 	left, center, right = st.columns( [ 0.05, 0.90, 0.05 ] )
 	with center:
 		st.subheader( 'Data Management' )
