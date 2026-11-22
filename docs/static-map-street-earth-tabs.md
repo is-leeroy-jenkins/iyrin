@@ -21,6 +21,16 @@
   an external link; Google Earth itself cannot be embedded.
 - Use the latitude and longitude saved with the most recently generated static
   map, falling back to the validated global coordinate getters if necessary.
+- **Zoom** and **Image Size** are independently persisted even when **Save Coordinates
+  to Global State** is unchecked. Once a map exists, adjusting either control
+  rebuilds the current map URL from the last generated location on the next
+  Streamlit rerun; the image remains stretched to the available content width.
+  The selected Image Size controls aspect ratio and provider image dimensions.
+- When **Save Coordinates to Global State** is checked during **Generate Map**,
+  the selected location is recorded as an explicit `static_map` location source.
+  This manual choice is protected from browser geolocation refreshes until a
+  subsequent geocoding selection or the browser-location **Reset** control.
+  Changing Zoom or Image Size never changes the saved location by itself.
 - Reuse the existing OS-backed `cfg.GOOGLEMAPS_API_KEY` (also used by
   `mapping.StaticMap`). No new credential entry or provider is introduced.
 
