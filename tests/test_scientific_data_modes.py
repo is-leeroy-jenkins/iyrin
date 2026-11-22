@@ -59,35 +59,35 @@ class ScientificDataModeTests( unittest.TestCase ):
         Returns:
             str: Mode-specific source between its dispatch and the next mode.
         """
-        starts = { 'Weather Data': 'Environmental Data',
-            'Environmental Data': 'Geological Data',
-            'Geological Data': 'Astronomical Data' }
+        starts = { 'Weather': 'Environmental',
+            'Environmental': 'Geological',
+            'Geological': 'Astronomical' }
         header = f"elif mode == '{mode}':"
         next_header = f"elif mode == '{starts[ mode ]}':"
         return SOURCE.split( header, 1 )[ 1 ].split( next_header, 1 )[ 0 ]
 
     def test_sidebar_exposes_three_distinct_modes( self ) -> None:
         """Replace the old combined selection with exactly three separate modes."""
-        expected = [ 'Weather Data', 'Environmental Data', 'Geological Data' ]
+        expected = [ 'Weather', 'Environmental', 'Geological' ]
         for mode in expected:
             self.assertEqual( 1, self.modes.count( mode ) )
             self.assertIn( mode, self.branches )
         self.assertNotIn( 'Geoscience Data', self.modes )
-        self.assertEqual( 12, len( self.modes ) )
+        self.assertEqual( 13, len( self.modes ) )
 
     def test_each_mode_uses_astronomical_style_layout( self ) -> None:
         """Match Astronomical Data's full-width columns instead of nested expanders."""
-        for mode in [ 'Weather Data', 'Environmental Data', 'Geological Data' ]:
+        for mode in [ 'Weather', 'Environmental', 'Geological' ]:
             branch = self.branches[ mode ]
             code = ast.get_source_segment( SOURCE, branch ) or ''
             self.assertIn( "left, center, right = st.columns(", code )
             self.assertIn( "with center:", code )
-            self.assertIn( f"st.subheader( '{mode}' )", code )
+            self.assertIn( f"st.subheader( '{mode} Data' )", code )
             self.assertNotIn( "with st.expander( 'Geoscience Data'", code )
 
     def test_weather_sources_and_processing_remain( self ) -> None:
         """Retain weather providers, session keys, and document display."""
-        code = self.mode_source( 'Weather Data' )
+        code = self.mode_source( 'Weather' )
         for marker in [ 'Google Weather', 'OpenWeather', 'Historical Weather',
                 'Climate Data', 'Tides & Currents', "'weather_last_result'",
                 "render_mode_document_tabs( 'weather'", 
@@ -96,7 +96,7 @@ class ScientificDataModeTests( unittest.TestCase ):
 
     def test_environmental_sources_and_processing_remain( self ) -> None:
         """Retain environmental providers, state, and processed document tabs."""
-        code = self.mode_source( 'Environmental Data' )
+        code = self.mode_source( 'Environmental' )
         for marker in [ 'AirNow', 'OpenAQ', 'PurpleAir', 'EnviroFacts',
                 'FIRMS', 'EONET', "'env_last_result'",
                 "render_mode_document_tabs( 'env'",
@@ -105,7 +105,7 @@ class ScientificDataModeTests( unittest.TestCase ):
 
     def test_geological_sources_and_processing_remain( self ) -> None:
         """Retain all USGS sources and the Geological document workflow."""
-        code = self.mode_source( 'Geological Data' )
+        code = self.mode_source( 'Geological' )
         for marker in [ 'USGS Earthquakes', 'USGS Water Data',
                 'USGS The National Map', 'USGS ScienceBase',
                 "'geo_last_result'", "render_mode_document_tabs( 'geo'",
@@ -114,9 +114,9 @@ class ScientificDataModeTests( unittest.TestCase ):
 
     def test_astronomical_and_other_modes_remain( self ) -> None:
         """Do not change the separately configured Astronomical and other pipelines."""
-        for mode in [ 'Mapping Tools', 'Interactive Map', 'Local Data',
-                'Astronomical Data', 'Celestial Map', 'Public Health',
-                'Artificial Intelligence', 'File Upload', 'Data Management' ]:
+        for mode in [ 'Tools', 'Mapping', 'Realtime', 'Data',
+                'Astronomical', 'Celestial', 'Health', 'AI', 'Upload',
+                'Management' ]:
             self.assertIn( mode, self.modes )
             self.assertIn( mode, self.branches )
 

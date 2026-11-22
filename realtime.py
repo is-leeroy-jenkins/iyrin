@@ -329,18 +329,17 @@ def get_world_layers( ) -> Dict[ str, bool ]:
 
 def render_world_sidebar( ) -> None:
 	'''
-		Render operational Live World Data controls in an isolated sidebar expander below.
+		Render Live World controls in grouped expanders within the Realtime mode.
 
 	Purpose:
-		Render operational Live World Data controls in an isolated sidebar expander below
-		Iyr's existing Mode expander.
+		Render Live World controls in grouped expanders within the Realtime mode.
 
 	Returns:
 		None: This operation has no return value.
 
 	'''
 	initialize_world_state( )
-	with st.expander( '🌐 Mapping', expanded=False ):
+	with st.expander( '🌐 Live Layers', expanded=True ):
 		st.checkbox( 'Enable Live Map', key='live_world_enabled' )
 		st.divider( )
 		st.caption( 'Live Layers' )
@@ -388,6 +387,15 @@ def render_world_sidebar( ) -> None:
 				'World' ], key='live_world_firms_area_mode' )
 			st.slider( 'Fire Record Limit', min_value=1000, max_value=50000, step=1000,
 				key='live_world_firms_max_records' )
+		st.divider( )
+		refresh_c1, clear_c2 = st.columns( 2 )
+		with refresh_c1:
+			if st.button( 'Refresh', icon='🔄', key='live_world_refresh', width='stretch' ):
+				st.session_state[ 'live_world_refresh_requested' ] = True
+		with clear_c2:
+			if st.button( 'Clear', icon='🧹', key='live_world_clear', width='stretch' ):
+				clear_live_data( )
+	with st.expander( '🎯 Tracking & Measurements', expanded=False ):
 		st.checkbox( LIVE_WORLD_LAYERS[ 'measurements' ], key='live_world_measurements' )
 		if st.session_state[ 'live_world_measurements' ]:
 			measurement_options = get_world_measurement_options( )
@@ -454,154 +462,146 @@ def render_world_sidebar( ) -> None:
 			if st.button( 'Clear Trail', icon='🧹', key='live_world_tracking_clear',
 					width='stretch' ):
 				clear_tracking( )
-		st.divider( )
-		refresh_c1, clear_c2 = st.columns( 2 )
-		with refresh_c1:
-			if st.button( 'Refresh', icon='🔄', key='live_world_refresh', width='stretch' ):
-				st.session_state[ 'live_world_refresh_requested' ] = True
-		with clear_c2:
-			if st.button( 'Clear', icon='🧹', key='live_world_clear', width='stretch' ):
-				clear_live_data( )
-		with st.expander( 'Additional Layers', expanded=False ):
-			st.checkbox( LIVE_WORLD_LAYERS[ 'infrastructure' ], key='live_world_infrastructure' )
-			if st.session_state[ 'live_world_infrastructure' ]:
-				st.multiselect( 'Infrastructure Categories', options=[ 'Airports', 'Ports',
-					'Power Plants', 'Dams', 'Data Centers',
-					'Military Installations' ], key='live_world_infrastructure_categories' )
-				infra_c1, infra_c2 = st.columns( 2 )
-				with infra_c1:
-					st.slider( 'Infrastructure Radius (KM)', min_value=10, max_value=250, step=10,
-						key='live_world_infrastructure_radius_km' )
-				with infra_c2:
-					st.slider( 'Infrastructure Limit', min_value=50, max_value=2000, step=50,
-						key='live_world_infrastructure_limit' )
-				st.caption( 'Infrastructure features are retrieved from OpenStreetMap via '
-				            'Overpass.' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'cameras' ], key='live_world_cameras' )
-			if st.session_state[ 'live_world_cameras' ]:
-				st.multiselect( 'Camera Categories', options=[ 'CCTV / Surveillance',
-					'Web Cameras' ], key='live_world_camera_categories' )
-				camera_c1, camera_c2 = st.columns( 2 )
-				with camera_c1:
-					st.slider( 'Camera Radius (KM)', min_value=1, max_value=100, step=1,
-						key='live_world_camera_radius_km' )
-				with camera_c2:
-					st.slider( 'Camera Limit', min_value=50, max_value=2000, step=50,
-						key='live_world_camera_limit' )
-				st.caption( 'Public camera locations and webcam tags are retrieved from '
-				            'OpenStreetMap via Overpass.' )
-			st.checkbox( LIVE_WORLD_LAYERS[ 'map_layers' ], key='live_world_map_layers' )
-			if st.session_state[ 'live_world_map_layers' ]:
-				st.multiselect( 'Map Layer Categories', options=[ 'Public Transit', 'Bike Share',
-					'Emergency Services', 'Healthcare', 'EV Charging', 'Communications',
-					'Launch Sites' ], key='live_world_map_layer_categories' )
-				map_layer_c1, map_layer_c2 = st.columns( 2 )
-				with map_layer_c1:
-					st.slider( 'Map Layer Radius (KM)', min_value=5, max_value=250, step=5,
-						key='live_world_map_layer_radius_km' )
-				with map_layer_c2:
-					st.slider( 'Map Layer Limit', min_value=50, max_value=5000, step=50,
-						key='live_world_map_layer_limit' )
-				st.caption( 'Contextual public map features are retrieved from OpenStreetMap via '
-				            'Overpass.' )
-			for label in LIVE_WORLD_PENDING_LAYERS.values( ):
-				st.checkbox( label, value=False, disabled=True )
-		with st.expander( 'AI & Advanced Tools', expanded=False ):
-			st.caption( 'Advanced tools operate on the currently loaded Live World entity frame.' )
-			st.checkbox(
-				AI_ADVANCED_TOOLS[ 'cross_layer_analysis' ],
-				key='live_world_cross_layer_analysis' )
-			if st.session_state[ 'live_world_cross_layer_analysis' ]:
-				analysis_options = get_analysis_origin_options( )
-				analysis_keys = list( analysis_options.keys( ) )
-				if st.session_state[ 'live_world_analysis_origin' ] not in analysis_keys:
-					st.session_state[ 'live_world_analysis_origin' ] = 'Current Location'
-				st.selectbox( 'Analysis Origin', options=analysis_keys, format_func=lambda value:
-				analysis_options[ value ], key='live_world_analysis_origin' )
-				if st.session_state[ 'live_world_analysis_origin' ] == 'Custom Point':
-					analysis_c1, analysis_c2 = st.columns( 2 )
-					with analysis_c1:
-						st.number_input( 'Analysis Latitude', min_value=-90.0, max_value=90.0,
-							format='%.6f', key='live_world_analysis_custom_latitude' )
-					with analysis_c2:
-						st.number_input( 'Analysis Longitude', min_value=-180.0, max_value=180.0,
-							format='%.6f', key='live_world_analysis_custom_longitude' )
-				st.slider( 'Analysis Radius (NM)', min_value=10, max_value=2500, step=10,
-					key='live_world_analysis_radius_nm' )
-				st.multiselect( 'Entity Types', options=[ 'Aircraft', 'Military Aircraft',
-					'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
-					'Map Feature' ], key='live_world_analysis_entity_types' )
-				st.slider( 'Analysis Result Limit', min_value=10, max_value=500, step=10,
-					key='live_world_analysis_limit' )
-			st.checkbox( AI_ADVANCED_TOOLS[ 'geofencing' ], key='live_world_geofencing' )
-			if st.session_state[ 'live_world_geofencing' ]:
-				geofence_options = get_geofence_origin_options( )
-				geofence_keys = list( geofence_options.keys( ) )
-				if st.session_state[ 'live_world_geofence_origin' ] not in geofence_keys:
-					st.session_state[ 'live_world_geofence_origin' ] = 'Current Location'
-				st.selectbox( 'Geofence Origin', options=geofence_keys, format_func=lambda value:
-				geofence_options[ value ], key='live_world_geofence_origin' )
-				if st.session_state[ 'live_world_geofence_origin' ] == 'Custom Point':
-					geofence_c1, geofence_c2 = st.columns( 2 )
-					with geofence_c1:
-						st.number_input( 'Geofence Latitude', min_value=-90.0, max_value=90.0,
-							format='%.6f', key='live_world_geofence_custom_latitude' )
-					with geofence_c2:
-						st.number_input( 'Geofence Longitude', min_value=-180.0, max_value=180.0,
-							format='%.6f', key='live_world_geofence_custom_longitude' )
-				st.slider( 'Geofence Radius (NM)', min_value=5, max_value=1000, step=5,
-					key='live_world_geofence_radius_nm' )
-				st.multiselect( 'Geofence Entity Types', options=[ 'Aircraft', 'Military Aircraft',
-					'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
-					'Map Feature' ], key='live_world_geofence_entity_types' )
-				st.slider( 'Geofence Event History', min_value=10, max_value=500, step=10,
-					key='live_world_geofence_event_limit' )
-				if st.button( 'Clear Geofence Events', icon='🧹',
-						key='live_world_geofence_clear_events', width='stretch' ):
-					clear_geofence_events( )
-			st.checkbox(
-				AI_ADVANCED_TOOLS[ 'historical_replay' ], key='live_world_historical_replay' )
-			if st.session_state[ 'live_world_historical_replay' ]:
-				st.checkbox( 'Persist Live World Refreshes', key='live_world_history_persist' )
-				history_c1, history_c2 = st.columns( 2 )
-				with history_c1:
-					st.selectbox( 'Replay Window', options=[ '1 Hour', '6 Hours', '24 Hours',
-						'7 Days', '30 Days', 'All Retained' ], key='live_world_history_window' )
-				with history_c2:
-					st.slider( 'Retention (Days)', min_value=1, max_value=365, step=1,
-						key='live_world_history_retention_days' )
-				st.slider( 'Max Rows / Source / Refresh', min_value=100, max_value=10000,
-					step=100, key='live_world_history_max_rows_per_source' )
-				st.multiselect( 'Replay Entity Types', options=[ 'Aircraft', 'Military Aircraft',
-					'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
-					'Map Feature' ], key='live_world_history_entity_types' )
-				st.slider( 'Replay Record Limit', min_value=100, max_value=25000, step=100,
-					key='live_world_history_limit' )
-				history_hours = get_history_window_hours( str(
-					st.session_state[ 'live_world_history_window' ] ) )
-				snapshot_options = get_live_world_history_snapshots( history_hours )
-				if snapshot_options:
-					if st.session_state[ 'live_world_history_snapshot' ] not in snapshot_options:
-						st.session_state[ 'live_world_history_snapshot' ] = snapshot_options[ 0 ]
-					st.selectbox( 'Replay Snapshot', options=snapshot_options,
-						key='live_world_history_snapshot' )
-				else:
+	with st.expander( 'Additional Layers', expanded=False ):
+		st.checkbox( LIVE_WORLD_LAYERS[ 'infrastructure' ], key='live_world_infrastructure' )
+		if st.session_state[ 'live_world_infrastructure' ]:
+			st.multiselect( 'Infrastructure Categories', options=[ 'Airports', 'Ports',
+				'Power Plants', 'Dams', 'Data Centers',
+				'Military Installations' ], key='live_world_infrastructure_categories' )
+			infra_c1, infra_c2 = st.columns( 2 )
+			with infra_c1:
+				st.slider( 'Infrastructure Radius (KM)', min_value=10, max_value=250, step=10,
+					key='live_world_infrastructure_radius_km' )
+			with infra_c2:
+				st.slider( 'Infrastructure Limit', min_value=50, max_value=2000, step=50,
+					key='live_world_infrastructure_limit' )
+			st.caption( 'Infrastructure features are retrieved from OpenStreetMap via '
+			            'Overpass.' )
+		st.checkbox( LIVE_WORLD_LAYERS[ 'cameras' ], key='live_world_cameras' )
+		if st.session_state[ 'live_world_cameras' ]:
+			st.multiselect( 'Camera Categories', options=[ 'CCTV / Surveillance',
+				'Web Cameras' ], key='live_world_camera_categories' )
+			camera_c1, camera_c2 = st.columns( 2 )
+			with camera_c1:
+				st.slider( 'Camera Radius (KM)', min_value=1, max_value=100, step=1,
+					key='live_world_camera_radius_km' )
+			with camera_c2:
+				st.slider( 'Camera Limit', min_value=50, max_value=2000, step=50,
+					key='live_world_camera_limit' )
+			st.caption( 'Public camera locations and webcam tags are retrieved from '
+			            'OpenStreetMap via Overpass.' )
+		st.checkbox( LIVE_WORLD_LAYERS[ 'map_layers' ], key='live_world_map_layers' )
+		if st.session_state[ 'live_world_map_layers' ]:
+			st.multiselect( 'Map Layer Categories', options=[ 'Public Transit', 'Bike Share',
+				'Emergency Services', 'Healthcare', 'EV Charging', 'Communications',
+				'Launch Sites' ], key='live_world_map_layer_categories' )
+			map_layer_c1, map_layer_c2 = st.columns( 2 )
+			with map_layer_c1:
+				st.slider( 'Map Layer Radius (KM)', min_value=5, max_value=250, step=5,
+					key='live_world_map_layer_radius_km' )
+			with map_layer_c2:
+				st.slider( 'Map Layer Limit', min_value=50, max_value=5000, step=50,
+					key='live_world_map_layer_limit' )
+			st.caption( 'Contextual public map features are retrieved from OpenStreetMap via '
+			            'Overpass.' )
+		for label in LIVE_WORLD_PENDING_LAYERS.values( ):
+			st.checkbox( label, value=False, disabled=True )
+	with st.expander( 'AI & Advanced Tools', expanded=False ):
+		st.caption( 'Advanced tools operate on the currently loaded Live World entity frame.' )
+		st.checkbox(
+			AI_ADVANCED_TOOLS[ 'cross_layer_analysis' ],
+			key='live_world_cross_layer_analysis' )
+		if st.session_state[ 'live_world_cross_layer_analysis' ]:
+			analysis_options = get_analysis_origin_options( )
+			analysis_keys = list( analysis_options.keys( ) )
+			if st.session_state[ 'live_world_analysis_origin' ] not in analysis_keys:
+				st.session_state[ 'live_world_analysis_origin' ] = 'Current Location'
+			st.selectbox( 'Analysis Origin', options=analysis_keys, format_func=lambda value:
+			analysis_options[ value ], key='live_world_analysis_origin' )
+			if st.session_state[ 'live_world_analysis_origin' ] == 'Custom Point':
+				analysis_c1, analysis_c2 = st.columns( 2 )
+				with analysis_c1:
+					st.number_input( 'Analysis Latitude', min_value=-90.0, max_value=90.0,
+						format='%.6f', key='live_world_analysis_custom_latitude' )
+				with analysis_c2:
+					st.number_input( 'Analysis Longitude', min_value=-180.0, max_value=180.0,
+						format='%.6f', key='live_world_analysis_custom_longitude' )
+			st.slider( 'Analysis Radius (NM)', min_value=10, max_value=2500, step=10,
+				key='live_world_analysis_radius_nm' )
+			st.multiselect( 'Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+				'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+				'Map Feature' ], key='live_world_analysis_entity_types' )
+			st.slider( 'Analysis Result Limit', min_value=10, max_value=500, step=10,
+				key='live_world_analysis_limit' )
+		st.checkbox( AI_ADVANCED_TOOLS[ 'geofencing' ], key='live_world_geofencing' )
+		if st.session_state[ 'live_world_geofencing' ]:
+			geofence_options = get_geofence_origin_options( )
+			geofence_keys = list( geofence_options.keys( ) )
+			if st.session_state[ 'live_world_geofence_origin' ] not in geofence_keys:
+				st.session_state[ 'live_world_geofence_origin' ] = 'Current Location'
+			st.selectbox( 'Geofence Origin', options=geofence_keys, format_func=lambda value:
+			geofence_options[ value ], key='live_world_geofence_origin' )
+			if st.session_state[ 'live_world_geofence_origin' ] == 'Custom Point':
+				geofence_c1, geofence_c2 = st.columns( 2 )
+				with geofence_c1:
+					st.number_input( 'Geofence Latitude', min_value=-90.0, max_value=90.0,
+						format='%.6f', key='live_world_geofence_custom_latitude' )
+				with geofence_c2:
+					st.number_input( 'Geofence Longitude', min_value=-180.0, max_value=180.0,
+						format='%.6f', key='live_world_geofence_custom_longitude' )
+			st.slider( 'Geofence Radius (NM)', min_value=5, max_value=1000, step=5,
+				key='live_world_geofence_radius_nm' )
+			st.multiselect( 'Geofence Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+				'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+				'Map Feature' ], key='live_world_geofence_entity_types' )
+			st.slider( 'Geofence Event History', min_value=10, max_value=500, step=10,
+				key='live_world_geofence_event_limit' )
+			if st.button( 'Clear Geofence Events', icon='🧹',
+					key='live_world_geofence_clear_events', width='stretch' ):
+				clear_geofence_events( )
+		st.checkbox(
+			AI_ADVANCED_TOOLS[ 'historical_replay' ], key='live_world_historical_replay' )
+		if st.session_state[ 'live_world_historical_replay' ]:
+			st.checkbox( 'Persist Live World Refreshes', key='live_world_history_persist' )
+			history_c1, history_c2 = st.columns( 2 )
+			with history_c1:
+				st.selectbox( 'Replay Window', options=[ '1 Hour', '6 Hours', '24 Hours',
+					'7 Days', '30 Days', 'All Retained' ], key='live_world_history_window' )
+			with history_c2:
+				st.slider( 'Retention (Days)', min_value=1, max_value=365, step=1,
+					key='live_world_history_retention_days' )
+			st.slider( 'Max Rows / Source / Refresh', min_value=100, max_value=10000,
+				step=100, key='live_world_history_max_rows_per_source' )
+			st.multiselect( 'Replay Entity Types', options=[ 'Aircraft', 'Military Aircraft',
+				'Satellite', 'Vessel', 'Earthquake', 'Fire', 'Infrastructure', 'Camera',
+				'Map Feature' ], key='live_world_history_entity_types' )
+			st.slider( 'Replay Record Limit', min_value=100, max_value=25000, step=100,
+				key='live_world_history_limit' )
+			history_hours = get_history_window_hours( str(
+				st.session_state[ 'live_world_history_window' ] ) )
+			snapshot_options = get_live_world_history_snapshots( history_hours )
+			if snapshot_options:
+				if st.session_state[ 'live_world_history_snapshot' ] not in snapshot_options:
+					st.session_state[ 'live_world_history_snapshot' ] = snapshot_options[ 0 ]
+				st.selectbox( 'Replay Snapshot', options=snapshot_options,
+					key='live_world_history_snapshot' )
+			else:
+				st.session_state[ 'live_world_history_snapshot' ] = ''
+				st.caption( 'No persisted Live World snapshots are available in this window.' )
+			history_b1, history_b2 = st.columns( 2 )
+			with history_b1:
+				if st.button( 'Purge Expired', icon='🧹', key='live_world_history_purge',
+						width='stretch' ):
+					purge_live_world_history( int(
+						st.session_state[ 'live_world_history_retention_days' ] ) )
+			with history_b2:
+				if st.button( 'Clear History', icon='🗑️', key='live_world_history_clear',
+						width='stretch' ):
+					clear_live_world_history( )
 					st.session_state[ 'live_world_history_snapshot' ] = ''
-					st.caption( 'No persisted Live World snapshots are available in this window.' )
-				history_b1, history_b2 = st.columns( 2 )
-				with history_b1:
-					if st.button( 'Purge Expired', icon='🧹', key='live_world_history_purge',
-							width='stretch' ):
-						purge_live_world_history( int(
-							st.session_state[ 'live_world_history_retention_days' ] ) )
-				with history_b2:
-					if st.button( 'Clear History', icon='🗑️', key='live_world_history_clear',
-							width='stretch' ):
-						clear_live_world_history( )
-						st.session_state[ 'live_world_history_snapshot' ] = ''
-						st.session_state[ 'live_world_history_last_saved' ] = 0
-						st.session_state[ 'live_world_history_last_error' ] = ''
-			st.checkbox( AI_ADVANCED_TOOLS[ 'agent_tools' ], key='live_world_agent_tools' )
+					st.session_state[ 'live_world_history_last_saved' ] = 0
+					st.session_state[ 'live_world_history_last_error' ] = ''
+		st.checkbox( AI_ADVANCED_TOOLS[ 'agent_tools' ], key='live_world_agent_tools' )
 
 def clear_live_data( ) -> None:
 	'''
@@ -2355,6 +2355,35 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 	finally:
 		st.session_state[ 'live_world_refresh_requested' ] = False
 
+def render_empty_world_map( latitude: float, longitude: float ) -> None:
+	"""Render the Realtime basemap and an empty entity editor before data is loaded.
+
+	Purpose:
+		Keep the right-hand map and entity-table workspace visible when layers are
+		disabled or no provider records are available, without making API requests.
+
+	Args:
+		latitude (float): Global latitude, or zero when no location is available.
+		longitude (float): Global longitude, or zero when no location is available.
+
+	Returns:
+		None: Renders the empty PyDeck map and read-only data editor.
+	"""
+	valid_location = (is_valid_world_coordinates( latitude, longitude )
+		and not (latitude == 0.0 and longitude == 0.0))
+	center_latitude = latitude if valid_location else 0.0
+	center_longitude = longitude if valid_location else 0.0
+	zoom = int( st.session_state[ 'live_world_zoom' ] ) if valid_location else 1
+	deck = pdk.Deck( layers=[ ], initial_view_state=pdk.ViewState(
+		latitude=center_latitude, longitude=center_longitude, zoom=zoom ),
+		map_style='https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' )
+	st.pydeck_chart( deck, use_container_width=True )
+	st.markdown( '##### Live Entities' )
+	st.data_editor( generate_world_display( entities_to_dataframe( [ ] ) ),
+		key='live_world_map_entities_editor', use_container_width=True,
+		disabled=True, hide_index=True )
+
+
 def render_live_world_map( latitude: float, longitude: float ) -> None:
 	'''
 		Render normalized Live World entities on an operational PyDeck map with metrics,.
@@ -2375,6 +2404,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
 	if not st.session_state[ 'live_world_enabled' ]:
+		st.info( 'Enable Live Map on the left to display enabled realtime layers.' )
+		render_empty_world_map( latitude, longitude )
 		return
 
 	st.divider( )
@@ -2382,7 +2413,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if (not any( get_world_layers( ).values( ) )
 			and not st.session_state[ 'live_world_historical_replay' ]
 			and not st.session_state[ 'live_world_measurements' ]):
-		st.info( 'Select at least one implemented Live World layer in the sidebar.' )
+		st.info( 'Select at least one implemented Live World layer on the left.' )
+		render_empty_world_map( latitude, longitude )
 		return
 
 	if st.session_state[ 'live_world_refresh_requested' ]:
@@ -2435,6 +2467,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 				st.info( 'No records are available because the enabled Live World source refresh failed.' )
 			else:
 				st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
+			render_empty_world_map( latitude, longitude )
 			return
 		df_entities = entities_to_dataframe( [ ] )
 
@@ -2447,6 +2480,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if (df_map.empty and not st.session_state[ 'live_world_measurements' ]
 			and not st.session_state[ 'live_world_historical_replay' ]):
 		st.info( 'Live World data does not contain usable map coordinates.' )
+		render_empty_world_map( latitude, longitude )
 		return
 
 	last_refresh = str( st.session_state.get( 'live_world_last_refresh', '' ) or 'Not refreshed' )
@@ -2769,6 +2803,9 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	deck = pdk.Deck( layers=layers, initial_view_state=view_state,
 		map_style=map_style_options[ st.session_state[ 'live_world_map_style' ] ], tooltip=tooltip )
 	st.pydeck_chart( deck, use_container_width=True )
+	st.markdown( '##### Live Entities' )
+	st.data_editor( generate_world_display( df_map ), key='live_world_map_entities_editor',
+		use_container_width=True, disabled=True, hide_index=True )
 	(entities_tab, aircraft_tab, military_tab, satellites_tab, vessels_tab, earthquakes_tab,
 		fires_tab, infrastructure_tab, cameras_tab, map_layers_tab, tracking_tab,
 		measurements_tab, analysis_tab, geofence_tab, history_tab, agent_tools_tab) = st.tabs( [

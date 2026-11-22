@@ -3338,9 +3338,6 @@ with st.sidebar:
 			st.session_state[ '_sidebar_dataset_signature' ] = dataset_signature
 			log_step( f'Loaded dataset: {st.session_state[ "active_dataset_name" ]}' )
 
-	# ------- Live World Data
-	st.markdown( '#### 📡 Live Data' )
-	render_world_sidebar( )
 	
 	# -------- Settings
 	blue_divider( )
@@ -12330,10 +12327,26 @@ elif mode == 'Management':
 							st.error( f'Execution failed: {e}' )
 
 # ==============================================================================
-# LIVE DATA
+# REALTIME MODE
 # ==============================================================================
-render_live_world_map( latitude=get_global_latitude_default( ),
-	longitude=get_global_longitude_default( ) )
+elif mode == 'Realtime':
+	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
+	with center:
+		st.subheader( 'Realtime' )
+		st.divider( )
+		global_location = get_global_location_default( )
+		global_latitude = get_global_latitude_default( )
+		global_longitude = get_global_longitude_default( )
+		location_c1, location_c2, location_c3 = st.columns( 3, border=True )
+		location_c1.metric( 'Location', global_location )
+		location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
+		location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
+		blue_divider( )
+		realtime_c1, realtime_c2 = st.columns( [ 0.40, 0.60 ], border=True, gap='xsmall' )
+		with realtime_c1:
+			render_world_sidebar( )
+		with realtime_c2:
+			render_live_world_map( latitude=global_latitude, longitude=global_longitude )
 
 # ======================================================================================
 # FOOTER — SECTION
