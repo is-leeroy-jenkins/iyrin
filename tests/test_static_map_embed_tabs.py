@@ -72,7 +72,36 @@ class StaticMapEmbedContractTests(unittest.TestCase):
         self.assertLess(zoom_assignment, generate_button)
         self.assertLess(size_assignment, generate_button)
         self.assertIn('if save_coordinates:\\n', section)
-        self.assertIn('set_coordinates( lat, lng )', section)
+        self.assertIn("set_location_state( location=f'{lat:.6f}, {lng:.6f}'", section)
+        self.assertIn("st.session_state[ 'active_location_source' ] = 'static_map'",
+            section)
+
+    def test_saved_static_location_is_not_overwritten_by_browser_reruns(self) -> None:
+        """A deliberate manual map save remains active until the browser reset."""
+        tree = ast.parse((ROOT / 'app.py').read_text(encoding='utf-8'))
+        methods = [node for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name in (
+                'bootstrap_browser_geolocation', 'ensure_active_location_state')]
+        self.assertEqual(2, len(methods))
+        module = ast.fix_missing_locations(ast.Module(body=methods, type_ignores=[]))
+        session = {'active_location_source': 'static_map',
+            'latitude': 38.861562, 'longitude': -77.063107,
+            'browser_geolocation_enabled': True, 'browser_geolocation_loaded': True,
+            'browser_geolocation': {'coords': {
+                'latitude': 40.0, 'longitude': -74.0}}}
+        namespace: Dict[str, Any] = {
+            'st': SimpleNamespace(session_state=session),
+            'Geocoder': object,
+            'has_valid_global_coordinates': lambda: True}
+        exec(compile(module, str(ROOT / 'app.py'), 'exec'), namespace)
+        namespace['bootstrap_browser_geolocation'](None)
+        namespace['ensure_active_location_state']()
+        self.assertEqual(38.861562, session['latitude'])
+        self.assertEqual(-77.063107, session['longitude'])
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        self.assertIn("st.session_state[ 'active_location_source' ] = ''",
+            source.split("key='browser_geolocation_reset'", 1)[1].split(
+                'st.rerun( )', 1)[0])
 
     def test_existing_static_map_rebuilds_for_zoom_and_size_changes(self) -> None:
         """The production render block must use updated widgets and saved location."""
