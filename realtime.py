@@ -2355,6 +2355,35 @@ def refresh_world_data( latitude: float, longitude: float ) -> pd.DataFrame:
 	finally:
 		st.session_state[ 'live_world_refresh_requested' ] = False
 
+def render_empty_world_map( latitude: float, longitude: float ) -> None:
+	"""Render the Realtime basemap and an empty entity editor before data is loaded.
+
+	Purpose:
+		Keep the right-hand map and entity-table workspace visible when layers are
+		disabled or no provider records are available, without making API requests.
+
+	Args:
+		latitude (float): Global latitude, or zero when no location is available.
+		longitude (float): Global longitude, or zero when no location is available.
+
+	Returns:
+		None: Renders the empty PyDeck map and read-only data editor.
+	"""
+	valid_location = (is_valid_world_coordinates( latitude, longitude )
+		and not (latitude == 0.0 and longitude == 0.0))
+	center_latitude = latitude if valid_location else 0.0
+	center_longitude = longitude if valid_location else 0.0
+	zoom = int( st.session_state[ 'live_world_zoom' ] ) if valid_location else 1
+	deck = pdk.Deck( layers=[ ], initial_view_state=pdk.ViewState(
+		latitude=center_latitude, longitude=center_longitude, zoom=zoom ),
+		map_style='https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' )
+	st.pydeck_chart( deck, use_container_width=True )
+	st.markdown( '##### Live Entities' )
+	st.data_editor( generate_world_display( entities_to_dataframe( [ ] ) ),
+		key='live_world_map_entities_editor', use_container_width=True,
+		disabled=True, hide_index=True )
+
+
 def render_live_world_map( latitude: float, longitude: float ) -> None:
 	'''
 		Render normalized Live World entities on an operational PyDeck map with metrics,.
@@ -2375,6 +2404,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	throw_if( 'latitude', latitude )
 	throw_if( 'longitude', longitude )
 	if not st.session_state[ 'live_world_enabled' ]:
+		st.info( 'Enable Live Map on the left to display enabled realtime layers.' )
+		render_empty_world_map( latitude, longitude )
 		return
 
 	st.divider( )
@@ -2382,7 +2413,8 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if (not any( get_world_layers( ).values( ) )
 			and not st.session_state[ 'live_world_historical_replay' ]
 			and not st.session_state[ 'live_world_measurements' ]):
-		st.info( 'Select at least one implemented Live World layer in the sidebar.' )
+		st.info( 'Select at least one implemented Live World layer on the left.' )
+		render_empty_world_map( latitude, longitude )
 		return
 
 	if st.session_state[ 'live_world_refresh_requested' ]:
@@ -2435,6 +2467,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 				st.info( 'No records are available because the enabled Live World source refresh failed.' )
 			else:
 				st.info( 'No Live World data has been loaded. Select Refresh in the sidebar.' )
+			render_empty_world_map( latitude, longitude )
 			return
 		df_entities = entities_to_dataframe( [ ] )
 
@@ -2447,6 +2480,7 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	if (df_map.empty and not st.session_state[ 'live_world_measurements' ]
 			and not st.session_state[ 'live_world_historical_replay' ]):
 		st.info( 'Live World data does not contain usable map coordinates.' )
+		render_empty_world_map( latitude, longitude )
 		return
 
 	last_refresh = str( st.session_state.get( 'live_world_last_refresh', '' ) or 'Not refreshed' )
