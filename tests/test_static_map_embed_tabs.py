@@ -59,6 +59,64 @@ class StaticMapEmbedContractTests(unittest.TestCase):
         self.assertIn("scale=2 )", source)
         self.assertNotIn("'800x600'", source)
 
+    def test_static_map_preferences_are_independent_of_coordinate_save(self) -> None:
+        """Saving image preferences must not depend on the coordinate checkbox."""
+        source = (ROOT / 'app.py').read_text(encoding='utf-8')
+        section = source.split('with static_maps_tab:', 1)[1].split(
+            '# ----- Street View and satellite imagery', 1)[0]
+        checkbox = section.index("save_coordinates = st.checkbox(")
+        zoom_assignment = section.index("st.session_state[ 'zoom' ] = int( zoom )")
+        size_assignment = section.index("st.session_state[ 'map_size' ] = str( size )")
+        generate_button = section.index("if st.button( 'Generate Map'")
+        self.assertLess(checkbox, zoom_assignment)
+        self.assertLess(zoom_assignment, generate_button)
+        self.assertLess(size_assignment, generate_button)
+        self.assertIn('if save_coordinates:\\n', section)
+        self.assertIn('set_coordinates( lat, lng )', section)
+
+    def test_existing_static_map_rebuilds_for_zoom_and_size_changes(self) -> None:
+        """The production render block must use updated widgets and saved location."""
+        tree = ast.parse((ROOT / 'app.py').read_text(encoding='utf-8'))
+        candidates = [node for node in ast.walk(tree)
+            if isinstance(node, ast.If)
+            and isinstance(node.test, ast.Name) and node.test.id == 'map_url'
+            and any(isinstance(item, ast.Call)
+                and isinstance(item.func, ast.Attribute) and item.func.attr == 'image'
+                for item in ast.walk(node))]
+        self.assertEqual(1, len(candidates))
+        module = ast.fix_missing_locations(ast.Module(body=candidates, type_ignores=[]))
+        urls = []
+        state = {'maps_last_latitude': 38.861562,
+            'maps_last_longitude': -77.063107,
+            'maps_last_url': 'previous-url'}
+
+        def pin(lat: float, lng: float, zoom: int, size: str, scale: int) -> str:
+            """Record actual arguments passed by the production rendering block."""
+            urls.append((lat, lng, zoom, size, scale))
+            return f'map-{zoom}-{size}'
+
+        streamlit = SimpleNamespace(
+            session_state=state,
+            markdown=lambda message: None,
+            image=lambda url, width: None,
+            caption=lambda message: None,
+            code=lambda url: None)
+        namespace: Dict[str, Any] = {
+            'st': streamlit, 'static_maps': SimpleNamespace(pin=pin),
+            'blue_divider': lambda: None, 'map_url': state['maps_last_url'],
+            'zoom': 9, 'size': '600x400'}
+        exec(compile(module, str(ROOT / 'app.py'), 'exec'), namespace)
+        namespace['zoom'] = 11
+        namespace['size'] = '640x400'
+        namespace['map_url'] = state['maps_last_url']
+        exec(compile(module, str(ROOT / 'app.py'), 'exec'), namespace)
+        self.assertEqual([
+            (38.861562, -77.063107, 9, '600x400', 2),
+            (38.861562, -77.063107, 11, '640x400', 2)], urls)
+        self.assertEqual('map-11-640x400', state['maps_last_url'])
+        self.assertNotIn('latitude', state)
+        self.assertNotIn('longitude', state)
+
     def test_street_and_satellites_are_top_level_mapping_tabs(self) -> None:
         """Street and Satellites belong directly to Mapping Tools after Static Maps."""
         source = (ROOT / 'app.py').read_text(encoding='utf-8')
