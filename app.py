@@ -3703,6 +3703,10 @@ if mode == 'Mapping Tools':
 				save_coordinates = st.checkbox( 'Save Coordinates to Global State', value=True,
 					key='maps_save_coordinates' )
 
+			# Persist image preferences independently of the coordinate-save checkbox.
+			st.session_state[ 'zoom' ] = int( zoom )
+			st.session_state[ 'map_size' ] = str( size )
+
 			if st.button( 'Generate Map', icon='🗺️', key='maps_generate', width='content' ):
 				if use_global_coordinates and not has_global_coords:
 					st.warning( 'User coordinates are not set.' )
@@ -3712,8 +3716,6 @@ if mode == 'Mapping Tools':
 					try:
 						if save_coordinates:
 							set_coordinates( lat, lng )
-							st.session_state[ 'zoom' ] = int( zoom )
-							st.session_state[ 'map_size' ] = str( size )
 
 						url = static_maps.pin( lat=float( lat ), lng=float( lng ), zoom=int( zoom ),
 							size=str( size ), scale=2 )
@@ -3727,9 +3729,16 @@ if mode == 'Mapping Tools':
 
 			map_url = st.session_state.get( 'maps_last_url', '' )
 			if map_url:
+				# Keep the last generated location while applying image-control changes.
+				map_latitude = st.session_state[ 'maps_last_latitude' ]
+				map_longitude = st.session_state[ 'maps_last_longitude' ]
+				map_url = static_maps.pin( lat=map_latitude, lng=map_longitude,
+					zoom=int( zoom ), size=str( size ), scale=2 )
+				st.session_state[ 'maps_last_url' ] = map_url
 				blue_divider( )
 				st.markdown( '##### Static Map Result' )
 				st.image( map_url, width='stretch' )
+				st.caption( f'Map zoom: {zoom} · Image size: {size} (2× resolution)' )
 				st.code( map_url )
 
 	# ----- Street View and satellite imagery share the same Mapping Tools tab bar.
