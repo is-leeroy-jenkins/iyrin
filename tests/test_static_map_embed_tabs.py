@@ -76,7 +76,9 @@ class StaticMapEmbedContractTests(unittest.TestCase):
         self.assertIn("https://www.google.com/maps/embed/v1/streetview?", source)
         self.assertIn("https://www.google.com/maps/embed/v1/view?", source)
         self.assertIn("'maptype': 'satellite'", source)
-        self.assertEqual(1, source.count("components.iframe( "))
+        satellites_section = source.split("with satellites_tab:", 1)[1].split(
+            "# MAP MODE", 1)[0]
+        self.assertEqual(1, satellites_section.count("components.iframe( "))
         self.assertIn("st.link_button( 'Open Google Earth', earth_url )", source)
 
     def test_satellites_default_to_photorealistic_3d(self) -> None:
