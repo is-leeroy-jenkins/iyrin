@@ -2769,6 +2769,9 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 	deck = pdk.Deck( layers=layers, initial_view_state=view_state,
 		map_style=map_style_options[ st.session_state[ 'live_world_map_style' ] ], tooltip=tooltip )
 	st.pydeck_chart( deck, use_container_width=True )
+	st.markdown( '##### Live Entities' )
+	st.data_editor( generate_world_display( df_map ), key='live_world_map_entities_editor',
+		use_container_width=True, disabled=True, hide_index=True )
 	(entities_tab, aircraft_tab, military_tab, satellites_tab, vessels_tab, earthquakes_tab,
 		fires_tab, infrastructure_tab, cameras_tab, map_layers_tab, tracking_tab,
 		measurements_tab, analysis_tab, geofence_tab, history_tab, agent_tools_tab) = st.tabs( [
