@@ -5630,7 +5630,7 @@ if mode == 'Data':
 # WEATHER DATA MODE
 # ==============================================================================
 elif mode == 'Weather':
-	left, center, right = st.columns( [ 0.025, 0.95, 0.025 ] )
+	left, center, right = st.columns( [ 0.015, 0.975, 0.015 ] )
 	with center:
 		st.subheader( 'Weather Data' )
 		st.divider( )
