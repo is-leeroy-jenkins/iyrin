@@ -12335,7 +12335,7 @@ elif mode == 'Realtime':
 		location_c2.metric( 'Latitude', f'{float( global_latitude ):.4f}' )
 		location_c3.metric( 'Longitude', f'{float( global_longitude ):.4f}' )
 		blue_divider( )
-		realtime_c1, realtime_c2 = st.columns( [ 0.25, 0.75 ], border=True, gap='xsmall' )
+		realtime_c1, realtime_c2 = st.columns( [ 0.30, 0.70 ], border=True, gap='xsmall' )
 		with realtime_c1:
 			render_world_sidebar( )
 		with realtime_c2:
