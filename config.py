@@ -175,7 +175,7 @@ API_CREDENTIAL_DEFAULTS: Dict[ str, str | None ] = {
 
 # -------------- SETTINGS
 
-MODES = [ 'Mapping Tools', 'Interactive Map', 'Local Data', 'Weather Data', 'Environmental Data',
+MODES = [ 'Mapping Tools', 'Interactive Map', 'Realtime', 'Local Data', 'Weather Data', 'Environmental Data',
 	'Geological Data', 'Astronomical Data', 'Public Health', 'Celestial Map',
 	'Artificial Intelligence', 'File Upload', 'Data Management' ]
 
