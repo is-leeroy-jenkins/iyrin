@@ -2408,7 +2408,6 @@ def render_live_world_map( latitude: float, longitude: float ) -> None:
 		render_empty_world_map( latitude, longitude )
 		return
 
-	st.subheader( 'Realtime' )
 	if (not any( get_world_layers( ).values( ) )
 			and not st.session_state[ 'live_world_historical_replay' ]
 			and not st.session_state[ 'live_world_measurements' ]):
